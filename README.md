@@ -1,2 +1,2 @@
 # SWP391_SE1986-JV_WMS
-Warehouse Management System
+Laptop Warehouse Management System

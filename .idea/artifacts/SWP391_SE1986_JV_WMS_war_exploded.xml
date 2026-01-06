@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="SWP391_SE1986-JV_WMS:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/SWP391_SE1986_JV_WMS_war_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="SWP391_SE1986-JV_WMS/web/Web" />
+    </root>
+  </artifact>
+</component>
