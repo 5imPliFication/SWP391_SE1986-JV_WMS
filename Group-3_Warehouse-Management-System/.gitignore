@@ -39,6 +39,4 @@ build/
 ### Mac OS ###
 .DS_Store
 
-# Chặn file thực thi
-tailwindcss.exe
 

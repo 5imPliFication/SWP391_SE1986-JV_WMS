@@ -1,4 +1,0 @@
-@import "tailwindcss";
-
-/* Khai báo trực tiếp các file cần quét class tại đây */
-@source "../**/*.jsp";
