@@ -60,4 +60,4 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
 -- Nhập Người dùng
 INSERT INTO user (id, username, email, password_hash, role_id) VALUES 
 ('U01', 'admin', 'admin@gmail.com', 'admin', 'R01'),
-('U02', 'staff', 'staff@gmail.com', 'staff', 'R02');permission
+('U02', 'staff', 'staff@gmail.com', 'staff', 'R02');
