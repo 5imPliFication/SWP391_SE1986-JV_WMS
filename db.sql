@@ -1,4 +1,5 @@
-CREATE DATABASE IF NOT EXISTS laptop_wms;
+DROP DATABASE IF EXISTS laptop_wms;
+CREATE DATABASE laptop_wms;
 
 USE laptop_wms;
 
@@ -21,7 +22,7 @@ CREATE TABLE permission (
 -- 3. Tạo bảng Người dùng (User)
 CREATE TABLE user (
     id VARCHAR(50) PRIMARY KEY,
-    username VARCHAR(100) NOT NULL UNIQUE,
+    fullname VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role_id VARCHAR(50),
@@ -58,6 +59,6 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
 ('R02', 'P02'); -- Editor có quyền sửa bài
 
 -- Nhập Người dùng
-INSERT INTO user (id, username, email, password_hash, role_id) VALUES 
+INSERT INTO user (id, fullname, email, password_hash, role_id) VALUES 
 ('U01', 'admin', 'admin@gmail.com', 'admin', 'R01'),
-('U02', 'staff', 'staff@gmail.com', 'staff', 'R02');permission
+('U02', 'staff', 'staff@gmail.com', 'staff', 'R02');
