@@ -7,14 +7,14 @@ import javax.sql.DataSource;
 
 public class DBConfig {
 
-    private static HikariDataSource dataSource;
+    private static final HikariDataSource dataSource;
 
     static {
         HikariConfig config = new HikariConfig();
 
         // JDBC URL
         config.setJdbcUrl(
-                "jdbc:mysql://localhost:3306/swp391_wms" +
+                "jdbc:mysql://localhost:3306/laptop_wms" +
                         "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
         );
 
