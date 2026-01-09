@@ -9,11 +9,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.List;
 
-@WebServlet("/users")
-public class UserListServlet extends HttpServlet {
-
+@WebServlet("/user")
+public class UserDetailServlet extends HttpServlet {
     private UserDAO userDAO;
 
     @Override
@@ -23,10 +21,10 @@ public class UserListServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<User> listUsers = userDAO.findAll();
 
-        request.setAttribute("userList", listUsers);
-        request.getRequestDispatcher("/user-list.jsp").forward(request,response);
+        User user = userDAO.findUserById(request.getParameter("id"));
 
+        request.setAttribute("user", user);
+        request.getRequestDispatcher("/user-detail.jsp").forward(request, response);
     }
 }

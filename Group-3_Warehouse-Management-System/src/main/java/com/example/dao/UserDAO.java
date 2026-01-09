@@ -42,4 +42,31 @@ public class UserDAO {
         // return list users
         return listUsers;
     }
+
+    public User findUserById(String id) {
+        User userDetail = new User();
+
+        StringBuilder sql = new StringBuilder("select fullname, email, r.name, u.is_active " +
+                "from user as u join roles as r on u.role_id = r.id where u.id like ?");
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString());
+             ) {
+            ps.setString(1, "%" + id + "%");
+            ResultSet rs = ps.executeQuery();
+            // get data
+            if (rs.next()){
+                userDetail.setFullName(rs.getString("fullName"));
+                userDetail.setEmail(rs.getString("email"));
+                userDetail.setRole(rs.getString("name"));
+                userDetail.setActive(rs.getBoolean("is_active"));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return userDetail;
+    }
 }
