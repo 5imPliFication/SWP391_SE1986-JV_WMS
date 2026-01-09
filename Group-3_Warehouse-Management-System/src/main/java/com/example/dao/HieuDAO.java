@@ -15,15 +15,14 @@ public class HieuDAO {
 
     public void updateUserInformation(User user) {
         StringBuilder sql = new StringBuilder("update users "
-                + "set fullname=?,email=?, role_id=?, is_active=?"
-                + "where id=?");
+                + "set fullname=?,email=?, role_id=?, is_active=? where id=?");
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString());) {
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getRole());
             ps.setBoolean(4, user.isActive());
             ps.setString(5, user.getId());
-
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -78,6 +77,8 @@ public class HieuDAO {
                 }
                 insertPs.executeBatch();
             }
+
+            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Update role permissions failed");
