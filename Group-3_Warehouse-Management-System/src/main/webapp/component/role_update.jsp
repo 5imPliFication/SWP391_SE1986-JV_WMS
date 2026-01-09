@@ -1,3 +1,5 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 
@@ -18,14 +20,22 @@
                 <label for="roleName">Role Name</label>
                 <input class="w-100" id="roleName">
             </div>
-            <!-- role permission -->
             <div >
                 <label class="form-label">Role Permissions</label>
-                <select class="selectpicker w-100" multiple data-live-search="true">
-                    <option value="admin">Admin</option>
-                    <option value="editor">Editor</option>
-                    <option value="viewer">Viewer</option>
+                <select name="permissions"
+                        class="selectpicker w-100"
+                        multiple
+                        data-live-search="true">
+
+                    <c:forEach items="${listRolePermission}" var="l">
+                        <option value="${l.permissionID}">
+                            ${l.permissionName}
+                        </option>
+                    </c:forEach>
+
                 </select>
+
+
             </div>
             <div >
                 <label for="roleDesscription">Desscription</label> 
