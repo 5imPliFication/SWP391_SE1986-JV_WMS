@@ -18,4 +18,5 @@ public class User {
     private String role;
     private boolean active;
     private LocalDateTime createdAt;
+    private LocalDateTime lastEditedAt;
 }
