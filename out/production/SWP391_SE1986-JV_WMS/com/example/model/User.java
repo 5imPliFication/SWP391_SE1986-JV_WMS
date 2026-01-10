@@ -1,20 +1,21 @@
 package com.example.model;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Role {
+public class User {
+
     private int id;
-    private String name;
-    private String description;
-    private boolean isActive;
+    private String email;
+    private String passwordHash;
+    private String fullName;
+    private Role role;
+    private boolean active;
     private LocalDateTime createdAt;
-    private List<Permission> permissions;
 }
