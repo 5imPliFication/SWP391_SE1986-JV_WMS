@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User {
 
-    private Long id;
+    private int id;
     private String email;
     private String passwordHash;
     private String fullName;
-    private String role;
+    private Role role;
     private boolean active;
     private LocalDateTime createdAt;
 }
