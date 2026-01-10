@@ -11,11 +11,11 @@ import lombok.*;
 @Setter
 public class User {
 
-    private String id;
+    private Integer id;
     private String fullName;
     private String email;
     private String passwordHash;
-    private String role;
+    private Role role;
     private boolean active;
     private LocalDateTime createdAt;
 }
