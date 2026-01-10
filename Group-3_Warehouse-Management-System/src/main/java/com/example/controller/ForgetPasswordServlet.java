@@ -26,19 +26,21 @@ public class ForgetPasswordServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        String emailTo = request.getParameter("email");
+        String email = request.getParameter("email");
 
         // Check user existed with email
-        if(!userDAO.existsByEmail(emailTo)){
+        if(!userDAO.existsByEmail(email)){
             request.getRequestDispatcher("/forget-password-error.jsp").forward(request,response);
         } else {
             // Create new password
-            String newPassword = PasswordRandomUtil.generateRandomPassword(10);
+            String newPassword = PasswordUtil.generateRandomPassword(10);
 
             // Send email
-            EmailUtil.sendEmail(emailTo,newPassword);
+            EmailUtil.sendEmail(email,newPassword);
 
             // Hash password (Bcrypt) and save in database
+            String passwordHashed = PasswordUtil.hashPassword(newPassword);
+            userDAO.updatePassword(email,passwordHashed);
 
             request.getRequestDispatcher("/login.jsp").forward(request,response);
         }
