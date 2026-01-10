@@ -48,6 +48,7 @@
         <th>Role</th>
         <th>Status</th>
         <th>Active/Deactive</th>
+        <th>Change password</th>
         <th>Details</th>
     </tr>
     </thead>
@@ -81,6 +82,9 @@
                         </button>
                     </c:if>
                 </form>
+            </td>
+            <td>
+                <a href="/change-password" target="_blank">Change password</a>
             </td>
             <td>
                 <a href="/user?id=${u.id}" target="_blank">Detail</a>
