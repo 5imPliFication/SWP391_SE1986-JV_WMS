@@ -1,4 +1,3 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%--
   Created by IntelliJ IDEA.
   User: Admin
@@ -6,27 +5,66 @@
   Time: 1:43 PM
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page session="false" %>
-<!DOCTYPE html>
+<%
+    String ctx = request.getContextPath();
+%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page contentType="text/html;charset=UTF-8"  language="java" %>
+<%--<%@ page session="false" %>--%>
 <html>
 <head>
     <title>Login</title>
-    <link rel="stylesheet" href="static/css/login.css">
-    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<%=ctx%>/static/css/login.css">
 </head>
 <body>
+<div class="login-container">
+    <div class="login-left">
+        <h1>📦 Laptop Warehouse</h1>
+        <p>Comprehensive inventory management system for laptop distribution and tracking</p>
+        <ul class="feature-list">
+            <li>Real-time inventory tracking</li>
+            <li>Order management</li>
+            <li>Supplier coordination</li>
+            <li>Sales analytics & reporting</li>
+            <li>Multi-user access control</li>
+        </ul>
+    </div>
 
-<h2>Login</h2>
-<form action="${pageContext.request.contextPath}/login" method="post">
-    Email: <input type="text" name="email" required /> <br/>
-    Password: <input type="password" name="password" required /> <br/>
-    <button type="submit">Login</button>
-</form>
+    <div class="login-right">
+        <div class="login-header">
+            <h2>Welcome Back</h2>
+            <p>Sign in to access your dashboard</p>
+        </div>
 
-<c:if test="${not empty error}">
-    <p style="color:red">${error}</p>
-</c:if>
+        <!-- Error message (JSP will populate this) -->
+        <%
+            String error = (String) request.getAttribute("error");
+            if (error != null && !error.isEmpty()) {
+        %>
+        <div class="alert alert-danger">
+            <%= error %>
+        </div>
+        <% } %>
+
+        <form action="${pageContext.request.contextPath}/login" method="post">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="your.email@company.com" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn-login">Sign In</button>
+        </form>
+
+        <div class="register-link">
+            Don't have an account? <a href="${pageContext.request.contextPath}/register">Register here</a>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
