@@ -12,7 +12,7 @@
     <title>Forget Password</title>
 </head>
 <body>
-    <form method="POST" action="${pageContext.request.contextPath}/forget_password">
+    <form method="POST" action="${pageContext.request.contextPath}/forget-password">
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required><br>
         <p>Mật khẩu mới sẽ được admin cấp qua email của bạn</p><br>

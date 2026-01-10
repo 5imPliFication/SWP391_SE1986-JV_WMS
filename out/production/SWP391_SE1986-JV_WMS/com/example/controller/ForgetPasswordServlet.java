@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet("/forget_password")
+@WebServlet("/forget-password")
 public class ForgetPasswordServlet extends HttpServlet {
     private UserDAO userDAO;
 
