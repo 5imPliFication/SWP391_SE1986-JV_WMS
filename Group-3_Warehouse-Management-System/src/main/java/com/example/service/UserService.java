@@ -36,4 +36,11 @@ public class UserService {
     public User findUserById(int id) {
         return userDAO.findUserById(id);
     }
+
+    public boolean changeStatus(int id) {
+        // get current status from DB
+        boolean currentStatus = userDAO.getCurrentStatus(id);
+        // change status
+        return userDAO.changeStatus(id, !currentStatus);
+    }
 }

@@ -18,11 +18,13 @@
             border-collapse: collapse;
             width: 100%;
         }
+
         th, td {
             padding: 8px;
             border: 1px solid #ccc;
             text-align: left;
         }
+
         th {
             background-color: #f4f4f4;
         }
@@ -66,7 +68,19 @@
                 </c:if>
             </td>
             <td>
-                <button>Change</button>
+                <form action="/change-user-status" method="post" class="d-inline">
+                    <input type="hidden" name="userId" value="${u.id}">
+                    <c:if test="${u.active == true}">
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            Inactive this user
+                        </button>
+                    </c:if>
+                    <c:if test="${u.active == false}">
+                        <button type="submit" class="btn btn-sm btn-success">
+                            Active this user
+                        </button>
+                    </c:if>
+                </form>
             </td>
             <td>
                 <a href="/user?id=${u.id}" target="_blank">Detail</a>
@@ -81,6 +95,16 @@
     </c:if>
     </tbody>
 </table>
+<div>
+        <c:choose>
+            <c:when test="${messageStatus}">
+                ${messageSuccess}
+            </c:when>
+            <c:otherwise>
+                ${messageFail}
+            </c:otherwise>
+        </c:choose>
+</div>
 
 </body>
 </html>

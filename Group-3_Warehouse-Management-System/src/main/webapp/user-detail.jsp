@@ -70,7 +70,7 @@
             </table>
 
             <div class="text-center mt-4">
-                <a href="users" class="btn btn-secondary px-4">
+                <a href="user-list" class="btn btn-secondary px-4">
                     Back
                 </a>
             </div>
