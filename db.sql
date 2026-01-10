@@ -13,14 +13,14 @@ CREATE TABLE roles (
 );
 
 -- 2. Tạo bảng Quyền hạn (Permission)
-CREATE TABLE permission (
+CREATE TABLE permissions (
     id VARCHAR(50) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT
 );
 
 -- 3. Tạo bảng Người dùng (User)
-CREATE TABLE user (
+CREATE TABLE users (
     id VARCHAR(50) PRIMARY KEY,
     fullname VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(150) NOT NULL UNIQUE,
@@ -47,7 +47,7 @@ INSERT INTO roles (id, name, description) VALUES
 ('R02', 'Staff', 'Chỉnh sửa nội dung');
 
 -- Nhập Quyền hạn
-INSERT INTO permission (id, name, description) VALUES 
+INSERT INTO permissions (id, name, description) VALUES 
 ('P01', 'CREATE_USER', 'Quyền tạo người dùng mới'),
 ('P02', 'EDIT_POST', 'Quyền chỉnh sửa bài viết'),
 ('P03', 'VIEW_REPORT', 'Quyền xem báo cáo');
@@ -59,6 +59,6 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
 ('R02', 'P02'); -- Editor có quyền sửa bài
 
 -- Nhập Người dùng
-INSERT INTO user (id, fullname, email, password_hash, role_id) VALUES 
+INSERT INTO users (id, fullname, email, password_hash, role_id) VALUES 
 ('U01', 'admin', 'admin@gmail.com', 'admin', 'R01'),
 ('U02', 'staff', 'staff@gmail.com', 'staff', 'R02');
