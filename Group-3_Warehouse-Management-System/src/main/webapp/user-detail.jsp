@@ -50,7 +50,7 @@
                     <th>Role</th>
                     <td>
                         <span class="badge bg-info text-dark">
-                            ${user.role}
+                            ${user.role.name}
                         </span>
                     </td>
                 </tr>

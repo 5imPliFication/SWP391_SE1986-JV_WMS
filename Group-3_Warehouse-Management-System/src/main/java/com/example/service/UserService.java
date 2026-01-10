@@ -4,6 +4,8 @@ import com.example.dao.UserDAO;
 import com.example.model.User;
 import com.example.validator.UserValidator;
 
+import java.util.List;
+
 public class UserService {
     private final UserDAO userDAO = new UserDAO();
 
@@ -25,5 +27,13 @@ public class UserService {
         boolean statusCreate = userDAO.insertUser(user);
         // return
         return statusCreate ? null : "Can not create new user";
+    }
+
+    public List<User> getListUsers() {
+        return userDAO.findAll();
+    }
+
+    public User findUserById(int id) {
+        return userDAO.findUserById(id);
     }
 }

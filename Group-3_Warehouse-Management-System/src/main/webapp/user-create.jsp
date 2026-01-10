@@ -68,7 +68,7 @@
 
                         <!-- Buttons -->
                         <div class="d-flex justify-content-between">
-                            <a href="${pageContext.request.contextPath}/users"
+                            <a href="/user-list"
                                class="btn btn-secondary">
                                 Back
                             </a>

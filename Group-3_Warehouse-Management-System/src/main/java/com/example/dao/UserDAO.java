@@ -1,6 +1,7 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
+import com.example.model.Role;
 import com.example.model.User;
 
 import java.sql.Connection;
@@ -15,24 +16,25 @@ public class UserDAO {
         List<User> listUsers = new ArrayList<>();
 
         // sql
-        StringBuilder sql = new StringBuilder("select u.id, fullname, email, r.name, u.is_active " +
-                "from user as u join roles as r on u.role_id = r.id" );
+        String sql = "select u.id, full_name, email, r.name, u.is_active " +
+                "from users as u join roles as r on u.role_id = r.id";
 
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString());
+             PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             // get data
             while (rs.next()){
                 User user = new User();
-//                user.setId(rs.getString("id"));
-                user.setFullName(rs.getString("fullname"));
+                Role role = new Role();
+                user.setId(rs.getInt("id"));
+                user.setFullName(rs.getString("full_name"));
                 user.setEmail(rs.getString("email"));
-//                user.setRole(rs.getString("name"));
+                role.setName(rs.getString("name"));
+                user.setRole(role);
                 user.setActive(rs.getBoolean("is_active"));
                 listUsers.add(user);
-
             }
 
         } catch (SQLException e) {
@@ -43,31 +45,35 @@ public class UserDAO {
         return listUsers;
     }
 
-    public User findUserById(String id) {
-        User userDetail = new User();
+    public User findUserById(int id) {
 
-        StringBuilder sql = new StringBuilder("select fullname, email, r.name, u.is_active " +
-                "from user as u join roles as r on u.role_id = r.id where u.id like ?");
+
+        String sql = "select full_name, email, u.is_active, r.name " +
+                "from users as u join roles as r on u.role_id = r.id where u.id like ?";
 
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString());
-             ) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, "%" + id + "%");
             ResultSet rs = ps.executeQuery();
             // get data
             if (rs.next()){
-                userDetail.setFullName(rs.getString("fullName"));
+                User userDetail = new User();
+                Role role = new Role();
+                userDetail.setFullName(rs.getString("full_name"));
                 userDetail.setEmail(rs.getString("email"));
-//                userDetail.setRole(rs.getString("name"));
+                role.setName(rs.getString("name"));
+                userDetail.setRole(role);
                 userDetail.setActive(rs.getBoolean("is_active"));
+                return userDetail;
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        return userDetail;
+        return null;
     }
 
 
