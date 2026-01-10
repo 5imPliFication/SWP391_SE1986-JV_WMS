@@ -25,19 +25,21 @@ public class UserDAO {
     }
 
     public boolean updatePassword(String email, String newPassword) {
-        String sql = "UPDATE users SET password = ? WHERE email = ?";
+        String sql = "UPDATE users SET password_hash = ? WHERE email = ?";
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, newPassword);
             ps.setString(2, email);
-            ResultSet rs = ps.executeQuery();
 
-            return rs.next();
+            int rowsUpdated = ps.executeUpdate();
+
+            return rowsUpdated > 0;
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return false;
         }
     }
 }

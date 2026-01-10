@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.dao.UserDAO;
 import com.example.util.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,6 +12,13 @@ import java.io.IOException;
 
 @WebServlet("/forget_password")
 public class ForgetPasswordServlet extends HttpServlet {
+    private UserDAO userDAO;
+
+    @Override
+    public void init(){
+        userDAO = new UserDAO();
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         request.getRequestDispatcher("/forget-password.jsp").forward(request, response);
@@ -20,14 +28,20 @@ public class ForgetPasswordServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String emailTo = request.getParameter("email");
 
-        // Create new password
-        String newPassword = PasswordRandomUtil.generateRandomPassword(10);
+        // Check user existed with email
+        if(!userDAO.existsByEmail(emailTo)){
+            request.getRequestDispatcher("/forget-password-error.jsp").forward(request,response);
+        } else {
+            // Create new password
+            String newPassword = PasswordRandomUtil.generateRandomPassword(10);
 
-        // Send email
-        EmailUtil.sendEmail(emailTo,newPassword);
+            // Send email
+            EmailUtil.sendEmail(emailTo,newPassword);
 
-        // Hash password (Bcrypt) and save in database
+            // Hash password (Bcrypt) and save in database
 
-        request.getRequestDispatcher("/login.jsp").forward(request,response);
+            request.getRequestDispatcher("/login.jsp").forward(request,response);
+        }
+
     }
 }
