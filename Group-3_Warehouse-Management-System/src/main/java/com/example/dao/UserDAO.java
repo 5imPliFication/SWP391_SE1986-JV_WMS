@@ -26,10 +26,10 @@ public class UserDAO {
             // get data
             while (rs.next()){
                 User user = new User();
-                user.setId(rs.getString("id"));
+//                user.setId(rs.getString("id"));
                 user.setFullName(rs.getString("fullname"));
                 user.setEmail(rs.getString("email"));
-                user.setRole(rs.getString("name"));
+//                user.setRole(rs.getString("name"));
                 user.setActive(rs.getBoolean("is_active"));
                 listUsers.add(user);
 
@@ -59,7 +59,7 @@ public class UserDAO {
             if (rs.next()){
                 userDetail.setFullName(rs.getString("fullName"));
                 userDetail.setEmail(rs.getString("email"));
-                userDetail.setRole(rs.getString("name"));
+//                userDetail.setRole(rs.getString("name"));
                 userDetail.setActive(rs.getBoolean("is_active"));
             }
 
@@ -68,5 +68,42 @@ public class UserDAO {
         }
 
         return userDetail;
+    }
+
+
+    public boolean insertUser(User user) {
+        String sql = "insert into users(full_name, email, password_hash, role_id)\n" +
+                "values (?, ?, ?, ?);";
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getPasswordHash());
+            ps.setInt(4, user.getRole().getId());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean isExistEmail(String email) {
+        String sql = "select email from users where email = ?";
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+
+            return rs.next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
