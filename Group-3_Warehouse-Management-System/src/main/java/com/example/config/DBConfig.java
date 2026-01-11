@@ -4,6 +4,8 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class DBConfig {
 
@@ -19,7 +21,7 @@ public class DBConfig {
         );
 
         config.setUsername("root");
-        config.setPassword("1234");
+        config.setPassword("123a");
 
         // MySQL Driver
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
@@ -39,4 +41,15 @@ public class DBConfig {
     public static DataSource getDataSource() {
         return dataSource;
     }
+
+    public static void testConnection() throws SQLException {
+        try (Connection connection = dataSource.getConnection()) {
+            if (connection.isValid(0)) {
+                System.out.println("Connected to the database");
+            } else {
+                System.out.println("Cannot connect to the database");
+            }
+        }
+    }
 }
+
