@@ -8,7 +8,7 @@
 <body class="">
   <jsp:include page="/component/navbar.jsp" />
   <h1 class="text-primary">
-    Hello JSP + Tailwind
+    Yo whats good gng
   </h1>
 </body>
 

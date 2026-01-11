@@ -19,7 +19,7 @@ public class UserService {
         }
 
         // check exist email
-        if(userDAO.isExistEmail(user.getEmail())){
+        if(userDAO.login(user.getEmail())!=null){
             return "Email exist, please input other email !!!";
         };
 

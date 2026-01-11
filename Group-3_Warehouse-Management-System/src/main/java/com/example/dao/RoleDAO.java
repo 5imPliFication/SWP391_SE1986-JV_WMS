@@ -1,5 +1,6 @@
 package com.example.dao;
 
+import com.example.model.Permission;
 import com.example.model.Role;
 import java.sql.*;
 import java.util.*;
@@ -22,11 +23,12 @@ public class RoleDAO {
 
         while (rs.next()) {
             list.add(new Role(
-                    rs.getString("id"),
+                    rs.getLong("id"),
                     rs.getString("name"),
                     rs.getString("description"),
                     rs.getBoolean("is_active"),
-                    rs.getTimestamp("created_at")
+                    rs.getTimestamp("created_at"),
+                    rs.getObject("permission", List.class)
             ));
         }
         return list;
@@ -41,11 +43,12 @@ public class RoleDAO {
         ResultSet rs = ps.executeQuery();
         if (rs.next()) {
             return new Role(
-                    rs.getString("id"),
+                    rs.getLong("id"),
                     rs.getString("name"),
                     rs.getString("description"),
                     rs.getBoolean("is_active"),
-                    rs.getTimestamp("created_at")
+                    rs.getTimestamp("created_at"),
+                    rs.getObject("permission", List.class)
             );
         }
         return null;
@@ -57,7 +60,7 @@ public class RoleDAO {
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setString(1, role.getName());
         ps.setString(2, role.getDescription());
-        ps.setString(3, role.getId());
+        ps.setLong(3, role.getId());
         ps.executeUpdate();
     }
 

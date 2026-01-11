@@ -29,9 +29,9 @@ public class HieuDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     RolePermission rolePermission = new RolePermission();
-                    rolePermission.setPermissionID(rs.getString("permission_id"));
+                    rolePermission.setPermissionID(rs.getLong("permission_id"));
                     rolePermission.setPermissionName(rs.getString("permission_name"));
-                    rolePermission.setRoleID(rs.getString("role_id"));
+                    rolePermission.setRoleID(rs.getLong("role_id"));
                     listRolePermission.add(rolePermission);
 
                 }

@@ -74,10 +74,11 @@ public class RoleService extends HttpServlet {
 
         try {
             Role role = new Role(
-                    req.getParameter("id"),
+                    Long.parseLong(req.getParameter("id")),
                     req.getParameter("name"),
                     req.getParameter("description"),
                     true,
+                    null,
                     null
             );
 

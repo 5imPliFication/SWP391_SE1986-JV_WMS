@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RolePermission {
-    private String roleID;
+    private Long roleID;
     private String permissionName;
-    private String permissionID;
+    private Long permissionID;
 }

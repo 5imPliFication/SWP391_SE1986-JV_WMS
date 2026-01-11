@@ -1,8 +1,8 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
-import com.example.model.User;
 import com.example.model.Role;
+import com.example.model.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,10 +26,10 @@ public class UserDAO {
             // get data
             while (rs.next()) {
                 User user = new User();
-                user.setId(rs.getInt("id"));
+                user.setId(rs.getLong("id"));
                 user.setFullName(rs.getString("fullname"));
                 user.setEmail(rs.getString("email"));
-                user.setRole(rs.getString("name"));
+                user.setRole(rs.getObject("name", Role.class));
                 user.setActive(rs.getBoolean("is_active"));
                 listUsers.add(user);
 
@@ -46,8 +46,8 @@ public class UserDAO {
     public User findUserById(int id) {
 
 
-        String sql = "select fullname, email, u.is_active, r.name " +
-                "from users as u join roles as r on u.role_id = r.id where u.id like ?";
+        String sql = "select u.fullname, u.email, u.is_active, r.name " +
+                "from user as u join roles as r on u.role_id = r.id where u.id like ?";
 
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
@@ -90,7 +90,7 @@ public class UserDAO {
                 u.setFullName(rs.getString("fullname"));
                 u.setEmail(rs.getString("email"));
                 u.setPasswordHash(rs.getString("password_hash"));
-                u.setRole(rs.getString("role_id"));
+                u.setRole(rs.getObject("name", Role.class));
                 return u;
             }
 
@@ -101,7 +101,7 @@ public class UserDAO {
     }
 
     public boolean insertUser(User user) {
-        String sql = "insert into users(full_name, email, password_hash, role_id)\n" +
+        String sql = "insert into user(fullname, email, password_hash, role_id)\n" +
                 "values (?, ?, ?, ?);";
 
         // access data
@@ -111,7 +111,7 @@ public class UserDAO {
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPasswordHash());
-            ps.setInt(4, user.getRole().getId());
+            ps.setLong(4, user.getRole().getId());
 
             return ps.executeUpdate() > 0;
 
@@ -121,7 +121,7 @@ public class UserDAO {
     }
 
     public boolean updatePassword(String email, String newPassword) {
-        String sql = "UPDATE users SET password_hash = ? WHERE email = ?";
+        String sql = "UPDATE user SET password_hash = ? WHERE email = ?";
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -141,7 +141,7 @@ public class UserDAO {
 
     // Get hashed password from database
     public String getPassword(String email) {
-        String sql = "SELECT password_hash FROM users WHERE email = ?";
+        String sql = "SELECT password_hash FROM user WHERE email = ?";
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -163,16 +163,16 @@ public class UserDAO {
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString());) {
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
-            ps.setInt(3, user.getRole().getId());
+            ps.setLong(3, user.getRole().getId());
             ps.setBoolean(4, user.isActive());
-            ps.setInt(5, user.getId());
+            ps.setLong(5, user.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
     public boolean changeStatus(int id, boolean status) {
-        String sql = "update users set is_active = ? where id = ?;";
+        String sql = "update user set is_active = ? where id = ?;";
 
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
@@ -188,7 +188,7 @@ public class UserDAO {
     }
 
     public boolean getCurrentStatus(int id) {
-        String sql = "select is_active from users where id = ?";
+        String sql = "select is_active from user where id = ?";
 
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
