@@ -1,7 +1,6 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
-import com.example.model.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,33 +8,21 @@ import java.sql.ResultSet;
 
 public class UserDAO {
 
-    public User login(String email) {
-        final String sql = "SELECT id,fullname,email,password_hash,role_id FROM user WHERE email = ?";
+    public boolean existsByEmail(String email) {
+        String sql = "SELECT 1 FROM users WHERE email = ?";
 
-        try (
-                Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)
-        ) {
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                User u = new User();
-                u.setId(rs.getLong("id"));
-                u.setFullName(rs.getString("fullname"));
-                u.setEmail(rs.getString("email"));
-                u.setPasswordHash(rs.getString("password_hash"));
-                u.setRole(rs.getString("role_id"));
-                return u;
-            }
+            return rs.next();
 
         } catch (Exception e) {
-            e.printStackTrace(); // replace with logger later
+            throw new RuntimeException(e);
         }
-        return null;
     }
-
-
 
     public boolean updatePassword(String email, String newPassword) {
         String sql = "UPDATE users SET password_hash = ? WHERE email = ?";
