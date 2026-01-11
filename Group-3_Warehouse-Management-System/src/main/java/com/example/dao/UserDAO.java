@@ -2,6 +2,7 @@ package com.example.dao;
 
 import com.example.config.DBConfig;
 import com.example.model.User;
+import com.example.model.Role;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -42,6 +43,37 @@ public class UserDAO {
         return listUsers;
     }
 
+    public User findUserById(int id) {
+
+
+        String sql = "select fullname, email, u.is_active, r.name " +
+                "from users as u join roles as r on u.role_id = r.id where u.id like ?";
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, "%" + id + "%");
+            ResultSet rs = ps.executeQuery();
+            // get data
+            if (rs.next()){
+                User userDetail = new User();
+                Role role = new Role();
+                userDetail.setFullName(rs.getString("full_name"));
+                userDetail.setEmail(rs.getString("email"));
+                role.setName(rs.getString("name"));
+                userDetail.setRole(role);
+                userDetail.setActive(rs.getBoolean("is_active"));
+                return userDetail;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return null;
+    }
+
     public User login(String email) {
         final String sql = "SELECT id,fullname,email,password_hash,role_id FROM user WHERE email = ?";
 
@@ -68,7 +100,25 @@ public class UserDAO {
         return null;
     }
 
+    public boolean insertUser(User user) {
+        String sql = "insert into users(full_name, email, password_hash, role_id)\n" +
+                "values (?, ?, ?, ?);";
 
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getPasswordHash());
+            ps.setInt(4, user.getRole().getId());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public boolean updatePassword(String email, String newPassword) {
         String sql = "UPDATE users SET password_hash = ? WHERE email = ?";
@@ -96,7 +146,6 @@ public class UserDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
-
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getString("password_hash");
@@ -118,6 +167,41 @@ public class UserDAO {
             ps.setBoolean(4, user.isActive());
             ps.setInt(5, user.getId());
             ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public boolean changeStatus(int id, boolean status) {
+        String sql = "update users set is_active = ? where id = ?;";
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setBoolean(1, status);
+            ps.setInt(2, id);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean getCurrentStatus(int id) {
+        String sql = "select is_active from users where id = ?";
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBoolean("is_active");
+                }
+            }
+            return false;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

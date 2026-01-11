@@ -21,7 +21,7 @@ public class DBConfig {
         );
 
         config.setUsername("root");
-        config.setPassword("123a");
+        config.setPassword("1231");
 
         // MySQL Driver
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
@@ -41,15 +41,4 @@ public class DBConfig {
     public static DataSource getDataSource() {
         return dataSource;
     }
-
-    public static void testConnection() throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
-            if (connection.isValid(0)) {
-                System.out.println("Connected to the database");
-            } else {
-                System.out.println("Cannot connect to the database");
-            }
-        }
-    }
 }
-
