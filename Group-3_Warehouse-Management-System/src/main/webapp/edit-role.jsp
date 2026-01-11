@@ -26,7 +26,7 @@
                     <c:set var="isSelected" value="" />
 
                     <%-- Duyệt qua danh sách quyền HIỆN TẠI của Role này --%>
-                    <c:forEach items="${role.permission}" var="rp">
+                    <c:forEach items="${role.permissions}" var="rp">
                         <%-- So sánh ID hoặc Name (nên dùng ID để chính xác tuyệt đối) --%>
                         <c:if test="${rp.id == p.id}">
                             <c:set var="isSelected" value="selected" />

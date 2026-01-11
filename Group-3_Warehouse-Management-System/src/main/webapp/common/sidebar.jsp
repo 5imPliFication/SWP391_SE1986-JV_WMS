@@ -5,6 +5,9 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<% String uri = request.getRequestURI(); %>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -13,8 +16,6 @@
 
         <title>JSP Page</title>
     </head>
-    <% String uri = request.getRequestURI(); %>
-    <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <h1>Warehouse</h1>
@@ -27,42 +28,22 @@
                     <span>Dashboard</span>
                 </a>
             </li>
-            <li>
-                <a href="${pageContext.request.contextPath}/user-list" 
-                   class="<%= (uri.contains("user")) ? "active" : "" %>">
-                    <span>User</span>
-                </a>
-            </li>
-            <li>
-                <a href="${pageContext.request.contextPath}/roles" 
-                   class="<%= (uri.contains("roles")) ? "active" : "" %>">
-                    <span>Role</span>
-                </a>
-            </li>
-            <li>
-                <a href="${pageContext.request.contextPath}/suppliers" 
-                   class="<%= (uri.contains("suppliers")) ? "active" : "" %>">
-                    <span>Suppliers</span>
-                </a>
-            </li>
-            <li>
-                <a href="${pageContext.request.contextPath}/customers" 
-                   class="<%= (uri.contains("customers")) ? "active" : "" %>">
-                    <span>Customers</span>
-                </a>
-            </li>
-            <li>
-                <a href="${pageContext.request.contextPath}/reports" 
-                   class="<%= (uri.contains("reports")) ? "active" : "" %>">
-                    <span>Reports</span>
-                </a>
-            </li>
-            <li>
-                <a href="${pageContext.request.contextPath}/settings" 
-                   class="<%= (uri.contains("settings")) ? "active" : "" %>">
-                    <span>⚙ Settings</span>
-                </a>
-            </li>
+            <c:if test="${sessionScope.user.hasPermission('READ_USER')}">
+                <li>
+                    <a href="${pageContext.request.contextPath}/user-list" 
+                       class="<%= (uri.contains("user")) ? "active" : "" %>">
+                        <span>User</span>
+                    </a>
+                </li>
+            </c:if>
+            <c:if test="${sessionScope.user.hasPermission('READ_ROLE')}">
+                <li>
+                    <a href="${pageContext.request.contextPath}/roles" 
+                       class="<%= (uri.contains("roles")) ? "active" : "" %>">
+                        <span>Role</span>
+                    </a>
+                </li>
+            </c:if>
         </ul>
     </aside>
 </html>

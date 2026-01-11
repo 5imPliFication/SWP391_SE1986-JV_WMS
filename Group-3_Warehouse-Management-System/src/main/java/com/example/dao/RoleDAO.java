@@ -9,7 +9,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RoleDAO {
 
@@ -26,7 +28,7 @@ public class RoleDAO {
 
             while (rs.next()) {
                 Role role = new Role();
-                role.setId(rs.getInt("id"));
+                role.setId(rs.getLong("id"));
                 role.setName(rs.getString("name"));
                 role.setDescription(rs.getString("description"));
                 role.setActive(rs.getBoolean("is_active"));
@@ -42,7 +44,7 @@ public class RoleDAO {
                         permList.add(p);
                     }
                 }
-                role.setPermission(permList);
+                role.setPermissions(permList);
                 list.add(role);
             }
         } catch (SQLException e) {
@@ -136,7 +138,7 @@ public class RoleDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Role role = new Role();
-                    role.setId(rs.getInt("id"));
+                    role.setId(rs.getLong("id"));
                     role.setName(rs.getString("name"));
                     role.setDescription(rs.getString("description"));
                     role.setActive(rs.getBoolean("is_active"));
@@ -150,13 +152,13 @@ public class RoleDAO {
                             String[] parts = entry.split(":"); // Tách ID và Name
                             if (parts.length == 2) {
                                 Permission p = new Permission();
-                                p.setId(Integer.parseInt(parts[0])); // QUAN TRỌNG: Phải có ID
+                                p.setId(Long.parseLong(parts[0])); // QUAN TRỌNG: Phải có ID
                                 p.setName(parts[1]);
                                 permList.add(p);
                             }
                         }
                     }
-                    role.setPermission(permList);
+                    role.setPermissions(permList);
                     return role;
                 }
             }
@@ -259,6 +261,30 @@ public class RoleDAO {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    //thêm filter permission ở đây
+    public class PermissionChecker {
+
+        private static final Map<String, String> urlPermissionMap = new HashMap<>();
+
+        static {
+            urlPermissionMap.put("/user-list", "READ_USER");
+            urlPermissionMap.put("/user-create", "CREATE_USER"); 
+            urlPermissionMap.put("/user", "UPDATE_USER");
+            urlPermissionMap.put("/user-delete", "DELETE_USER");
+
+            // --- QUẢN LÝ ROLE ---
+            urlPermissionMap.put("/roles", "READ_ROLE");
+            urlPermissionMap.put("/create-role", "CREATE_ROLE");
+            urlPermissionMap.put("/edit-role", "UPDATE_ROLE");
+            urlPermissionMap.put("/role-delete", "DELETE_ROLE");
+
+        }
+
+        public static String getRequiredPermission(String url) {
+            return urlPermissionMap.get(url);
         }
     }
 }

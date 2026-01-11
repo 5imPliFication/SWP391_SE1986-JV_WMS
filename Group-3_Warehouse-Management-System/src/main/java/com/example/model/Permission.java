@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Permission {
-    private int id;
+    private Long id;
     private String name;
     private String description;
 }

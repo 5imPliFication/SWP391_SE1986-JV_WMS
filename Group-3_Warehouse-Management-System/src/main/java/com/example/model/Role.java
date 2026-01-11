@@ -14,10 +14,10 @@ import java.util.List;
 @Setter
 public class Role {
 
-    private Integer id;
+    private Long id;
     private String name;
     private String description;
     private boolean isActive;
-    private List<Permission> permission;
+    private List<Permission> permissions;
     private LocalDateTime createdAt;
 }

@@ -33,7 +33,7 @@ public class UserCreateServlet extends HttpServlet {
         user.setFullName(request.getParameter("fullName"));
         user.setEmail(request.getParameter("email"));
         user.setPasswordHash(request.getParameter("password"));
-        role.setId(Integer.parseInt(request.getParameter("role")));
+        role.setId(Long.parseLong(request.getParameter("role")));
         user.setRole(role);
 
         System.out.println(request.getParameter("email"));

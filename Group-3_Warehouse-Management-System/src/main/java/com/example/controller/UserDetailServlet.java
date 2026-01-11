@@ -41,10 +41,10 @@ public class UserDetailServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            int id = Integer.parseInt(request.getParameter("id"));
+            Long id = Long.parseLong(request.getParameter("id"));
             String fullName = request.getParameter("fullName");
             String email = request.getParameter("email");
-            int roleId = Integer.parseInt(request.getParameter("roleId"));
+            Long roleId = Long.parseLong(request.getParameter("roleId"));
             boolean active = Boolean.parseBoolean(request.getParameter("active"));
 
             User user = new User();

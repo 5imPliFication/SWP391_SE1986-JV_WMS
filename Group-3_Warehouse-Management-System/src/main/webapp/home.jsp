@@ -10,19 +10,21 @@
 <html>
     <head>
         <title>Home</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
     </head>
-    <body>
+    <body >     
         <%
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                response.sendRedirect("login");
-                return;
-            }
+                User user = (User) session.getAttribute("user");
+                if (user == null) {
+                    response.sendRedirect("login");
+                    return;
+                }
 
-            // Get first letter of name for avatar
-            String initial = user.getFullName() != null && !user.getFullName().isEmpty()
-                    ? user.getFullName().substring(0, 1).toUpperCase()
-                    : user.getFullName().substring(0, 1).toUpperCase();
+                // Get first letter of name for avatar
+                String initial = user.getFullName() != null && !user.getFullName().isEmpty()
+                        ? user.getFullName().substring(0, 1).toUpperCase()
+                        : user.getFullName().substring(0, 1).toUpperCase();
         %>
 
         <jsp:include page="/common/sidebar.jsp" />

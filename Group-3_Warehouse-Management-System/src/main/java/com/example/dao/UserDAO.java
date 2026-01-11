@@ -34,13 +34,13 @@ public class UserDAO {
 
             while (rs.next()) {
                 User user = new User();
-                user.setId(rs.getInt("id"));
+                user.setId(rs.getLong("id"));
                 user.setFullName(rs.getString("fullname"));
                 user.setEmail(rs.getString("email"));
                 user.setActive(rs.getBoolean("is_active"));
 
                 Role role = new Role();
-                role.setId(rs.getInt("role_id"));
+                role.setId(rs.getLong("role_id"));
                 role.setName(rs.getString("role_name"));
 
                 user.setRole(role);
@@ -99,9 +99,9 @@ public class UserDAO {
 
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
-            ps.setInt(3, user.getRole().getId());
+            ps.setLong(3, user.getRole().getId());
             ps.setBoolean(4, user.isActive());
-            ps.setInt(5, user.getId());
+            ps.setLong(5, user.getId());
 
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -110,6 +110,7 @@ public class UserDAO {
     }
 
     public User login(String email) {
+        // 1. Câu lệnh SQL lấy User và Role
         final String sql = """
         SELECT 
             u.id,
@@ -123,28 +124,53 @@ public class UserDAO {
         WHERE u.email = ?
     """;
 
-        try (
-                Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
                 User u = new User();
-                u.setId(rs.getInt("id"));
+                u.setId(rs.getLong("id"));
                 u.setFullName(rs.getString("fullname"));
                 u.setEmail(rs.getString("email"));
                 u.setPasswordHash(rs.getString("password_hash"));
 
+                // 2. Khởi tạo đối tượng Role
                 Role role = new Role();
-                role.setId(rs.getInt("role_id"));
+                long roleId = rs.getLong("role_id");
+                role.setId(roleId);
                 role.setName(rs.getString("role_name"));
+
+                // --- BẮT ĐẦU LẤY DANH SÁCH PERMISSION ---
+                List<Permission> permissions = new ArrayList<>();
+                final String sqlPerms = """
+                SELECT p.id, p.name 
+                FROM permissions p
+                JOIN role_permissions rp ON p.id = rp.permission_id
+                WHERE rp.role_id = ?
+            """;
+
+                try (PreparedStatement psP = conn.prepareStatement(sqlPerms)) {
+                    psP.setLong(1, roleId);
+                    ResultSet rsP = psP.executeQuery();
+                    while (rsP.next()) {
+                        Permission p = new Permission();
+                        p.setId(rsP.getLong("id"));
+                        p.setName(rsP.getString("name"));
+                        permissions.add(p);
+                    }
+                }
+                // Gán danh sách quyền vào Role
+                role.setPermissions(permissions);
+                // --- KẾT THÚC LẤY PERMISSION ---
 
                 u.setRole(role);
                 return u;
             }
 
         } catch (Exception e) {
-            e.printStackTrace();// replace with logger later
+            e.printStackTrace();
         }
         return null;
     }
@@ -184,12 +210,12 @@ public class UserDAO {
                 User user = new User();
                 Role role = new Role();
 
-                user.setId(rs.getInt("id"));
+                user.setId(rs.getLong("id"));
                 user.setFullName(rs.getString("fullname"));
                 user.setEmail(rs.getString("email"));
                 user.setActive(rs.getBoolean("is_active"));
 
-                role.setId(rs.getInt("role_id"));
+                role.setId(rs.getLong("role_id"));
                 role.setName(rs.getString("role_name"));
                 user.setRole(role);
 
@@ -213,7 +239,7 @@ public class UserDAO {
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPasswordHash());
-            ps.setInt(4, user.getRole().getId());
+            ps.setLong(4, user.getRole().getId());
 
             return ps.executeUpdate() > 0;
 
@@ -271,58 +297,6 @@ public class UserDAO {
         }
     }
 
-    public List<Role> getAllRoles() {
-        List<Role> list = new ArrayList<>();
-        String sql = "SELECT r.id, r.name, r.description, r.is_active, "
-                + "GROUP_CONCAT(p.name SEPARATOR '|') AS p_names "
-                + "FROM roles r "
-                + "LEFT JOIN role_permissions rp ON r.id = rp.role_id "
-                + "LEFT JOIN permissions p ON rp.permission_id = p.id "
-                + "GROUP BY r.id";
-
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Role role = new Role();
-                role.setId(rs.getInt("id"));
-                role.setName(rs.getString("name"));
-                role.setDescription(rs.getString("description"));
-                role.setActive(rs.getBoolean("is_active"));
-
-                List<Permission> permList = new ArrayList<>();
-                String pNames = rs.getString("p_names");
-
-                if (pNames != null) {
-                    String[] names = pNames.split("\\|");
-                    for (String name : names) {
-                        Permission p = new Permission();
-                        p.setName(name);
-                        permList.add(p);
-                    }
-                }
-                role.setPermission(permList);
-                list.add(role);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public boolean changeRoleStatus(int id, boolean status) {
-        String sql = "update roles set is_active = ? where id = ?;";
-
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setBoolean(1, status);
-            ps.setInt(2, id);
-
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public List<Permission> getAllPermissions() {
         List<Permission> listPermission = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM laptop_wms.permissions;");
@@ -331,7 +305,7 @@ public class UserDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Permission permission = new Permission();
-                    permission.setId(rs.getInt("id"));
+                    permission.setId(rs.getLong("id"));
                     permission.setName(rs.getString("name"));
                     permission.setDescription(rs.getString("description"));
                     listPermission.add(permission);
@@ -342,60 +316,6 @@ public class UserDAO {
             throw new RuntimeException(e);
         }
         return listPermission;
-    }
-
-    public void updateRoleFull(int roleId, String name, String description, String[] permissionIds) {
-        String sqlUpdateRole = "UPDATE roles SET name = ?, description = ? WHERE id = ?";
-        String sqlDeletePerms = "DELETE FROM role_permissions WHERE role_id = ?";
-        String sqlInsertPerms = "INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)";
-
-        Connection conn = null;
-        try {
-            conn = DBConfig.getDataSource().getConnection();
-            conn.setAutoCommit(false);
-
-            try (PreparedStatement ps = conn.prepareStatement(sqlUpdateRole)) {
-                ps.setString(1, name);
-                ps.setString(2, description);
-                ps.setInt(3, roleId);
-                ps.executeUpdate();
-            }
-
-            try (PreparedStatement ps = conn.prepareStatement(sqlDeletePerms)) {
-                ps.setInt(1, roleId);
-                ps.executeUpdate();
-            }
-
-            if (permissionIds != null && permissionIds.length > 0) {
-                try (PreparedStatement ps = conn.prepareStatement(sqlInsertPerms)) {
-                    for (String pId : permissionIds) {
-                        ps.setInt(1, roleId);
-                        ps.setInt(2, Integer.parseInt(pId));
-                        ps.addBatch();
-                    }
-                    ps.executeBatch();
-                }
-            }
-
-            conn.commit();
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            e.printStackTrace();
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
     public static void main(String[] args) {
@@ -422,7 +342,7 @@ public class UserDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Role role = new Role();
-                    role.setId(rs.getInt("id"));
+                    role.setId(rs.getLong("id"));
                     role.setName(rs.getString("name"));
                     role.setDescription(rs.getString("description"));
                     role.setActive(rs.getBoolean("is_active"));
@@ -436,13 +356,13 @@ public class UserDAO {
                             String[] parts = entry.split(":"); // Tách ID và Name
                             if (parts.length == 2) {
                                 Permission p = new Permission();
-                                p.setId(Integer.parseInt(parts[0])); // QUAN TRỌNG: Phải có ID
+                                p.setId(Long.parseLong(parts[0])); // QUAN TRỌNG: Phải có ID
                                 p.setName(parts[1]);
                                 permList.add(p);
                             }
                         }
                     }
-                    role.setPermission(permList);
+                    role.setPermissions(permList);
                     return role;
                 }
             }

@@ -30,15 +30,15 @@
             }
         </style>
     </head>
-    <body>
+    <body >
         <jsp:include page="/common/sidebar.jsp" />
         <div class="main-content">
             <h2>List user</h2>
-
-            <a href="/user-create">
-                <button class="btn btn-primary mb-3">Create new user</button>
-            </a>
-
+            <c:if test="${sessionScope.user.hasPermission('CREATE_USER')}">
+                <a href="/user-create">
+                    <button class="btn btn-primary mb-3">Create new user</button>
+                </a>
+            </c:if>
             <br>
             <table>
                 <thead>
@@ -62,25 +62,57 @@
                             <td>${u.role.name}</td>
 
                             <td>
-                                <form action="/change-user-status" method="post" class="d-inline">
-                                    <input type="hidden" name="userId" value="${u.id}">
-                                    <c:if test="${u.active == false}">
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            Inactive 
-                                        </button>
-                                    </c:if>
-                                    <c:if test="${u.active == true}">
-                                        <button type="submit" class="btn btn-sm btn-success">
-                                            Active 
-                                        </button>
-                                    </c:if>
-                                </form>
+                                <c:choose>
+
+                                    <c:when test="${sessionScope.user.hasPermission('UPDATE_ROLE')}">
+                                        <form action="/change-user-status" method="post" class="d-inline">
+                                            <input type="hidden" name="userId" value="${u.id}">
+                                            <c:if test="${u.active == false}">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    Inactive 
+                                                </button>
+                                            </c:if>
+                                            <c:if test="${u.active == true}">
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    Active 
+                                                </button>
+                                            </c:if>
+                                        </form>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:choose>
+                                            <c:when test="${u.active}">
+                                                <span class="badge bg-success p-2 w-75">ACTIVE</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="badge bg-danger p-2 w-75">DEACTIVE</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
                             <td>
-                                <a href="/change-password">Change password</a>
+                                <c:choose>
+                                    <c:when test="${sessionScope.user.hasPermission('UPDATE_USER')}">
+                                        <a href="/change-password">Change password</a>
+
+                                    </c:when>
+                                    <c:otherwise>
+                                        <p>Bạn không được cấp quyền</p>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
                             <td>
-                                <a href="/user?id=${u.id}" >Detail</a>
+                                <c:choose>
+                                    <c:when test="${sessionScope.user.hasPermission('UPDATE_USER')}">
+                                        <a href="/user?id=${u.id}" >Detail</a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <p>Bạn không được cấp quyền</p>
+                                    </c:otherwise>
+                                </c:choose>
+
+
                             </td>
                         </tr>
                     </c:forEach>
