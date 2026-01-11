@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 
 public class DBConfig {
 
-    private static final HikariDataSource dataSource;
+    private static HikariDataSource dataSource;
 
     static {
         HikariConfig config = new HikariConfig();
