@@ -60,9 +60,6 @@
             <button type="submit" class="btn-login">Sign In</button>
         </form>
 
-        <div class="register-link">
-            Don't have an account? <a href="${pageContext.request.contextPath}/register">Register here</a>
-        </div>
     </div>
 </div>
 
