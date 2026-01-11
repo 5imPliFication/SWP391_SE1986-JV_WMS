@@ -1,10 +1,10 @@
 package com.example.model;
 
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.sql.Timestamp;
 
 @Data
 @AllArgsConstructor
@@ -17,5 +17,5 @@ public class User {
     private String fullName;
     private Role role;
     private boolean active;
-    private LocalDateTime createdAt;
+    private Timestamp createdAt;
 }
