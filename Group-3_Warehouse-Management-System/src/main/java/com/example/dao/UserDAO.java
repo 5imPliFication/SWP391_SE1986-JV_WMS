@@ -16,30 +16,41 @@ public class UserDAO {
     public List<User> findAll() {
         List<User> listUsers = new ArrayList<>();
 
-        // sql
-        StringBuilder sql = new StringBuilder("select u.id, fullname, email, r.name, u.is_active "
-                + "from user as u join roles as r on u.role_id = r.id");
+        String sql = """
+        SELECT 
+            u.id,
+            u.fullname,
+            u.email,
+            u.is_active,
+            r.id   AS role_id,
+            r.name AS role_name
+        FROM users u
+        JOIN roles r ON u.role_id = r.id
+    """;
 
-        // access data
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString()); ResultSet rs = ps.executeQuery()) {
+        try (
+                Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
-            // get data
             while (rs.next()) {
                 User user = new User();
                 user.setId(rs.getInt("id"));
                 user.setFullName(rs.getString("fullname"));
                 user.setEmail(rs.getString("email"));
-//                user.setRole(rs.getString("name"));
                 user.setActive(rs.getBoolean("is_active"));
-                listUsers.add(user);
 
+                Role role = new Role();
+                role.setId(rs.getInt("role_id"));
+                role.setName(rs.getString("role_name"));
+
+                user.setRole(role);
+
+                listUsers.add(user);
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        // return list users
         return listUsers;
     }
 
@@ -64,8 +75,7 @@ public class UserDAO {
     // Get hashed password from database
     public String getPassword(String email) {
         String sql = "SELECT password_hash FROM users WHERE email = ?";
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
 
@@ -82,12 +92,16 @@ public class UserDAO {
     }
 
     public void updateUserInformation(User user) {
-        StringBuilder sql = new StringBuilder("update users "
-                + "set fullname=?,email=? where id=?");
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString());) {
+        String sql = "UPDATE users SET fullname = ?, email = ?, role_id = ?, is_active = ? WHERE id = ?";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
-            ps.setInt(3, user.getId());
+            ps.setInt(3, user.getRole().getId());
+            ps.setBoolean(4, user.isActive());
+            ps.setInt(5, user.getId());
+
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -134,4 +148,162 @@ public class UserDAO {
         return null;
     }
 
+    public boolean existsByEmail(String email) {
+        String sql = "SELECT 1 FROM users WHERE email = ?";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+
+            return rs.next();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public User findUserById(int id) {
+
+        String sql = """
+        SELECT u.id, u.fullname, u.email, u.is_active,
+               r.id AS role_id, r.name AS role_name
+        FROM users u
+        JOIN roles r ON u.role_id = r.id
+        WHERE u.id = ?
+    """;
+
+        try (
+                Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                User user = new User();
+                Role role = new Role();
+
+                user.setId(rs.getInt("id"));
+                user.setFullName(rs.getString("fullname"));
+                user.setEmail(rs.getString("email"));
+                user.setActive(rs.getBoolean("is_active"));
+
+                role.setId(rs.getInt("role_id"));
+                role.setName(rs.getString("role_name"));
+                user.setRole(role);
+
+                return user;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return null;
+    }
+
+    public boolean insertUser(User user) {
+        String sql = "insert into users(fullname, email, password_hash, role_id)\n"
+                + "values (?, ?, ?, ?);";
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getPasswordHash());
+            ps.setInt(4, user.getRole().getId());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean isExistEmail(String email) {
+        String sql = "select email from users where email = ?";
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+
+            return rs.next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean changeStatus(int id, boolean status) {
+        String sql = "update users set is_active = ? where id = ?;";
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setBoolean(1, status);
+            ps.setInt(2, id);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean getCurrentStatus(int id) {
+        String sql = "select is_active from users where id = ?";
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBoolean("is_active");
+                }
+            }
+            return false;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Role> getAllRoles() {
+        List<Role> list = new ArrayList<>();
+        String sql = "SELECT id, name FROM roles WHERE is_active = 1";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Role role = new Role();
+                role.setId(rs.getInt("id"));
+                role.setName(rs.getString("name"));
+                list.add(role);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static void main(String[] args) {
+        UserDAO dao = new UserDAO();
+
+        // Giả sử bạn test với User ID = 1
+        int testId = 1;
+        User u = dao.findUserById(testId);
+
+        if (u != null) {
+            System.out.println("--- Test thành công ---");
+            System.out.println("Họ tên: " + u.getFullName());
+            System.out.println("Email: " + u.getEmail());
+            System.out.println("Role hiện tại: " + u.getRole().getId());
+            System.out.println("Role hiện tại: " + u.getRole().getName());
+            System.out.println("Trạng thái: " + (u.isActive() ? "Active" : "Inactive"));
+        } else {
+            System.out.println("--- Test thất bại: Không tìm thấy User với ID = " + testId + " ---");
+        }
+    }
 }

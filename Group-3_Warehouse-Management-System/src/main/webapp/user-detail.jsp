@@ -1,83 +1,118 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: ADMIN
-  Date: 1/9/2026
-  Time: 9:34 AM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html>
-<head>
-    <title>User Detail Information</title>
+    <head>
+        <title>User Detail Information</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <body>
+        <div class="container mt-5">
 
-    <style>
-        body {
-            background-color: #f4f6f9;
-        }
-        .card {
-            border-radius: 8px;
-        }
-        .table th {
-            width: 35%;
-            background-color: #f8f9fa;
-        }
-    </style>
-</head>
+            <h3 class="text-center mb-4 fw-semibold">Edit User Information</h3>
 
-<body>
-<div class="container mt-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
 
-    <h3 class="text-center mb-4 fw-semibold">User Information</h3>
+                    <!-- FORM UPDATE -->
+                    <form action="user" method="post">
 
-    <div class="card shadow-sm">
-        <div class="card-body">
+                        <input type="hidden" name="id" value="${user.id}">
+                        <input type="hidden" name="active" value="${user.active}" id="activeValue">
 
-            <table class="table table-bordered align-middle mb-0">
-                <tr>
-                    <th>Full Name</th>
-                    <td>${user.fullName}</td>
-                </tr>
-                <tr>
-                    <th>Email</th>
-                    <td>${user.email}</td>
-                </tr>
-                <tr>
-                    <th>Role</th>
-                    <td>
-                        <span class="badge bg-info text-dark">
-                            ${user.role.name}
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Status</th>
-                    <td>
-                        <c:choose>
-                            <c:when test="${user.active}">
-                                <span class="badge bg-success">ACTIVE</span>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="badge bg-danger">INACTIVE</span>
-                            </c:otherwise>
-                        </c:choose>
-                    </td>
-                </tr>
-            </table>
+                        <table class="table table-bordered align-middle mb-0">
 
-            <div class="text-center mt-4">
-                <a href="user-list" class="btn btn-secondary px-4">
-                    Back
-                </a>
+                            <!-- FULL NAME -->
+                            <tr>
+                                <th>Full Name</th>
+                                <td>
+                                    <input type="text"
+                                           name="fullName"
+                                           class="form-control"
+                                           value="${user.fullName}"
+                                           required>
+                                </td>
+                            </tr>
+
+                            <!-- EMAIL -->
+                            <tr>
+                                <th>Email</th>
+                                <td>
+                                    <input type="email"
+                                           name="email"
+                                           class="form-control"
+                                           value="${user.email}"
+                                           required>
+                                </td>
+                            </tr>
+
+                            <!-- ROLE -->
+                            <tr>
+                                <th>Role</th>
+                                <td>
+                                    <select name="roleId" class="form-select">
+                                        <c:forEach items="${roles}" var="r">
+                                            <option value="${r.id}"
+                                                    ${r.id == user.role.id ? "selected" : ""}>
+                                                ${r.name}
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </td>
+                            </tr>
+
+                            <!-- STATUS TOGGLE -->
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    <button type="button"
+                                            id="statusBtn"
+                                            class="btn ${user.active ? 'btn-success' : 'btn-danger'}"
+                                            onclick="toggleStatus()">
+                                        ${user.active ? 'ACTIVE' : 'INACTIVE'}
+                                    </button>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                        <!-- BUTTONS -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary px-4">
+                                Save Changes
+                            </button>
+
+                            <a href="user-list" class="btn btn-secondary px-4 ms-2">
+                                Back
+                            </a>
+                        </div>
+
+                    </form>
+
+                </div>
             </div>
-
         </div>
-    </div>
 
-</div>
-</body>
+        <script>
+            function toggleStatus() {
+                const btn = document.getElementById("statusBtn");
+                const input = document.getElementById("activeValue");
+
+                if (input.value === "true") {
+                    input.value = "false";
+                    btn.textContent = "INACTIVE";
+                    btn.classList.remove("btn-success");
+                    btn.classList.add("btn-danger");
+                } else {
+                    input.value = "true";
+                    btn.textContent = "ACTIVE";
+                    btn.classList.remove("btn-danger");
+                    btn.classList.add("btn-success");
+                }
+            }
+        </script>
+
+    </body>
 </html>

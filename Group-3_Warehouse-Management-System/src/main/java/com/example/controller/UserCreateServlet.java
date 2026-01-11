@@ -30,7 +30,6 @@ public class UserCreateServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = new User();
         Role role = new Role();
-        // get input data
         user.setFullName(request.getParameter("fullName"));
         user.setEmail(request.getParameter("email"));
         user.setPasswordHash(request.getParameter("password"));
@@ -38,17 +37,15 @@ public class UserCreateServlet extends HttpServlet {
         user.setRole(role);
 
         System.out.println(request.getParameter("email"));
-        // call to Service to handle
         String messageError = userService.createUser(user);
 
-        // if create user error
-        if(messageError != null){
-            // handle error
+        if (messageError != null) {
             request.setAttribute("error", messageError);
-            request.getRequestDispatcher("/user-create.jsp").forward(request,response);
+            request.getRequestDispatcher("/user-create.jsp").forward(request, response);
         } else {
             request.setAttribute("success", "Create new user successfully");
-            request.getRequestDispatcher("/user-create.jsp").forward(request,response);
+            request.getRequestDispatcher("/user-create.jsp").forward(request, response);
         }
+
     }
 }

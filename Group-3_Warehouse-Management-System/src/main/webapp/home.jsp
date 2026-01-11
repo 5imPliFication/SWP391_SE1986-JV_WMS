@@ -34,7 +34,7 @@
             </div>
             <ul class="sidebar-menu">
                 <li><a href="home" class="active"><span></span><span>Dashboard</span></a></li>
-                <li><a href="inventory"><span></span><span>Inventory</span></a></li>
+                <li><a href="user-list"><span></span><span>User</span></a></li>
                 <li><a href="orders"><span></span><span>Orders</span></a></li>
                 <li><a href="suppliers"><span></span><span>Suppliers</span></a></li>
                 <li><a href="customers"><span></span><span>Customers</span></a></li>

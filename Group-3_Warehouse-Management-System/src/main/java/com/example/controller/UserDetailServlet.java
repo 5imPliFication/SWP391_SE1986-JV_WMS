@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.dao.UserDAO;
+import com.example.model.Role;
 import com.example.model.User;
 import com.example.service.UserService;
 import jakarta.servlet.ServletException;
@@ -10,22 +11,56 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet("/user")
 public class UserDetailServlet extends HttpServlet {
+
     private UserService userService;
+    private UserDAO d;
 
     @Override
-    public void init(){
+    public void init() {
         userService = new UserService();
+        d = new UserDAO();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         User user = userService.findUserById(Integer.parseInt(request.getParameter("id")));
-
+        List<Role> roles = d.getAllRoles();
+        request.setAttribute("roles", roles);
         request.setAttribute("user", user);
         request.getRequestDispatcher("/user-detail.jsp").forward(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            String fullName = request.getParameter("fullName");
+            String email = request.getParameter("email");
+            int roleId = Integer.parseInt(request.getParameter("roleId"));
+            boolean active = Boolean.parseBoolean(request.getParameter("active"));
+
+            User user = new User();
+            user.setId(id);
+            user.setFullName(fullName);
+            user.setEmail(email);
+            user.setActive(active);
+
+            Role role = new Role();
+            role.setId(roleId);
+            user.setRole(role);
+
+            d.updateUserInformation(user);
+
+            response.sendRedirect(request.getContextPath() + "/user-list?status=success");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/user?id=" + request.getParameter("id") + "&error=1");
+        }
     }
 }
