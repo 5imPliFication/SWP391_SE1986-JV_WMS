@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.dao.UserDAO;
+import com.example.dao.RoleDAO;
 import com.example.model.Role;
 import com.example.model.User;
 import com.example.service.UserService;
@@ -18,18 +19,20 @@ public class UserDetailServlet extends HttpServlet {
 
     private UserService userService;
     private UserDAO d;
+    private RoleDAO r;
 
     @Override
     public void init() {
         userService = new UserService();
         d = new UserDAO();
+        r = new RoleDAO();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         User user = userService.findUserById(Integer.parseInt(request.getParameter("id")));
-        List<Role> roles = d.getAllRoles();
+        List<Role> roles = r.getAllRoles();
         request.setAttribute("roles", roles);
         request.setAttribute("user", user);
         request.getRequestDispatcher("/user-detail.jsp").forward(request, response);
