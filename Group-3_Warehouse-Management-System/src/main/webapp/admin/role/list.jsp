@@ -18,7 +18,7 @@
             <td>${r.description}</td>
             <td>${r.status ? "Active" : "Inactive"}</td>
             <td>
-                <a href="role?action=detail&id=${r.id}">Detail</a> |
+                <a href="${pageContext.request.contextPath}/admin/role?action=detail&id=${r.id}">Detail</a> |
                 <a href="role?action=toggle&id=${r.id}&status=${!r.status}">
                         ${r.status ? "Deactivate" : "Activate"}
                 </a>

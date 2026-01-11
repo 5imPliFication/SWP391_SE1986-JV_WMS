@@ -61,6 +61,15 @@ public class RoleService extends HttpServlet {
                 roleDAO.changeStatus(id, status);
                 resp.sendRedirect("role");
             }
+            else if ("update".equals(action)) {
+                // View update role
+                String id = req.getParameter("id");
+                Role role = roleDAO.findById(id);
+
+                req.setAttribute("role", role);
+                req.getRequestDispatcher("/admin/role/update.jsp").forward(req, resp);
+            }
+
 
         } catch (Exception e) {
             throw new ServletException(e);
@@ -73,13 +82,16 @@ public class RoleService extends HttpServlet {
             throws ServletException, IOException {
 
         try {
+            boolean status = req.getParameter("status") != null;
+
             Role role = new Role(
                     req.getParameter("id"),
                     req.getParameter("name"),
                     req.getParameter("description"),
-                    true,
+                    status,
                     null
             );
+
 
             roleDAO.update(role);
             resp.sendRedirect("role");
