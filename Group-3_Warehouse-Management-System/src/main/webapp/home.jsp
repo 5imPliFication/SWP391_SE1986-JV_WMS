@@ -10,7 +10,6 @@
 <html>
     <head>
         <title>Home</title>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/home.css">
     </head>
     <body>
         <%
@@ -26,22 +25,7 @@
                     : user.getFullName().substring(0, 1).toUpperCase();
         %>
 
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h1>Warehouse</h1>
-                <p>Management System</p>
-            </div>
-            <ul class="sidebar-menu">
-                <li><a href="home" class="active"><span></span><span>Dashboard</span></a></li>
-                <li><a href="user-list"><span></span><span>User</span></a></li>
-                <li><a href="orders"><span></span><span>Orders</span></a></li>
-                <li><a href="suppliers"><span></span><span>Suppliers</span></a></li>
-                <li><a href="customers"><span></span><span>Customers</span></a></li>
-                <li><a href="reports"><span></span><span>Reports</span></a></li>
-                <li><a href="settings"><span>⚙</span><span>Settings</span></a></li>
-            </ul>
-        </aside>
+        <jsp:include page="/common/sidebar.jsp" />
 
         <!-- Main Content -->
         <main class="main-content">

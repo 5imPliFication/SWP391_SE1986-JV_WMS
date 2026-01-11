@@ -31,75 +31,77 @@
         </style>
     </head>
     <body>
+        <jsp:include page="/common/sidebar.jsp" />
+        <div class="main-content">
+            <h2>List user</h2>
 
-        <h2>List user</h2>
+            <a href="/user-create">
+                <button class="btn btn-primary mb-3">Create new user</button>
+            </a>
 
-        <a href="/user-create">
-            <button class="btn btn-primary mb-3">Create new user</button>
-        </a>
-
-        <br>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Change password</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <c:forEach items="${userList}" var="u">
+            <br>
+            <table>
+                <thead>
                     <tr>
-                        <td>${u.id}</td>
-                        <td>${u.fullName}</td>
-                        <td>${u.email}</td>
-                        <td>${u.role.name}</td>
-
-                        <td>
-                            <form action="/change-user-status" method="post" class="d-inline">
-                                <input type="hidden" name="userId" value="${u.id}">
-                                <c:if test="${u.active == false}">
-                                    <button type="submit" class="btn btn-sm btn-danger">
-                                        Inactive 
-                                    </button>
-                                </c:if>
-                                <c:if test="${u.active == true}">
-                                    <button type="submit" class="btn btn-sm btn-success">
-                                        Active 
-                                    </button>
-                                </c:if>
-                            </form>
-                        </td>
-                        <td>
-                            <a href="/change-password">Change password</a>
-                        </td>
-                        <td>
-                            <a href="/user?id=${u.id}" >Detail</a>
-                        </td>
+                        <th>ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Change password</th>
+                        <th>Details</th>
                     </tr>
-                </c:forEach>
+                </thead>
 
-                <c:if test="${empty userList}">
-                    <tr>
-                        <td colspan="7">No data</td>
-                    </tr>
-                </c:if>
-            </tbody>
-        </table>
-        <div>
-            <c:choose>
-                <c:when test="${messageStatus}">
-                    ${messageSuccess}
-                </c:when>
-                <c:otherwise>
-                    ${messageFail}
-                </c:otherwise>
-            </c:choose>
+                <tbody>
+                    <c:forEach items="${userList}" var="u">
+                        <tr>
+                            <td>${u.id}</td>
+                            <td>${u.fullName}</td>
+                            <td>${u.email}</td>
+                            <td>${u.role.name}</td>
+
+                            <td>
+                                <form action="/change-user-status" method="post" class="d-inline">
+                                    <input type="hidden" name="userId" value="${u.id}">
+                                    <c:if test="${u.active == false}">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            Inactive 
+                                        </button>
+                                    </c:if>
+                                    <c:if test="${u.active == true}">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            Active 
+                                        </button>
+                                    </c:if>
+                                </form>
+                            </td>
+                            <td>
+                                <a href="/change-password">Change password</a>
+                            </td>
+                            <td>
+                                <a href="/user?id=${u.id}" >Detail</a>
+                            </td>
+                        </tr>
+                    </c:forEach>
+
+                    <c:if test="${empty userList}">
+                        <tr>
+                            <td colspan="7">No data</td>
+                        </tr>
+                    </c:if>
+                </tbody>
+            </table>
+            <div>
+                <c:choose>
+                    <c:when test="${messageStatus}">
+                        ${messageSuccess}
+                    </c:when>
+                    <c:otherwise>
+                        ${messageFail}
+                    </c:otherwise>
+                </c:choose>
+            </div>
         </div>
 
     </body>
