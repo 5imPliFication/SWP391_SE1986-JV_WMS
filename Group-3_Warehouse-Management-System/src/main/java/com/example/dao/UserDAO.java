@@ -1,6 +1,7 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
+import com.example.model.Role;
 import com.example.model.User;
 
 import java.sql.Connection;
@@ -28,7 +29,7 @@ public class UserDAO {
                 user.setId(rs.getInt("id"));
                 user.setFullName(rs.getString("fullname"));
                 user.setEmail(rs.getString("email"));
-                user.setRole(rs.getString("name"));
+//                user.setRole(rs.getString("name"));
                 user.setActive(rs.getBoolean("is_active"));
                 listUsers.add(user);
 
@@ -60,16 +61,55 @@ public class UserDAO {
 
     public void updateUserInformation(User user) {
         StringBuilder sql = new StringBuilder("update users "
-                + "set fullname=?,email=?, role_id=?, is_active=? where id=?");
+                + "set fullname=?,email=? where id=?");
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString());) {
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
-            ps.setInt(3, user.getRole().getId());
-            ps.setBoolean(4, user.isActive());
-            ps.setInt(5, user.getId());
+            ps.setInt(3, user.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
+    public User login(String email) {
+        final String sql = """
+        SELECT 
+            u.id,
+            u.fullname,
+            u.email,
+            u.password_hash,
+            r.id   AS role_id,
+            r.name AS role_name
+        FROM users u
+        LEFT JOIN roles r ON u.role_id = r.id
+        WHERE u.email = ?
+    """;
+
+        try (
+                Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                User u = new User();
+                u.setId(rs.getInt("id"));
+                u.setFullName(rs.getString("fullname"));
+                u.setEmail(rs.getString("email"));
+                u.setPasswordHash(rs.getString("password_hash"));
+
+                Role role = new Role();
+                role.setId(rs.getInt("role_id"));
+                role.setName(rs.getString("role_name"));
+
+                u.setRole(role);
+                return u;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();// replace with logger later
+        }
+        return null;
+    }
+
 }
