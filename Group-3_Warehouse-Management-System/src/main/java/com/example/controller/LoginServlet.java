@@ -1,7 +1,11 @@
 package com.example.controller;
 
 import com.example.dao.UserDAO;
+import com.example.model.Permission;
 import com.example.model.User;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,7 +21,6 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
         req.getRequestDispatcher("/login.jsp").forward(req, resp);
     }
 
@@ -30,6 +33,15 @@ public class LoginServlet extends HttpServlet {
 
         User user = userDAO.login(email);
 
+        // Debug: Kiểm tra User lấy ra từ DB
+        System.out.println("--- DEBUG LOGIN SERVLET ---");
+        if (user != null) {
+            System.out.println("Email login: " + user.getEmail());
+            System.out.println("Role name: " + (user.getRole() != null ? user.getRole().getName() : "NULL ROLE"));
+        } else {
+            System.out.println("User object is NULL - Check email in Database");
+        }
+
         if (user == null || !user.getPasswordHash().equals(password_hash)) {
             req.setAttribute("error", "Invalid email or password");
             req.getRequestDispatcher("/login.jsp").forward(req, resp);
@@ -38,6 +50,25 @@ public class LoginServlet extends HttpServlet {
 
         HttpSession session = req.getSession(true);
         session.setAttribute("user", user);
+
+        // --- XỬ LÝ VÀ DEBUG PERMISSIONS ---
+        List<String> userPermissions = new ArrayList<>();
+
+        if (user.getRole() != null && user.getRole().getPermissions() != null) {
+            // Chuyển đổi List<Permission> thành List<String> (tên quyền)
+            userPermissions = user.getRole().getPermissions().stream()
+                    .map(Permission::getName)
+                    .collect(Collectors.toList());
+
+            System.out.println("Permissions found: " + userPermissions);
+        } else {
+            System.out.println("WARNING: Permissions list is EMPTY or NULL for this user!");
+        }
+
+        // Lưu danh sách String tên quyền vào Session cho RoleFilter
+        session.setAttribute("userPermissions", userPermissions);
+        System.out.println("Session 'userPermissions' has been set.");
+        System.out.println("---------------------------");
 
         resp.sendRedirect(req.getContextPath() + "/home");
     }

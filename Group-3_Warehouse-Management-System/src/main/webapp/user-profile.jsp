@@ -8,26 +8,62 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
-<head>
-    <title>User Profile</title>
-</head>
-<body>
-<p>User Profile</p>
-<table>
-    <thead>
-        <tr>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Role</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>${user.fullName}</td>
-            <td>${user.email}</td>
-            <td>${user.role.name}</td>
-        </tr>
-    </tbody>
-</table>
-</body>
+    <head>
+        <title>User Profile</title>
+    </head>
+    <body>
+        <h2>User Profile</h2>
+
+        <form action="<%= request.getContextPath() %>/user/profile" method="post">
+            <table>
+                <tr>
+                    <td>Full Name</td>
+                    <td>
+                        <input type="text"
+                               name="fullName"
+                               value="${user.fullName}"
+                               required />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Email</td>
+                    <td>
+                        <input type="email"
+                               name="email"
+                               value="${user.email}"
+                               />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Role</td>
+                    <td>
+                        <input type="text"
+                               value="${user.role.name}"
+                               disabled />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <button type="submit">Update Profile</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+        <%
+       String success = request.getParameter("success");
+       if ("true".equals(success)) {
+        %>
+        <p style="color: green;">Cập nhật thành công!</p>
+        <%
+            }else{
+        %>   
+        <p style="color: red">Cập nhật không thành công</p>
+        <%
+     }
+        %>
+    </body>
 </html>

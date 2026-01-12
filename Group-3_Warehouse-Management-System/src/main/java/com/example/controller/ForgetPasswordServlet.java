@@ -29,7 +29,7 @@ public class ForgetPasswordServlet extends HttpServlet {
         String email = request.getParameter("email");
 
         // Check user existed with email
-        if(!userDAO.existsByEmail(email)){
+        if(userDAO.login(email)!=null || !userDAO.login(email).isActive()){
             request.getRequestDispatcher("/forget-password-error.jsp").forward(request,response);
         } else {
             // Create new password
