@@ -1,65 +1,66 @@
 DROP DATABASE IF EXISTS laptop_wms;
 CREATE DATABASE laptop_wms;
-
 USE laptop_wms;
 
--- 1. Tạo bảng Vai trò (Roles)
+-- 1. Bảng Roles
 CREATE TABLE roles (
-    id VARCHAR(50) PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Tạo bảng Quyền hạn (Permission)
-CREATE TABLE permission (
-    id VARCHAR(50) PRIMARY KEY,
+-- 2. Bảng Permissions
+CREATE TABLE permissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT
 );
 
--- 3. Tạo bảng Người dùng (User)
-CREATE TABLE user (
-    id VARCHAR(50) PRIMARY KEY,
+-- 3. Bảng Users
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     fullname VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    role_id VARCHAR(50),
+    role_id INT,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_edited_at TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
--- 4. Tạo bảng trung gian Phân quyền cho Vai trò (Role_Permissions)
--- Đây là bảng liên kết n-n giữa Roles và Permission
+-- 4. Bảng Role_Permissions (n-n)
 CREATE TABLE role_permissions (
-    role_id VARCHAR(50),
-    permission_id VARCHAR(50),
+    role_id INT,
+    permission_id INT,
     PRIMARY KEY (role_id, permission_id),
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
-    FOREIGN KEY (permission_id) REFERENCES permission(id) ON DELETE CASCADE
+    FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
 );
 
--- Nhập Vai trò
-INSERT INTO roles (id, name, description) VALUES 
-('R01', 'Admin', 'Toàn quyền hệ thống'),
-('R02', 'Staff', 'Chỉnh sửa nội dung');
+-- ===== DỮ LIỆU MẪU =====
 
--- Nhập Quyền hạn
-INSERT INTO permission (id, name, description) VALUES 
-('P01', 'CREATE_USER', 'Quyền tạo người dùng mới'),
-('P02', 'EDIT_POST', 'Quyền chỉnh sửa bài viết'),
-('P03', 'VIEW_REPORT', 'Quyền xem báo cáo');
+-- Roles
+INSERT INTO roles (name, description) VALUES 
+('Admin', 'Toàn quyền hệ thống'),
+('Staff', 'Chỉnh sửa nội dung');
 
--- Gán quyền cho vai trò (Role_Permissions)
+-- Permissions
+INSERT INTO permissions (name, description) VALUES 
+('CREATE_USER', 'Quyền tạo người dùng mới'),
+('EDIT_POST', 'Quyền chỉnh sửa bài viết'),
+('VIEW_REPORT', 'Quyền xem báo cáo');
+
+-- Gán quyền cho roles
 INSERT INTO role_permissions (role_id, permission_id) VALUES 
-('R01', 'P01'), -- Admin có quyền tạo user
-('R01', 'P02'), -- Admin có quyền sửa bài
-('R02', 'P02'); -- Editor có quyền sửa bài
+(1, 1),
+(1, 2),
+(1, 3),
+(2, 2);
 
--- Nhập Người dùng
-INSERT INTO user (id, fullname, email, password_hash, role_id) VALUES 
-('U01', 'admin', 'admin@gmail.com', 'admin', 'R01'),
-('U02', 'staff', 'staff@gmail.com', 'staff', 'R02');
+-- Users
+INSERT INTO users (fullname, email, password_hash, role_id) VALUES 
+('admin', 'admin@gmail.com', 'admin', 1),
+('staff', 'staff@gmail.com', 'staff', 2);

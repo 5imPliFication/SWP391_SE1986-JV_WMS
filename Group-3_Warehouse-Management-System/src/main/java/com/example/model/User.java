@@ -18,4 +18,12 @@ public class User {
     private Role role;
     private boolean active;
     private LocalDateTime createdAt;
+
+    public boolean hasPermission(String permissionName) {
+        if (role == null || role.getPermissions() == null) {
+            return false;
+        }
+        return role.getPermissions().stream()
+                .anyMatch(p -> p.getName().equalsIgnoreCase(permissionName));
+    }
 }

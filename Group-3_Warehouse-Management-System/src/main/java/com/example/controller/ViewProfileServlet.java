@@ -44,9 +44,8 @@ public class ViewProfileServlet extends HttpServlet {
         String email = request.getParameter("email");
 
         if (fullName == null || email == null || fullName.isBlank() || email.isBlank()) {
-            request.setAttribute("error", "Dữ liệu không hợp lệ");
             request.setAttribute("user", user);
-            request.getRequestDispatcher("/user-profile.jsp").forward(request, response);
+            response.sendRedirect(request.getContextPath() + "/user/profile?success=false");
             return;
         }
 
