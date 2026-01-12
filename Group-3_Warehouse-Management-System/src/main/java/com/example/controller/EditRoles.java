@@ -8,12 +8,19 @@ import com.example.dao.UserDAO;
 import com.example.dao.RoleDAO;
 import com.example.model.Permission;
 import com.example.model.Role;
+
 import java.io.IOException;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @WebServlet(name = "EditRoles", urlPatterns = {"/edit-role"})
@@ -32,9 +39,14 @@ public class EditRoles extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int id = Integer.parseInt(request.getParameter("id"));
+        Long id = Long.parseLong(request.getParameter("id"));
 
-        Role role = r.findRoleByID(id);
+        Role role;
+        try {
+            role = r.findById(id);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         List<Permission> allPermissions = d.getAllPermissions();
 
@@ -51,12 +63,29 @@ public class EditRoles extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         try {
-            int roleId = Integer.parseInt(request.getParameter("roleID"));
+            Long roleId = Long.parseLong(request.getParameter("roleID"));
             String roleName = request.getParameter("roleName");
             String description = request.getParameter("description");
 
             String[] permissionIds = request.getParameterValues("permissionIds");
-            r.updateRoleFull(roleId, roleName, description, permissionIds);
+            //convert from array of strings to List
+            List<Permission> permissions = new ArrayList<>();
+            if (permissionIds != null) {
+                for (String pid : permissionIds) {
+                    Permission p = new Permission();
+                    p.setId(Long.parseLong(pid));
+                    permissions.add(p);
+                }
+            }
+            Role newRole = new Role(
+                    roleId,
+                    roleName,
+                    description,
+                    true,                          // isActive
+                    new Timestamp(System.currentTimeMillis()), // createdAt
+                    permissions
+            );
+            r.update(newRole);
             response.sendRedirect("roles?message=update_success");
 
         } catch (Exception e) {

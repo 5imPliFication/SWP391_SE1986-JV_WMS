@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
+import static com.example.util.PasswordUtil.hashPassword;
+
 @WebServlet("/user-create")
 public class UserCreateServlet extends HttpServlet {
 
@@ -32,7 +34,7 @@ public class UserCreateServlet extends HttpServlet {
         Role role = new Role();
         user.setFullName(request.getParameter("fullName"));
         user.setEmail(request.getParameter("email"));
-        user.setPasswordHash(request.getParameter("password"));
+        user.setPasswordHash(hashPassword(request.getParameter("password_hash")));
         role.setId(Long.parseLong(request.getParameter("role")));
         user.setRole(role);
 

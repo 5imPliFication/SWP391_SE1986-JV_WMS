@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -37,7 +38,12 @@ public class RoleList extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Role> roleList = r.getAllRoles();
+        List<Role> roleList = null;
+        try {
+            roleList = r.findAll();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         List<Permission> allPermissions = d.getAllPermissions();
         request.setAttribute("roleList", roleList);
         request.setAttribute("allPermissions", allPermissions);

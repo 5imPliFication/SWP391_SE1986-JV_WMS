@@ -49,14 +49,14 @@ public class RoleService extends HttpServlet {
 
             } else if ("detail".equals(action)) {
                 // 13. View role detail
-                String id = req.getParameter("id");
+                Long id = Long.parseLong(req.getParameter("id"));
                 Role role = roleDAO.findById(id);
                 req.setAttribute("role", role);
                 req.getRequestDispatcher("/admin/role/detail.jsp").forward(req, resp);
 
             } else if ("toggle".equals(action)) {
                 // 15. Active / Deactivate role
-                String id = req.getParameter("id");
+                Long id = Long.parseLong(req.getParameter("id"));
                 boolean status = Boolean.parseBoolean(req.getParameter("status"));
                 roleDAO.changeStatus(id, status);
                 resp.sendRedirect("role");

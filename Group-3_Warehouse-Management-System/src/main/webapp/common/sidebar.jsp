@@ -22,12 +22,14 @@
             <p>Management System</p>
         </div>
         <ul class="sidebar-menu">
+<%--            dashboard--%>
             <li>
                 <a href="${pageContext.request.contextPath}/home" 
                    class="<%= (uri.endsWith("home") || uri.contains("home")) ? "active" : "" %>">
                     <span>Dashboard</span>
                 </a>
             </li>
+    <%--            view user profile--%>
             <c:if test="${sessionScope.user.hasPermission('READ_USER')}">
                 <li>
                     <a href="${pageContext.request.contextPath}/user-list" 

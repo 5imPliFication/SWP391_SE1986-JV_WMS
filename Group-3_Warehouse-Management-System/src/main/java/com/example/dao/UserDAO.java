@@ -13,20 +13,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO {
-    public List<User> findAll(){
+    public List<User> findAll() {
         List<User> listUsers = new ArrayList<>();
 
         String sql = """
-        SELECT 
-            u.id,
-            u.fullname,
-            u.email,
-            u.is_active,
-            r.id   AS role_id,
-            r.name AS role_name
-        FROM users u
-        JOIN roles r ON u.role_id = r.id
-    """;
+                    SELECT 
+                        u.id,
+                        u.fullname,
+                        u.email,
+                        u.is_active,
+                        r.id   AS role_id,
+                        r.name AS role_name
+                    FROM users u
+                    JOIN roles r ON u.role_id = r.id
+                """;
 
         try (
                 Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -56,74 +56,21 @@ public class UserDAO {
         return listUsers;
     }
 
-    public boolean updatePassword(String email, String newPassword) {
-        String sql = "UPDATE users SET password_hash = ? WHERE email = ?";
 
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, newPassword);
-            ps.setString(2, email);
-
-            int rowsUpdated = ps.executeUpdate();
-
-            return rowsUpdated > 0;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // Get hashed password from database
-    public String getPassword(String email) {
-        String sql = "SELECT password_hash FROM users WHERE email = ?";
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, email);
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getString("password_hash");
-            }
-            return null;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public void updateUserInformation(User user) {
-        String sql = "UPDATE users SET fullname = ?, email = ?, role_id = ?, is_active = ? WHERE id = ?";
-
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, user.getFullName());
-            ps.setString(2, user.getEmail());
-            ps.setLong(3, user.getRole().getId());
-            ps.setBoolean(4, user.isActive());
-            ps.setLong(5, user.getId());
-
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public User login(String email) {
+    public User existedByEmail(String email) {
         // 1. Câu lệnh SQL lấy User và Role
         final String sql = """
-        SELECT 
-            u.id,
-            u.fullname,
-            u.email,
-            u.password_hash,
-            r.id   AS role_id,
-            r.name AS role_name
-        FROM users u
-        LEFT JOIN roles r ON u.role_id = r.id
-        WHERE u.email = ?
-    """;
+                    SELECT 
+                        u.id,
+                        u.fullname,
+                        u.email,
+                        u.password_hash,
+                        r.id   AS role_id,
+                        r.name AS role_name
+                    FROM users u
+                    LEFT JOIN roles r ON u.role_id = r.id
+                    WHERE u.email = ?
+                """;
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -146,11 +93,11 @@ public class UserDAO {
                 // --- BẮT ĐẦU LẤY DANH SÁCH PERMISSION ---
                 List<Permission> permissions = new ArrayList<>();
                 final String sqlPerms = """
-                SELECT p.id, p.name 
-                FROM permissions p
-                JOIN role_permissions rp ON p.id = rp.permission_id
-                WHERE rp.role_id = ?
-            """;
+                            SELECT p.id, p.name 
+                            FROM permissions p
+                            JOIN role_permissions rp ON p.id = rp.permission_id
+                            WHERE rp.role_id = ?
+                        """;
 
                 try (PreparedStatement psP = conn.prepareStatement(sqlPerms)) {
                     psP.setLong(1, roleId);
@@ -194,12 +141,12 @@ public class UserDAO {
     public User findUserById(int id) {
 
         String sql = """
-        SELECT u.id, u.fullname, u.email, u.is_active,
-               r.id AS role_id, r.name AS role_name
-        FROM users u
-        JOIN roles r ON u.role_id = r.id
-        WHERE u.id = ?
-    """;
+                    SELECT u.id, u.fullname, u.email, u.is_active,
+                           r.id AS role_id, r.name AS role_name
+                    FROM users u
+                    JOIN roles r ON u.role_id = r.id
+                    WHERE u.id = ?
+                """;
 
 
         // access data
@@ -209,20 +156,20 @@ public class UserDAO {
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
             // get data
-            if (rs.next()){
+            if (rs.next()) {
                 User userDetail = new User();
                 Role role = new Role();
 
-                user.setId(rs.getLong("id"));
-                user.setFullName(rs.getString("fullname"));
-                user.setEmail(rs.getString("email"));
-                user.setActive(rs.getBoolean("is_active"));
+                userDetail.setId(rs.getLong("id"));
+                userDetail.setFullName(rs.getString("fullname"));
+                userDetail.setEmail(rs.getString("email"));
+                userDetail.setActive(rs.getBoolean("is_active"));
 
                 role.setId(rs.getLong("role_id"));
                 role.setName(rs.getString("role_name"));
-                user.setRole(role);
+                userDetail.setRole(role);
 
-                return user;
+                return userDetail;
             }
 
         } catch (SQLException e) {
@@ -233,7 +180,18 @@ public class UserDAO {
     }
 
     public User login(String email) {
-        final String sql = "SELECT id,fullname,email,password_hash,role_id FROM user WHERE email = ?";
+        final String sql = "SELECT \n" +
+                "    u.id,\n" +
+                "    u.fullname,\n" +
+                "    u.email,\n" +
+                "    u.password_hash,\n" +
+                "    r.id,\n" +
+                "    r.name ,\n" +
+                "    r.description,\n" +
+                "    r.is_active,\n" +
+                "    r.created_at\n" +
+                "FROM users u\n" +
+                "JOIN roles r ON u.role_id = r.id WHERE email = ?";
 
         try (
                 Connection conn = DBConfig.getDataSource().getConnection();
@@ -248,7 +206,13 @@ public class UserDAO {
                 u.setFullName(rs.getString("fullname"));
                 u.setEmail(rs.getString("email"));
                 u.setPasswordHash(rs.getString("password_hash"));
-                u.setRole(rs.getObject("name", Role.class));
+
+                Role role = new Role();
+                role.setId(rs.getLong("id"));
+                role.setName(rs.getString("name"));
+
+                u.setRole(role);
+
                 return u;
             }
 
@@ -293,6 +257,7 @@ public class UserDAO {
             throw new RuntimeException(e);
         }
     }
+
     public void updateUserInformation(User user) {
         StringBuilder sql = new StringBuilder("update users "
                 + "set fullname=?,email=?, role_id=?, is_active=? where id=?");
@@ -307,9 +272,10 @@ public class UserDAO {
             throw new RuntimeException(e);
         }
     }
+
     // Get hashed password from database
     public String getPassword(String email) {
-        String sql = "SELECT password_hash FROM user WHERE email = ?";
+        String sql = "SELECT password_hash FROM users WHERE email = ?";
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -325,8 +291,9 @@ public class UserDAO {
             return null;
         }
     }
+
     public boolean updatePassword(String email, String newPassword) {
-        String sql = "UPDATE user SET password_hash = ? WHERE email = ?";
+        String sql = "UPDATE users SET password_hash = ? WHERE email = ?";
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

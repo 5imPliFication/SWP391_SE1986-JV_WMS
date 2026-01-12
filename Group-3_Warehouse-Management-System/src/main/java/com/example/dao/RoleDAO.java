@@ -17,11 +17,14 @@ import java.util.Map;
 
 public class RoleDAO {
 
-    private final Connection conn;
+    private Connection conn;
+
+    public RoleDAO() {    }
 
     public RoleDAO(Connection conn) {
         this.conn = conn;
     }
+
 
     // 12. View role list
     public List<Role> findAll() throws SQLException {
@@ -45,10 +48,10 @@ public class RoleDAO {
     }
 
     // 13. View role detail
-    public Role findById(String id) throws SQLException {
+    public Role findById(Long id) throws SQLException {
         String sql = "SELECT * FROM roles WHERE id = ?";
         PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setString(1, id);
+        ps.setLong(1, id);
 
         ResultSet rs = ps.executeQuery();
         if (rs.next()) {
@@ -75,11 +78,11 @@ public class RoleDAO {
     }
 
     // 15. Active / Deactivate
-    public void changeStatus(String id, boolean active) throws SQLException {
+    public void changeStatus(Long id, boolean active) throws SQLException {
         String sql = "UPDATE roles SET is_active=? WHERE id=?";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setBoolean(1, active);
-        ps.setString(2, id);
+        ps.setLong(2, id);
         ps.executeUpdate();
     }
 

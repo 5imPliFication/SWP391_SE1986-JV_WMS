@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 @WebServlet("/user")
@@ -32,7 +33,12 @@ public class UserDetailServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         User user = userService.findUserById(Integer.parseInt(request.getParameter("id")));
-        List<Role> roles = r.getAllRoles();
+        List<Role> roles;
+        try {
+            roles = r.findAll();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         request.setAttribute("roles", roles);
         request.setAttribute("user", user);
         request.getRequestDispatcher("/user-detail.jsp").forward(request, response);
