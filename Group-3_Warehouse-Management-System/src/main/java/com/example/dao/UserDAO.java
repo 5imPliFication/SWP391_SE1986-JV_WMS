@@ -12,6 +12,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.util.PasswordUtil.checkPassword;
+import static com.example.util.PasswordUtil.hashPassword;
+
 public class UserDAO {
     public List<User> findAll() {
         List<User> listUsers = new ArrayList<>();
@@ -180,23 +183,23 @@ public class UserDAO {
     }
 
     public User login(String email) {
-        final String sql = "SELECT \n" +
-                "    u.id,\n" +
-                "    u.fullname,\n" +
-                "    u.email,\n" +
-                "    u.password_hash,\n" +
-                "    r.id,\n" +
-                "    r.name ,\n" +
-                "    r.description,\n" +
-                "    r.is_active,\n" +
-                "    r.created_at\n" +
-                "FROM users u\n" +
-                "JOIN roles r ON u.role_id = r.id WHERE email = ?";
+        // 1. Câu lệnh SQL lấy User và Role
+        final String sql = """
+        SELECT 
+            u.id,
+            u.fullname,
+            u.email,
+            u.password_hash,
+            r.id   AS role_id,
+            r.name AS role_name,
+                           r.is_active
+        FROM users u
+        LEFT JOIN roles r ON u.role_id = r.id
+        WHERE u.email = ?
+    """;
 
-        try (
-                Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)
-        ) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
 
@@ -207,20 +210,46 @@ public class UserDAO {
                 u.setEmail(rs.getString("email"));
                 u.setPasswordHash(rs.getString("password_hash"));
 
+                // 2. Khởi tạo đối tượng Role
                 Role role = new Role();
-                role.setId(rs.getLong("id"));
-                role.setName(rs.getString("name"));
+                long roleId = rs.getLong("role_id");
+                role.setId(roleId);
+                role.setName(rs.getString("role_name"));
+                role.setActive(rs.getBoolean("is_active"));
+
+                // --- BẮT ĐẦU LẤY DANH SÁCH PERMISSION ---
+                List<Permission> permissions = new ArrayList<>();
+                final String sqlPerms = """
+                SELECT p.id, p.name 
+                FROM permissions p
+                JOIN role_permissions rp ON p.id = rp.permission_id
+                WHERE rp.role_id = ?
+            """;
+
+                try (PreparedStatement psP = conn.prepareStatement(sqlPerms)) {
+                    psP.setLong(1, roleId);
+                    ResultSet rsP = psP.executeQuery();
+                    while (rsP.next()) {
+                        Permission p = new Permission();
+                        p.setId(rsP.getLong("id"));
+                        p.setName(rsP.getString("name"));
+                        permissions.add(p);
+                    }
+                }
+                // Gán danh sách quyền vào Role
+                role.setPermissions(permissions);
+                // --- KẾT THÚC LẤY PERMISSION ---
 
                 u.setRole(role);
-
                 return u;
             }
 
         } catch (Exception e) {
-            e.printStackTrace(); // replace with logger later
+            e.printStackTrace();
         }
         return null;
     }
+
 
     public boolean insertUser(User user) {
         String sql = "insert into users(fullname, email, password_hash, role_id)\n"

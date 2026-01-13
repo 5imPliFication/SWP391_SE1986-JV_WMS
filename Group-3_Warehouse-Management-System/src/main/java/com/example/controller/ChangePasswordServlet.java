@@ -35,6 +35,7 @@ public class ChangePasswordServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
+        //get unencrypted password from <form>
         User user = (User)request.getSession().getAttribute("user");
         String currentPassword = request.getParameter("currentPassword");
         String newPassword = request.getParameter("newPassword");
