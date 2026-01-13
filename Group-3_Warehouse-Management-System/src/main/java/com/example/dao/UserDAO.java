@@ -117,6 +117,8 @@ public class UserDAO {
                 // --- KẾT THÚC LẤY PERMISSION ---
 
                 u.setRole(role);
+                System.out.println("--- Debug getting role event ---");
+                System.out.println(role.getName());
                 return u;
             }
 

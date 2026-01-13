@@ -34,7 +34,7 @@ public class UserCreateServlet extends HttpServlet {
         Role role = new Role();
         user.setFullName(request.getParameter("fullName"));
         user.setEmail(request.getParameter("email"));
-        user.setPasswordHash(hashPassword(request.getParameter("password_hash")));
+        user.setPasswordHash(hashPassword(request.getParameter("password")));
         role.setId(Long.parseLong(request.getParameter("role")));
         user.setRole(role);
 
