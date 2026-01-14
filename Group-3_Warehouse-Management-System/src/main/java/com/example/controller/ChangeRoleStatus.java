@@ -5,6 +5,7 @@
 package com.example.controller;
 
 import com.example.dao.RoleDAO;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -35,11 +36,8 @@ public class ChangeRoleStatus extends HttpServlet {
         boolean test = !Boolean.parseBoolean(request.getParameter("currentStatus"));
         System.out.println("id = " + id);
         System.out.println("status " + test);
-        try {
-            d.changeStatus(id, test);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        d.changeStatus(id, test);
+
         response.sendRedirect(request.getContextPath() + "/roles");
     }
 

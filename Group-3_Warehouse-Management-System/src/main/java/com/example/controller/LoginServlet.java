@@ -3,7 +3,6 @@ package com.example.controller;
 import com.example.dao.UserDAO;
 import com.example.model.Permission;
 import com.example.model.User;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,8 +30,8 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String email = (req.getParameter("email")).trim();
-        String password = req.getParameter("password").trim();
+        String email = req.getParameter("email");
+        String password = req.getParameter("password");
 
         User user = userDAO.existedByEmail(email);
 
@@ -66,6 +65,7 @@ public class LoginServlet extends HttpServlet {
         List<String> userPermissions = new ArrayList<>();
 
         if (user.getRole() != null && user.getRole().getPermissions() != null) {
+            // Chuyển đổi List<Permission> thành List<String> (tên quyền)
             userPermissions = user.getRole().getPermissions().stream()
                     .map(Permission::getName)
                     .collect(Collectors.toList());
@@ -75,6 +75,7 @@ public class LoginServlet extends HttpServlet {
             System.out.println("WARNING: Permissions list is EMPTY or NULL for this user!");
         }
 
+        // Lưu danh sách String tên quyền vào Session cho RoleFilter
         session.setAttribute("userPermissions", userPermissions);
         System.out.println("Session 'userPermissions' has been set.");
         System.out.println("---------------------------");

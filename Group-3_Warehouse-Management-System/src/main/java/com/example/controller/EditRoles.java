@@ -41,12 +41,7 @@ public class EditRoles extends HttpServlet {
 
         Long id = Long.parseLong(request.getParameter("id"));
 
-        Role role;
-        try {
-            role = r.findById(id);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        Role role = r.findById(id);
 
         List<Permission> allPermissions = d.getAllPermissions();
 

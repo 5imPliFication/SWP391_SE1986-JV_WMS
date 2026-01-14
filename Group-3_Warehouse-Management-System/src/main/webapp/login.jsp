@@ -5,16 +5,13 @@
   Time: 1:43 PM
   To change this template use File | Settings | File Templates.
 --%>
-<%
-    String ctx = request.getContextPath();
-%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8"  language="java" %>
 <%--<%@ page session="false" %>--%>
 <html>
 <head>
     <title>Login</title>
-    <link rel="stylesheet" href="<%=ctx%>/static/css/login.css">
+    <link rel="stylesheet" href="${pageContext.request.getContextPath()}/static/css/login.css">
 </head>
 <body>
 <div class="login-container">
@@ -59,6 +56,9 @@
 
             <button type="submit" class="btn-login">Sign In</button>
         </form>
+        <div>
+            <a href="${pageContext.request.contextPath}/forget-password">Forgot password?</a>
+        </div>
 
     </div>
 </div>

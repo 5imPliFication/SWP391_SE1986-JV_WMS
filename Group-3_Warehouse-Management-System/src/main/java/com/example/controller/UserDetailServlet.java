@@ -33,12 +33,7 @@ public class UserDetailServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         User user = userService.findUserById(Integer.parseInt(request.getParameter("id")));
-        List<Role> roles;
-        try {
-            roles = r.findAll();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        List<Role> roles = r.findAll();
         request.setAttribute("roles", roles);
         request.setAttribute("user", user);
         request.getRequestDispatcher("/user-detail.jsp").forward(request, response);

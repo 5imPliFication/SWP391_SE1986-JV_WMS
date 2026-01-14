@@ -6,6 +6,7 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <% String uri = request.getRequestURI(); %>
 
 <!DOCTYPE html>
@@ -30,7 +31,7 @@
                 </a>
             </li>
     <%--            view user profile--%>
-            <c:if test="${sessionScope.user.hasPermission('READ_USER')}">
+            <c:if test="${fn:contains(sessionScope.userPermissions, 'READ_USER')}">
                 <li>
                     <a href="${pageContext.request.contextPath}/user-list" 
                        class="<%= (uri.contains("user")) ? "active" : "" %>">
@@ -38,7 +39,7 @@
                     </a>
                 </li>
             </c:if>
-            <c:if test="${sessionScope.user.hasPermission('READ_ROLE')}">
+            <c:if test="${fn:contains(sessionScope.userPermissions, 'READ_ROLE')}">
                 <li>
                     <a href="${pageContext.request.contextPath}/roles" 
                        class="<%= (uri.contains("roles")) ? "active" : "" %>">

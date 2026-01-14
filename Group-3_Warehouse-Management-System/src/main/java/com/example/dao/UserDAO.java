@@ -68,6 +68,7 @@ public class UserDAO {
                         u.fullname,
                         u.email,
                         u.password_hash,
+                        u.is_active,
                         r.id   AS role_id,
                         r.name AS role_name
                     FROM users u
@@ -86,6 +87,7 @@ public class UserDAO {
                 u.setFullName(rs.getString("fullname"));
                 u.setEmail(rs.getString("email"));
                 u.setPasswordHash(rs.getString("password_hash"));
+                u.setActive(rs.getBoolean("is_active"));
 
                 // 2. Khởi tạo đối tượng Role
                 Role role = new Role();

@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.dao.UserDAO;
+import com.example.model.User;
 import com.example.util.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -27,10 +28,15 @@ public class ForgetPasswordServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String email = request.getParameter("email");
+        User user = userDAO.existedByEmail(email);
 
         // Check user existed with email
-        if(userDAO.login(email)!=null || !userDAO.login(email).isActive()){
-            request.getRequestDispatcher("/forget-password-error.jsp").forward(request,response);
+        if(user==null || !user.isActive()){
+            try {
+                request.getRequestDispatcher("/forget-password-error.jsp").forward(request, response);
+            }catch (NullPointerException e){
+                e.printStackTrace();
+            }
         } else {
             // Create new password
             String newPassword = PasswordUtil.generateRandomPassword(10);

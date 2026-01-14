@@ -26,7 +26,7 @@ public class RoleService extends HttpServlet {
 
             conn = ds.getConnection();
 
-            roleDAO = new RoleDAO(conn);
+            roleDAO = new RoleDAO();
 
         } catch (Exception e) {
             throw new RuntimeException("Cannot init RoleServlet", e);

@@ -1,0 +1,210 @@
+Index: src/main/java/com/example/controller/LoginServlet.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.controller;\r\n\r\nimport com.example.dao.UserDAO;\r\nimport com.example.model.Permission;\r\nimport com.example.model.User;\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\nimport java.util.stream.Collectors;\r\n\r\nimport jakarta.servlet.ServletException;\r\nimport jakarta.servlet.annotation.WebServlet;\r\nimport jakarta.servlet.http.*;\r\n\r\nimport java.io.IOException;\r\n\r\n@WebServlet(\"/login\")\r\npublic class LoginServlet extends HttpServlet {\r\n\r\n    private final UserDAO userDAO = new UserDAO();\r\n\r\n    @Override\r\n    protected void doGet(HttpServletRequest req, HttpServletResponse resp)\r\n            throws ServletException, IOException {\r\n        req.getRequestDispatcher(\"/login.jsp\").forward(req, resp);\r\n    }\r\n\r\n    @Override\r\n    protected void doPost(HttpServletRequest req, HttpServletResponse resp)\r\n            throws ServletException, IOException {\r\n\r\n        String email = req.getParameter(\"email\");\r\n        String password_hash = req.getParameter(\"password\");\r\n\r\n        User user = userDAO.login(email);\r\n\r\n        // Debug: Kiểm tra User lấy ra từ DB\r\n        System.out.println(\"--- DEBUG LOGIN SERVLET ---\");\r\n        if (user != null) {\r\n            System.out.println(\"Email login: \" + user.getEmail());\r\n            System.out.println(\"Role name: \" + (user.getRole() != null ? user.getRole().getName() : \"NULL ROLE\"));\r\n        } else {\r\n            System.out.println(\"User object is NULL - Check email in Database\");\r\n        }\r\n\r\n        if (user == null || !user.getPasswordHash().equals(password_hash)) {\r\n            req.setAttribute(\"error\", \"Invalid email or password\");\r\n            req.getRequestDispatcher(\"/login.jsp\").forward(req, resp);\r\n            return;\r\n        }\r\n\r\n        HttpSession session = req.getSession(true);\r\n        session.setAttribute(\"user\", user);\r\n\r\n        // --- XỬ LÝ VÀ DEBUG PERMISSIONS ---\r\n        List<String> userPermissions = new ArrayList<>();\r\n\r\n        if (user.getRole() != null && user.getRole().getPermissions() != null) {\r\n            // Chuyển đổi List<Permission> thành List<String> (tên quyền)\r\n            userPermissions = user.getRole().getPermissions().stream()\r\n                    .map(Permission::getName)\r\n                    .collect(Collectors.toList());\r\n\r\n            System.out.println(\"Permissions found: \" + userPermissions);\r\n        } else {\r\n            System.out.println(\"WARNING: Permissions list is EMPTY or NULL for this user!\");\r\n        }\r\n\r\n        // Lưu danh sách String tên quyền vào Session cho RoleFilter\r\n        session.setAttribute(\"userPermissions\", userPermissions);\r\n        System.out.println(\"Session 'userPermissions' has been set.\");\r\n        System.out.println(\"---------------------------\");\r\n\r\n        resp.sendRedirect(req.getContextPath() + \"/home\");\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/example/controller/LoginServlet.java b/src/main/java/com/example/controller/LoginServlet.java
+--- a/src/main/java/com/example/controller/LoginServlet.java	(revision 12b408130c1086a21aed9ddf7eec6adbd0498e83)
++++ b/src/main/java/com/example/controller/LoginServlet.java	(date 1768299946124)
+@@ -4,6 +4,7 @@
+ import com.example.model.Permission;
+ import com.example.model.User;
+ import java.util.ArrayList;
++import java.util.Collections;
+ import java.util.List;
+ import java.util.stream.Collectors;
+ 
+@@ -13,6 +14,8 @@
+ 
+ import java.io.IOException;
+ 
++import static com.example.util.PasswordUtil.checkPassword;
++
+ @WebServlet("/login")
+ public class LoginServlet extends HttpServlet {
+ 
+@@ -29,10 +32,23 @@
+             throws ServletException, IOException {
+ 
+         String email = req.getParameter("email");
+-        String password_hash = req.getParameter("password");
++        String password = req.getParameter("password");
++
++        User user = userDAO.existedByEmail(email);
+ 
+-        User user = userDAO.login(email);
++        if (user == null) {
++            req.setAttribute("error", "Invalid email or password");
++            req.getRequestDispatcher("/login.jsp").forward(req, resp);
++            return;
++        }
+ 
++        boolean isMatchingPassword = checkPassword(password, user.getPasswordHash());
++
++        if (!isMatchingPassword) {
++            req.setAttribute("error", "Invalid email or password");
++            req.getRequestDispatcher("/login.jsp").forward(req, resp);
++            return;
++        }
+         // Debug: Kiểm tra User lấy ra từ DB
+         System.out.println("--- DEBUG LOGIN SERVLET ---");
+         if (user != null) {
+@@ -41,28 +57,26 @@
+         } else {
+             System.out.println("User object is NULL - Check email in Database");
+         }
+-
+-        if (user == null || !user.getPasswordHash().equals(password_hash)) {
+-            req.setAttribute("error", "Invalid email or password");
+-            req.getRequestDispatcher("/login.jsp").forward(req, resp);
+-            return;
++        //session handling
++        HttpSession oldSession = req.getSession(false);
++        if (oldSession != null) {
++            oldSession.invalidate();
+         }
+ 
+         HttpSession session = req.getSession(true);
+         session.setAttribute("user", user);
+ 
+         // --- XỬ LÝ VÀ DEBUG PERMISSIONS ---
+-        List<String> userPermissions = new ArrayList<>();
++        List<String> userPermissions = Collections.emptyList();
+ 
+         if (user.getRole() != null && user.getRole().getPermissions() != null) {
+-            // Chuyển đổi List<Permission> thành List<String> (tên quyền)
+-            userPermissions = user.getRole().getPermissions().stream()
++            userPermissions = user.getRole().getPermissions()
++                    .stream()
+                     .map(Permission::getName)
+                     .collect(Collectors.toList());
+-
+-            System.out.println("Permissions found: " + userPermissions);
++            System.out.println("Permission found: " + userPermissions);
+         } else {
+-            System.out.println("WARNING: Permissions list is EMPTY or NULL for this user!");
++            System.out.println("WARNING: Per    missions list is EMPTY or NULL for this user!");
+         }
+ 
+         // Lưu danh sách String tên quyền vào Session cho RoleFilter
+Index: .idea/dataSources.local.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"dataSourceStorageLocal\" created-in=\"IU-252.27397.103\">\r\n    <data-source name=\"laptop_wms@localhost\" uuid=\"7508e486-3b7a-4de3-9d28-19b869eb1a48\">\r\n      <database-info product=\"MySQL\" version=\"8.0.44\" jdbc-version=\"4.2\" driver-name=\"MySQL Connector/J\" driver-version=\"mysql-connector-j-8.2.0 (Revision: 06a1f724497fd81c6a659131fda822c9e5085b6c)\" dbms=\"MYSQL\" exact-version=\"8.0.44\" exact-driver-version=\"8.2\">\r\n        <extra-name-characters>#@</extra-name-characters>\r\n        <identifier-quote-string>`</identifier-quote-string>\r\n        <jdbc-catalog-is-schema>true</jdbc-catalog-is-schema>\r\n      </database-info>\r\n      <case-sensitivity plain-identifiers=\"lower\" quoted-identifiers=\"lower\" />\r\n      <secret-storage>master_key</secret-storage>\r\n      <user-name>root</user-name>\r\n      <schema-mapping>\r\n        <introspection-scope>\r\n          <node kind=\"schema\">\r\n            <name qname=\"@\" />\r\n            <name qname=\"laptop_wms\" />\r\n          </node>\r\n        </introspection-scope>\r\n      </schema-mapping>\r\n    </data-source>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/dataSources.local.xml b/.idea/dataSources.local.xml
+--- a/.idea/dataSources.local.xml	(revision 12b408130c1086a21aed9ddf7eec6adbd0498e83)
++++ b/.idea/dataSources.local.xml	(date 1768294372346)
+@@ -5,7 +5,6 @@
+       <database-info product="MySQL" version="8.0.44" jdbc-version="4.2" driver-name="MySQL Connector/J" driver-version="mysql-connector-j-8.2.0 (Revision: 06a1f724497fd81c6a659131fda822c9e5085b6c)" dbms="MYSQL" exact-version="8.0.44" exact-driver-version="8.2">
+         <extra-name-characters>#@</extra-name-characters>
+         <identifier-quote-string>`</identifier-quote-string>
+-        <jdbc-catalog-is-schema>true</jdbc-catalog-is-schema>
+       </database-info>
+       <case-sensitivity plain-identifiers="lower" quoted-identifiers="lower" />
+       <secret-storage>master_key</secret-storage>
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ArtifactsWorkspaceSettings\">\r\n    <artifacts-to-build>\r\n      <artifact name=\"Group-3_Warehouse-Management-System:war\" />\r\n    </artifacts-to-build>\r\n  </component>\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"f1594cb6-5d8b-40eb-b4a9-050fdaac606b\" name=\"Changes\" comment=\"\">\r\n      <change afterPath=\"$PROJECT_DIR$/.idea/sqldialects.xml\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/db.sql\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/com/example/config/AppContextListener.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/com/example/config/PasswordUtil.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/com/example/controller/HomeServlet.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/com/example/controller/LoginServlet.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/com/example/controller/LogoutServlet.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/home.jsp\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/login.jsp\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-grid.css\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-grid.css.map\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-grid.min.css\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-grid.min.css.map\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-reboot.css\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-reboot.css.map\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-reboot.min.css\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-reboot.min.css.map\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/bootstrap.css\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/bootstrap.css.map\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/bootstrap.min.css\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/bootstrap.min.css.map\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/css/login.css\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.bundle.js\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.bundle.js.map\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.bundle.min.js\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.bundle.min.js.map\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.js\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.js.map\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.min.js\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.min.js.map\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/dataSources.local.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/dataSources.local.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/dataSources/7508e486-3b7a-4de3-9d28-19b869eb1a48.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/dataSources/7508e486-3b7a-4de3-9d28-19b869eb1a48.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/data_source_mapping.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/data_source_mapping.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/com/example/config/DBConfig.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/com/example/config/DBConfig.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/com/example/dao/UserDAO.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/com/example/dao/UserDAO.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/com/example/model/User.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/com/example/model/User.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/webapp/index.jsp\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/webapp/index.jsp\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/.idea/artifacts/Group_3_Warehouse_Management_System_Web_exploded.xml\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/com/example/controller/admin/RoleService.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/com/example/dao/RoleDAO.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/com/example/model/Role.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/admin/role/detail.jsp\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/webapp/admin/role/list.jsp\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/web/WEB-INF/web.xml\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/web/web/WEB-INF/web.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/misc.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/misc.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Jsp File\" />\r\n        <option value=\"CSS File\" />\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"EmbeddingIndexingInfo\">\r\n    <option name=\"cachedIndexableFilesCount\" value=\"22\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Jsp File\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$/..\" />\r\n  </component>\r\n  <component name=\"LogFilters\">\r\n    <option name=\"FILTER_ERRORS\" value=\"false\" />\r\n    <option name=\"FILTER_WARNINGS\" value=\"false\" />\r\n    <option name=\"FILTER_INFO\" value=\"true\" />\r\n    <option name=\"FILTER_DEBUG\" value=\"true\" />\r\n    <option name=\"CUSTOM_FILTER\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 8\r\n}</component>\r\n  <component name=\"McpProjectServerCommands\">\r\n    <commands />\r\n    <urls />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 8\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"37sZ92cPknpI9HsijVRCSxR8fMJ\" />\r\n  <component name=\"ProjectLevelVcsManager\">\r\n    <ConfirmationsSetting value=\"2\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"Maven. [org.apache.maven.plugins:maven-archetype-plugin:RELEASE:generate].executor\": \"Run\",\r\n    \"ModuleVcsDetector.initialDetectionPerformed\": \"true\",\r\n    \"RunOnceActivity.MCP Project settings loaded\": \"true\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"RunOnceActivity.git.unshallow\": \"true\",\r\n    \"SHARE_PROJECT_CONFIGURATION_FILES\": \"true\",\r\n    \"Tomcat Server.SWP.executor\": \"Run\",\r\n    \"git-widget-placeholder\": \"nam\",\r\n    \"kotlin-language-version-configured\": \"true\",\r\n    \"last_opened_file_path\": \"D:/Documents/Code/SWP391_SE1986-JV_WMS/Group-3_Warehouse-Management-System/src/main/webapp/static\",\r\n    \"list.type.of.created.stylesheet\": \"CSS\",\r\n    \"node.js.detected.package.eslint\": \"true\",\r\n    \"node.js.detected.package.tslint\": \"true\",\r\n    \"node.js.selected.package.eslint\": \"(autodetect)\",\r\n    \"node.js.selected.package.tslint\": \"(autodetect)\",\r\n    \"nodejs_package_manager_path\": \"npm\",\r\n    \"project.structure.last.edited\": \"Artifacts\",\r\n    \"project.structure.proportion\": \"0.0\",\r\n    \"project.structure.side.proportion\": \"0.0\",\r\n    \"vue.rearranger.settings.migration\": \"true\"\r\n  },\r\n  \"keyToStringList\": {\r\n    \"DatabaseDriversLRU\": [\r\n      \"mysql\"\r\n    ]\r\n  }\r\n}]]></component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"D:\\Documents\\Code\\SWP391_SE1986-JV_WMS\\Group-3_Warehouse-Management-System\\src\\main\\webapp\\static\" />\r\n      <recent name=\"D:\\Documents\\Code\\SWP391_SE1986-JV_WMS\\Group-3_Warehouse-Management-System\" />\r\n    </key>\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"D:\\Documents\\Code\\SWP391_SE1986-JV_WMS\\Group-3_Warehouse-Management-System\\src\\main\\webapp\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunDashboard\">\r\n    <option name=\"configurationStatuses\">\r\n      <map>\r\n        <entry key=\"#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory\">\r\n          <value>\r\n            <map>\r\n              <entry key=\"SWP\" value=\"STOPPED\" />\r\n            </map>\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"SWP\" type=\"#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory\" factoryName=\"Local\" APPLICATION_SERVER_NAME=\"Tomcat 10.1.50\" ALTERNATIVE_JRE_ENABLED=\"false\">\r\n      <option name=\"BROWSER_ID\" value=\"37cae5b9-e8b2-4949-9172-aafa37fbc09c\" />\r\n      <option name=\"UPDATING_POLICY\" value=\"restart-server\" />\r\n      <deployment>\r\n        <artifact name=\"Group-3_Warehouse-Management-System:war\">\r\n          <settings>\r\n            <option name=\"CONTEXT_PATH\" value=\"/\" />\r\n          </settings>\r\n        </artifact>\r\n      </deployment>\r\n      <server-settings>\r\n        <option name=\"BASE_DIRECTORY_NAME\" value=\"46fe098c-53bf-4a83-bdca-daf191095c3d\" />\r\n      </server-settings>\r\n      <predefined_log_file enabled=\"true\" id=\"Tomcat\" />\r\n      <predefined_log_file enabled=\"true\" id=\"Tomcat Catalina\" />\r\n      <predefined_log_file id=\"Tomcat Manager\" />\r\n      <predefined_log_file id=\"Tomcat Host Manager\" />\r\n      <predefined_log_file id=\"Tomcat Localhost Access\" />\r\n      <RunnerSettings RunnerId=\"Debug\">\r\n        <option name=\"DEBUG_PORT\" value=\"50266\" />\r\n      </RunnerSettings>\r\n      <ConfigurationWrapper VM_VAR=\"JAVA_OPTS\" RunnerId=\"Cover\">\r\n        <option name=\"USE_ENV_VARIABLES\" value=\"true\" />\r\n        <STARTUP>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </STARTUP>\r\n        <SHUTDOWN>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </SHUTDOWN>\r\n      </ConfigurationWrapper>\r\n      <ConfigurationWrapper VM_VAR=\"JAVA_OPTS\" RunnerId=\"Debug\">\r\n        <option name=\"USE_ENV_VARIABLES\" value=\"true\" />\r\n        <STARTUP>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </STARTUP>\r\n        <SHUTDOWN>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </SHUTDOWN>\r\n      </ConfigurationWrapper>\r\n      <ConfigurationWrapper VM_VAR=\"JAVA_OPTS\" RunnerId=\"Profile\">\r\n        <option name=\"USE_ENV_VARIABLES\" value=\"true\" />\r\n        <STARTUP>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </STARTUP>\r\n        <SHUTDOWN>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </SHUTDOWN>\r\n      </ConfigurationWrapper>\r\n      <ConfigurationWrapper VM_VAR=\"JAVA_OPTS\" RunnerId=\"Run\">\r\n        <option name=\"USE_ENV_VARIABLES\" value=\"true\" />\r\n        <STARTUP>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </STARTUP>\r\n        <SHUTDOWN>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </SHUTDOWN>\r\n      </ConfigurationWrapper>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n        <option name=\"BuildArtifacts\" enabled=\"true\">\r\n          <artifact name=\"Group-3_Warehouse-Management-System:war\" />\r\n        </option>\r\n      </method>\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SharedIndexes\">\r\n    <attachedChunks>\r\n      <set>\r\n        <option value=\"bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.27397.103\" />\r\n        <option value=\"bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.27397.103\" />\r\n      </set>\r\n    </attachedChunks>\r\n  </component>\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"f1594cb6-5d8b-40eb-b4a9-050fdaac606b\" name=\"Changes\" comment=\"\" />\r\n      <created>1767693584161</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1767693584161</updated>\r\n      <workItem from=\"1767693586503\" duration=\"2244000\" />\r\n      <workItem from=\"1767938608939\" duration=\"917000\" />\r\n      <workItem from=\"1767941833906\" duration=\"4302000\" />\r\n      <workItem from=\"1768016778144\" duration=\"4461000\" />\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 12b408130c1086a21aed9ddf7eec6adbd0498e83)
++++ b/.idea/workspace.xml	(date 1768299657929)
+@@ -10,70 +10,15 @@
+   </component>
+   <component name="ChangeListManager">
+     <list default="true" id="f1594cb6-5d8b-40eb-b4a9-050fdaac606b" name="Changes" comment="">
+-      <change afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/db.sql" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/config/AppContextListener.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/config/PasswordUtil.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/HomeServlet.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/LoginServlet.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/LogoutServlet.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/home.jsp" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/login.jsp" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-grid.css" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-grid.css.map" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-grid.min.css" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-grid.min.css.map" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-reboot.css" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-reboot.css.map" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-reboot.min.css" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/bootstrap-reboot.min.css.map" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/bootstrap.css" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/bootstrap.css.map" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/bootstrap.min.css" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/bootstrap.min.css.map" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/css/login.css" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.bundle.js" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.bundle.js.map" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.bundle.min.js" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.bundle.min.js.map" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.js" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.js.map" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.min.js" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/static/js/bootstrap.min.js.map" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/7508e486-3b7a-4de3-9d28-19b869eb1a48.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/7508e486-3b7a-4de3-9d28-19b869eb1a48.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/.idea/data_source_mapping.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/data_source_mapping.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/config/DBConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/config/DBConfig.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/dao/UserDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/dao/UserDAO.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/model/User.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/webapp/index.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/index.jsp" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/.idea/artifacts/Group_3_Warehouse_Management_System_Web_exploded.xml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/admin/RoleService.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/dao/RoleDAO.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/model/Role.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/admin/role/detail.jsp" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/webapp/admin/role/list.jsp" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/web/WEB-INF/web.xml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/web/web/WEB-INF/web.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/LoginServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/LoginServlet.java" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+     <option name="LAST_RESOLUTION" value="IGNORE" />
+   </component>
+-  <component name="FileTemplateManagerImpl">
+-    <option name="RECENT_TEMPLATES">
+-      <list>
+-        <option value="Jsp File" />
+-        <option value="CSS File" />
+-        <option value="Class" />
+-      </list>
+-    </option>
+-  </component>
+   <component name="EmbeddingIndexingInfo">
+     <option name="cachedIndexableFilesCount" value="22" />
+   </component>
+@@ -94,9 +39,6 @@
+     <option name="FILTER_DEBUG" value="true" />
+     <option name="CUSTOM_FILTER" />
+   </component>
+-  <component name="ProjectColorInfo">{
+-  &quot;associatedIndex&quot;: 8
+-}</component>
+   <component name="McpProjectServerCommands">
+     <commands />
+     <urls />
+@@ -115,6 +57,8 @@
+   <component name="PropertiesComponent"><![CDATA[{
+   "keyToString": {
+     "Maven. [org.apache.maven.plugins:maven-archetype-plugin:RELEASE:generate].executor": "Run",
++    "Maven.Group-3_Warehouse-Management-System [clean].executor": "Run",
++    "Maven.Group-3_Warehouse-Management-System [compile].executor": "Run",
+     "ModuleVcsDetector.initialDetectionPerformed": "true",
+     "RunOnceActivity.MCP Project settings loaded": "true",
+     "RunOnceActivity.ShowReadmeOnStart": "true",
