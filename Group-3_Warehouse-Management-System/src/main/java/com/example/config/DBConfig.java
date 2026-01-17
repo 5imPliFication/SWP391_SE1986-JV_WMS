@@ -4,17 +4,19 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class DBConfig {
 
-    private static HikariDataSource dataSource;
+    private static final HikariDataSource dataSource;
 
     static {
         HikariConfig config = new HikariConfig();
 
         // JDBC URL
         config.setJdbcUrl(
-                "jdbc:mysql://localhost:3306/swp391_wms" +
+                "jdbc:mysql://localhost:3306/laptop_wms" +
                         "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
         );
 
@@ -39,4 +41,15 @@ public class DBConfig {
     public static DataSource getDataSource() {
         return dataSource;
     }
+
+    public static void testConnection() throws SQLException {
+        try (Connection connection = dataSource.getConnection()) {
+            if (connection.isValid(0)) {
+                System.out.println("Connected to the database");
+            } else {
+                System.out.println("Cannot connect to the database");
+            }
+        }
+    }
 }
+

@@ -15,7 +15,15 @@ public class User {
     private String email;
     private String passwordHash;
     private String fullName;
-    private String role;
+    private Role role;
     private boolean active;
     private LocalDateTime createdAt;
+
+    public boolean hasPermission(String permissionName) {
+        if (role == null || role.getPermissions() == null || !role.isActive()) {
+            return false;
+        }
+        return role.getPermissions().stream()
+                .anyMatch(p -> p.getName().equalsIgnoreCase(permissionName));
+    }
 }
