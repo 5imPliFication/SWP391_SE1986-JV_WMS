@@ -7,6 +7,7 @@ import com.example.dao.UserDAO;
 import com.example.model.Permission;
 import com.example.model.Role;
 import com.example.model.User;
+import com.example.util.EmailUtil;
 import com.example.util.PasswordUtil;
 import com.example.validator.UserValidator;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,6 @@ import java.util.List;
 import static com.example.util.PasswordUtil.hashPassword;
 
 @AllArgsConstructor
-@NoArgsConstructor
 public class UserService {
     private final UserDAO userDAO = new UserDAO();
     private final RoleDAO roleDAO = new RoleDAO();
@@ -86,22 +86,63 @@ public class UserService {
         }
     }
 
-    public void changePassword(String email, String newPassword) {
-        // 1. Validate input (business rule)
-        if (email == null || newPassword == null || newPassword.isBlank()) {
-            System.out.println("Invalid account detail");
-        }
+    public boolean changePassword(String email,
+                               String currentRawPassword,
+                               String newRawPassword) {
+        try (Connection conn = DBConfig.getDataSource().getConnection()) {
 
-        // 2. Hash password
-        String passwordHash = hashPassword(newPassword);
+            System.out.println("Resetting password for email = [" + email + "]");
+            String currentHash = userDAO.getPassword(conn, email);
+
+            if (!PasswordUtil.checkPassword(currentRawPassword, currentHash)) {
+                System.out.println("Password not matched");
+                return false;
+            }
+
+            String newHash = PasswordUtil.hashPassword(newRawPassword);
+            return userDAO.updatePassword(conn, email, newHash);
+        } catch (SQLException e) {
+            throw new RuntimeException("Password change failed", e);
+        }
+    }
+
+    public boolean resetPasswordByEmail(String email) {
 
         try (Connection conn = DBConfig.getDataSource().getConnection()) {
 
-            // 3. Execute update
-            userDAO.updatePassword(conn, email, passwordHash);
+            User user = userDAO.findByEmail(conn, email);
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to update password for email: " + email, e);
+            if (user == null || !user.isActive()) {
+                return false;
+            }
+
+            // 1. Generate new password
+            String newPassword = PasswordUtil.generateRandomPassword(10);
+
+            // 2. Hash password
+            String newHash = PasswordUtil.hashPassword(newPassword);
+
+            // 3. Update DB
+            userDAO.updatePassword(conn, email, newHash);
+
+            // 4. Send email
+            EmailUtil.sendEmail(email, newPassword);
+
+            return true;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Password reset failed", e);
         }
+    }
+
+    public String findPasswordByEmail(String email) {
+        if (email != null) {
+            try(Connection conn = DBConfig.getDataSource().getConnection()) {
+                userDAO.getPassword(conn,email);
+            }catch (SQLException e){
+                throw new RuntimeException("Failed to load user by email: " + email, e);
+            }
+        }
+        return null;
     }
 }

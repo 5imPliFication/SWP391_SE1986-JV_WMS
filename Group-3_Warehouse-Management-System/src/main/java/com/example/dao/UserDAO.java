@@ -188,10 +188,9 @@ public class UserDAO {
     }
 
     // Get hashed password from database
-    public String getPassword(String email) {
+    public String getPassword(Connection conn, String email) throws SQLException{
         String sql = "SELECT password_hash FROM users WHERE email = ?";
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -212,8 +211,11 @@ public class UserDAO {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, newPassword);
             ps.setString(2, email);
-            return ps.executeUpdate() > 0;
+            int rows = ps.executeUpdate();
+            System.out.println("Password update rows = " + rows);
+            return rows > 0;
         }
+
     }
 
     public boolean changeStatus(int id, boolean status) {

@@ -17,7 +17,7 @@ public class ForgetPasswordServlet extends HttpServlet {
     private UserService userService;
 
     @Override
-    public void init(){
+    public void init() {
         userService = new UserService();
     }
 
@@ -29,28 +29,16 @@ public class ForgetPasswordServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String email = request.getParameter("email");
-        User user = userService.getUserByEmail(email);
 
-        // Check user existed with email
-        if(user==null || !user.isActive()){
-            try {
-                request.getRequestDispatcher("/forget-password-error.jsp").forward(request, response);
-            }catch (NullPointerException e){
-                e.printStackTrace();
-            }
-        } else {
-            // Create new password
-            String newPassword = PasswordUtil.generateRandomPassword(10);
+        boolean success = userService.resetPasswordByEmail(email);
 
-            // Send email
-            EmailUtil.sendEmail(email,newPassword);
-
-            // Hash password (Bcrypt) and save in database
-            String passwordHashed = PasswordUtil.hashPassword(newPassword);
-            userService.changePassword(email,passwordHashed);
-
-            request.getRequestDispatcher("/login.jsp").forward(request,response);
+        if (!success) {
+            request.getRequestDispatcher("/forget-password-error.jsp")
+                    .forward(request, response);
+            return;
         }
 
+        request.getRequestDispatcher("/login.jsp")
+                .forward(request, response);
     }
 }
