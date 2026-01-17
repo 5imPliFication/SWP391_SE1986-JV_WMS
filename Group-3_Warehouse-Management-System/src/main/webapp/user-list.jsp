@@ -49,7 +49,6 @@
                         <th>Email</th>
                         <th>Role</th>
                         <th>Status</th>
-                        <th>Change password</th>
                         <th>Details</th>
                     </tr>
                 </thead>
@@ -61,7 +60,6 @@
                             <td>${u.fullName}</td>
                             <td>${u.email}</td>
                             <td>${u.role.name}</td>
-
                             <td>
                                 <c:choose>
 
@@ -89,17 +87,6 @@
                                                 <span class="badge bg-danger p-2 w-75">DEACTIVE</span>
                                             </c:otherwise>
                                         </c:choose>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                            <td>
-                                <c:choose>
-                                    <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_USER')}">
-                                        <a href="/change-password">Change password</a>
-
-                                    </c:when>
-                                    <c:otherwise>
-                                        <p>Bạn không được cấp quyền</p>
                                     </c:otherwise>
                                 </c:choose>
                             </td>

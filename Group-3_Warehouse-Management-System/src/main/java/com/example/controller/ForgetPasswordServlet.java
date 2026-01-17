@@ -2,6 +2,7 @@ package com.example.controller;
 
 import com.example.dao.UserDAO;
 import com.example.model.User;
+import com.example.service.UserService;
 import com.example.util.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,11 +14,11 @@ import java.io.IOException;
 
 @WebServlet("/forget-password")
 public class ForgetPasswordServlet extends HttpServlet {
-    private UserDAO userDAO;
+    private UserService userService;
 
     @Override
     public void init(){
-        userDAO = new UserDAO();
+        userService = new UserService();
     }
 
     @Override
@@ -28,7 +29,7 @@ public class ForgetPasswordServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String email = request.getParameter("email");
-        User user = userDAO.existedByEmail(email);
+        User user = userService.getUserByEmail(email);
 
         // Check user existed with email
         if(user==null || !user.isActive()){
@@ -46,7 +47,7 @@ public class ForgetPasswordServlet extends HttpServlet {
 
             // Hash password (Bcrypt) and save in database
             String passwordHashed = PasswordUtil.hashPassword(newPassword);
-            userDAO.updatePassword(email,passwordHashed);
+            userService.changePassword(email,passwordHashed);
 
             request.getRequestDispatcher("/login.jsp").forward(request,response);
         }

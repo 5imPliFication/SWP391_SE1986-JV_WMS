@@ -10,9 +10,24 @@
 <html>
 <head>
     <title>Forget Password Error</title>
+    <link rel="stylesheet" href="${pageContext.request.getContextPath()}/static/css/forget-password.css">
 </head>
-<body>
-    <p>Không tồn tại tài khoản dành cho Email của bạn. Không thể cấp lại mật khẩu</p><br>
-    <a href="${pageContext.request.contextPath}/login.jsp">Quay lại trang đăng nhập</a>
-</body>
+<div class="forgot-container">
+    <hr class="error-container">
+
+    <h2>Account Not Found</h2>
+
+    <div class="error-message">
+        <p>We couldn't find an account associated with this email address. Password reset cannot be processed.</p>
+    </div>
+
+    <a href="${pageContext.request.contextPath}/login" class="btn-back">
+        Back to Login
+    </a>
+    <div class="help-text">
+        <strong>Need help?</strong>
+        If you believe this is an error, please contact your system administrator or create a new account if you
+        don't have one yet.
+    </div>
+</div>
 </html>
