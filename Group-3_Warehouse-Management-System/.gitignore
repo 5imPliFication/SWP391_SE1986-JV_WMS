@@ -1,42 +1,42 @@
+# Maven
 target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-.kotlin
-src/main/java/com/example/config/DBConfig.java
+.mvn/
 
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-*.iws
+# Build output (IDE / Server)
+out/
+build/
+dist/
+nbbuild/
+nbdist/
+
+# IntelliJ IDEA
+.idea/
 *.iml
 *.ipr
+*.iws
 
-### Eclipse ###
-.apt_generated
-.classpath
-.factorypath
+# NetBeans
+nbproject/private/
+.nb-gradle/
+.apt_generated/
+
+# Eclipse (optional but safe)
 .project
-.settings
+.classpath
+.settings/
+.factorypath
 .springBeans
-.sts4-cache
+.sts4-cache/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# VS Code
 .vscode/
 
-### Mac OS ###
+# OS
 .DS_Store
+Thumbs.db
 
+# Logs & temp
+*.log
+*.tmp
+*.swp
 
