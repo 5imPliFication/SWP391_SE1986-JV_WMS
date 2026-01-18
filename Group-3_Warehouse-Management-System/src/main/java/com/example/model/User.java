@@ -20,7 +20,7 @@ public class User {
     private LocalDateTime createdAt;
 
     public boolean hasPermission(String permissionName) {
-        if (role == null || role.getPermissions() == null || !role.isActive()) {
+        if (role == null || role.getPermissions() == null) {
             return false;
         }
         return role.getPermissions().stream()

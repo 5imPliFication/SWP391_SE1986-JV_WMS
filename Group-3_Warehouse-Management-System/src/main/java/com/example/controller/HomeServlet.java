@@ -22,6 +22,6 @@ public class HomeServlet extends HttpServlet {
             return;
         }
 
-        request.getRequestDispatcher("/WEB-INF/home.jsp").forward(request, response);
+        request.getRequestDispatcher("/home.jsp").forward(request, response);
     }
 }
