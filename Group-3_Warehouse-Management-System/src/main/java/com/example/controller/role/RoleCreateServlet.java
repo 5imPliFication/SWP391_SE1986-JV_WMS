@@ -4,10 +4,10 @@
  */
 package com.example.controller.role;
 
-import com.example.dao.PermissionDAO;
-import com.example.dao.RoleDAO;
-import com.example.dao.UserDAO;
+
 import com.example.model.Permission;
+import com.example.service.PermissionService;
+import com.example.service.RoleService;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -23,15 +23,14 @@ import java.util.List;
 @WebServlet(name = "RoleCreateServlet", urlPatterns = {"/create-role"})
 public class RoleCreateServlet extends HttpServlet {
 
-    private UserDAO d;
-    private RoleDAO r;
-    private  PermissionDAO p;
+
+    private RoleService r;
+    private PermissionService p;
 
     @Override
     public void init() {
-        d = new UserDAO();
-        r = new RoleDAO();
-        p = new PermissionDAO();
+        r = new RoleService();
+        p = new PermissionService();
     }
 
     @Override
@@ -53,7 +52,7 @@ public class RoleCreateServlet extends HttpServlet {
             boolean isActive = request.getParameter("status") != null && request.getParameter("status").equals("true");
             String[] permissionIds = request.getParameterValues("permissionIds");
 
-            r.createNewRole(roleName, description, isActive, permissionIds);
+            r.createRole(roleName, description, isActive, permissionIds);
 
             response.sendRedirect("roles?status=add_success");
         } catch (Exception e) {

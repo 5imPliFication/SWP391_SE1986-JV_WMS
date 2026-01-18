@@ -26,9 +26,6 @@ public class RoleService {
         return roleDAO.findAll();
     }
 
-    public List<Permission> getAllPermissions() {
-        return PermissionDAO.getAllPermissions();
-    }
 
     public void deleteRole(Long roleId) {
         roleDAO.deleteRole(roleId);
