@@ -14,6 +14,21 @@
         <main class="main-content">
             <div class="container-fluid py-4">
                 <h2 class="mb-4">Role & Permission Management</h2>
+                
+                <!-- Success/Error Messages -->
+                <c:if test="${param.msg == 'delete_success'}">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle"></i> Role deleted successfully!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </c:if>
+                <c:if test="${param.msg == 'delete_error'}">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> Failed to delete role. Please try again.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </c:if>
+                
                 <c:if test="${fn:contains(sessionScope.userPermissions, 'CREATE_ROLE')}">
                     <a href="create-role" class="btn btn-primary mb-3">
                         <i class="fas fa-plus-circle"></i> Create new role

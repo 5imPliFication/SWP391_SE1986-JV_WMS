@@ -56,12 +56,18 @@ public class RoleList extends HttpServlet {
             try {
                 Long roleId = Long.parseLong(request.getParameter("id"));
 
-                r.deleteRole(roleId);
+                boolean deleted = r.deleteRole(roleId);
 
-                response.sendRedirect("roles?msg=delete_success");
+                if (deleted) {
+                    response.sendRedirect("roles?msg=delete_success");
+                } else {
+                    response.sendRedirect("roles?msg=delete_error");
+                }
                 return;
             } catch (Exception e) {
                 e.printStackTrace();
+                response.sendRedirect("roles?msg=delete_error");
+                return;
             }
         }
 
