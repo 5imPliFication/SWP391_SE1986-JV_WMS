@@ -275,12 +275,7 @@ public class UserDAO {
         return listPermission;
     }
 
-    public static void main(String[] args) {
-        UserDAO d = new UserDAO();
-        List<Permission> test = new ArrayList<Permission>();
-        test = d.getAllPermissions();
-        System.out.println(test);
-    }
+    
 
     public Role findRoleByID(int roleId) {
         // Sửa SQL để lấy cả ID và Name của Permission, nối bằng dấu hai chấm
@@ -328,4 +323,5 @@ public class UserDAO {
         }
         return null;
     }
+
 }

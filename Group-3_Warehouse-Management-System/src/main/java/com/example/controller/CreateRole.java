@@ -1,12 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package com.example.controller;
 
-import com.example.dao.RoleDAO;
-import com.example.dao.UserDAO;
 import com.example.model.Permission;
+import com.example.service.RoleService;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,25 +10,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
-/**
- *
- * @author PC
- */
 @WebServlet(name = "CreateRole", urlPatterns = {"/create-role"})
 public class CreateRole extends HttpServlet {
 
-    private UserDAO d;
-    private RoleDAO r;
+    private RoleService roleService;
 
     @Override
     public void init() {
-        d = new UserDAO();
-        r = new RoleDAO();
+        roleService = new RoleService();
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Permission> allPermissions = d.getAllPermissions();
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        List<Permission> allPermissions = roleService.getAllPermissions();
         request.setAttribute("listRolePermission", allPermissions);
 
         request.getRequestDispatcher("create-role.jsp").forward(request, response);
@@ -42,15 +33,16 @@ public class CreateRole extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         request.setCharacterEncoding("UTF-8");
 
         try {
             String roleName = request.getParameter("roleName");
             String description = request.getParameter("description");
-            boolean isActive = request.getParameter("status") != null && request.getParameter("status").equals("true");
+            boolean isActive = "true".equals(request.getParameter("status"));
             String[] permissionIds = request.getParameterValues("permissionIds");
 
-            r.createNewRole(roleName, description, isActive, permissionIds);
+            roleService.createRole(roleName, description, isActive, permissionIds);
 
             response.sendRedirect("roles?status=add_success");
         } catch (Exception e) {
@@ -58,5 +50,4 @@ public class CreateRole extends HttpServlet {
             response.sendRedirect("roles?status=add_error");
         }
     }
-
 }

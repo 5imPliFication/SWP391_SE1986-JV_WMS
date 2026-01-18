@@ -3,6 +3,7 @@ package com.example.dao;
 import com.example.config.DBConfig;
 import com.example.model.Permission;
 import com.example.model.Role;
+import com.example.model.RolePermission;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -210,6 +211,101 @@ public class RoleDAO {
                 }
             }
             e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public List<RolePermission> viewRolePermission(String role_id) {
+        List<RolePermission> listRolePermission = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT \n"
+                + "    p.id   AS permission_id,\n"
+                + "    p.name AS permission_name,\n"
+                + "    r.role_id\n"
+                + "FROM laptop_wms.permission p\n"
+                + "JOIN laptop_wms.role_permissions r \n"
+                + "    ON p.id = r.permission_id\n"
+                + "WHERE r.role_id = ?");
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString());) {
+            ps.setString(1, role_id);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    RolePermission rolePermission = new RolePermission();
+                    rolePermission.setPermissionID(rs.getLong("permission_id"));
+                    rolePermission.setPermissionName(rs.getString("permission_name"));
+                    rolePermission.setRoleID(rs.getLong("role_id"));
+                    listRolePermission.add(rolePermission);
+
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return listRolePermission;
+    }
+
+    public void updateRole(Long roleId, String name, String description, boolean isActive, List<String> permissionIds) {
+
+        String updateRoleSql
+                = "UPDATE roles SET name = ?, description = ?, is_active = ? WHERE id = ?";
+
+        String deletePermSql
+                = "DELETE FROM role_permissions WHERE role_id = ?";
+
+        String insertPermSql
+                = "INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)";
+
+        Connection conn = null;
+
+        try {
+            conn = DBConfig.getDataSource().getConnection();
+            conn.setAutoCommit(false);
+
+            // 1️⃣ Update ROLE
+            try (PreparedStatement ps = conn.prepareStatement(updateRoleSql)) {
+                ps.setString(1, name);
+                ps.setString(2, description);
+                ps.setBoolean(3, isActive);
+                ps.setLong(4, roleId);
+                ps.executeUpdate();
+            }
+
+            // 2️⃣ Xóa permission cũ
+            try (PreparedStatement ps = conn.prepareStatement(deletePermSql)) {
+                ps.setLong(1, roleId);
+                ps.executeUpdate();
+            }
+
+            // 3️⃣ Thêm permission mới
+            if (permissionIds != null && !permissionIds.isEmpty()) {
+                try (PreparedStatement ps = conn.prepareStatement(insertPermSql)) {
+                    for (String pid : permissionIds) {
+                        ps.setLong(1, roleId);
+                        ps.setLong(2, Long.parseLong(pid));
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+            }
+
+            conn.commit(); // ✅ thành công
+
+        } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.rollback(); // ❌ rollback
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            throw new RuntimeException("Update role & permissions failed", e);
         } finally {
             if (conn != null) {
                 try {

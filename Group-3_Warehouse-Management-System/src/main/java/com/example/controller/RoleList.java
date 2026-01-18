@@ -1,62 +1,51 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package com.example.controller;
-
-import com.example.config.DBConfig;
-import com.example.dao.UserDAO;
-import com.example.dao.RoleDAO;
 
 import com.example.model.Permission;
 import com.example.model.Role;
+import com.example.service.RoleService;
+
 import java.io.IOException;
+import java.util.List;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-
-/**
- *
- * @author PC
- */
 @WebServlet(name = "Role", urlPatterns = {"/roles"})
 public class RoleList extends HttpServlet {
 
-    private UserDAO d;
-    private RoleDAO r;
+    private RoleService roleService;
 
     @Override
     public void init() {
-        d = new UserDAO();
-        r = new RoleDAO();
+        roleService = new RoleService();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Role> roleList = r.findAll();
-        List<Permission> allPermissions = d.getAllPermissions();
+
+        List<Role> roleList = roleService.getAllRoles();
+        List<Permission> allPermissions = roleService.getAllPermissions();
+
         request.setAttribute("roleList", roleList);
         request.setAttribute("allPermissions", allPermissions);
+
         request.getRequestDispatcher("/roles.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         String action = request.getParameter("action");
 
         if ("delete".equals(action)) {
             try {
                 Long roleId = Long.parseLong(request.getParameter("id"));
-
-                r.deleteRole(roleId);
+                roleService.deleteRole(roleId);
 
                 response.sendRedirect("roles?msg=delete_success");
                 return;
@@ -67,5 +56,4 @@ public class RoleList extends HttpServlet {
 
         response.sendRedirect("roles?msg=error");
     }
-
 }

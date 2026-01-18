@@ -41,4 +41,9 @@ public class PasswordUtil {
 
         return result;
     }
+    
+    
+    public static void main(String[] args) {
+        System.out.println(hashPassword("admin"));
+    }
 }

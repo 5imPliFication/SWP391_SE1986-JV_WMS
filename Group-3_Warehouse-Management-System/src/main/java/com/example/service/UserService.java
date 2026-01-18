@@ -22,22 +22,22 @@ import static com.example.util.PasswordUtil.hashPassword;
 
 @AllArgsConstructor
 public class UserService {
+
     private final UserDAO userDAO = new UserDAO();
     private final RoleDAO roleDAO = new RoleDAO();
     private final PermissionDAO permissionDAO = new PermissionDAO();
-
 
     public String createUser(User user) {
         // check validate user
         String error = UserValidator.validateCreate(user);
 
         // if error -> return message error
-        if(error != null){
+        if (error != null) {
             return error;
         }
 
         // check exist email
-        if(getUserByEmail(user.getEmail())!=null){
+        if (getUserByEmail(user.getEmail()) != null) {
             return "Email exist, please input other email !!!";
         };
 
@@ -74,8 +74,8 @@ public class UserService {
             // 2. Load permissions for role
             Role role = user.getRole();
             if (role != null && role.getId() > 0) {
-                List<Permission> permissions =
-                        permissionDAO.findByRoleId(conn, role.getId());
+                List<Permission> permissions
+                        = permissionDAO.findByRoleId(conn, role.getId());
                 role.setPermissions(permissions);
             }
 
@@ -87,8 +87,8 @@ public class UserService {
     }
 
     public boolean changePassword(String email,
-                               String currentRawPassword,
-                               String newRawPassword) {
+            String currentRawPassword,
+            String newRawPassword) {
         try (Connection conn = DBConfig.getDataSource().getConnection()) {
 
             System.out.println("Resetting password for email = [" + email + "]");
@@ -137,12 +137,13 @@ public class UserService {
 
     public String findPasswordByEmail(String email) {
         if (email != null) {
-            try(Connection conn = DBConfig.getDataSource().getConnection()) {
-                userDAO.getPassword(conn,email);
-            }catch (SQLException e){
+            try (Connection conn = DBConfig.getDataSource().getConnection()) {
+                userDAO.getPassword(conn, email);
+            } catch (SQLException e) {
                 throw new RuntimeException("Failed to load user by email: " + email, e);
             }
         }
         return null;
     }
+
 }
