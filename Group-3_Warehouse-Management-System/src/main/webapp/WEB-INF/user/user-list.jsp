@@ -32,7 +32,7 @@
         </style>
     </head>
     <body >
-        <jsp:include page="/common/sidebar.jsp" />
+        <jsp:include page="/WEB-INF/common/sidebar.jsp" />
         <div class="main-content">
             <h2>List user</h2>
             <c:if test="${fn:contains(sessionScope.userPermissions, 'CREATE_USER')}">
@@ -48,7 +48,7 @@
                         <th>Full Name</th>
                         <th>Email</th>
                         <th>Role</th>
-                        <th>Status</th>
+                        <th>Active/Inactive</th>
                         <th>Details</th>
                     </tr>
                 </thead>
@@ -61,46 +61,22 @@
                             <td>${u.email}</td>
                             <td>${u.role.name}</td>
                             <td>
-                                <c:choose>
-
-                                    <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
-                                        <form action="/change-user-status" method="post" class="d-inline">
-                                            <input type="hidden" name="userId" value="${u.id}">
-                                            <c:if test="${u.active == false}">
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    Inactive 
-                                                </button>
-                                            </c:if>
-                                            <c:if test="${u.active == true}">
-                                                <button type="submit" class="btn btn-sm btn-success">
-                                                    Active 
-                                                </button>
-                                            </c:if>
-                                        </form>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <c:choose>
-                                            <c:when test="${u.active}">
-                                                <span class="badge bg-success p-2 w-75">ACTIVE</span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="badge bg-danger p-2 w-75">DEACTIVE</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </c:otherwise>
-                                </c:choose>
+                                <form action="/change-user-status" method="post" class="d-inline">
+                                    <input type="hidden" name="userId" value="${u.id}">
+                                    <c:if test="${u.active == true}">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            Inactive this user
+                                        </button>
+                                    </c:if>
+                                    <c:if test="${u.active == false}">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            Active this user
+                                        </button>
+                                    </c:if>
+                                </form>
                             </td>
                             <td>
-                                <c:choose>
-                                    <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_USER')}">
-                                        <a href="/user?id=${u.id}" >Detail</a>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <p>Bạn không được cấp quyền</p>
-                                    </c:otherwise>
-                                </c:choose>
-
-
+                                <a href="/user?id=${u.id}" target="_blank">Detail</a>
                             </td>
                         </tr>
                     </c:forEach>
@@ -112,6 +88,7 @@
                     </c:if>
                 </tbody>
             </table>
+<%--            message about change status of user--%>
             <div>
                 <c:choose>
                     <c:when test="${messageStatus}">
