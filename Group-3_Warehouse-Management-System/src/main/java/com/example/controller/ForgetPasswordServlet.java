@@ -1,6 +1,8 @@
 package com.example.controller;
 
 import com.example.dao.UserDAO;
+import com.example.model.User;
+import com.example.service.UserService;
 import com.example.util.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,11 +14,11 @@ import java.io.IOException;
 
 @WebServlet("/forget-password")
 public class ForgetPasswordServlet extends HttpServlet {
-    private UserDAO userDAO;
+    private UserService userService;
 
     @Override
-    public void init(){
-        userDAO = new UserDAO();
+    public void init() {
+        userService = new UserService();
     }
 
     @Override
@@ -28,22 +30,15 @@ public class ForgetPasswordServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String email = request.getParameter("email");
 
-        // Check user existed with email
-        if(!userDAO.existsByEmail(email)){
-            request.getRequestDispatcher("/forget-password-error.jsp").forward(request,response);
-        } else {
-            // Create new password
-            String newPassword = PasswordUtil.generateRandomPassword(10);
+        boolean success = userService.resetPasswordByEmail(email);
 
-            // Send email
-            EmailUtil.sendEmail(email,newPassword);
-
-            // Hash password (Bcrypt) and save in database
-            String passwordHashed = PasswordUtil.hashPassword(newPassword);
-            userDAO.updatePassword(email,passwordHashed);
-
-            request.getRequestDispatcher("/login.jsp").forward(request,response);
+        if (!success) {
+            request.getRequestDispatcher("/forget-password-error.jsp")
+                    .forward(request, response);
+            return;
         }
 
+        request.getRequestDispatcher("/login.jsp")
+                .forward(request, response);
     }
 }

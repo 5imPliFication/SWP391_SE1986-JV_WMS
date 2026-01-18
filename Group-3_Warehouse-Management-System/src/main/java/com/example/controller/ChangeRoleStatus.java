@@ -5,7 +5,10 @@
 package com.example.controller;
 
 import com.example.dao.RoleDAO;
+
 import java.io.IOException;
+import java.sql.SQLException;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -29,11 +32,12 @@ public class ChangeRoleStatus extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id = Integer.parseInt(request.getParameter("roleId"));
+        Long id = Long.parseLong(request.getParameter("roleId"));
         boolean test = !Boolean.parseBoolean(request.getParameter("currentStatus"));
         System.out.println("id = " + id);
         System.out.println("status " + test);
-        d.changeRoleStatus(id, test);
+        d.changeStatus(id, test);
+
         response.sendRedirect(request.getContextPath() + "/roles");
     }
 

@@ -4,6 +4,7 @@
  */
 package com.example.controller;
 
+import com.example.config.DBConfig;
 import com.example.dao.UserDAO;
 import com.example.dao.RoleDAO;
 
@@ -16,6 +17,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -37,7 +40,7 @@ public class RoleList extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Role> roleList = r.getAllRoles();
+        List<Role> roleList = r.findAll();
         List<Permission> allPermissions = d.getAllPermissions();
         request.setAttribute("roleList", roleList);
         request.setAttribute("allPermissions", allPermissions);
@@ -51,7 +54,7 @@ public class RoleList extends HttpServlet {
 
         if ("delete".equals(action)) {
             try {
-                int roleId = Integer.parseInt(request.getParameter("id"));
+                Long roleId = Long.parseLong(request.getParameter("id"));
 
                 r.deleteRole(roleId);
 

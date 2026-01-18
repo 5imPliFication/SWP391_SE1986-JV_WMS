@@ -13,6 +13,7 @@ public class PasswordUtil {
     private static final SecureRandom random = new SecureRandom();
 
     // Generate random string
+    // for forget password
     public static String generateRandomPassword(int passwordLength) {
         String combinedChars = ALPHA_CAPS + ALPHA + NUMERIC + SPECIAL;
         // Xác định luôn capacity ban đầu cho StringBuilder = passwordLength
@@ -29,8 +30,15 @@ public class PasswordUtil {
         return BCrypt.hashpw(plainPassword, BCrypt.gensalt(10));
     }
 
-    // Check password
+    // Check password for testing
     public static boolean checkPassword(String plainPassword, String hashedPassword) {
-        return BCrypt.checkpw(plainPassword, hashedPassword);
+        System.out.println("=== PASSWORD CHECK ===");
+        System.out.println("Plain password: [" + plainPassword + "]");
+        System.out.println("Hashed password: [" + hashedPassword + "]");
+
+        boolean result = BCrypt.checkpw(plainPassword, hashedPassword);
+        System.out.println("Password match: " + result);
+
+        return result;
     }
 }

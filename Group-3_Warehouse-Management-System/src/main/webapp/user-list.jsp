@@ -7,6 +7,7 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -34,7 +35,7 @@
         <jsp:include page="/common/sidebar.jsp" />
         <div class="main-content">
             <h2>List user</h2>
-            <c:if test="${sessionScope.user.hasPermission('CREATE_USER')}">
+            <c:if test="${fn:contains(sessionScope.userPermissions, 'CREATE_USER')}">
                 <a href="/user-create">
                     <button class="btn btn-primary mb-3">Create new user</button>
                 </a>
@@ -48,7 +49,6 @@
                         <th>Email</th>
                         <th>Role</th>
                         <th>Status</th>
-                        <th>Change password</th>
                         <th>Details</th>
                     </tr>
                 </thead>
@@ -60,11 +60,10 @@
                             <td>${u.fullName}</td>
                             <td>${u.email}</td>
                             <td>${u.role.name}</td>
-
                             <td>
                                 <c:choose>
 
-                                    <c:when test="${sessionScope.user.hasPermission('UPDATE_ROLE')}">
+                                    <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
                                         <form action="/change-user-status" method="post" class="d-inline">
                                             <input type="hidden" name="userId" value="${u.id}">
                                             <c:if test="${u.active == false}">
@@ -93,18 +92,7 @@
                             </td>
                             <td>
                                 <c:choose>
-                                    <c:when test="${sessionScope.user.hasPermission('UPDATE_USER')}">
-                                        <a href="/change-password">Change password</a>
-
-                                    </c:when>
-                                    <c:otherwise>
-                                        <p>Bạn không được cấp quyền</p>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                            <td>
-                                <c:choose>
-                                    <c:when test="${sessionScope.user.hasPermission('UPDATE_USER')}">
+                                    <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_USER')}">
                                         <a href="/user?id=${u.id}" >Detail</a>
                                     </c:when>
                                     <c:otherwise>

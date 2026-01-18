@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -13,7 +14,7 @@
         <main class="main-content">
             <div class="container-fluid py-4">
                 <h2 class="mb-4">Role & Permission Management</h2>
-                <c:if test="${sessionScope.user.hasPermission('CREATE_ROLE')}">
+                <c:if test="${fn:contains(sessionScope.userPermissions, 'CREATE_ROLE')}">
                     <a href="create-role" class="btn btn-primary mb-3">
                         <i class="fas fa-plus-circle"></i> Create new role
                     </a>
@@ -47,7 +48,7 @@
 
                                         <td>
                                             <c:choose>
-                                                <c:when test="${sessionScope.user.hasPermission('UPDATE_ROLE')}">
+                                                <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
                                                     <form action="${pageContext.request.contextPath}/change_role_status" method="post" class="d-inline">
                                                         <input type="hidden" name="roleId" value="${role.id}">
                                                         <input type="hidden" name="currentStatus" value="${role.active}">
@@ -81,11 +82,11 @@
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <c:choose>
-                                                    <c:when test="${sessionScope.user.hasPermission('UPDATE_ROLE')}">
+                                                    <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
                                                         <a href="edit-role?id=${role.id}" class="btn btn-outline-primary btn-sm">
                                                             <i class="fas fa-edit"></i> Edit
                                                         </a>
-                                                        <c:if test="${sessionScope.user.hasPermission('DELETE_ROLE')}">
+                                                        <c:if test="${fn:contains(sessionScope.userPermissions, 'DELETE_ROLE')}">
 
                                                             <form action="roles" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa Role: ${role.name}?')">
                                                                 <input type="hidden" name="action" value="delete">

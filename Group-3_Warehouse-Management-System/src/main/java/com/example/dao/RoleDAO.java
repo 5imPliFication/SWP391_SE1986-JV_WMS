@@ -15,7 +15,8 @@ import java.util.Map;
 
 public class RoleDAO {
 
-    public List<Role> getAllRoles() {
+    public List<Role> findAll() {
+
         List<Role> list = new ArrayList<>();
         String sql = "SELECT r.id, r.name, r.description, r.is_active, "
                 + "GROUP_CONCAT(p.name SEPARATOR '|') AS p_names "
@@ -53,67 +54,23 @@ public class RoleDAO {
         return list;
     }
 
-    public void updateRoleFull(int roleId, String name, String description, String[] permissionIds) {
-        String sqlUpdateRole = "UPDATE roles SET name = ?, description = ? WHERE id = ?";
-        String sqlDeletePerms = "DELETE FROM role_permissions WHERE role_id = ?";
-        String sqlInsertPerms = "INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)";
-
-        Connection conn = null;
-        try {
-            conn = DBConfig.getDataSource().getConnection();
-            conn.setAutoCommit(false);
-
-            try (PreparedStatement ps = conn.prepareStatement(sqlUpdateRole)) {
-                ps.setString(1, name);
-                ps.setString(2, description);
-                ps.setInt(3, roleId);
-                ps.executeUpdate();
-            }
-
-            try (PreparedStatement ps = conn.prepareStatement(sqlDeletePerms)) {
-                ps.setInt(1, roleId);
-                ps.executeUpdate();
-            }
-
-            if (permissionIds != null && permissionIds.length > 0) {
-                try (PreparedStatement ps = conn.prepareStatement(sqlInsertPerms)) {
-                    for (String pId : permissionIds) {
-                        ps.setInt(1, roleId);
-                        ps.setInt(2, Integer.parseInt(pId));
-                        ps.addBatch();
-                    }
-                    ps.executeBatch();
-                }
-            }
-
-            conn.commit();
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            e.printStackTrace();
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+    public void update(Role role) throws SQLException {
+        String sql = "UPDATE roles SET name=?, description=? WHERE id=?";
+        Connection conn = DBConfig.getDataSource().getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, role.getName());
+        ps.setString(2, role.getDescription());
+        ps.setLong(3, role.getId());
+        ps.executeUpdate();
     }
 
-    public boolean changeRoleStatus(int id, boolean status) {
+    public boolean changeStatus(Long id, boolean status) {
         String sql = "update roles set is_active = ? where id = ?;";
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setBoolean(1, status);
-            ps.setInt(2, id);
+            ps.setLong(2, id);
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -121,7 +78,7 @@ public class RoleDAO {
         }
     }
 
-    public Role findRoleByID(int roleId) {
+    public Role findById(Long roleId) {
         // Sửa SQL để lấy cả ID và Name của Permission, nối bằng dấu hai chấm
         String sql = "SELECT r.id, r.name, r.description, r.is_active, "
                 + "GROUP_CONCAT(CONCAT(p.id, ':', p.name) SEPARATOR '|') AS p_info "
@@ -133,7 +90,7 @@ public class RoleDAO {
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, roleId);
+            ps.setLong(1, roleId);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -224,7 +181,7 @@ public class RoleDAO {
         }
     }
 
-    public void deleteRole(int roleId) {
+    public void deleteRole(Long roleId) {
         String sqlDeleteMapping = "DELETE FROM role_permissions WHERE role_id = ?";
         String sqlDeleteRole = "DELETE FROM roles WHERE id = ?";
 
@@ -234,12 +191,12 @@ public class RoleDAO {
             conn.setAutoCommit(false);
 
             try (PreparedStatement ps1 = conn.prepareStatement(sqlDeleteMapping)) {
-                ps1.setInt(1, roleId);
+                ps1.setLong(1, roleId);
                 ps1.executeUpdate();
             }
 
             try (PreparedStatement ps2 = conn.prepareStatement(sqlDeleteRole)) {
-                ps2.setInt(1, roleId);
+                ps2.setLong(1, roleId);
                 ps2.executeUpdate();
             }
 
@@ -271,7 +228,7 @@ public class RoleDAO {
 
         static {
             urlPermissionMap.put("/user-list", "READ_USER");
-            urlPermissionMap.put("/user-create", "CREATE_USER"); 
+            urlPermissionMap.put("/user-create", "CREATE_USER");
             urlPermissionMap.put("/user", "UPDATE_USER");
             urlPermissionMap.put("/user-delete", "DELETE_USER");
 

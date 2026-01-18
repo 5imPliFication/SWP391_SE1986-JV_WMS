@@ -10,13 +10,36 @@
 <html>
 <head>
     <title>Forget Password</title>
+    <link rel="stylesheet" href="${pageContext.request.getContextPath()}/static/css/forget-password.css">
 </head>
 <body>
+<div class="forgot-container">
+    <div class="forgot-header">
+        <h2>Forgot Password?</h2>
+    </div>
+
     <form method="POST" action="${pageContext.request.contextPath}/forget-password">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br>
-        <p>Mật khẩu mới sẽ được admin cấp qua email của bạn</p><br>
-        <input type="submit" value="Send Request">
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email"
+                   id="email"
+                   name="email"
+                   placeholder="your.email@company.com"
+                   required
+                   autofocus>
+        </div>
+
+        <div class="info-box">
+            <p>A new password will be sent to your email by the administrator. Please check your inbox after
+                submitting this request.</p>
+        </div>
+
+        <input type="submit" value="Send Request" class="btn-submit">
     </form>
+
+    <div class="back-link">
+        Remember your password? <a href="${pageContext.request.contextPath}/login">Back to Login</a>
+    </div>
+</div>
 </body>
 </html>

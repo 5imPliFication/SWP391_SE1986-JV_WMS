@@ -36,6 +36,7 @@ public class RoleFilter implements Filter {
 
         // 1. Cho phép truy cập Login và các tài nguyên tĩnh (CSS/JS)
         if (servletPath.equals("/login")
+                || servletPath.equals("/forget-password")
                 || servletPath.contains("/common/")
                 || servletPath.contains("/static/")
                 || servletPath.endsWith(".css")

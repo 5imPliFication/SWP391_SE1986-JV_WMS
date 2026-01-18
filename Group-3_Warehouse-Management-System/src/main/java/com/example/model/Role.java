@@ -1,23 +1,21 @@
 package com.example.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-@Getter
-@Setter
+@NoArgsConstructor
 public class Role {
-
     private Long id;
     private String name;
     private String description;
     private boolean isActive;
+    private Timestamp createdAt;
     private List<Permission> permissions;
-    private LocalDateTime createdAt;
 }
