@@ -4,7 +4,7 @@
  */
 package com.example.filter;
 
-import com.example.dao.RoleDAO.PermissionChecker;
+import com.example.dao.PermissionDAO.PermissionChecker;
 import java.io.IOException;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;

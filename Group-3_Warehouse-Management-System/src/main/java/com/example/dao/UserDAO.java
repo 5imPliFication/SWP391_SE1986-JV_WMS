@@ -254,33 +254,8 @@ public class UserDAO {
         }
     }
 
-    public List<Permission> getAllPermissions() {
-        List<Permission> listPermission = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM laptop_wms.permissions;");
+   
 
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString());) {
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Permission permission = new Permission();
-                    permission.setId(rs.getLong("id"));
-                    permission.setName(rs.getString("name"));
-                    permission.setDescription(rs.getString("description"));
-                    listPermission.add(permission);
-
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return listPermission;
-    }
-
-    public static void main(String[] args) {
-        UserDAO d = new UserDAO();
-        List<Permission> test = new ArrayList<Permission>();
-        test = d.getAllPermissions();
-        System.out.println(test);
-    }
 
     public Role findRoleByID(int roleId) {
         // Sửa SQL để lấy cả ID và Name của Permission, nối bằng dấu hai chấm
