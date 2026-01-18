@@ -18,24 +18,24 @@ import java.util.List;
 public class UserDetailServlet extends HttpServlet {
 
     private UserService userService;
-    private UserDAO d;
-    private RoleDAO r;
+    private UserDAO userDAO;
+    private RoleDAO roleDAO;
 
     @Override
     public void init() {
         userService = new UserService();
-        d = new UserDAO();
-        r = new RoleDAO();
+        userDAO = new UserDAO();
+        roleDAO = new RoleDAO();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         User user = userService.findUserById(Integer.parseInt(request.getParameter("id")));
-        List<Role> roles = r.findAll();
+        List<Role> roles = roleDAO.findAll();
         request.setAttribute("roles", roles);
         request.setAttribute("user", user);
-        request.getRequestDispatcher("/user-detail.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/user/user-detail.jsp").forward(request, response);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class UserDetailServlet extends HttpServlet {
             role.setId(roleId);
             user.setRole(role);
 
-            d.updateUserInformation(user);
+            userDAO.updateUserInformation(user);
 
             response.sendRedirect(request.getContextPath() + "/user-list?status=success");
 
