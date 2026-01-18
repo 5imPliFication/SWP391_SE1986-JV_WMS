@@ -4,7 +4,7 @@
  */
 package com.example.filter;
 
-import com.example.dao.RoleDAO.PermissionChecker;
+import com.example.filter.PermissionChecker;
 import java.io.IOException;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -36,6 +36,7 @@ public class RoleFilter implements Filter {
 
         // 1. Cho phép truy cập Login và các tài nguyên tĩnh (CSS/JS)
         if (servletPath.equals("/login")
+                || servletPath.equals("/forget-password")
                 || servletPath.contains("/common/")
                 || servletPath.contains("/static/")
                 || servletPath.endsWith(".css")

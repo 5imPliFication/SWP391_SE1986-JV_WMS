@@ -3,8 +3,8 @@ package com.example.dao;
 import com.example.config.DBConfig;
 import com.example.model.Permission;
 import com.example.model.Role;
-import java.sql.*;
-import java.util.*;
+import com.example.model.RolePermission;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,73 +17,115 @@ import java.util.Map;
 
 public class RoleDAO {
 
-    private Connection conn;
+    public List<Role> findAll() {
 
-    public RoleDAO() {    }
-
-    public RoleDAO(Connection conn) {
-        this.conn = conn;
-    }
-
-
-    // 12. View role list
-    public List<Role> findAll() throws SQLException {
         List<Role> list = new ArrayList<>();
-        String sql = "SELECT * FROM roles";
+        String sql = "SELECT r.id, r.name, r.description, r.is_active, "
+                + "GROUP_CONCAT(p.name SEPARATOR '|') AS p_names "
+                + "FROM roles r "
+                + "LEFT JOIN role_permissions rp ON r.id = rp.role_id "
+                + "LEFT JOIN permissions p ON rp.permission_id = p.id "
+                + "GROUP BY r.id";
 
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ResultSet rs = ps.executeQuery();
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
-        while (rs.next()) {
-            list.add(new Role(
-                    rs.getLong("id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getBoolean("is_active"),
-                    rs.getTimestamp("created_at"),
-                    rs.getObject("permission", List.class)
-            ));
+            while (rs.next()) {
+                Role role = new Role();
+                role.setId(rs.getLong("id"));
+                role.setName(rs.getString("name"));
+                role.setDescription(rs.getString("description"));
+                role.setActive(rs.getBoolean("is_active"));
+
+                List<Permission> permList = new ArrayList<>();
+                String pNames = rs.getString("p_names");
+
+                if (pNames != null) {
+                    String[] names = pNames.split("\\|");
+                    for (String name : names) {
+                        Permission p = new Permission();
+                        p.setName(name);
+                        permList.add(p);
+                    }
+                }
+                role.setPermissions(permList);
+                list.add(role);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return list;
     }
 
-    // 13. View role detail
-    public Role findById(Long id) throws SQLException {
-        String sql = "SELECT * FROM roles WHERE id = ?";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setLong(1, id);
+    public void update(Connection conn, Role role) throws SQLException {
+        String sql = "UPDATE roles SET name = ?, description = ? WHERE id = ?";
 
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return new Role(
-                    rs.getLong("id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getBoolean("is_active"),
-                    rs.getTimestamp("created_at"),
-                    rs.getObject("permission", List.class)
-            );
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, role.getName());
+            ps.setString(2, role.getDescription());
+            ps.setLong(3, role.getId());
+            ps.executeUpdate();
+        }
+    }
+
+    public boolean changeStatus(Long id, boolean status) {
+        String sql = "update roles set is_active = ? where id = ?;";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setBoolean(1, status);
+            ps.setLong(2, id);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Role findById(Long roleId) {
+        // Sửa SQL để lấy cả ID và Name của Permission, nối bằng dấu hai chấm
+        String sql = "SELECT r.id, r.name, r.description, r.is_active, "
+                + "GROUP_CONCAT(CONCAT(p.id, ':', p.name) SEPARATOR '|') AS p_info "
+                + "FROM roles r "
+                + "LEFT JOIN role_permissions rp ON r.id = rp.role_id "
+                + "LEFT JOIN permissions p ON rp.permission_id = p.id "
+                + "WHERE r.id = ? "
+                + "GROUP BY r.id";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, roleId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Role role = new Role();
+                    role.setId(rs.getLong("id"));
+                    role.setName(rs.getString("name"));
+                    role.setDescription(rs.getString("description"));
+                    role.setActive(rs.getBoolean("is_active"));
+
+                    List<Permission> permList = new ArrayList<>();
+                    String pInfo = rs.getString("p_info");
+
+                    if (pInfo != null && !pInfo.isEmpty()) {
+                        String[] entries = pInfo.split("\\|");
+                        for (String entry : entries) {
+                            String[] parts = entry.split(":");
+                            if (parts.length == 2) {
+                                Permission p = new Permission();
+                                p.setId(Long.parseLong(parts[0]));
+                                p.setName(parts[1]);
+                                permList.add(p);
+                            }
+                        }
+                    }
+                    role.setPermissions(permList);
+                    return role;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return null;
-    }
-
-    // 14. Update role info
-    public void update(Role role) throws SQLException {
-        String sql = "UPDATE roles SET name=?, description=? WHERE id=?";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setString(1, role.getName());
-        ps.setString(2, role.getDescription());
-        ps.setLong(3, role.getId());
-        ps.executeUpdate();
-    }
-
-    // 15. Active / Deactivate
-    public void changeStatus(Long id, boolean active) throws SQLException {
-        String sql = "UPDATE roles SET is_active=? WHERE id=?";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setBoolean(1, active);
-        ps.setLong(2, id);
-        ps.executeUpdate();
     }
 
     public void createNewRole(String name, String description, boolean isActive, String[] permissionIds) {
@@ -142,7 +184,7 @@ public class RoleDAO {
         }
     }
 
-    public void deleteRole(int roleId) {
+    public void deleteRole(Long roleId) {
         String sqlDeleteMapping = "DELETE FROM role_permissions WHERE role_id = ?";
         String sqlDeleteRole = "DELETE FROM roles WHERE id = ?";
 
@@ -152,12 +194,12 @@ public class RoleDAO {
             conn.setAutoCommit(false);
 
             try (PreparedStatement ps1 = conn.prepareStatement(sqlDeleteMapping)) {
-                ps1.setInt(1, roleId);
+                ps1.setLong(1, roleId);
                 ps1.executeUpdate();
             }
 
             try (PreparedStatement ps2 = conn.prepareStatement(sqlDeleteRole)) {
-                ps2.setInt(1, roleId);
+                ps2.setLong(1, roleId);
                 ps2.executeUpdate();
             }
 
@@ -182,27 +224,4 @@ public class RoleDAO {
         }
     }
 
-    //thêm filter permission ở đây
-    public class PermissionChecker {
-
-        private static final Map<String, String> urlPermissionMap = new HashMap<>();
-
-        static {
-            urlPermissionMap.put("/user-list", "READ_USER");
-            urlPermissionMap.put("/user-create", "CREATE_USER");
-            urlPermissionMap.put("/user", "UPDATE_USER");
-            urlPermissionMap.put("/user-delete", "DELETE_USER");
-
-            // --- QUẢN LÝ ROLE ---
-            urlPermissionMap.put("/roles", "READ_ROLE");
-            urlPermissionMap.put("/create-role", "CREATE_ROLE");
-            urlPermissionMap.put("/edit-role", "UPDATE_ROLE");
-            urlPermissionMap.put("/role-delete", "DELETE_ROLE");
-
-        }
-
-        public static String getRequiredPermission(String url) {
-            return urlPermissionMap.get(url);
-        }
-    }
 }
