@@ -25,7 +25,7 @@ public class UserCreateServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/user-create.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/user/user-create.jsp").forward(request, response);
     }
 
     @Override
@@ -43,10 +43,10 @@ public class UserCreateServlet extends HttpServlet {
 
         if (messageError != null) {
             request.setAttribute("error", messageError);
-            request.getRequestDispatcher("/user-create.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/user/user-create.jsp").forward(request, response);
         } else {
             request.setAttribute("success", "Create new user successfully");
-            request.getRequestDispatcher("/user-create.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/user/user-create.jsp").forward(request, response);
         }
 
     }
