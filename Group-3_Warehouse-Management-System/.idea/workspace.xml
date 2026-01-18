@@ -10,24 +10,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f1594cb6-5d8b-40eb-b4a9-050fdaac606b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/service/PermissionService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/service/RoleService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/HomeServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/HomeServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/ChangePasswordServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/ChangePasswordServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/ForgetPasswordServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/ForgetPasswordServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/LoginServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/LoginServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleCreateServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleCreateServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleEditServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleEditServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleListServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleListServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/user/ViewProfileServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/user/ViewProfileServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/dao/HieuDAO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/dao/RoleDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/dao/RoleDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/home.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/home.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/user/user-profile.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/user/user-profile.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
