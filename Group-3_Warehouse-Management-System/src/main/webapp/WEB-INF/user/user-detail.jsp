@@ -9,7 +9,7 @@
     </head>
 
     <body class="d-flex justify-content-center mt-5 vh-100 bg-light">
-        <jsp:include page="/common/sidebar.jsp" />
+        <jsp:include page="/WEB-INF/common/sidebar.jsp" />
 
         <div class="container main-content">
 

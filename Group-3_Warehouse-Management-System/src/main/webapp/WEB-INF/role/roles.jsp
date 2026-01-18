@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     </head>
     <body>
-        <jsp:include page="/common/sidebar.jsp" />
+        <jsp:include page="/WEB-INF/common/sidebar.jsp" />
 
         <main class="main-content">
             <div class="container-fluid py-4">

@@ -10,7 +10,7 @@
     </head>
 
     <body class="d-flex justify-content-center align-items-center vh-100 bg-light">
-        <jsp:include page="/common/sidebar.jsp" />
+        <jsp:include page="/WEB-INF/common/sidebar.jsp" />
 
         <form action="edit-role" method="post" class="border border-secondary rounded shadow bg-white w-50 p-4 main-content">
             <h2 class="text-center mb-4">Update Role</h2>
