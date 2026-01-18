@@ -4,11 +4,10 @@
  */
 package com.example.controller.role;
 
-import com.example.dao.UserDAO;
-import com.example.dao.RoleDAO;
-
 import com.example.model.Permission;
 import com.example.model.Role;
+import com.example.service.PermissionService;
+import com.example.service.RoleService;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -25,20 +24,20 @@ import java.util.List;
 @WebServlet(name = "RoleListServlet", urlPatterns = {"/roles"})
 public class RoleListServlet extends HttpServlet {
 
-    private UserDAO d;
-    private RoleDAO r;
+    private RoleService r;
+    private PermissionService p;
 
     @Override
     public void init() {
-        d = new UserDAO();
-        r = new RoleDAO();
+        r = new RoleService();
+        p = new PermissionService();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Role> roleList = r.findAll();
-        List<Permission> allPermissions = d.getAllPermissions();
+        List<Role> roleList = r.getAllRoles();
+        List<Permission> allPermissions = p.getAllPermissions();
         request.setAttribute("roleList", roleList);
         request.setAttribute("allPermissions", allPermissions);
         request.getRequestDispatcher("/WEB-INF/role/roles.jsp").forward(request, response);

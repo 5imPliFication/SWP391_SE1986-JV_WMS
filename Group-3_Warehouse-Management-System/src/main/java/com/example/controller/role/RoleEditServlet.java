@@ -1,22 +1,18 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package com.example.controller.role;
 
-import com.example.dao.UserDAO;
-import com.example.dao.RoleDAO;
 import com.example.model.Permission;
 import com.example.model.Role;
-
-import java.io.IOException;
-
+import com.example.config.DBConfig;
+import com.example.service.PermissionService;
+import com.example.service.RoleService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,29 +20,30 @@ import java.util.List;
 @WebServlet(name = "RoleEditServlet", urlPatterns = {"/edit-role"})
 public class RoleEditServlet extends HttpServlet {
 
-    private UserDAO d;
-    private RoleDAO r;
+    private RoleService r;
+    private PermissionService p;
 
     @Override
     public void init() {
-        d = new UserDAO();
-        r = new RoleDAO();
+        r = new RoleService();
+        p = new PermissionService();
     }
 
+    // ===================== GET =====================
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         Long id = Long.parseLong(request.getParameter("id"));
 
-        Role role = r.findById(id);
-
-        List<Permission> allPermissions = d.getAllPermissions();
+        Role role = r.getRoleById(id);
+        List<Permission> allPermissions = p.getAllPermissions();
 
         request.setAttribute("role", role);
         request.setAttribute("listRolePermission", allPermissions);
 
-        request.getRequestDispatcher("/WEB-INF/role/edit-role.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/role/edit-role.jsp")
+                .forward(request, response);
     }
 
     @Override
@@ -55,33 +52,46 @@ public class RoleEditServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
-        try {
+        try (Connection conn = DBConfig.getDataSource().getConnection()) {
+
+            conn.setAutoCommit(false); // 🔥 transaction
+
             Long roleId = Long.parseLong(request.getParameter("roleID"));
             String roleName = request.getParameter("roleName");
             String description = request.getParameter("description");
 
             String[] permissionIds = request.getParameterValues("permissionIds");
-            //convert from array of strings to List
-            List<Permission> permissions = new ArrayList<>();
+
+            // convert permissionIds -> List<Long>
+            List<Long> permissionIdList = new ArrayList<>();
             if (permissionIds != null) {
                 for (String pid : permissionIds) {
-                    Permission p = new Permission();
-                    p.setId(Long.parseLong(pid));
-                    permissions.add(p);
+                    permissionIdList.add(Long.parseLong(pid));
                 }
             }
-            Role newRole = new Role(
+
+            Role role = new Role(
                     roleId,
                     roleName,
                     description,
-                    true,                          // isActive
-                    new Timestamp(System.currentTimeMillis()), // createdAt
-                    permissions
+                    true,
+                    new Timestamp(System.currentTimeMillis()),
+                    null
             );
-            r.update(newRole);
+
+            r.updateRole( role);
+
+            // 2️⃣ update role_permissions
+            p.updateRolePermissions(
+                    roleId,
+                    permissionIdList
+            );
+
+            conn.commit(); // ✅ OK
+
             response.sendRedirect("roles?message=update_success");
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             response.sendRedirect("roles?error=update_failed");
         }
