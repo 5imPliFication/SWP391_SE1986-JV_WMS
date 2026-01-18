@@ -16,7 +16,7 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
     </head>
     <body class="d-flex justify-content-center align-items-center vh-100 bg-light">
-        <jsp:include page="/common/sidebar.jsp" />
+        <jsp:include page="/WEB-INF/common/sidebar.jsp" />
 
         <div class="container mt-5 main-content ">
             <div class="row justify-content-center">
