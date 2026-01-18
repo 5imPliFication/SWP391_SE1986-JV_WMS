@@ -16,7 +16,7 @@ import java.io.IOException;
 
 import static com.example.util.PasswordUtil.checkPassword;
 
-@WebServlet({"/", "/login"})
+@WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
     private final UserDAO userDAO = new UserDAO();
@@ -25,7 +25,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.getRequestDispatcher("/login.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/auth/login.jsp").forward(req, resp);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class LoginServlet extends HttpServlet {
         // Check user exists first, then verify password properly
         if (user == null || !checkPassword(password, user.getPasswordHash())) {
             req.setAttribute("error", "Invalid email or password");
-            req.getRequestDispatcher("/login.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/auth/login.jsp").forward(req, resp);
             return;
         }
 

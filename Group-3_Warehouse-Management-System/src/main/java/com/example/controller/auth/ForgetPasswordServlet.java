@@ -20,7 +20,7 @@ public class ForgetPasswordServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        request.getRequestDispatcher("/forget-password.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/auth/forget-password.jsp").forward(request, response);
     }
 
     @Override
@@ -30,12 +30,12 @@ public class ForgetPasswordServlet extends HttpServlet {
         boolean success = userService.resetPasswordByEmail(email);
 
         if (!success) {
-            request.getRequestDispatcher("/forget-password-error.jsp")
+            request.getRequestDispatcher("/WEB-INF/auth/forget-password-error.jsp")
                     .forward(request, response);
             return;
         }
 
-        request.getRequestDispatcher("/login.jsp")
+        request.getRequestDispatcher("/WEB-INF/auth/login.jsp")
                 .forward(request, response);
     }
 }

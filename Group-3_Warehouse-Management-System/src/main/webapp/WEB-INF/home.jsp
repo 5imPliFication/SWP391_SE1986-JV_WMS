@@ -27,7 +27,7 @@
                         : user.getFullName().substring(0, 1).toUpperCase();
         %>
 
-        <jsp:include page="/common/sidebar.jsp" />
+        <jsp:include page="/WEB-INF/common/sidebar.jsp" />
 
         <!-- Main Content -->
         <main class="main-content">

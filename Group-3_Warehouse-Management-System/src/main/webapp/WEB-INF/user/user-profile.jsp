@@ -21,7 +21,7 @@
 </head>
 <body>
 
-<jsp:include page="/common/sidebar.jsp"/>
+<jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
 <div class="main-content">
     <h2>User Profile</h2>

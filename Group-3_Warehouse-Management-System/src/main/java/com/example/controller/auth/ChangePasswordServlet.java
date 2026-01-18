@@ -22,7 +22,7 @@ public class ChangePasswordServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        request.getRequestDispatcher("/change-password.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/auth/change-password.jsp").forward(request, response);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class ChangePasswordServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
         }else {
             request.setAttribute("error", "Invalid current password");
-            request.getRequestDispatcher("/change-password.jsp")
+            request.getRequestDispatcher("/WEB-INF/auth/change-password.jsp")
                     .forward(request, response);
         }
     }

@@ -41,7 +41,7 @@ public class RoleListServlet extends HttpServlet {
         List<Permission> allPermissions = d.getAllPermissions();
         request.setAttribute("roleList", roleList);
         request.setAttribute("allPermissions", allPermissions);
-        request.getRequestDispatcher("/roles.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/role/roles.jsp").forward(request, response);
     }
 
     @Override

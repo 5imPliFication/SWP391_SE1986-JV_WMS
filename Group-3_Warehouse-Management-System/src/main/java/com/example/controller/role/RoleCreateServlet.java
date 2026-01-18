@@ -36,7 +36,7 @@ public class RoleCreateServlet extends HttpServlet {
         List<Permission> allPermissions = d.getAllPermissions();
         request.setAttribute("listRolePermission", allPermissions);
 
-        request.getRequestDispatcher("create-role.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/role/create-role.jsp").forward(request, response);
     }
 
     @Override

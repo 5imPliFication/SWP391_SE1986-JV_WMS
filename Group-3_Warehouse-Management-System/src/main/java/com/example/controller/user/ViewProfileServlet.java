@@ -22,7 +22,7 @@ public class ViewProfileServlet extends HttpServlet {
             return;
         }
         request.setAttribute("user", user);
-        request.getRequestDispatcher("/user-profile.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/user/user-profile.jsp").forward(request, response);
     }
 
     @Override

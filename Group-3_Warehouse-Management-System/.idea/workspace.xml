@@ -10,69 +10,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f1594cb6-5d8b-40eb-b4a9-050fdaac606b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/material_theme_project_new.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/permission/PermissionListServlet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/product/ProductListServlet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/product/product-list.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/service/PermissionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/service/RoleService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/config/DBConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/config/DBConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/ChangePasswordServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/ChangePasswordServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/ChangeRoleStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleChangeStatusServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/CreateRole.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleCreateServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/EditRoles.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleEditServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/ForgetPasswordServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/ForgetPasswordServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/LoginServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/LoginServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/LogoutServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/LogoutServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/RoleList.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleListServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/ShowRolePermission.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/UserChangeStatusServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/user/UserChangeStatusServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/UserCreateServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/user/UserCreateServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/UserDetailServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/user/UserDetailServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/UserListServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/user/UserListServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/ViewProfileServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/user/ViewProfileServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/admin/RoleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/HomeServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/HomeServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/ChangePasswordServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/ChangePasswordServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/ForgetPasswordServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/ForgetPasswordServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/LoginServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/auth/LoginServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleCreateServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleCreateServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleEditServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleEditServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleListServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/role/RoleListServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/user/ViewProfileServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/user/ViewProfileServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/dao/HieuDAO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/dao/RoleDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/dao/RoleDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/home.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/home.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/user/user-profile.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/user/user-profile.jsp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/admin/role/detail.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/admin/role/list.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/change-password.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/auth/change-password.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/common/sidebar.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/common/sidebar.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/create-role.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/role/create-role.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/bootstrap-grid.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/bootstrap-grid.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/bootstrap-grid.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/bootstrap-grid.min.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/bootstrap-reboot.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/bootstrap-reboot.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/bootstrap-reboot.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/bootstrap-reboot.min.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/bootstrap.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/bootstrap.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/bootstrap.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/bootstrap.min.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/edit-role.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/role/edit-role.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/forget-password-error.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/auth/forget-password-error.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/forget-password.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/auth/forget-password.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/home.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/home.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/index.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/js/bootstrap.bundle.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/js/bootstrap.bundle.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/js/bootstrap.bundle.min.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/js/bootstrap.bundle.min.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/js/bootstrap.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/js/bootstrap.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/js/bootstrap.min.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/js/bootstrap.min.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/login.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/auth/login.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/roles.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/role/roles.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/user-create.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/user/user-create.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/user-detail.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/user/user-detail.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/user-list.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/user/user-list.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/user-profile.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/user/user-profile.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/WEB-INF/web.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/web/WEB-INF/web.xml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,8 +41,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="CSS File" />
-        <option value="Class" />
         <option value="Jsp File" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -176,20 +131,7 @@
       <recent name="com.example.controller.permission" />
     </key>
   </component>
-  <component name="RunManager" selected="Tomcat Server.SWP">
-    <configuration name="BcryptTool" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.example.BcryptTool" />
-      <module name="Group-3_Warehouse-Management-System" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.example.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager">
     <configuration name="SWP" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" APPLICATION_SERVER_NAME="Tomcat 10.1.40" ALTERNATIVE_JRE_ENABLED="false">
       <option name="UPDATING_POLICY" value="restart-server" />
       <deployment>
@@ -277,11 +219,6 @@
         </option>
       </method>
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Application.BcryptTool" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>

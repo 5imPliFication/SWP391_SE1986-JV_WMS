@@ -46,7 +46,7 @@ public class RoleEditServlet extends HttpServlet {
         request.setAttribute("role", role);
         request.setAttribute("listRolePermission", allPermissions);
 
-        request.getRequestDispatcher("/edit-role.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/role/edit-role.jsp").forward(request, response);
     }
 
     @Override
