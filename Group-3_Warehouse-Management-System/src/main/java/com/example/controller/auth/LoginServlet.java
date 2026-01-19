@@ -49,6 +49,12 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
+        if (!user.isActive()) {
+            req.setAttribute("error", "Account is inactive");
+            req.getRequestDispatcher("/WEB-INF/auth/login.jsp").forward(req, resp);
+            return;
+        }
+
         HttpSession session = req.getSession(true);
         session.setAttribute("user", user);
 

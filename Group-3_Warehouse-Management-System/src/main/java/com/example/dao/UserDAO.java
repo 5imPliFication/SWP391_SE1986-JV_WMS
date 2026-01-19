@@ -95,7 +95,7 @@ public class UserDAO {
             return user;
         }
     }
-    public User findUserById(int id) {
+    public User findUserById(long id) {
 
         String sql = """
                     SELECT u.id, u.fullname, u.email, u.is_active,
