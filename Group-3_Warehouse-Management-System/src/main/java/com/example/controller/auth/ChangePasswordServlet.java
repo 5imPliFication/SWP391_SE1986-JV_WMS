@@ -35,6 +35,10 @@ public class ChangePasswordServlet extends HttpServlet {
         }
 
         User user = (User) session.getAttribute("user");
+
+        // Set user to request for displaying info
+        request.setAttribute("user", user);
+
         System.out.println(user.getEmail());
         String currentPassword = request.getParameter("currentPassword");
         String newPassword = request.getParameter("newPassword");
