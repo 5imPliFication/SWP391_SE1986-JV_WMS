@@ -145,4 +145,9 @@ public class UserService {
         }
         return null;
     }
+
+    // Update User Infomation
+    public boolean updateUserInformation(User user) {
+        return userDAO.updateUserInformation(user);
+    }
 }

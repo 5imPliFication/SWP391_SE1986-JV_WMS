@@ -172,7 +172,7 @@ public class UserDAO {
         }
     }
 
-    public void updateUserInformation(User user) {
+    public boolean updateUserInformation(User user) {
         StringBuilder sql = new StringBuilder("update users "
                 + "set fullname=?,email=?, role_id=?, is_active=? where id=?");
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString());) {
@@ -182,6 +182,7 @@ public class UserDAO {
             ps.setBoolean(4, user.isActive());
             ps.setLong(5, user.getId());
             ps.executeUpdate();
+            return true;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
