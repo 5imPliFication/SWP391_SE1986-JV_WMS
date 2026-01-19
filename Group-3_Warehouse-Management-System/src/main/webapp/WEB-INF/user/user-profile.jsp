@@ -86,19 +86,19 @@
         </table>
     </form>
 
-    <!-- Success/Error Messages -->
-    <%
-        String success = request.getParameter("success");
-        if ("true".equals(success)) {
-    %>
-    <p style="color: green;">Profile updated successfully!</p>
-    <%
-    } else if ("false".equals(success)) {
-    %>
-    <p style="color: red;">Failed to update profile. Please try again.</p>
-    <%
-        }
-    %>
+    <c:if test="${not empty sessionScope.success}">
+        <div class="alert alert-success">
+                ${sessionScope.success}
+        </div>
+        <c:remove var="success" scope="session"/>
+    </c:if>
+    <c:if test="${not empty sessionScope.fail}">
+        <div class="alert alert-danger">
+                ${sessionScope.fail}
+        </div>
+        <c:remove var="fail" scope="session"/>
+    </c:if>
+
 </div>
 </body>
 </html>
