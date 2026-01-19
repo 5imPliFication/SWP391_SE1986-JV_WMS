@@ -51,7 +51,7 @@ public class UserService {
         return userDAO.findAll();
     }
 
-    public User findUserById(int id) {
+    public User findUserById(long id) {
         return userDAO.findUserById(id);
     }
 
