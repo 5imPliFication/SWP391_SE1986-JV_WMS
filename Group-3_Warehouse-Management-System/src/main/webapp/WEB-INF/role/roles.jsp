@@ -14,6 +14,22 @@
         <main class="main-content">
             <div class="container-fluid py-4">
                 <h2 class="mb-4">Role & Permission Management</h2>
+                <c:if test="${param.msg == 'delete_success'}">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Xóa role thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </c:if>
+
+                <c:if test="${param.msg == 'error'}">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Có lỗi xảy ra khi xóa role!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </c:if>
+
                 <c:if test="${fn:contains(sessionScope.userPermissions, 'CREATE_ROLE')}">
                     <a href="create-role" class="btn btn-primary mb-3">
                         <i class="fas fa-plus-circle"></i> Create new role
@@ -112,4 +128,4 @@
             </div>
         </main>
 
-        <script src="
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
