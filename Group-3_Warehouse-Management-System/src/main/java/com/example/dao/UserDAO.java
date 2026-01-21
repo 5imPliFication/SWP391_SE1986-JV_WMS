@@ -12,53 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.util.PasswordUtil.checkPassword;
-import static com.example.util.PasswordUtil.hashPassword;
-
 public class UserDAO {
-    public List<User> findAll() {
-        List<User> listUsers = new ArrayList<>();
-
-        String sql = """
-                    SELECT 
-                        u.id,
-                        u.fullname,
-                        u.email,
-                        u.is_active,
-                        r.id   AS role_id,
-                        r.name AS role_name
-                    FROM users u
-                    JOIN roles r ON u.role_id = r.id
-                """;
-
-        try (
-                Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                User user = new User();
-                user.setId(rs.getLong("id"));
-                user.setFullName(rs.getString("fullname"));
-                user.setEmail(rs.getString("email"));
-                user.setActive(rs.getBoolean("is_active"));
-
-                Role role = new Role();
-                role.setId(rs.getLong("role_id"));
-                role.setName(rs.getString("role_name"));
-
-                user.setRole(role);
-
-                listUsers.add(user);
-
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        // return list users
-        return listUsers;
-    }
-
 
     public User findByEmail(Connection conn, String email) throws SQLException {
         String sql = "SELECT \n"
@@ -100,6 +54,7 @@ public class UserDAO {
             return user;
         }
     }
+
     public User findUserById(long id) {
 
         String sql = """
@@ -194,7 +149,7 @@ public class UserDAO {
     }
 
     // Get hashed password from database
-    public String getPassword(Connection conn, String email) throws SQLException{
+    public String getPassword(Connection conn, String email) throws SQLException {
         String sql = "SELECT password_hash FROM users WHERE email = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -211,7 +166,7 @@ public class UserDAO {
         }
     }
 
-    public boolean updatePassword(Connection conn, String email, String newPassword) throws SQLException{
+    public boolean updatePassword(Connection conn, String email, String newPassword) throws SQLException {
         String sql = "UPDATE users SET password_hash = ? WHERE email = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -259,8 +214,6 @@ public class UserDAO {
             throw new RuntimeException(e);
         }
     }
-
-   
 
 
     public Role findRoleByID(int roleId) {
@@ -310,20 +263,25 @@ public class UserDAO {
         return null;
     }
 
-    //get list users by name
-    public List<User> getUsersByName(String name) {
-        String sql = "select u.id, u.fullname, u.email, r.id as role_id, r.name as role_name, u.is_active from users u " +
-                " join roles r on u.role_id = r.id " +
-                " where u.fullname like ?;";
+    public List<User> findAll(String searchName) {
+        StringBuilder sql = new StringBuilder("select u.id, u.fullname, u.email, r.id as role_id, r.name as role_name, u.is_active from users u\n" +
+                "join roles r on u.role_id = r.id where 1 = 1 ");
         List<User> listUsers = new ArrayList<>();
+
+        // if param has value of searchName
+        if (searchName != null && !searchName.trim().isEmpty()) {
+            sql.append(" and u.fullname like ? ");
+        }
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, "%" + name + "%");
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
-            // get data
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()){
+            // if searchName has value -> set value to query
+            if (searchName != null && !searchName.trim().isEmpty()) {
+                ps.setString(1, "%" + searchName + "%");
+            }
+            ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
                     User user = new User();
                     user.setId(rs.getLong("id"));
                     user.setFullName(rs.getString("fullname"));
@@ -333,9 +291,7 @@ public class UserDAO {
                     role.setId(rs.getLong("role_id"));
                     role.setName(rs.getString("role_name"));
                     user.setRole(role);
-
                     listUsers.add(user);
-                }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

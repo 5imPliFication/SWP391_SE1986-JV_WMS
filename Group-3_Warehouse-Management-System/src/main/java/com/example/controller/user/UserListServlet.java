@@ -23,20 +23,12 @@ public class UserListServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<User> listUsers;
-
+        // get searchName
         String searchName = request.getParameter("searchName");
 
-        //if searchName == null or blank
-        if (searchName == null || searchName.trim().isEmpty()) {
-            listUsers = userService.getListUsers();
-            request.setAttribute("userList", listUsers);
-            request.getRequestDispatcher("/WEB-INF/user/user-list.jsp").forward(request, response);
-        } else {
-            listUsers = userService.getUsersByName(searchName);
-            request.setAttribute("userList", listUsers);
-            request.getRequestDispatcher("/WEB-INF/user/user-list.jsp").forward(request, response);
-        }
+        List<User> listUsers = userService.getListUsers(searchName);
+        request.setAttribute("userList", listUsers);
+        request.getRequestDispatcher("/WEB-INF/user/user-list.jsp").forward(request, response);
 
     }
 }

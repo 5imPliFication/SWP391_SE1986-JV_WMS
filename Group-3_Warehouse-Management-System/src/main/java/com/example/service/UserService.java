@@ -47,8 +47,8 @@ public class UserService {
         return statusCreate ? null : "Can not create new user";
     }
 
-    public List<User> getListUsers() {
-        return userDAO.findAll();
+    public List<User> getListUsers(String name) {
+        return userDAO.findAll(name);
     }
 
     public User findUserById(long id) {
@@ -149,12 +149,5 @@ public class UserService {
     // Update User Infomation
     public boolean updateUserInformation(User user) {
         return userDAO.updateUserInformation(user);
-    }
-
-    // get list users by name
-    public List<User> getUsersByName(String name) {
-        List<User> listUsers;
-        listUsers = userDAO.getUsersByName(name);
-        return listUsers;
     }
 }

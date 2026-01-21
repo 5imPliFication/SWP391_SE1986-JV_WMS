@@ -35,18 +35,27 @@
         <jsp:include page="/WEB-INF/common/sidebar.jsp" />
         <div class="main-content">
             <h2>List user</h2>
+<%--            create new user--%>
             <c:if test="${fn:contains(sessionScope.userPermissions, 'CREATE_USER')}">
                 <a href="${pageContext.request.contextPath}/user-create">
                     <button class="btn btn-primary mb-3">Create new user</button>
                 </a>
             </c:if>
             <br>
-            <form action="${pageContext.request.contextPath}/user-list" method="get" style="margin-bottom: 10px;">
-                <label>
-                    <input type="text" name="searchName" placeholder="Search by name"
-                            value="${param.searchName}" />
-                </label>
-                <button type="submit">Search</button>
+<%--            search user by name--%>
+            <form action="${pageContext.request.contextPath}/user-list" method="get"
+                  class="row g-2 align-items-center mb-3">
+                <div class="col-auto">
+                    <label>
+                         <input type="text" class="form-control" name="searchName" placeholder="Search by name"
+                               value="${param.searchName}">
+                    </label>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-outline-primary">
+                        Search
+                    </button>
+                </div>
             </form>
 
             <table>
@@ -68,6 +77,7 @@
                             <td>${u.fullName}</td>
                             <td>${u.email}</td>
                             <td>${u.role.name}</td>
+<%--                            active/inactive user--%>
                             <td>
                                 <form action="${pageContext.request.contextPath}/change-user-status" method="post" class="d-inline">
                                     <input type="hidden" name="userId" value="${u.id}">
