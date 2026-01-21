@@ -61,17 +61,18 @@ public class UserDAO {
 
 
     public User findByEmail(Connection conn, String email) throws SQLException {
-        String sql = "SELECT \n" +
-                "            u.id,\n" +
-                "            u.fullname,\n" +
-                "            u.email,\n" +
-                "            u.password_hash,\n" +
-                "            u.is_active,\n" +
-                "            r.id   AS role_id,\n" +
-                "            r.name AS role_name\n" +
-                "        FROM users u\n" +
-                "        LEFT JOIN roles r ON u.role_id = r.id\n" +
-                "        WHERE u.email = ?";
+        String sql = "SELECT \n"
+                + "            u.id,\n"
+                + "            u.fullname,\n"
+                + "            u.email,\n"
+                + "            u.password_hash,\n"
+                + "            u.is_active,\n"
+                + "            r.id   AS role_id,\n"
+                + "            r.is_active as role_active,\n"
+                + "            r.name AS role_name\n"
+                + "        FROM users u\n"
+                + "        LEFT JOIN roles r ON u.role_id = r.id\n"
+                + "        WHERE u.email = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -90,8 +91,12 @@ public class UserDAO {
             Role role = new Role();
             role.setId(rs.getLong("role_id"));
             role.setName(rs.getString("role_name"));
-
+            role.setActive(rs.getBoolean("role_active"));
             user.setRole(role);
+            System.out.println("ROLE ID = " + user.getRole().getId());
+            System.out.println("ROLE NAME = " + user.getRole().getName());
+            System.out.println("ROLE ACTIVE = " + user.getRole().isActive());
+
             return user;
         }
     }

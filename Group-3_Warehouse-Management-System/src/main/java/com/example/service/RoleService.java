@@ -9,7 +9,9 @@ import com.example.model.Role;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RoleService {
 
@@ -20,7 +22,9 @@ public class RoleService {
     public RoleService() {
         roleDAO = new RoleDAO();
         userDAO = new UserDAO();
+        PermissionDAO = new PermissionDAO();
     }
+
 
     public List<Role> getAllRoles() {
         return roleDAO.findAll();
@@ -47,12 +51,16 @@ public class RoleService {
 
             roleDAO.update(conn, role);
 
-            List<Long> permissionIds = role.getPermissions()
-                    .stream()
-                    .map(Permission::getId)
-                    .toList();
+            List<Permission> permissions = role.getPermissions();
+            if (permissions == null) {
+                permissions = new ArrayList<>();
+            }
 
-            PermissionDAO.updateRolePermissions(conn, role.getId(), permissionIds);
+            List<Long> newPermissionIds = permissions.stream()
+                    .map(Permission::getId)
+                    .collect(Collectors.toList());
+
+            PermissionDAO.updateRolePermissions(conn, role.getId(), newPermissionIds);
 
             conn.commit();
 
