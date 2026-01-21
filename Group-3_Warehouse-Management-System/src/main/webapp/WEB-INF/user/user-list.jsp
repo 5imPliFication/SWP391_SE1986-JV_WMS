@@ -36,11 +36,19 @@
         <div class="main-content">
             <h2>List user</h2>
             <c:if test="${fn:contains(sessionScope.userPermissions, 'CREATE_USER')}">
-                <a href="/user-create">
+                <a href="${pageContext.request.contextPath}/user-create">
                     <button class="btn btn-primary mb-3">Create new user</button>
                 </a>
             </c:if>
             <br>
+            <form action="${pageContext.request.contextPath}/user-list" method="get" style="margin-bottom: 10px;">
+                <label>
+                    <input type="text" name="searchName" placeholder="Search by name"
+                            value="${param.searchName}" />
+                </label>
+                <button type="submit">Search</button>
+            </form>
+
             <table>
                 <thead>
                     <tr>
@@ -61,7 +69,7 @@
                             <td>${u.email}</td>
                             <td>${u.role.name}</td>
                             <td>
-                                <form action="/change-user-status" method="post" class="d-inline">
+                                <form action="${pageContext.request.contextPath}/change-user-status" method="post" class="d-inline">
                                     <input type="hidden" name="userId" value="${u.id}">
                                     <c:if test="${u.active == true}">
                                         <button type="submit" class="btn btn-sm btn-danger">
@@ -76,7 +84,7 @@
                                 </form>
                             </td>
                             <td>
-                                <a href="/user?id=${u.id}" target="_blank">Detail</a>
+                                <a href="${pageContext.request.contextPath}/user?id=${u.id}" target="_blank">Detail</a>
                             </td>
                         </tr>
                     </c:forEach>

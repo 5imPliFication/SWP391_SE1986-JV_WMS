@@ -150,4 +150,11 @@ public class UserService {
     public boolean updateUserInformation(User user) {
         return userDAO.updateUserInformation(user);
     }
+
+    // get list users by name
+    public List<User> getUsersByName(String name) {
+        List<User> listUsers;
+        listUsers = userDAO.getUsersByName(name);
+        return listUsers;
+    }
 }

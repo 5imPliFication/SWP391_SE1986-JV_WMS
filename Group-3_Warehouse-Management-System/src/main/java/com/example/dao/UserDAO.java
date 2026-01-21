@@ -309,4 +309,37 @@ public class UserDAO {
         }
         return null;
     }
+
+    //get list users by name
+    public List<User> getUsersByName(String name) {
+        String sql = "select u.id, u.fullname, u.email, r.id as role_id, r.name as role_name, u.is_active from users u " +
+                " join roles r on u.role_id = r.id " +
+                " where u.fullname like ?;";
+        List<User> listUsers = new ArrayList<>();
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + name + "%");
+
+            // get data
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()){
+                    User user = new User();
+                    user.setId(rs.getLong("id"));
+                    user.setFullName(rs.getString("fullname"));
+                    user.setEmail(rs.getString("email"));
+                    user.setActive(rs.getBoolean("is_active"));
+                    Role role = new Role();
+                    role.setId(rs.getLong("role_id"));
+                    role.setName(rs.getString("role_name"));
+                    user.setRole(role);
+
+                    listUsers.add(user);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return listUsers;
+    }
 }
