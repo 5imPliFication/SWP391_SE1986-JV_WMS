@@ -35,12 +35,29 @@
         <jsp:include page="/WEB-INF/common/sidebar.jsp" />
         <div class="main-content">
             <h2>List user</h2>
+<%--            create new user--%>
             <c:if test="${fn:contains(sessionScope.userPermissions, 'CREATE_USER')}">
-                <a href="/user-create">
+                <a href="${pageContext.request.contextPath}/user-create">
                     <button class="btn btn-primary mb-3">Create new user</button>
                 </a>
             </c:if>
             <br>
+<%--            search user by name--%>
+            <form action="${pageContext.request.contextPath}/user-list" method="get"
+                  class="row g-2 align-items-center mb-3">
+                <div class="col-auto">
+                    <label>
+                         <input type="text" class="form-control" name="searchName" placeholder="Search by name"
+                               value="${param.searchName}">
+                    </label>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-outline-primary">
+                        Search
+                    </button>
+                </div>
+            </form>
+
             <table>
                 <thead>
                     <tr>
@@ -60,8 +77,9 @@
                             <td>${u.fullName}</td>
                             <td>${u.email}</td>
                             <td>${u.role.name}</td>
+<%--                            active/inactive user--%>
                             <td>
-                                <form action="/change-user-status" method="post" class="d-inline">
+                                <form action="${pageContext.request.contextPath}/change-user-status" method="post" class="d-inline">
                                     <input type="hidden" name="userId" value="${u.id}">
                                     <c:if test="${u.active == true}">
                                         <button type="submit" class="btn btn-sm btn-danger">
@@ -76,7 +94,7 @@
                                 </form>
                             </td>
                             <td>
-                                <a href="/user?id=${u.id}" target="_blank">Detail</a>
+                                <a href="${pageContext.request.contextPath}/user?id=${u.id}" target="_blank">Detail</a>
                             </td>
                         </tr>
                     </c:forEach>

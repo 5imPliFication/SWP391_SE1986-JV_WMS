@@ -17,16 +17,18 @@ public class UserListServlet extends HttpServlet {
     private UserService userService;
 
     @Override
-    public void init(){
+    public void init() {
         userService = new UserService();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<User> listUsers = userService.getListUsers();
+        // get searchName
+        String searchName = request.getParameter("searchName");
 
+        List<User> listUsers = userService.getListUsers(searchName);
         request.setAttribute("userList", listUsers);
-        request.getRequestDispatcher("/WEB-INF/user/user-list.jsp").forward(request,response);
+        request.getRequestDispatcher("/WEB-INF/user/user-list.jsp").forward(request, response);
 
     }
 }
