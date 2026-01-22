@@ -4,6 +4,7 @@ import com.example.config.DBConfig;
 import com.example.model.Permission;
 import com.example.model.Role;
 import com.example.model.User;
+import com.example.util.UserConstant;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -263,7 +264,7 @@ public class UserDAO {
         return null;
     }
 
-    public List<User> findAll(String searchName, String typeSort) {
+    public List<User> findAll(String searchName, String typeSort, int pageNo) {
         StringBuilder sql = new StringBuilder("select u.id, u.fullname, u.email, r.id as role_id, r.name as role_name, u.is_active from users u\n" +
                 "join roles r on u.role_id = r.id where 1 = 1 ");
         List<User> listUsers = new ArrayList<>();
@@ -276,20 +277,30 @@ public class UserDAO {
         // handle type sort
         if (typeSort != null && !typeSort.trim().isEmpty()) {
             if (typeSort.equalsIgnoreCase("asc")) {
-                sql.append(" order by u.fullname asc");
+                sql.append(" order by u.fullname asc ");
             } else if (typeSort.equalsIgnoreCase("desc")) {
-                sql.append(" order by u.fullname desc");
+                sql.append(" order by u.fullname desc ");
             }
         }
 
+        // handle pagination
+        sql.append(" limit ? offset ? ");
+
+        int index = 1;
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // if searchName has value -> set value to query
             if (searchName != null && !searchName.trim().isEmpty()) {
-                ps.setString(1, "%" + searchName + "%");
+                ps.setString(index++, "%" + searchName + "%");
             }
+
+            // set value for pagination of SQL
+            ps.setInt(index++, UserConstant.PAGE_SIZE);
+            int offset = (pageNo - 1)* UserConstant.PAGE_SIZE;
+            ps.setInt(index++, offset);
+
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 User user = new User();
@@ -307,5 +318,35 @@ public class UserDAO {
             throw new RuntimeException(e);
         }
         return listUsers;
+    }
+
+    // count amount of user by name
+    public int countUsers(String searchName) {
+        int totalOfUsers = 0;
+        StringBuilder sql = new StringBuilder("select count(*) from users ");
+
+        // if it has searchName
+        if (searchName != null && !searchName.trim().isEmpty()) {
+            sql.append(" where fullname like ?");
+        }
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            // if searchName has value -> set value to query
+            if (searchName != null && !searchName.trim().isEmpty()) {
+                ps.setString(1, "%" + searchName + "%");
+            }
+            ResultSet rs = ps.executeQuery();
+            // return value of column 1
+            if (rs.next()) {
+                totalOfUsers = rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return totalOfUsers;
     }
 }

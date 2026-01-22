@@ -49,7 +49,7 @@
         <div class="col-auto">
             <label>
                 <input type="text" class="form-control" name="searchName" placeholder="Search by name"
-                       value="${param.searchName}">
+                       value="${searchName}">
             </label>
         </div>
 
@@ -58,10 +58,10 @@
             <label>
                 <select name="sortName" class="form-select">
                     <option value="">Sort</option>
-                    <option value="asc"  ${param.sortName == 'asc' ? 'selected' : ''}>
+                    <option value="asc"  ${typeSort == 'asc' ? 'selected' : ''}>
                         Name ASC
                     </option>
-                    <option value="desc" ${param.sortName == 'desc' ? 'selected' : ''}>
+                    <option value="desc" ${typeSort == 'desc' ? 'selected' : ''}>
                         Name DESC
                     </option>
                 </select>
@@ -123,6 +123,39 @@
         </c:if>
         </tbody>
     </table>
+    <%-- pagination--%>
+    <c:if test="${totalPages > 1}">
+        <nav class="mt-3">
+            <ul class="pagination justify-content-center">
+                    <%-- previous page --%>
+                <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
+                    <a class="page-link"
+                       href="${pageContext.request.contextPath}/user-list?pageNo=${pageNo - 1}&searchName=${param.searchName}&sortName=${param.sortName}">
+                        Previous
+                    </a>
+                </li>
+
+                    <%-- current page  --%>
+                <c:forEach begin="1" end="${totalPages}" var="i">
+                    <li class="page-item ${i == pageNo ? 'active' : ''}">
+                        <a class="page-link"
+                           href="${pageContext.request.contextPath}/user-list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
+                                ${i}
+                        </a>
+                    </li>
+                </c:forEach>
+
+                    <%-- next page--%>
+                <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
+                    <a class="page-link"
+                       href="${pageContext.request.contextPath}/user-list?pageNo=${pageNo + 1}&searchName=${param.searchName}&sortName=${param.sortName}">
+                        Next
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+    </c:if>
     <%--message about change status of user--%>
     <div>
         <c:choose>

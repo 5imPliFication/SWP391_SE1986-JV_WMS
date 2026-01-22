@@ -2,6 +2,7 @@ package com.example.controller.user;
 
 import com.example.model.User;
 import com.example.service.UserService;
+import com.example.util.UserConstant;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -28,8 +29,25 @@ public class UserListServlet extends HttpServlet {
 
         // get type sort
         String typeSort = request.getParameter("sortName");
-        List<User> listUsers = userService.getListUsers(searchName, typeSort);
+
+        // pagination
+        int pageNo = 1;
+
+        // get total record
+        int totalUsers = userService.getTotalUsers(searchName);
+
+        // get total pages
+        int totalPages = (int)Math.ceil((double) totalUsers/ UserConstant.PAGE_SIZE);
+
+        if (request.getParameter("pageNo") != null) {
+            pageNo = Integer.parseInt(request.getParameter("pageNo"));
+        }
+        List<User> listUsers = userService.getListUsers(searchName, typeSort, pageNo);
         request.setAttribute("userList", listUsers);
+        request.setAttribute("searchName", searchName);
+        request.setAttribute("typeSort", typeSort);
+        request.setAttribute("pageNo", pageNo);
+        request.setAttribute("totalPages", totalPages);
         request.getRequestDispatcher("/WEB-INF/user/user-list.jsp").forward(request, response);
 
     }
