@@ -54,11 +54,9 @@
             <tr>
                 <td>Email</td>
                 <td>
-                    <input type="email"
-                           name="email"
+                    <input type="text"
                            value="${user.email}"
-                           placeholder="your.email@company.com"
-                           required/>
+                           disabled/>
                     <div class="field-hint">Used for notifications and account recovery</div>
                 </td>
             </tr>

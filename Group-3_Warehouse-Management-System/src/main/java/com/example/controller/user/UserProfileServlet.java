@@ -49,10 +49,8 @@ public class UserProfileServlet extends HttpServlet {
         }
 
         String fullName = request.getParameter("fullName");
-        String email = request.getParameter("email");
 
         user.setFullName(fullName);
-        user.setEmail(email);
 
         if(userService.updateUserInformation(user)) {
             session.setAttribute("success", "Profile updated successfully!");
