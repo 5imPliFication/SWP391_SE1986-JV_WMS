@@ -26,20 +26,20 @@ public class UserService {
     private final RoleDAO roleDAO = new RoleDAO();
     private final PermissionDAO permissionDAO = new PermissionDAO();
 
-
+    // create new user
     public String createUser(User user) {
         // check validate user
         String error = UserValidator.validateCreate(user);
 
         // if error -> return message error
-        if(error != null){
+        if (error != null) {
             return error;
         }
 
         // check exist email
-        if(getUserByEmail(user.getEmail())!=null){
+        if (getUserByEmail(user.getEmail()) != null) {
             return "Email exist, please input other email !!!";
-        };
+        }
 
         // insert new user to DB
         boolean statusCreate = userDAO.insertUser(user);
@@ -47,14 +47,16 @@ public class UserService {
         return statusCreate ? null : "Can not create new user";
     }
 
-    public List<User> getListUsers(String name, String typeSort) {
-        return userDAO.findAll(name, typeSort);
+    //get list user by name + pagination
+    public List<User> getListUsers(String name, String typeSort, int pageNo) {
+        return userDAO.findAll(name, typeSort, pageNo);
     }
 
     public User findUserById(long id) {
         return userDAO.findUserById(id);
     }
 
+    // change status of user
     public boolean changeStatus(int id) {
         // get current status from DB
         boolean currentStatus = userDAO.getCurrentStatus(id);
@@ -137,9 +139,9 @@ public class UserService {
 
     public String findPasswordByEmail(String email) {
         if (email != null) {
-            try(Connection conn = DBConfig.getDataSource().getConnection()) {
-                userDAO.getPassword(conn,email);
-            }catch (SQLException e){
+            try (Connection conn = DBConfig.getDataSource().getConnection()) {
+                userDAO.getPassword(conn, email);
+            } catch (SQLException e) {
                 throw new RuntimeException("Failed to load user by email: " + email, e);
             }
         }
@@ -149,5 +151,9 @@ public class UserService {
     // Update User Infomation
     public boolean updateUserInformation(User user) {
         return userDAO.updateUserInformation(user);
+    }
+
+    public int getTotalUsers(String searchName) {
+        return userDAO.countUsers(searchName);
     }
 }
