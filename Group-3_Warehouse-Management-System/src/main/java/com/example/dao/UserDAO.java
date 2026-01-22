@@ -263,7 +263,7 @@ public class UserDAO {
         return null;
     }
 
-    public List<User> findAll(String searchName) {
+    public List<User> findAll(String searchName, String typeSort) {
         StringBuilder sql = new StringBuilder("select u.id, u.fullname, u.email, r.id as role_id, r.name as role_name, u.is_active from users u\n" +
                 "join roles r on u.role_id = r.id where 1 = 1 ");
         List<User> listUsers = new ArrayList<>();
@@ -272,6 +272,16 @@ public class UserDAO {
         if (searchName != null && !searchName.trim().isEmpty()) {
             sql.append(" and u.fullname like ? ");
         }
+
+        // handle type sort
+        if (typeSort != null && !typeSort.trim().isEmpty()) {
+            if (typeSort.equalsIgnoreCase("asc")) {
+                sql.append(" order by u.fullname asc");
+            } else if (typeSort.equalsIgnoreCase("desc")) {
+                sql.append(" order by u.fullname desc");
+            }
+        }
+
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -281,17 +291,17 @@ public class UserDAO {
                 ps.setString(1, "%" + searchName + "%");
             }
             ResultSet rs = ps.executeQuery();
-                while (rs.next()) {
-                    User user = new User();
-                    user.setId(rs.getLong("id"));
-                    user.setFullName(rs.getString("fullname"));
-                    user.setEmail(rs.getString("email"));
-                    user.setActive(rs.getBoolean("is_active"));
-                    Role role = new Role();
-                    role.setId(rs.getLong("role_id"));
-                    role.setName(rs.getString("role_name"));
-                    user.setRole(role);
-                    listUsers.add(user);
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getLong("id"));
+                user.setFullName(rs.getString("fullname"));
+                user.setEmail(rs.getString("email"));
+                user.setActive(rs.getBoolean("is_active"));
+                Role role = new Role();
+                role.setId(rs.getLong("role_id"));
+                role.setName(rs.getString("role_name"));
+                user.setRole(role);
+                listUsers.add(user);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

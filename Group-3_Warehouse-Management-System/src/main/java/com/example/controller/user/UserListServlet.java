@@ -26,7 +26,9 @@ public class UserListServlet extends HttpServlet {
         // get searchName
         String searchName = request.getParameter("searchName");
 
-        List<User> listUsers = userService.getListUsers(searchName);
+        // get type sort
+        String typeSort = request.getParameter("sortName");
+        List<User> listUsers = userService.getListUsers(searchName, typeSort);
         request.setAttribute("userList", listUsers);
         request.getRequestDispatcher("/WEB-INF/user/user-list.jsp").forward(request, response);
 
