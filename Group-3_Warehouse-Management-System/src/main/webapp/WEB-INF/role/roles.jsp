@@ -35,97 +35,92 @@
                         <i class="fas fa-plus-circle"></i> Create new role
                     </a>
                 </c:if>
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
+
+                <!-- Sua tu cho nay-->
+                <c:forEach items="${roleList}" var="role">
+
+                    <div class="card mb-4 shadow-sm">
+
+                        <!-- ROLE HEADER -->
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0 text-primary fw-bold">
+                                    ${role.name}
+                            </h4>
+
+                            <div>
+                                <c:if test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
+                                    <a href="edit-role?id=${role.id}" class="btn btn-outline-primary btn-sm">
+                                        Edit
+                                    </a>
+                                </c:if>
+
+                                <c:if test="${fn:contains(sessionScope.userPermissions, 'DELETE_ROLE')}">
+                                    <form action="roles" method="post" class="d-inline"
+                                          onsubmit="return confirm('Xóa role ${role.name}?')">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="id" value="${role.id}">
+                                        <button class="btn btn-outline-danger btn-sm">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </c:if>
+                            </div>
+                        </div>
+
+                        <!-- PERMISSION TABLE -->
+                        <div class="card-body p-0">
+                            <table class="table table-bordered mb-0">
+
+                                <thead class="table-primary text-center">
                                 <tr>
-                                    <th style="width: 20%">Role Name</th>
-                                    <th style="width: 35%">Permissions</th>
-                                    <th style="width: 15%">Status</th>
-                                    <th style="width: 20%">Actions</th>
+                                    <th>Permission</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach items="${roleList}" var="role">
+                                </thead>
+
+                                <tbody>
+                                <c:set var="rolePermissionIds"
+                                       value="${requestScope['rolePermissionIds_' += role.id]}" />
+
+                                <c:forEach items="${allPermissions}" var="p">
                                     <tr>
-                                        <td class="fw-bold text-primary">${role.name}</td>
-
-                                        <td>
-                                            <c:forEach items="${role.permissions}" var="p">
-                                                <span class="badge bg-info text-dark me-1" style="font-weight: 500;">
-                                                    ${p.name}
-                                                </span>
-                                            </c:forEach>
-                                            <c:if test="${empty role.permissions}">
-                                                <span class="text-muted small fst-italic">Chưa cấp quyền</span>
-                                            </c:if>
-                                        </td>
-
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
-                                                    <form action="${pageContext.request.contextPath}/change_role_status" method="post" class="d-inline">
-                                                        <input type="hidden" name="roleId" value="${role.id}">
-                                                        <input type="hidden" name="currentStatus" value="${role.active}">
-
-                                                        <c:choose>
-                                                            <c:when test="${role.active}">
-                                                                <button type="submit" class="btn btn-success btn-sm w-75" 
-                                                                        onclick="return confirm('Ngừng kích hoạt role này?')">ACTIVE</button>
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <button type="submit" class="btn btn-danger btn-sm w-75" 
-                                                                        onclick="return confirm('Kích hoạt lại role này?')">DEACTIVE</button>
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </form>
-                                                </c:when>
-
-                                                <c:otherwise>
-                                                    <c:choose>
-                                                        <c:when test="${role.active}">
-                                                            <span class="badge bg-success p-2 w-75">ACTIVE</span>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="badge bg-danger p-2 w-75">DEACTIVE</span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </td>
-
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <c:choose>
-                                                    <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
-                                                        <a href="edit-role?id=${role.id}" class="btn btn-outline-primary btn-sm">
-                                                            <i class="fas fa-edit"></i> Edit
-                                                        </a>
-                                                        <c:if test="${fn:contains(sessionScope.userPermissions, 'DELETE_ROLE')}">
-
-                                                            <form action="roles" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa Role: ${role.name}?')">
-                                                                <input type="hidden" name="action" value="delete">
-                                                                <input type="hidden" name="id" value="${role.id}">
-                                                                <button type="submit" class="btn btn-outline-danger btn-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
-                                                                    <i class="fas fa-trash"></i> Delete
-                                                                </button>
-                                                            </form>
-                                                        </c:if>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <p>Bạn không được cấp quyền</p>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </div>
+                                        <td class="fw-semibold">${p.name}</td>
+                                        <td>${p.description}</td>
+                                        <td class="text-center">
+                                            <input type="checkbox"
+                                                   class="form-check-input permission-checkbox"
+                                                   data-role-id="${role.id}"
+                                                   data-permission-id="${p.id}"
+                                                   <c:if test="${rolePermissionIds.contains(p.id)}">checked</c:if>
+                                            >
                                         </td>
                                     </tr>
                                 </c:forEach>
-                            </tbody>
-                        </table>
+                                </tbody>
+
+                            </table>
+                        </div>
                     </div>
-                </div>
+
+                </c:forEach>
+
+
             </div>
         </main>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.querySelectorAll('.permission-checkbox').forEach(cb => {
+                cb.addEventListener('change', function () {
+                    fetch('update-role-permission', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        body:
+                            'roleId=' + this.dataset.role +
+                            '&permissionId=' + this.dataset.permission +
+                            '&checked=' + this.checked
+                    });
+                });
+            });
+        </script>
