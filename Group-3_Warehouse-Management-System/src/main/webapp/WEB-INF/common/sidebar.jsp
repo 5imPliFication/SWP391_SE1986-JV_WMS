@@ -52,6 +52,19 @@
             </li>
         </c:if>
 
+        <!-- Request Password Reset -->
+        <c:if test="${sessionScope.user != null
+                         and sessionScope.user.role != null
+                         and sessionScope.user.role.active
+                         and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
+            <li>
+                <a href="${pageContext.request.contextPath}/admin/password-reset"
+                   class="<%= (uri.contains("admin/password-reset")) ? "active" : "" %>">
+                    <span>Password Reset Request</span>
+                </a>
+            </li>
+        </c:if>
+
     </ul>
 </aside>
 </html>

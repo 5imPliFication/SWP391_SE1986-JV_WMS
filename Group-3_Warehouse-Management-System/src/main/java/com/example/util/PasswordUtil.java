@@ -12,8 +12,7 @@ public class PasswordUtil {
 
     private static final SecureRandom random = new SecureRandom();
 
-    // Generate random string
-    // for forget password
+    // Generate random string for making new password
     public static String generateRandomPassword(int passwordLength) {
         String combinedChars = ALPHA_CAPS + ALPHA + NUMERIC + SPECIAL;
         // Xác định luôn capacity ban đầu cho StringBuilder = passwordLength

@@ -43,7 +43,7 @@ public class EmailUtil {
 
             String content = """
                     <h3>Xin chào,</h3>
-                    <p>Mật khẩu mới của bạn là:</p>
+                    <p>Mật khẩu mới:</p>
                     <b>%s</b>
                     <p>Vui lòng đăng nhập và đổi mật khẩu ngay.</p>
                     """.formatted(newPassword);
