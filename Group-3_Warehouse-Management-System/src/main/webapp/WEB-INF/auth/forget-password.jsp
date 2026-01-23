@@ -30,8 +30,7 @@
         </div>
 
         <div class="info-box">
-            <p>A new password will be sent to your email by the administrator. Please check your inbox after
-                submitting this request.</p>
+            <p>Your request will be sent to the administrator. The administrator will send a reset password link to your email after confirming your request.</p>
         </div>
 
         <input type="submit" value="Send Request" class="btn-submit">
