@@ -38,6 +38,20 @@ public class RoleListServlet extends HttpServlet {
             throws ServletException, IOException {
         List<Role> roleList = r.getAllRoles();
         List<Permission> allPermissions = p.getAllPermissions();
+        
+        // Populate permission IDs for each role to support JSP checkbox rendering
+        if (roleList != null) {
+            for (Role role : roleList) {
+                List<Long> pIds = new java.util.ArrayList<>();
+                if (role.getPermissions() != null) {
+                    for (Permission perm : role.getPermissions()) {
+                        pIds.add(perm.getId());
+                    }
+                }
+                request.setAttribute("rolePermissionIds_" + role.getId(), pIds);
+            }
+        }
+        
         request.setAttribute("roleList", roleList);
         request.setAttribute("allPermissions", allPermissions);
         request.getRequestDispatcher("/WEB-INF/role/roles.jsp").forward(request, response);

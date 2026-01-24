@@ -20,8 +20,9 @@ public class RoleDAO {
     public List<Role> findAll() {
 
         List<Role> list = new ArrayList<>();
+        // Modified SQL to get both ID and Name, separated by colon
         String sql = "SELECT r.id, r.name, r.description, r.is_active, "
-                + "GROUP_CONCAT(p.name SEPARATOR '|') AS p_names "
+                + "GROUP_CONCAT(CONCAT(p.id, ':', p.name) SEPARATOR '|') AS p_infos "
                 + "FROM roles r "
                 + "LEFT JOIN role_permissions rp ON r.id = rp.role_id "
                 + "LEFT JOIN permissions p ON rp.permission_id = p.id "
@@ -37,14 +38,23 @@ public class RoleDAO {
                 role.setActive(rs.getBoolean("is_active"));
 
                 List<Permission> permList = new ArrayList<>();
-                String pNames = rs.getString("p_names");
+                String pInfos = rs.getString("p_infos");
 
-                if (pNames != null) {
-                    String[] names = pNames.split("\\|");
-                    for (String name : names) {
-                        Permission p = new Permission();
-                        p.setName(name);
-                        permList.add(p);
+                if (pInfos != null && !pInfos.isEmpty()) {
+                    String[] entries = pInfos.split("\\|");
+                    for (String entry : entries) {
+                        String[] parts = entry.split(":");
+                        // Ensure we have at least ID and Name
+                        if (parts.length >= 2) {
+                            Permission p = new Permission();
+                            try {
+                                p.setId(Long.parseLong(parts[0]));
+                                p.setName(parts[1]);
+                                permList.add(p);
+                            } catch (NumberFormatException e) {
+                                // Ignore malformed entries
+                            }
+                        }
                     }
                 }
                 role.setPermissions(permList);
