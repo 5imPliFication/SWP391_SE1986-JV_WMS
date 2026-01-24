@@ -35,6 +35,42 @@
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 <div class="main-content">
     <h2>List Reset Password Request</h2>
+    <br>
+    <%--form submit for search and sort--%>
+    <form action="${pageContext.request.contextPath}/admin/password-reset" method="get"
+          class="row g-2 align-items-center mb-3">
+        <%--search user by name--%>
+        <div class="col-auto">
+            <label>
+                <input type="text" class="form-control" name="searchName" placeholder="Search by name"
+                       value="${param.searchName}">
+            </label>
+        </div>
+
+        <%-- sort by type of status--%>
+        <div class="col-auto">
+            <label>
+                <select name="status" class="form-select">
+                    <option value="">Status</option>
+                    <option value="PENDING"  ${param.status == 'PENDING' ? 'selected' : ''}>
+                        PENDING
+                    </option>
+                    <option value="APPROVED"  ${param.status == 'APPROVED' ? 'selected' : ''}>
+                        APPROVED
+                    </option>
+                    <option value="REJECTED"  ${param.status == 'REJECTED' ? 'selected' : ''}>
+                        REJECTED
+                    </option>
+                </select>
+            </label>
+        </div>
+
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary">
+                Search
+            </button>
+        </div>
+    </form>
     <table>
         <thead>
         <tr>
@@ -59,6 +95,11 @@
                     <form action="${pageContext.request.contextPath}/admin/password-reset" method="post" class="d-inline">
                         <input type="hidden" name="passwordResetId" value="${p.id}">
                         <input type="hidden" name="userEmail" value="${p.user.email}">
+
+                        <!-- giữ filter để dùng post vẫn còn get param được -->
+                        <input type="hidden" name="searchName" value="${param.searchName}">
+                        <input type="hidden" name="status" value="${param.status}">
+
                         <c:if test="${p.status == 'PENDING'}">
                             <button type="submit" name="action" value="Approve" class="btn btn-sm btn-success">
                                 Approve

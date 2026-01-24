@@ -29,7 +29,9 @@ public class HandleResetPasswordServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        List<PasswordReset> passwordResetList = passwordResetService.findAll();
+        String searchName = request.getParameter("searchName");
+        String status = request.getParameter("status");
+        List<PasswordReset> passwordResetList = passwordResetService.findAll(searchName, status);
         request.setAttribute("passwordResetList", passwordResetList);
         request.getRequestDispatcher("/WEB-INF/user/user-reset-password-list.jsp").forward(request, response);
     }
@@ -49,7 +51,13 @@ public class HandleResetPasswordServlet extends HttpServlet {
             // Create a new password and send to user through email
             userService.resetPasswordByEmail(emailTo);
         }
-        request.setAttribute("passwordResetList", passwordResetService.findAll());
-        request.getRequestDispatcher("/WEB-INF/user/user-reset-password-list.jsp").forward(request, response);
+        // Keep current filter
+        String searchName = request.getParameter("searchName");
+        String status = request.getParameter("status");
+
+        response.sendRedirect(request.getContextPath()
+                + "/admin/password-reset?searchName=" + (searchName != null ? searchName : "")
+                + "&status=" + (status != null ? status : "")
+        );
     }
 }
