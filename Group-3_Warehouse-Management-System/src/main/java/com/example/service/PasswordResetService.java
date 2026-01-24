@@ -15,8 +15,8 @@ public class PasswordResetService {
         return passwordResetDAO.insert(userId, status);
     }
 
-    public List<PasswordReset> findAll() {
-        return passwordResetDAO.getAll();
+    public List<PasswordReset> findAll(String searchName, String requestStatus) {
+        return passwordResetDAO.getAll(searchName, requestStatus);
     }
 
     public boolean updateStatus(Long passwordResetId, String status) {

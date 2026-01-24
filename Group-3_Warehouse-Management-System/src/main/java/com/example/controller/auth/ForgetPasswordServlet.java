@@ -35,14 +35,14 @@ public class ForgetPasswordServlet extends HttpServlet {
         // Check user existed by email
         User user = userService.getUserByEmail(email);
         if (user == null) {
-            request.setAttribute("error", "Your email does not exist!");
+            request.setAttribute("error", "Your email does not exist in the system!");
             request.getRequestDispatcher("/WEB-INF/auth/forget-password.jsp").forward(request, response);
         } else {
             // Create a new password reset request
             passwordResetService.createPasswordResetRequest(user.getId());
 
             request.setAttribute("status","Your reset password request was sent successfully!");
-            request.getRequestDispatcher("/WEB-INF/auth/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/auth/forget-password.jsp").forward(request, response);
         }
 
 

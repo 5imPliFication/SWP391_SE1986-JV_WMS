@@ -39,6 +39,17 @@
     <div class="back-link">
         Remember your password? <a href="${pageContext.request.contextPath}/login">Back to Login</a>
     </div>
+
+    <c:if test="${not empty error}">
+        <div class="alert alert-danger">
+                ${error}
+        </div>
+    </c:if>
+    <c:if test="${not empty status}">
+        <div class="alert alert-success">
+                ${status}
+        </div>
+    </c:if>
 </div>
 </body>
 </html>
