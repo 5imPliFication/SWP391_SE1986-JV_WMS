@@ -11,16 +11,36 @@ import java.util.List;
 
 public class PasswordResetDAO {
 
-    public List<PasswordReset> getAll() {
+    public List<PasswordReset> getAll(String searchName, String requestStatus) {
         List<PasswordReset> passwordResetList = new ArrayList<>();
-        String sql = """
-                SELECT r.id, u.fullname, u.email, r.status, r.created_at
-                FROM password_resets r
-                JOIN users u ON r.user_id = u.id
-                ORDER BY r.created_at DESC;
-                """;
+        StringBuilder sql = new StringBuilder("""
+                    SELECT r.id, u.fullname, u.email, r.status, r.created_at
+                    FROM password_resets r
+                    JOIN users u ON r.user_id = u.id
+                    WHERE 1=1
+                """);
+
+        // search by name
+        if (searchName != null && !searchName.trim().isEmpty()) {
+            sql.append(" AND u.fullname LIKE ? ");
+        }
+        // filter by status
+        if (requestStatus != null && !requestStatus.trim().isEmpty()) {
+            sql.append(" AND r.status = ? ");
+        }
+        sql.append(" ORDER BY r.created_at DESC ");
+
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int index = 1;
+            if (searchName != null && !searchName.trim().isEmpty()) {
+                ps.setString(index++, "%" + searchName + "%");
+            }
+            if (requestStatus != null && !requestStatus.trim().isEmpty()) {
+                ps.setString(index++, requestStatus.toUpperCase());
+            }
+
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 PasswordReset passwordReset = new PasswordReset();
