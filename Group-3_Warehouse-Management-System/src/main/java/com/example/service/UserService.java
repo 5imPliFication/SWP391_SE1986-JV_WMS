@@ -3,6 +3,7 @@ package com.example.service;
 import com.example.config.DBConfig;
 import com.example.dao.PermissionDAO;
 import com.example.dao.RoleDAO;
+import com.example.dao.UserActivityDAO;
 import com.example.dao.UserDAO;
 import com.example.model.Permission;
 import com.example.model.Role;
@@ -21,9 +22,10 @@ import java.util.List;
 import static com.example.util.PasswordUtil.hashPassword;
 
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserService {
     private final UserDAO userDAO = new UserDAO();
-    private final RoleDAO roleDAO = new RoleDAO();
+    private UserActivityDAO userActivityDAO = new UserActivityDAO();
     private final PermissionDAO permissionDAO = new PermissionDAO();
 
     // create new user
@@ -41,8 +43,12 @@ public class UserService {
             return "Email exist, please input other email !!!";
         }
 
-        // insert new user to DB
+        // insert new user to DB + log
         boolean statusCreate = userDAO.insertUser(user);
+        if (statusCreate) {
+            userActivityDAO.initActivity(user.getId());
+        }
+
         // return
         return statusCreate ? null : "Can not create new user";
     }
@@ -80,7 +86,6 @@ public class UserService {
                         permissionDAO.findByRoleId(conn, role.getId());
                 role.setPermissions(permissions);
             }
-
             return user;
 
         } catch (SQLException e) {
@@ -89,24 +94,30 @@ public class UserService {
     }
 
     public boolean changePassword(String email,
-                               String currentRawPassword,
-                               String newRawPassword) {
+                                  String currentRawPassword,
+                                  String newRawPassword) {
         try (Connection conn = DBConfig.getDataSource().getConnection()) {
 
-            System.out.println("Resetting password for email = [" + email + "]");
             String currentHash = userDAO.getPassword(conn, email);
-
             if (!PasswordUtil.checkPassword(currentRawPassword, currentHash)) {
-                System.out.println("Password not matched");
                 return false;
             }
 
             String newHash = PasswordUtil.hashPassword(newRawPassword);
-            return userDAO.updatePassword(conn, email, newHash);
+            boolean updated = userDAO.updatePassword(conn, email, newHash);
+
+            if (updated) {
+                User user = userDAO.findByEmail(conn, email);
+                userActivityDAO.logPasswordChange(conn, user.getId());
+            }
+
+            return updated;
+
         } catch (SQLException e) {
             throw new RuntimeException("Password change failed", e);
         }
     }
+
 
     public boolean resetPasswordByEmail(String email) {
 

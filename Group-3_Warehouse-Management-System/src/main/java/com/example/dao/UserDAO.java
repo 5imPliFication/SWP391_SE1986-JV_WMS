@@ -15,6 +15,19 @@ import java.util.List;
 
 public class UserDAO {
 
+    private int executeCount(String sql) {
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            rs.next();
+            return rs.getInt(1);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public User findByEmail(Connection conn, String email) throws SQLException {
         String sql = "SELECT \n"
                 + "            u.id,\n"
@@ -348,5 +361,39 @@ public class UserDAO {
             throw new RuntimeException(e);
         }
         return totalOfUsers;
+    }
+    public int countAllUsers() {
+        String sql = "SELECT COUNT(*) FROM users";
+        return executeCount(sql);
+    }
+    public int countActiveUsers() {
+        String sql = "SELECT COUNT(*) FROM users WHERE is_active = 1";
+        return executeCount(sql);
+    }
+
+    public int countInactiveUsers() {
+        String sql = "SELECT COUNT(*) FROM users WHERE is_active = 0";
+        return executeCount(sql);
+    }
+
+    public int countUsersByRole(String roleName) {
+        String sql = """
+            SELECT COUNT(*) 
+            FROM users u
+            JOIN roles r ON u.role_id = r.id
+            WHERE r.name = ?
+        """;
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, roleName);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

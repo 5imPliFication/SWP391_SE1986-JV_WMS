@@ -1,8 +1,13 @@
 package com.example.controller.auth;
 
+import com.example.config.DBConfig;
+import com.example.dao.UserActivityDAO;
 import com.example.dao.UserDAO;
 import com.example.model.Permission;
 import com.example.model.User;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,7 +24,6 @@ import static com.example.util.PasswordUtil.checkPassword;
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
-    private final UserDAO userDAO = new UserDAO();
     private final UserService userService = new UserService();
 
     @Override
@@ -57,6 +61,11 @@ public class LoginServlet extends HttpServlet {
 
         HttpSession session = req.getSession(true);
         session.setAttribute("user", user);
+        try (Connection conn = DBConfig.getDataSource().getConnection()) {
+            new UserActivityDAO().logLogin(conn, user.getId());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         // --- XỬ LÝ VÀ DEBUG PERMISSIONS ---
         List<String> userPermissions = new ArrayList<>();
