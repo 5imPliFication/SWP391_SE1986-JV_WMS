@@ -30,8 +30,7 @@
         </div>
 
         <div class="info-box">
-            <p>A new password will be sent to your email by the administrator. Please check your inbox after
-                submitting this request.</p>
+            <p>Your request will be sent to the administrator. The administrator will send a reset password link to your email after confirming your request.</p>
         </div>
 
         <input type="submit" value="Send Request" class="btn-submit">
@@ -40,6 +39,17 @@
     <div class="back-link">
         Remember your password? <a href="${pageContext.request.contextPath}/login">Back to Login</a>
     </div>
+
+    <c:if test="${not empty error}">
+        <div class="alert alert-danger">
+                ${error}
+        </div>
+    </c:if>
+    <c:if test="${not empty status}">
+        <div class="alert alert-success">
+                ${status}
+        </div>
+    </c:if>
 </div>
 </body>
 </html>

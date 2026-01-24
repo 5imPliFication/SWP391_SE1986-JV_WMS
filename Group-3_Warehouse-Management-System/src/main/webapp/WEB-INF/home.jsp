@@ -7,6 +7,7 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.example.model.User" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <html>
     <head>
         <title>Home</title>
@@ -21,7 +22,8 @@
                     return;
                 }
 
-                // Get first letter of name for avatar
+
+            // Get first letter of name for avatar
                 String initial = user.getFullName() != null && !user.getFullName().isEmpty()
                         ? user.getFullName().substring(0, 1).toUpperCase()
                         : user.getFullName().substring(0, 1).toUpperCase();
@@ -55,88 +57,20 @@
                 </div>
             </header>
 
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon blue">💻</div>
-                    </div>
-                    <div class="stat-content">
-                        <h3>1,234</h3>
-                        <p>Total Laptops in Stock</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon green"></div>
-                    </div>
-                    <div class="stat-content">
-                        <h3>89</h3>
-                        <p>Orders This Month</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon purple">🏭</div>
-                    </div>
-                    <div class="stat-content">
-                        <h3>24</h3>
-                        <p>Active Suppliers</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon orange">⚠️</div>
-                    </div>
-                    <div class="stat-content">
-                        <h3>12</h3>
-                        <p>Low Stock Alerts</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <h3>Quick Actions</h3>
-                <div class="action-buttons">
-                    <a href="add-product" class="action-btn">
-                        <span>➕</span>
-                        <span>Add New Product</span>
-                    </a>
-                    <a href="new-order" class="action-btn">
-                        <span>🛒</span>
-                        <span>Create Order</span>
-                    </a>
-                    <a href="add-supplier" class="action-btn">
-                        <span>🏢</span>
-                        <span>Add Supplier</span>
-                    </a>
-                    <a href="stock-report" class="action-btn">
-                        <span>📋</span>
-                        <span>Generate Report</span>
-                    </a>
-                </div>
-            </div>
-
             <!-- Recent Activity -->
-            <div class="recent-activity">
-                <h3>Recent Activity</h3>
-                <div class="activity-item">
-                    <h4>New order received - #ORD-2026-001</h4>
-                    <p>Dell Latitude 5420 x10 units - 2 hours ago</p>
-                </div>
-                <div class="activity-item">
-                    <h4>Stock updated - MacBook Pro 14"</h4>
-                    <p>15 units added to inventory - 5 hours ago</p>
-                </div>
-                <div class="activity-item">
-                    <h4>Low stock alert - HP EliteBook 840</h4>
-                    <p>Only 3 units remaining - 1 day ago</p>
-                </div>
-            </div>
+            <c:if test="${sessionScope.user.role.name == 'Admin'}">
+                <jsp:include page="/WEB-INF/views/home/admin-dashboard.jsp"/>
+            </c:if>
+
+            <!-- ================= MANAGER DASHBOARD ================= -->
+            <c:if test="${sessionScope.user.role.name == 'Manager'}">
+                <jsp:include page="/WEB-INF/views/home/manager-dashboard.jsp"/>
+            </c:if>
+
+            <!-- ================= STAFF DASHBOARD ================= -->
+            <c:if test="${sessionScope.user.role.name == 'Staff'}">
+                <jsp:include page="/WEB-INF/views/home/staff-dashboard.jsp"/>
+            </c:if>
         </main>
     </body>
 </html>

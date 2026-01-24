@@ -1,5 +1,7 @@
 package com.example.controller.auth;
 
+import com.example.model.User;
+import com.example.service.PasswordResetService;
 import com.example.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -9,13 +11,16 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
+// Using when User forget password and request new password
 @WebServlet("/forget-password")
 public class ForgetPasswordServlet extends HttpServlet {
     private UserService userService;
+    private PasswordResetService passwordResetService;
 
     @Override
     public void init() {
         userService = new UserService();
+        passwordResetService = new PasswordResetService();
     }
 
     @Override
@@ -27,15 +32,19 @@ public class ForgetPasswordServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String email = request.getParameter("email");
 
-        boolean success = userService.resetPasswordByEmail(email);
+        // Check user existed by email
+        User user = userService.getUserByEmail(email);
+        if (user == null) {
+            request.setAttribute("error", "Your email does not exist in the system!");
+            request.getRequestDispatcher("/WEB-INF/auth/forget-password.jsp").forward(request, response);
+        } else {
+            // Create a new password reset request
+            passwordResetService.createPasswordResetRequest(user.getId());
 
-        if (!success) {
-            request.getRequestDispatcher("/WEB-INF/auth/forget-password-error.jsp")
-                    .forward(request, response);
-            return;
+            request.setAttribute("status","Your reset password request was sent successfully!");
+            request.getRequestDispatcher("/WEB-INF/auth/forget-password.jsp").forward(request, response);
         }
 
-        request.getRequestDispatcher("/WEB-INF/auth/login.jsp")
-                .forward(request, response);
+
     }
 }
