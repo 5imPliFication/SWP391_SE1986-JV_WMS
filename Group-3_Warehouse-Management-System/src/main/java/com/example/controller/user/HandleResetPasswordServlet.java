@@ -5,6 +5,7 @@ import com.example.model.User;
 import com.example.service.PasswordResetService;
 import com.example.service.UserService;
 import com.example.util.EmailUtil;
+import com.example.util.UserConstant;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -31,8 +32,24 @@ public class HandleResetPasswordServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String searchName = request.getParameter("searchName");
         String status = request.getParameter("status");
-        List<PasswordReset> passwordResetList = passwordResetService.findAll(searchName, status);
+
+        // Using when the first time load this page (No param pageNo in URL)
+        int pageNo = 1;
+        // Get total record
+        int totalPasswordResetRequest = passwordResetService.getTotalRequest(searchName, status);
+        System.out.println("Total Password Reset Request: " + totalPasswordResetRequest);
+        // Count total pages
+        int totalPages = (int)Math.ceil((double) totalPasswordResetRequest/ UserConstant.PAGE_SIZE);
+        System.out.println("Total pages: " + totalPages);
+
+        if (request.getParameter("pageNo") != null) {
+            pageNo = Integer.parseInt(request.getParameter("pageNo"));
+        }
+        List<PasswordReset> passwordResetList = passwordResetService.findAll(searchName, status, pageNo);
         request.setAttribute("passwordResetList", passwordResetList);
+        request.setAttribute("totalPages", totalPages);
+        // Use to determine active page number for the first time
+        request.setAttribute("pageNo", pageNo);
         request.getRequestDispatcher("/WEB-INF/user/user-reset-password-list.jsp").forward(request, response);
     }
 
@@ -54,9 +71,12 @@ public class HandleResetPasswordServlet extends HttpServlet {
         // Keep current filter
         String searchName = request.getParameter("searchName");
         String status = request.getParameter("status");
+        String pageNo = request.getParameter("pageNo");
 
         response.sendRedirect(request.getContextPath()
-                + "/admin/password-reset?searchName=" + (searchName != null ? searchName : "")
+                + "/admin/password-reset?"
+                + "pageNo=" + (pageNo != null ? pageNo : "")
+                + "&searchName=" + (searchName != null ? searchName : "")
                 + "&status=" + (status != null ? status : "")
         );
     }

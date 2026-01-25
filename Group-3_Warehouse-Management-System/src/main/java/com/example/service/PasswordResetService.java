@@ -2,9 +2,7 @@ package com.example.service;
 
 import com.example.dao.PasswordResetDAO;
 import com.example.model.PasswordReset;
-import com.example.util.PasswordUtil;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class PasswordResetService {
@@ -15,11 +13,15 @@ public class PasswordResetService {
         return passwordResetDAO.insert(userId, status);
     }
 
-    public List<PasswordReset> findAll(String searchName, String requestStatus) {
-        return passwordResetDAO.getAll(searchName, requestStatus);
+    public List<PasswordReset> findAll(String searchName, String requestStatus, int pageNo) {
+        return passwordResetDAO.getAll(searchName, requestStatus, pageNo);
     }
 
     public boolean updateStatus(Long passwordResetId, String status) {
         return passwordResetDAO.updateStatusById(passwordResetId, status);
+    }
+
+    public int getTotalRequest(String searchName, String requestStatus) {
+        return passwordResetDAO.countRequests(searchName, requestStatus);
     }
 }

@@ -92,13 +92,15 @@
                 <td>${p.status}</td>
                 <td>${p.createdAt}</td>
                 <td>
-                    <form action="${pageContext.request.contextPath}/admin/password-reset" method="post" class="d-inline">
+                    <form action="${pageContext.request.contextPath}/admin/password-reset" method="post"
+                          class="d-inline">
                         <input type="hidden" name="passwordResetId" value="${p.id}">
                         <input type="hidden" name="userEmail" value="${p.user.email}">
 
                         <!-- giữ filter để dùng post vẫn còn get param được -->
                         <input type="hidden" name="searchName" value="${param.searchName}">
                         <input type="hidden" name="status" value="${param.status}">
+                        <input type="hidden" name="pageNo" value="${param.pageNo}">
 
                         <c:if test="${p.status == 'PENDING'}">
                             <button type="submit" name="action" value="Approve" class="btn btn-sm btn-success">
@@ -121,6 +123,41 @@
         </c:if>
         </tbody>
     </table>
+
+    <%-- pagination--%>
+    <c:if test="${totalPages > 1}">
+        <nav class="mt-3">
+            <ul class="pagination justify-content-center">
+
+                    <%-- previous page --%>
+                <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
+                    <a class="page-link"
+                       href="${pageContext.request.contextPath}/admin/password-reset?pageNo=${pageNo - 1}&searchName=${param.searchName}&status=${param.status}">
+                        Previous
+                    </a>
+                </li>
+
+                    <%-- current page  --%>
+                <c:forEach begin="1" end="${totalPages}" var="i">
+                    <li class="page-item ${i == pageNo ? 'active' : ''}">
+                        <a class="page-link"
+                           href="${pageContext.request.contextPath}/admin/password-reset?pageNo=${i}&searchName=${param.searchName}&status=${param.status}">
+                                ${i}
+                        </a>
+                    </li>
+                </c:forEach>
+
+                    <%-- next page--%>
+                <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
+                    <a class="page-link"
+                       href="${pageContext.request.contextPath}/admin/password-reset?pageNo=${pageNo + 1}&searchName=${param.searchName}&status=${param.status}">
+                        Next
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+    </c:if>
 </div>
 
 </body>
