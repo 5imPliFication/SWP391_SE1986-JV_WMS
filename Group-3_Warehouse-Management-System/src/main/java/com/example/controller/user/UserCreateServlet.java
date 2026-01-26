@@ -23,11 +23,13 @@ public class UserCreateServlet extends HttpServlet {
         userService = new UserService();
     }
 
+    // display screen create new user
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.getRequestDispatcher("/WEB-INF/user/user-create.jsp").forward(request, response);
     }
 
+    // handle submit form create new user
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = new User();
@@ -38,11 +40,11 @@ public class UserCreateServlet extends HttpServlet {
         role.setId(Long.parseLong(request.getParameter("role")));
         user.setRole(role);
 
-        System.out.println(request.getParameter("email"));
-        String messageError = userService.createUser(user);
+        String messageResponseError = userService.createUser(user);
 
-        if (messageError != null) {
-            request.setAttribute("error", messageError);
+        // if messageResponseError has value -> error
+        if (messageResponseError != null) {
+            request.setAttribute("error", messageResponseError);
             request.getRequestDispatcher("/WEB-INF/user/user-create.jsp").forward(request, response);
         } else {
             request.setAttribute("success", "Create new user successfully");

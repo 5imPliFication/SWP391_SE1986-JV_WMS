@@ -31,15 +31,15 @@ public class UserService {
     // create new user
     public String createUser(User user) {
         // check validate user
-        String error = UserValidator.validateCreate(user);
+        String messageValidation = UserValidator.validateCreate(user);
 
-        // if error -> return message error
-        if (error != null) {
-            return error;
+        // if messageValidation has value -> return message validation
+        if (messageValidation != null) {
+            return messageValidation;
         }
 
         // check exist email
-        if (getUserByEmail(user.getEmail()) != null) {
+        if(userDAO.isExistEmail(user.getEmail())){
             return "Email exist, please input other email !!!";
         }
 
@@ -49,7 +49,8 @@ public class UserService {
             userActivityDAO.initActivity(user.getId());
         }
 
-        // return
+        // if statusCreate = true -> return null
+        // else return error
         return statusCreate ? null : "Can not create new user";
     }
 
