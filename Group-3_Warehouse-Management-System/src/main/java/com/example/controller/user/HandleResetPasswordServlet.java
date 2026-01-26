@@ -42,7 +42,7 @@ public class HandleResetPasswordServlet extends HttpServlet {
         int totalPages = (int)Math.ceil((double) totalPasswordResetRequest/ UserConstant.PAGE_SIZE);
         System.out.println("Total pages: " + totalPages);
 
-        if (request.getParameter("pageNo") != null) {
+        if (request.getParameter("pageNo") != null && !request.getParameter("pageNo").isEmpty()) {
             pageNo = Integer.parseInt(request.getParameter("pageNo"));
         }
         List<PasswordReset> passwordResetList = passwordResetService.findAll(searchName, status, pageNo);
