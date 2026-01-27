@@ -11,13 +11,13 @@ public class PermissionChecker {
         urlPermissionMap.put("/user-list", "READ_USER");
         urlPermissionMap.put("/user-create", "CREATE_USER");
         urlPermissionMap.put("/user", "UPDATE_USER");
-        urlPermissionMap.put("/user-delete", "DELETE_USER");
+        urlPermissionMap.put("/user-delete", "UPDATE_ROLE");
 
         // --- QUẢN LÝ ROLE ---
         urlPermissionMap.put("/roles", "READ_ROLE");
         urlPermissionMap.put("/create-role", "CREATE_ROLE");
         urlPermissionMap.put("/edit-role", "UPDATE_ROLE");
-        urlPermissionMap.put("/role-delete", "DELETE_ROLE");
+        urlPermissionMap.put("/role-delete", "UPDATE_ROLE");
     }
 
     public static String getRequiredPermission(String url) {

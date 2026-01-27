@@ -59,7 +59,12 @@ public class RoleEditServlet extends HttpServlet {
             Long roleId = Long.parseLong(request.getParameter("roleID"));
             String roleName = request.getParameter("roleName");
             String description = request.getParameter("description");
-
+            
+            
+            boolean test = Boolean.parseBoolean(request.getParameter("currentStatus"));
+            r.changeRoleStatus(roleId, test);
+            
+            
             String[] permissionIds = request.getParameterValues("permissionIds");
 
             // convert permissionIds -> List<Long>
@@ -79,7 +84,7 @@ public class RoleEditServlet extends HttpServlet {
                     null
             );
 
-            r.updateRole( role);
+            r.updateRole(role);
 
             // 2️⃣ update role_permissions
             p.updateRolePermissions(

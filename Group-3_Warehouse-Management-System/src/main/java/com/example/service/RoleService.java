@@ -25,11 +25,9 @@ public class RoleService {
         PermissionDAO = new PermissionDAO();
     }
 
-
     public List<Role> getAllRoles() {
         return roleDAO.findAll();
     }
-
 
     public void deleteRole(Long roleId) {
         roleDAO.deleteRole(roleId);
@@ -65,6 +63,16 @@ public class RoleService {
             conn.commit();
 
         } catch (SQLException e) {
+            throw new RuntimeException("Update role failed", e);
+        }
+    }
+
+    public void changeRoleStatus(Long roleId, boolean active) {
+        try (Connection conn = DBConfig.getDataSource().getConnection()) {
+            conn.setAutoCommit(false);
+            roleDAO.changeStatus(roleId, active);
+            conn.commit();
+        } catch (Exception e) {
             throw new RuntimeException("Update role failed", e);
         }
     }

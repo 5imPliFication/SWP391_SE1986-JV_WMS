@@ -5,6 +5,7 @@ import com.example.dao.PermissionDAO;
 import com.example.model.Permission;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PermissionService {
