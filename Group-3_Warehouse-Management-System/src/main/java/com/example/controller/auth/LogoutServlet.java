@@ -24,7 +24,7 @@ public class LogoutServlet extends HttpServlet {
             User user = (User) session.getAttribute("user");
             if (user != null) {
                 try (Connection conn = DBConfig.getDataSource().getConnection()) {
-                    new UserActivityDAO().logLogout(conn, user.getId());
+                    new UserActivityDAO().log(conn, user, "Logout");
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

@@ -45,10 +45,6 @@ public class UserService {
 
         // insert new user to DB + log
         boolean statusCreate = userDAO.insertUser(user);
-        if (statusCreate) {
-            userActivityDAO.initActivity(user.getId());
-        }
-
         // if statusCreate = true -> return null
         // else return error
         return statusCreate ? null : "Can not create new user";
@@ -109,7 +105,6 @@ public class UserService {
 
             if (updated) {
                 User user = userDAO.findByEmail(conn, email);
-                userActivityDAO.logPasswordChange(conn, user.getId());
             }
 
             return updated;

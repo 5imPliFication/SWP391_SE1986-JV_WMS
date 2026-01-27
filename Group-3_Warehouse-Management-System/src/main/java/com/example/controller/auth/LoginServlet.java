@@ -62,7 +62,7 @@ public class LoginServlet extends HttpServlet {
         HttpSession session = req.getSession(true);
         session.setAttribute("user", user);
         try (Connection conn = DBConfig.getDataSource().getConnection()) {
-            new UserActivityDAO().logLogin(conn, user.getId());
+            new UserActivityDAO().log(conn, user, "Login");
         } catch (SQLException e) {
             e.printStackTrace();
         }

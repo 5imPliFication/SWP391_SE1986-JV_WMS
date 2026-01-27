@@ -13,11 +13,6 @@ import java.time.LocalDateTime;
 public class UserActivityLog {
     private Long id;
     private User user;
-    private Timestamp lastLoginAt;
-    private Timestamp lastLogoutAt;
-    private Timestamp lastActivityAt;
-    private Timestamp lastPasswordChangeAt;
-    private Timestamp lastProfileUpdateAt;
-    private String ipAddress;
-    private String userAgent;
+    private String activity;
+    private Timestamp time;
 }

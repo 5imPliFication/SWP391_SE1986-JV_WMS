@@ -59,9 +59,8 @@
             <tr>
                 <th>Email</th>
                 <th>Role</th>
-                <th>Last Login</th>
-                <th>Last Activity</th>
-                <th>Status</th>
+                <th>Activity</th>
+                <th>Time</th>
             </tr>
             </thead>
             <tbody>
@@ -75,13 +74,8 @@
                 <tr>
                     <td><strong>${log.user.email}</strong></td>
                     <td class="timestamp">${log.user.role.name}</td>
-                    <td class="timestamp">${log.lastLoginAt}</td>
-                    <td class="timestamp">${log.lastActivityAt}</td>
-                    <td>
-                            <span class="status-badge ${log.user.active == 'true' ? 'status-active' : 'status-inactive'}">
-                                    ${log.user.active}
-                            </span>
-                    </td>
+                    <td class="timestamp">${log.activity}</td>
+                    <td class="timestamp">${log.time}</td>
                 </tr>
             </c:forEach>
             </tbody>

@@ -2,7 +2,7 @@ package com.example.controller;
 
 import com.example.model.User;
 import com.example.model.UserActivityLog;
-import com.example.service.DashboardService;
+import com.example.service.ActivityLogService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,7 +16,7 @@ import java.util.List;
 @WebServlet(urlPatterns = "/home")
 public class HomeServlet extends HttpServlet {
 
-    private final DashboardService dashboardService = new DashboardService();
+    private final ActivityLogService dashboardService = new ActivityLogService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
