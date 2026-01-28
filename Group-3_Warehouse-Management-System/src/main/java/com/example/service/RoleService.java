@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 
 public class RoleService {
 
-    private RoleDAO roleDAO;
-    private UserDAO userDAO;
-    private PermissionDAO PermissionDAO;
+    private final RoleDAO roleDAO;
+    private final UserDAO userDAO;
+    private final PermissionDAO PermissionDAO;
 
     public RoleService() {
         roleDAO = new RoleDAO();
