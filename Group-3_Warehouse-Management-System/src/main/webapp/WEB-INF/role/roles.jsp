@@ -42,7 +42,7 @@
                         <input type="hidden" name="roleIds" value="${role.id}" />
                     </c:forEach>
 
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 ">
                         <!-- ROLE HEADER -->
                         <div class="card-header">
 
@@ -166,6 +166,7 @@
                                     </tbody>
 
                                 </table>
+                                
                             </div>
 
                         </div>
