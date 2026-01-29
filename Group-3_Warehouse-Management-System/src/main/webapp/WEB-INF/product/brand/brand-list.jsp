@@ -6,7 +6,9 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">    
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">   
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     </head>
     <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp" />
@@ -15,6 +17,31 @@
             <div class="container-fluid py-4">
 
                 <h2>Brand</h2>
+
+                <!-- message -->
+                <c:if test="${param.status == 'success'}">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Thêm thành công
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </c:if>
+                <c:if test="${param.status == 'name_existed'}">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Brand đã tồn tại
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </c:if>
+                <c:if test="${param.status == 'error'}">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Đã xảy ra lỗi
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </c:if>
+
+
                 <div class="card mb-4 shadow-sm">
                     <!-- ROLE HEADER -->
                     <div class="card-header">
@@ -42,7 +69,9 @@
                                 </div>
 
                                 <div class="col-md-7 d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-success mt-4">
+                                    <button class="btn btn-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#addBrandModal">
                                         Add new brand
                                     </button>
                                 </div>
@@ -87,7 +116,6 @@
                                         </c:forEach>
                                     </tbody>
                                 </table>
-
                             </div>
                         </div>
 
@@ -96,6 +124,7 @@
                 </div>
 
         </main>
+        <jsp:include page="add-brand.jsp" />
     </body>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>

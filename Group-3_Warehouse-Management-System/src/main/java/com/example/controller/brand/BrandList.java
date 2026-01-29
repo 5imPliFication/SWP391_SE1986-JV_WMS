@@ -37,16 +37,26 @@ public class BrandList extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        try {
+            String name = request.getParameter("name");
+            String description = request.getParameter("description");
+            boolean isActive = request.getParameter("active") != null && request.getParameter("active").equals("true");
+
+            Brand brand = new Brand();
+            brand.setName(name);
+            brand.setDescription(description);
+            brand.setActive(isActive);
+
+            boolean checkName = b.addBrand(brand);
+
+            if (!checkName) {
+                response.sendRedirect("brand?status=name_existed");
+                return;
+            }
+            response.sendRedirect("brand?status=success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("brand?status=error");
+        }
     }
-
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
 }

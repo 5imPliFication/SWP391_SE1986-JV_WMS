@@ -31,4 +31,34 @@ public class BrandDAO {
         }
         return list;
     }
+
+    public boolean addBrand(Brand brand) {
+        String sql = "INSERT INTO brand (name, description, is_active) VALUES (?, ?, ?)";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, brand.getName());
+            ps.setString(2, brand.getDescription());
+            ps.setBoolean(3, brand.isActive());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isBrandExist(String name) {
+        String sql = "SELECT 1 FROM brand WHERE name = ?";
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

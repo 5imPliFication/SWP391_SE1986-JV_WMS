@@ -23,4 +23,13 @@ public class BrandService {
     public List<Brand> getAllBrand() {
         return b.findAll();
     }
+
+    public boolean addBrand(Brand brand) {
+        if (b.isBrandExist(brand.getName())) {
+            return false;
+        }
+        b.addBrand(brand);
+        return true;
+    }
+
 }
