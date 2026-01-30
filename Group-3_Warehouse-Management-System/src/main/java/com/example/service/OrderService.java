@@ -7,6 +7,7 @@ import com.example.model.OrderItem;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class OrderService {
     private final OrderDAO orderDAO;
@@ -19,13 +20,16 @@ public class OrderService {
 
     /* ================= SALESMAN ================= */
 
-    public int createDraftOrder(String customerName, Long salesmanId) {
+    public int createDraftOrder(String customerName, String customerPhone,  String note, Long salesmanId) {
         Order order = new Order();
-        order.setOrderCode("ORD-" + System.currentTimeMillis());
+        order.setOrderCode("ORD-" + UUID.randomUUID());
         order.setCustomerName(customerName);
+        order.setCustomerPhone(customerPhone);
         order.setStatus("DRAFT");
+        order.setNote(note);
         order.setCreatedBy(salesmanId);
-
+        System.out.println("Service layer ----------");
+        System.out.println(order.getOrderCode()+" ++ "+order.getStatus()+" ++ "+order.getCreatedBy());
         return orderDAO.create(order);
     }
 

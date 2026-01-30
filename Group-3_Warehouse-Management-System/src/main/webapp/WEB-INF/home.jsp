@@ -68,8 +68,13 @@
             </c:if>
 
             <!-- ================= STAFF DASHBOARD ================= -->
-            <c:if test="${sessionScope.user.role.name == 'Staff'}">
-                <jsp:include page="/WEB-INF/views/home/staff-dashboard.jsp"/>
+            <c:if test="${sessionScope.user.role.name == 'Salesman'}">
+                <jsp:include page="/WEB-INF/views/home/salesman-dashboard.jsp"/>
+            </c:if>
+
+            <!-- ================= WAREHOUSE KEEPER DASHBOARD ================= -->
+            <c:if test="${sessionScope.user.role.name == 'Warehouse'}">
+                <jsp:include page="/WEB-INF/views/home/salesman-dashboard.jsp"/>
             </c:if>
         </main>
     </body>

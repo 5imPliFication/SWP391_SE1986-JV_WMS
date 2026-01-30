@@ -14,6 +14,7 @@ public class OrderDAO {
         o.setId(rs.getLong("id"));
         o.setOrderCode(rs.getString("order_code"));
         o.setCustomerName(rs.getString("customer_name"));
+        o.setCustomerPhone(rs.getString("customer_phone"));
         o.setStatus(rs.getString("status"));
         o.setCreatedBy(rs.getLong("created_by"));
         o.setCreatedAt(rs.getTimestamp("created_at"));
@@ -25,27 +26,46 @@ public class OrderDAO {
 
     public int create(Order order) {
         String sql = """
-            INSERT INTO orders (order_code, customer_name, status, created_by)
-            VALUES (?, ?, ?, ?)
-            RETURNING id
-        """;
+        INSERT INTO orders (order_code, customer_name, customer_phone, note, status, created_by)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """;
 
         try (Connection con = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, order.getOrderCode());
             ps.setString(2, order.getCustomerName());
-            ps.setString(3, order.getStatus());
-            ps.setLong(4, order.getCreatedBy());
+            ps.setString(3, order.getCustomerPhone());
+            ps.setString(4, order.getNote());
+            ps.setString(5, order.getStatus());
+            ps.setLong(6, order.getCreatedBy());
 
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("id");
+            System.out.println("DAO LEVEL - Creating order");
+            System.out.println("Order Code: " + order.getOrderCode());
+
+            // Use executeUpdate() for INSERT statements
+            int affectedRows = ps.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new SQLException("Creating order failed, no rows affected.");
             }
+
+            // Get the generated ID
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int generatedId = generatedKeys.getInt(1);
+                    System.out.println("Order created with ID: " + generatedId);
+                    return generatedId;
+                } else {
+                    throw new SQLException("Creating order failed, no ID obtained.");
+                }
+            }
+
         } catch (SQLException e) {
+            System.err.println("SQL Error: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Create order failed", e);
         }
-        return -1;
     }
 
 

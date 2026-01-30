@@ -32,6 +32,7 @@ public class OrderDetailServlet extends HttpServlet {
 
         User user = (User) req.getSession().getAttribute("user");
         Long orderId = Long.parseLong(req.getParameter("id"));
+//        Product product =
 
         Order order = orderService.getOrderDetail(orderId, user.getId(), user.getRole().getName());
         List<OrderItem> items =
@@ -39,6 +40,7 @@ public class OrderDetailServlet extends HttpServlet {
 
         req.setAttribute("order", order);
         req.setAttribute("items", items);
+//        req.setAttribute("product", product);
 
         req.getRequestDispatcher("/WEB-INF/salesman/order-detail.jsp")
                 .forward(req, resp);

@@ -7,39 +7,108 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order List - Laptop Warehouse</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
 </head>
 <body>
-<h2>My Orders</h2>
+<jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
-<a href="${pageContext.request.contextPath}/salesman/create-order.jsp">
-    Create New Order
-</a>
+<main class="main-content">
+    <jsp:include page="/WEB-INF/common/header.jsp"/>
 
-<table border="1" width="100%">
-    <tr>
-        <th>Order Code</th>
-        <th>Customer</th>
-        <th>Status</th>
-        <th>Created At</th>
-        <th>Action</th>
-    </tr>
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark">
+            <i class="bi bi-cart-check me-2"></i>My Orders
+        </h2>
+        <a href="${pageContext.request.contextPath}/salesman/order/create"
+           class="btn btn-primary btn-lg shadow-sm">
+            <i class="bi bi-plus-circle me-2"></i>Create New Order
+        </a>
+    </div>
 
-    <c:forEach items="${orders}" var="o">
-        <tr>
-            <td>${o.orderCode}</td>
-            <td>${o.customerName}</td>
-            <td>${o.status}</td>
-            <td>${o.createdAt}</td>
-            <td>
-                <a href="${pageContext.request.contextPath}/salesman/order/detail?id=${o.id}">
-                    View
-                </a>
-            </td>
-        </tr>
-    </c:forEach>
-</table>
+    <!-- Table Container -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="table-primary">
+                    <tr>
+                        <th class="py-3 px-4">Order Code</th>
+                        <th class="py-3 px-4">Customer</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4">Created At</th>
+                        <th class="py-3 px-4 text-center">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach items="${orders}" var="o">
+                        <tr>
+                            <td class="px-4 fw-semibold text-primary">${o.orderCode}</td>
+                            <td class="px-4">${o.customerName}</td>
+                            <td class="px-4">
+                                <c:choose>
+                                    <c:when test="${o.status == 'Pending'}">
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-clock-history me-1"></i>${o.status}
+                                            </span>
+                                    </c:when>
+                                    <c:when test="${o.status == 'Processing'}">
+                                            <span class="badge bg-info text-dark">
+                                                <i class="bi bi-arrow-repeat me-1"></i>${o.status}
+                                            </span>
+                                    </c:when>
+                                    <c:when test="${o.status == 'Completed'}">
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>${o.status}
+                                            </span>
+                                    </c:when>
+                                    <c:when test="${o.status == 'Cancelled'}">
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-x-circle me-1"></i>${o.status}
+                                            </span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="badge bg-secondary">${o.status}</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td class="px-4 text-muted">
+                                <i class="bi bi-calendar3 me-1"></i>${o.createdAt}
+                            </td>
+                            <td class="px-4 text-center">
+                                <a href="${pageContext.request.contextPath}/salesman/order/detail?id=${o.id}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye me-1"></i>View
+                                </a>
+                            </td>
+                        </tr>
+                    </c:forEach>
+
+                    <!-- Empty State -->
+                    <c:if test="${empty orders}">
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-inbox display-1 d-block mb-3"></i>
+                                    <h5>No Orders Found</h5>
+                                    <p class="mb-0">Start by creating your first order</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </c:if>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -35,7 +35,7 @@ public class OrderItemDAO {
         String sql = """
             SELECT oi.*, p.name AS product_name
             FROM order_items oi
-            JOIN products p ON oi.product_id = p.id
+            JOIN product p ON oi.product_id = p.id
             WHERE oi.order_id = ?
         """;
 

@@ -65,6 +65,20 @@
             </li>
         </c:if>
 
+        <!-- ORDERS -->
+        <c:if test="${sessionScope.user != null
+                         and sessionScope.user.role != null
+                         and sessionScope.user.role.active
+                         and sessionScope.user.role.name eq 'Salesman'
+                         and fn:contains(sessionScope.userPermissions, 'READ_ORDER')}">
+            <li>
+                <a href="${pageContext.request.contextPath}/salesman/orders"
+                   class="<%= (uri.contains("order")) ? "active" : "" %>">
+                    <span>Orders</span>
+                </a>
+            </li>
+        </c:if>
+
     </ul>
 </aside>
 </html>
