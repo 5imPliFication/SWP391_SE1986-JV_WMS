@@ -61,7 +61,7 @@ public class OrderService {
         orderDAO.updateStatus(orderId, "SUBMITTED", null, null);
     }
 
-    public List<Order> getOrdersBySalesman(int salesmanId) {
+    public List<Order> getOrdersBySalesman(Long salesmanId) {
         return orderDAO.findBySalesman(salesmanId);
     }
 

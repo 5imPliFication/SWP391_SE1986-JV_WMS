@@ -67,7 +67,7 @@ public class OrderDAO {
         return null;
     }
 
-    public List<Order> findBySalesman(int salesmanId) {
+    public List<Order> findBySalesman(Long salesmanId) {
         String sql = """
             SELECT * FROM orders
             WHERE created_by = ?
@@ -79,7 +79,7 @@ public class OrderDAO {
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setInt(1, salesmanId);
+            ps.setLong(1, salesmanId);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {

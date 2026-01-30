@@ -11,6 +11,14 @@
     <title>Title</title>
 </head>
 <body>
+<h2>Create Order</h2>
+
+<form action="${pageContext.request.contextPath}/salesman/order/create" method="post">
+    Customer Name:
+    <input type="text" name="customerName" required/>
+
+    <button type="submit">Create</button>
+</form>
 
 </body>
 </html>
