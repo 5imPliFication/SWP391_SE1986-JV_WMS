@@ -159,5 +159,82 @@ public class ProductDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public Product findById(long productId) {
+        String sql = """
+                SELECT p.id as product_id, p.name as product_name, p.description, p.img_url, p.is_active ,
+                       b.id as brand_id, b.name as brand_name,
+                       c.id as category_id, c.name as category_name
+                FROM products p
+                JOIN brands b on p.brand_id = b.id
+                JOIN categories c on p.category_id = c.id
+                WHERE p.id = ?;
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            Product product = null;
+
+            ps.setLong(1, productId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                product = new Product();
+
+                product.setId(rs.getLong("product_id"));
+                product.setName(rs.getString("product_name"));
+                product.setDescription(rs.getString("description"));
+                product.setImgUrl(rs.getString("img_url"));
+                product.setIsActive(rs.getBoolean("is_active"));
+
+                Brand brand = new Brand();
+                brand.setId(rs.getLong("brand_id"));
+                brand.setName(rs.getString("brand_name"));
+                product.setBrand(brand);
+
+                Category category = new Category();
+                category.setId(rs.getLong("category_id"));
+                category.setName(rs.getString("category_name"));
+                product.setCategory(category);
+            }
+
+            return product;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean update(Product product) {
+        String sql = """
+            UPDATE products
+            SET name = ?,
+                description = ?,
+                img_url = ?,
+                brand_id = ?,
+                category_id = ?,
+                is_active = ?,
+                updated_at = NOW()
+            WHERE id = ?
+            """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, product.getName());
+            ps.setString(2, product.getDescription());
+            ps.setString(3, product.getImgUrl());
+            ps.setLong(4, product.getBrand().getId());
+            ps.setLong(5, product.getCategory().getId());
+            ps.setBoolean(6, product.getIsActive());
+            ps.setLong(7, product.getId());
+
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
 

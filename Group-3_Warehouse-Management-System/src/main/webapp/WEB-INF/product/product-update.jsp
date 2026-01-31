@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add new product</title>
+    <title>Update product</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
@@ -17,11 +17,14 @@
 
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Add new product</h4>
+                    <h4 class="mb-0">Update product</h4>
                 </div>
 
                 <div class="card-body">
-                    <form action="${pageContext.request.contextPath}/products/add" method="post">
+                    <form action="${pageContext.request.contextPath}/products/update" method="post">
+
+                        <%--Product ID hidden--%>
+                        <input type="hidden" name="productId" value="${product.id}">
 
                         <!-- Product Name -->
                         <div class="mb-3">
@@ -29,6 +32,7 @@
                             <input type="text"
                                    name="productName"
                                    class="form-control"
+                                   value="${product.name}"
                                    placeholder="Enter product name"
                                    required>
                         </div>
@@ -39,6 +43,7 @@
                             <input type="text"
                                    name="productDescription"
                                    class="form-control"
+                                   value="${product.description}"
                                    placeholder="Enter description"
                                    required>
                         </div>
@@ -49,6 +54,7 @@
                             <input type="text"
                                    name="imgUrl"
                                    class="form-control"
+                                   value="${product.imgUrl}"
                                    placeholder="Enter image url"
                                    required>
                         </div>
@@ -58,7 +64,10 @@
                             <label class="form-label">Brand</label>
                             <select name="brandId" class="form-select">
                                 <c:forEach items="${brands}" var="b">
-                                    <option value="${b.id}">${b.name}</option>
+                                    <option value="${b.id}"
+                                            <c:if test="${product.brand.id == b.id}">selected</c:if>>
+                                            ${b.name}
+                                    </option>
                                 </c:forEach>
                             </select>
                         </div>
@@ -68,8 +77,20 @@
                             <label class="form-label">Category</label>
                             <select name="categoryId" class="form-select">
                                 <c:forEach items="${categories}" var="c">
-                                    <option value="${c.id}">${c.name}</option>
+                                    <option value="${c.id}"
+                                            <c:if test="${product.category.id == c.id}">selected</c:if>>
+                                            ${c.name}
+                                    </option>
                                 </c:forEach>
+                            </select>
+                        </div>
+
+                        <%--Status--%>
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select name="isActive" class="form-select">
+                                <option value="true"  ${product.isActive ? 'selected' : ''}>Active</option>
+                                <option value="false" ${!product.isActive ? 'selected' : ''}>Inactive</option>
                             </select>
                         </div>
 
@@ -80,7 +101,7 @@
                                 Back to products list
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                Add product
+                                Update product
                             </button>
                         </div>
 

@@ -35,4 +35,24 @@ public class ProductService {
 
         return productDAO.create(product);
     }
+
+    public Product findProductById(long productId) {
+        return productDAO.findById(productId);
+    }
+
+    public boolean updateProduct(long productId, String productName, String productDescription, String imgUrl, long brandId, long categoryId, boolean isActive) {
+        Brand brand = brandDAO.findById(brandId);
+        Category category = categoryDAO.findById(categoryId);
+
+        Product product = new Product();
+        product.setId(productId);
+        product.setName(productName);
+        product.setDescription(productDescription);
+        product.setImgUrl(imgUrl);
+        product.setIsActive(isActive);
+        product.setBrand(brand);
+        product.setCategory(category);
+
+        return productDAO.update(product);
+    }
 }
