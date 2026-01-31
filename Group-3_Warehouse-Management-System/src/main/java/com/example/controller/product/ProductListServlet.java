@@ -1,11 +1,7 @@
 package com.example.controller.product;
 
-import com.example.model.PasswordReset;
-import com.example.model.Product;
-import com.example.model.User;
-import com.example.service.PasswordResetService;
-import com.example.service.ProductService;
-import com.example.service.UserService;
+import com.example.model.*;
+import com.example.service.*;
 import com.example.util.EmailUtil;
 import com.example.util.UserConstant;
 import jakarta.servlet.ServletException;
@@ -22,10 +18,14 @@ import java.util.List;
 public class ProductListServlet extends HttpServlet {
 
     private ProductService productService;
+    private BrandService brandService;
+    private CategoryService categoryService;
 
     @Override
     public void init() {
         productService = new ProductService();
+        brandService = new BrandService();
+        categoryService = new CategoryService();
     }
 
     @Override
@@ -45,6 +45,10 @@ public class ProductListServlet extends HttpServlet {
             pageNo = Integer.parseInt(request.getParameter("pageNo"));
         }
         List<Product> products = productService.findAll(searchName, brandName, categoryName, pageNo);
+        List<Brand> brands = brandService.getActiveBrands();
+        List<Category> categories = categoryService.getActiveCategories();
+        request.setAttribute("brands", brands);
+        request.setAttribute("categories", categories);
         request.setAttribute("products", products);
         request.setAttribute("totalPages", totalPages);
         // Use to determine active page number for the first time

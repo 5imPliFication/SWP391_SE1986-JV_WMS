@@ -1,12 +1,18 @@
 package com.example.service;
 
+import com.example.dao.BrandDAO;
+import com.example.dao.CategoryDAO;
 import com.example.dao.ProductDAO;
+import com.example.model.Brand;
+import com.example.model.Category;
 import com.example.model.Product;
 
 import java.util.List;
 
 public class ProductService {
     private ProductDAO productDAO = new ProductDAO();
+    private CategoryDAO categoryDAO = new CategoryDAO();
+    private BrandDAO brandDAO = new BrandDAO();
 
     public List<Product> findAll(String searchName, String brandName, String categoryName, int pageNo) {
         return productDAO.getAll(searchName, brandName, categoryName, pageNo);
@@ -14,5 +20,19 @@ public class ProductService {
 
     public int getTotalProducts(String searchName, String brandName, String categoryName) {
         return productDAO.countProducts(searchName, brandName, categoryName);
+    }
+
+    public boolean addProduct(String productName, String productDescription, String imgUrl, long brandId, long categoryId) {
+        Brand brand = brandDAO.findById(brandId);
+        Category category = categoryDAO.findById(categoryId);
+
+        Product product = new Product();
+        product.setName(productName);
+        product.setDescription(productDescription);
+        product.setImgUrl(imgUrl);
+        product.setBrand(brand);
+        product.setCategory(category);
+
+        return productDAO.create(product);
     }
 }

@@ -32,4 +32,8 @@ public class BrandService {
         return true;
     }
 
+    // Using for select box
+    public List<Brand> getActiveBrands() {
+        return b.getAllActive();
+    }
 }

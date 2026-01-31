@@ -31,13 +31,9 @@ public class ProductDAO {
         if (brandName != null && !brandName.trim().isEmpty()) {
             sql.append(" AND b.name = ? ");
         }
-        // filter by brand name
-        if (brandName != null && !brandName.trim().isEmpty()) {
-            sql.append(" AND b.name = ? ");
-        }
         // filter by category name
-        if (brandName != null && !brandName.trim().isEmpty()) {
-            sql.append(" AND b.name = ? ");
+        if (categoryName != null && !categoryName.trim().isEmpty()) {
+            sql.append(" AND c.name = ? ");
         }
         // filter by date created
         sql.append(" ORDER BY p.created_at DESC ");
@@ -135,6 +131,30 @@ public class ProductDAO {
                 totalProducts = rs.getInt(1);
             }
             return totalProducts;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Create new product
+    public boolean create(Product product) {
+        String sql = """
+                INSERT INTO products (name, description, img_url, brand_id, category_id, is_active, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, product.getName());
+            ps.setString(2, product.getDescription());
+            ps.setString(3, product.getImgUrl());
+            ps.setLong(4, product.getBrand().getId());
+            ps.setLong(5, product.getCategory().getId());
+
+            int affectedRows = ps.executeUpdate();
+
+            return affectedRows > 0;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

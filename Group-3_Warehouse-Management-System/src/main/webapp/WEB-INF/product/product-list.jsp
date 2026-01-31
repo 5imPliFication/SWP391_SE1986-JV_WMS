@@ -35,6 +35,12 @@
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 <div class="main-content">
     <h2>Product List</h2>
+
+    <%--create new Product--%>
+    <a href="${pageContext.request.contextPath}/products/add">
+        <button class="btn btn-primary mb-3">Add new product </button>
+    </a>
+    <br>
     <br>
     <%--form submit for search and sort--%>
     <form action="${pageContext.request.contextPath}/products" method="get"
@@ -47,35 +53,35 @@
             </label>
         </div>
 
-        <%-- sort by brand name--%>
-        <%--        <div class="col-auto">--%>
-        <%--            <label>--%>
-        <%--                <select name="brandName" class="form-select">--%>
-        <%--                    <option value="">Brand</option>--%>
-        <%--                    <c:forEach var="b" items="${brands}">--%>
-        <%--                        <option value="${b.name}"--%>
-        <%--                            ${param.brandName == b.name ? 'selected' : ''}>--%>
-        <%--                                ${b.name}--%>
-        <%--                        </option>--%>
-        <%--                    </c:forEach>--%>
-        <%--                </select>--%>
-        <%--            </label>--%>
-        <%--        </div>--%>
+        <%--sort by brand name--%>
+        <div class="col-auto">
+            <label>
+                <select name="brandName" class="form-select">
+                    <option value="">All Brand</option>
+                    <c:forEach var="b" items="${brands}">
+                        <option value="${b.name}"
+                            ${param.brandName == b.name ? 'selected' : ''}>
+                                ${b.name}
+                        </option>
+                    </c:forEach>
+                </select>
+            </label>
+        </div>
 
-        <%-- sort by brand name--%>
-        <%--        <div class="col-auto">--%>
-        <%--            <label>--%>
-        <%--                <select name="categoryName" class="form-select">--%>
-        <%--                    <option value="">Category</option>--%>
-        <%--                    <c:forEach var="c" items="${categories}">--%>
-        <%--                        <option value="${c.name}"--%>
-        <%--                            ${param.categoryName == c.name ? 'selected' : ''}>--%>
-        <%--                                ${c.name}--%>
-        <%--                        </option>--%>
-        <%--                    </c:forEach>--%>
-        <%--                </select>--%>
-        <%--            </label>--%>
-        <%--        </div>--%>
+        <%--sort by brand name--%>
+        <div class="col-auto">
+            <label>
+                <select name="categoryName" class="form-select">
+                    <option value="">All Category</option>
+                    <c:forEach var="c" items="${categories}">
+                        <option value="${c.name}"
+                            ${param.categoryName == c.name ? 'selected' : ''}>
+                                ${c.name}
+                        </option>
+                    </c:forEach>
+                </select>
+            </label>
+        </div>
 
         <div class="col-auto">
             <button type="submit" class="btn btn-outline-primary">
@@ -100,8 +106,10 @@
         <tbody>
         <c:forEach items="${products}" var="p">
             <tr>
-                <td><img src="${p.imgUrl}" class="product-img"></td>
-                <td>${p.name}</td>
+                <td><img src="${p.imgUrl}" class="product-img" alt="${p.name}"></td>
+                <td>
+                    <a href="${pageContext.request.contextPath}/products/update?productId=${p.id}">${p.name}</a>
+                </td>
                 <td>${p.description}</td>
                 <td>${p.brand.name}</td>
                 <td>${p.category.name}</td>
