@@ -34,17 +34,24 @@ public class ProductListServlet extends HttpServlet {
         String brandName = request.getParameter("brandName");
         String categoryName = request.getParameter("categoryName");
 
+        String isActiveParam = request.getParameter("isActive");
+        // Nếu parse sang boolean ngay sẽ lỗi All Status == false (parse("") => false)
+        Boolean isActive = null;
+        if (isActiveParam != null && !isActiveParam.isEmpty()) {
+            isActive = Boolean.valueOf(isActiveParam);
+        }
+
         // Using when the first time load this page (No param pageNo in URL)
         int pageNo = 1;
         // Get total record
-        int totalProducts = productService.getTotalProducts(searchName, brandName, categoryName);
+        int totalProducts = productService.getTotalProducts(searchName, brandName, categoryName, isActive);
         // Count total pages
         int totalPages = (int) Math.ceil((double) totalProducts / UserConstant.PAGE_SIZE);
 
         if (request.getParameter("pageNo") != null && !request.getParameter("pageNo").isEmpty()) {
             pageNo = Integer.parseInt(request.getParameter("pageNo"));
         }
-        List<Product> products = productService.findAll(searchName, brandName, categoryName, pageNo);
+        List<Product> products = productService.findAll(searchName, brandName, categoryName, isActive, pageNo);
         List<Brand> brands = brandService.getActiveBrands();
         List<Category> categories = categoryService.getActiveCategories();
         request.setAttribute("brands", brands);

@@ -89,8 +89,8 @@
                         <div class="mb-3">
                             <label class="form-label">Status</label>
                             <select name="isActive" class="form-select">
-                                <option value="true"  ${product.isActive ? 'selected' : ''}>Active</option>
-                                <option value="false" ${!product.isActive ? 'selected' : ''}>Inactive</option>
+                                <option value="true"  ${product.isActive == 'true' ? 'selected' : ''}>Active</option>
+                                <option value="false" ${product.isActive == 'false' ? 'selected' : ''}>Inactive</option>
                             </select>
                         </div>
 

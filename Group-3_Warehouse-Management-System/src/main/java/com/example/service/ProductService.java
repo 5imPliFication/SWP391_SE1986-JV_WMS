@@ -14,12 +14,12 @@ public class ProductService {
     private CategoryDAO categoryDAO = new CategoryDAO();
     private BrandDAO brandDAO = new BrandDAO();
 
-    public List<Product> findAll(String searchName, String brandName, String categoryName, int pageNo) {
-        return productDAO.getAll(searchName, brandName, categoryName, pageNo);
+    public List<Product> findAll(String searchName, String brandName, String categoryName, Boolean isActive, int pageNo) {
+        return productDAO.getAll(searchName, brandName, categoryName,isActive, pageNo);
     }
 
-    public int getTotalProducts(String searchName, String brandName, String categoryName) {
-        return productDAO.countProducts(searchName, brandName, categoryName);
+    public int getTotalProducts(String searchName, String brandName, String categoryName, Boolean isActive) {
+        return productDAO.countProducts(searchName, brandName, categoryName, isActive);
     }
 
     public boolean addProduct(String productName, String productDescription, String imgUrl, long brandId, long categoryId) {

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ProductDAO {
 
-    public List<Product> getAll(String searchName, String brandName, String categoryName, int pageNo) {
+    public List<Product> getAll(String searchName, String brandName, String categoryName, Boolean isActive, int pageNo) {
         List<Product> products = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
                     SELECT p.id, p.name, p.description, p.img_url, p.is_active, b.name as brand_name , c.name as category_name , p.created_at, p.updated_at
@@ -35,6 +35,11 @@ public class ProductDAO {
         if (categoryName != null && !categoryName.trim().isEmpty()) {
             sql.append(" AND c.name = ? ");
         }
+        // filter by active status
+        if (isActive != null) {
+            sql.append(" AND p.is_active = ? ");
+        }
+
         // filter by date created
         sql.append(" ORDER BY p.created_at DESC ");
 
@@ -54,10 +59,13 @@ public class ProductDAO {
             if (categoryName != null && !categoryName.trim().isEmpty()) {
                 ps.setString(index++, categoryName);
             }
+            if (isActive != null) {
+                ps.setBoolean(index++, isActive);
+            }
             // set value for pagination of SQL
             ps.setInt(index++, UserConstant.PAGE_SIZE);
 
-            int offset = (pageNo - 1)* UserConstant.PAGE_SIZE;
+            int offset = (pageNo - 1) * UserConstant.PAGE_SIZE;
             ps.setInt(index++, offset);
 
             ResultSet rs = ps.executeQuery();
@@ -88,7 +96,7 @@ public class ProductDAO {
         }
     }
 
-    public int countProducts(String searchName, String brandName, String categoryName) {
+    public int countProducts(String searchName, String brandName, String categoryName, Boolean isActive) {
         int totalProducts = 0;
         StringBuilder sql = new StringBuilder("""
                     SELECT count(*)
@@ -112,6 +120,11 @@ public class ProductDAO {
             sql.append(" AND c.name = ? ");
         }
 
+        // filter by active status
+        if (isActive != null) {
+            sql.append(" AND p.is_active = ? ");
+        }
+
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
@@ -124,6 +137,9 @@ public class ProductDAO {
             }
             if (categoryName != null && !categoryName.trim().isEmpty()) {
                 ps.setString(index++, categoryName);
+            }
+            if (isActive != null) {
+                ps.setBoolean(index++, isActive);
             }
 
             ResultSet rs = ps.executeQuery();
@@ -206,16 +222,16 @@ public class ProductDAO {
 
     public boolean update(Product product) {
         String sql = """
-            UPDATE products
-            SET name = ?,
-                description = ?,
-                img_url = ?,
-                brand_id = ?,
-                category_id = ?,
-                is_active = ?,
-                updated_at = NOW()
-            WHERE id = ?
-            """;
+                UPDATE products
+                SET name = ?,
+                    description = ?,
+                    img_url = ?,
+                    brand_id = ?,
+                    category_id = ?,
+                    is_active = ?,
+                    updated_at = NOW()
+                WHERE id = ?
+                """;
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

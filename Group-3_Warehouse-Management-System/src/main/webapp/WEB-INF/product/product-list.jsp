@@ -38,7 +38,7 @@
 
     <%--create new Product--%>
     <a href="${pageContext.request.contextPath}/products/add">
-        <button class="btn btn-primary mb-3">Add new product </button>
+        <button class="btn btn-primary mb-3">Add new product</button>
     </a>
     <br>
     <br>
@@ -68,7 +68,7 @@
             </label>
         </div>
 
-        <%--sort by brand name--%>
+        <%--sort by category name--%>
         <div class="col-auto">
             <label>
                 <select name="categoryName" class="form-select">
@@ -79,6 +79,17 @@
                                 ${c.name}
                         </option>
                     </c:forEach>
+                </select>
+            </label>
+        </div>
+
+        <%--sort by status--%>
+        <div class="col-auto">
+            <label>
+                <select name="isActive" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="true"  ${param.isActive == 'true' ? 'selected' : ''}>Active</option>
+                    <option value="false" ${param.isActive == 'false' ? 'selected' : ''}>Inactive</option>
                 </select>
             </label>
         </div>
@@ -136,7 +147,7 @@
                     <%-- previous page --%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/products?pageNo=${pageNo - 1}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}">
+                       href="${pageContext.request.contextPath}/products?pageNo=${pageNo - 1}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&isActive=${param.isActive}">
                         Previous
                     </a>
                 </li>
@@ -145,7 +156,7 @@
                 <c:forEach begin="1" end="${totalPages}" var="i">
                     <li class="page-item ${i == pageNo ? 'active' : ''}">
                         <a class="page-link"
-                           href="${pageContext.request.contextPath}/products?pageNo=${i}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}">
+                           href="${pageContext.request.contextPath}/products?pageNo=${i}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&isActive=${param.isActive}">
                                 ${i}
                         </a>
                     </li>
@@ -154,7 +165,7 @@
                     <%-- next page--%>
                 <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/products?pageNo=${pageNo + 1}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}">
+                       href="${pageContext.request.contextPath}/products?pageNo=${pageNo + 1}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&isActive=${param.isActive}">
                         Next
                     </a>
                 </li>
