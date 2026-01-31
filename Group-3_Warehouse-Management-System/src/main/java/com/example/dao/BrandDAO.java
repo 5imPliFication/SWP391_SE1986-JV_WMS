@@ -74,8 +74,8 @@ public class BrandDAO {
             throw new RuntimeException(e);
         }
     }
-    
-     public List<Brand> findActiveBrand() {
+
+    public List<Brand> findActiveBrand() {
         List<Brand> list = new ArrayList<>();
         // Modified SQL to get both ID and Name, separated by colon
         String sql = "SELECT * from brand where is_active = 1";
@@ -96,4 +96,37 @@ public class BrandDAO {
         return list;
     }
 
+    public Brand findBrandByID(Long id) {
+        Brand brand = new Brand();
+        String sql = "SELECT * FROM brand WHERE id = ?";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    brand.setId(rs.getLong("id"));
+                    brand.setName(rs.getString("name"));
+                    brand.setDescription(rs.getString("description"));
+                    brand.setActive(rs.getBoolean("is_active"));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return brand;
+    }
+
+    public void updateBrand(Connection conn, Brand brand) throws SQLException {
+        String sql = "UPDATE brand SET name = ?, description = ?, is_active = ? WHERE id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, brand.getName());
+            ps.setString(2, brand.getDescription());
+            ps.setBoolean(3, brand.isActive());
+            ps.setLong(4, brand.getId());
+            ps.executeUpdate();
+        }
+    }
 }
