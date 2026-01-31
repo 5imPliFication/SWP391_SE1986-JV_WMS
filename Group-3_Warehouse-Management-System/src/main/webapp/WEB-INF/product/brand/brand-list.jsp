@@ -104,9 +104,20 @@
                                                 <td>${b.name}</td>
                                                 <td>${b.description}</td>
                                                 <td>
-                                                    <span class="badge ${b.active ? 'bg-success' : 'bg-secondary'}">
-                                                        ${b.active ? 'Active' : 'Deactive'}
-                                                    </span>
+                                                    <form action="/brand-update" method="get" class="d-inline">
+                                                        <input type="hidden" name="brandId" value="${b.id}">
+                                                        <input type="hidden" name="status" value="${b.active}">
+                                                        <c:if test="${b.active == true}">
+                                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                                Active 
+                                                            </button>
+                                                        </c:if>
+                                                        <c:if test="${b.active == false}">
+                                                            <button type="submit" class="btn btn-sm btn-success">
+                                                                Inactive 
+                                                            </button>
+                                                        </c:if>
+                                                    </form>
                                                 </td>
                                                 <td>
                                                     <button>edit</button>

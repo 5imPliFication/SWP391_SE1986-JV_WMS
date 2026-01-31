@@ -32,4 +32,12 @@ public class BrandService {
         return true;
     }
 
+    public void updateStatus(long id, boolean status) {
+         b.changeStatus(id, status);
+    }
+    
+    public List<Brand> getActiveBrand() {
+        return b.findActiveBrand();
+    }
+
 }

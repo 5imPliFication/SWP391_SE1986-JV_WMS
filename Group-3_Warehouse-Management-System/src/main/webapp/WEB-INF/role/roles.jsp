@@ -87,11 +87,14 @@
                                 </div>
 
                                 <!-- BUTTON CUỐI CÙNG BÊN PHẢI -->
-                                <div class="col-md-8 d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-success mt-4">
-                                        <i class="fas fa-save"></i> Save changes
-                                    </button>
-                                </div>
+                                <c:if test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
+
+                                    <div class="col-md-8 d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-success mt-4">
+                                            <i class="fas fa-save"></i> Save changes
+                                        </button>
+                                    </div>
+                                </c:if>
 
                             </div>
 
@@ -144,20 +147,24 @@
 
 
                                                 <c:forEach items="${roleList}" var="role">
-                                                    <td class="text-center
-                                                        <c:if test='${!role.active}'>fw-bold text-dark bg-secondary bg-opacity-25</c:if>
-                                                            ">
+                                                    <td class="text-center ${(not role.active or !fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE'))
+                                                                             ? 'fw-bold text-dark bg-secondary bg-opacity-25'
+                                                                             : ''}"
 
-                                                            <input type="checkbox"
-                                                                   class="form-check-input permission-checkbox
-                                                            <c:if test='${!role.active}'>opacity-50</c:if>"
-                                                            name="perm_${role.id}"
-                                                            value="${p.id}"
-                                                            <c:if test="${!role.active}">disabled</c:if>
-                                                            <c:forEach items="${role.permissions}" var="rp">
-                                                                <c:if test="${rp.id == p.id}">checked</c:if>
-                                                            </c:forEach>
-                                                            />
+                                                        ">
+
+                                                        <input type="checkbox"
+                                                               class="form-check-input permission-checkbox
+                                                               <c:if test='${!role.active}'>opacity-50</c:if>"
+                                                               name="perm_${role.id}"
+                                                               value="${p.id}"
+                                                               ${(not role.active or !fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE'))
+                                                                 ? 'disabled="disabled"'
+                                                                 : ''}"                                                           
+                                                               <c:forEach items="${role.permissions}" var="rp">
+                                                                   <c:if test="${rp.id == p.id}">checked</c:if>
+                                                               </c:forEach>
+                                                               />
 
                                                     </td>
                                                 </c:forEach>
@@ -166,7 +173,7 @@
                                     </tbody>
 
                                 </table>
-                                
+
                             </div>
 
                         </div>
