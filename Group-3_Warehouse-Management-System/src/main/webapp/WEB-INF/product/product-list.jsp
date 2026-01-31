@@ -113,7 +113,7 @@
                 <td>${p.description}</td>
                 <td>${p.brand.name}</td>
                 <td>${p.category.name}</td>
-                <td>${(p.isActive == true) ? 'Active' : 'Deactive'}</td>
+                <td>${(p.isActive == true) ? 'Active' : 'Inactive'}</td>
                 <td>${p.createdAt}</td>
                 <td>${p.updatedAt}</td>
 
