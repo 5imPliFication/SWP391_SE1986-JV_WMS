@@ -23,4 +23,12 @@ public class CategoryService {
 
         categoryDAO.createCategory(category);
     }
+
+    public Category getCategoryById(Long id) {
+        return categoryDAO.getCategoryById(id);
+    }
+
+    public java.util.List<Category> getAllCategories() {
+        return categoryDAO.getAllCategories();
+    }
 }
