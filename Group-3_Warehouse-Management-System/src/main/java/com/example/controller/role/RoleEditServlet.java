@@ -86,13 +86,12 @@ public class RoleEditServlet extends HttpServlet {
 
             r.updateRole(role);
 
-            // 2️⃣ update role_permissions
             p.updateRolePermissions(
                     roleId,
                     permissionIdList
             );
 
-            conn.commit(); // ✅ OK
+            conn.commit(); 
 
             response.sendRedirect("roles?message=update_success");
 
