@@ -30,6 +30,7 @@
                 </div>
 
                 <div class="d-grid mb-3">
+                    <label class="form-label fw-bold">Status</label>
                     <button type="button"
                             id="btnStatus"
                             class="btn btn-sm ${role.active ? 'btn-danger' : 'btn-success'}"
@@ -49,6 +50,8 @@
 
 
                 <!-- PERMISSIONS -->
+                <label class="form-label fw-bold">Permission</label>
+
                 <select name="permissionIds" class="selectpicker w-100" multiple data-live-search="true">
                     <c:forEach items="${listRolePermission}" var="p">
                         <c:set var="isSelected" value="" />

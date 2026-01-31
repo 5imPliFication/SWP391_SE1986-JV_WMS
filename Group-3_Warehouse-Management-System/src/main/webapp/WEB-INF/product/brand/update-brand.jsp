@@ -35,15 +35,16 @@
                     <input type="hidden" id="isActive" name="status" value="${brand.active}">
                     <div >
                         <div class="mb-3">
-                            <label class="form-label text-center">Brand name</label>
+                            <label class="form-label fw-bold">Brand names</label>
                             <input type="text" name="name" class="form-control" value="${brand.name}" required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Description</label>
+                            <label class="form-label fw-bold">Description</label>
                             <textarea name="description" class="form-control" rows="8">${brand.description}</textarea>
                         </div>
                         <div class="d-grid mb-3">
+                            <label class="form-label fw-bold">Status</label>
                             <button type="button"
                                     id="btnStatus"
                                     data-active="${brand.active}"
