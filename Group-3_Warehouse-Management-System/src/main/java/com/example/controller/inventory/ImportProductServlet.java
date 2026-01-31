@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,17 +100,14 @@ public class ImportProductServlet extends HttpServlet {
             String[] prices = request.getParameterValues("price");
             String[] productIds = request.getParameterValues("product-id");
 
-            // init list product items
-            List<ProductItem> productItems = new ArrayList<>();
-
-            // loop
-            for (int i = 1; i <= amountRecord; i++) {
-                String serial = serials[i-1];
-                Double price = Double.parseDouble(prices[i-1]);
-                Long productId = Long.parseLong(productIds[i-1]);
-                productItems.add(new ProductItem(serial, price, LocalDateTime.now(), productId));
+            // message
+            if (productService.saveProductItems(serials, prices, productIds)) {
+                session.setAttribute("message", "Product item saved successfully");
+                session.setAttribute("messageType", "success");
+            } else {
+                session.setAttribute("message", "Product items could not be saved");
+                session.setAttribute("messageType", "danger");
             }
-            productService.saveProductItems(productItems);
 
             // delete session after save success
             session.removeAttribute("IMPORT_ITEMS");

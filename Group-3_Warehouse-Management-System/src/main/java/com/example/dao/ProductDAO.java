@@ -28,7 +28,7 @@ public class ProductDAO {
         int index = 1;
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // if searchName has value -> set value to query
             if (searchName != null && !searchName.trim().isEmpty()) {
@@ -48,45 +48,14 @@ public class ProductDAO {
         return listProducts;
     }
 
-    // find id of product by name
-    public Long findProductIdByName(String productName) {
-        long id = -1;
-        StringBuilder sql = new StringBuilder("select id from products as p " +
-                "where 1 = 1 ");
-
-        // if param has value of searchName
-        if (productName != null && !productName.trim().isEmpty()) {
-            sql.append(" and p.name like ? ");
-        }
-
-        int index = 1;
-        // access data
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
-            // if searchName has value -> set value to query
-            if (productName != null && !productName.trim().isEmpty()) {
-                ps.setString(index, "%" + productName + "%");
-            }
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                id = rs.getLong("id");
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return id;
-    }
-
-
-    public void saveProductItems(List<ProductItem> productItems) {
-        StringBuilder sql = new StringBuilder("insert into product_items(serial, import_price, import_date, is_active, product_id) values (?, ?, ?, ?, ?);");
+    // save list products item to db
+    public boolean saveProductItems(List<ProductItem> productItems) {
+        StringBuilder sql = new StringBuilder(
+                "insert into product_items(serial, import_price, import_date, is_active, product_id) values (?, ?, ?, ?, ?);");
 
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (ProductItem item : productItems) {
                 ps.setString(1, item.getSerial());
                 ps.setDouble(2, item.getImportPrice());
@@ -96,7 +65,7 @@ public class ProductDAO {
                 ps.addBatch();
             }
             ps.executeBatch();
-
+            return true;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -114,7 +83,7 @@ public class ProductDAO {
 
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // if searchName has value -> set value to query
             if (id != null) {
@@ -130,5 +99,31 @@ public class ProductDAO {
             throw new RuntimeException(e);
         }
         return name;
+    }
+
+    public boolean isExistSerial(String serial) {
+        StringBuilder sql = new StringBuilder("select serial from product_items as pt " +
+                "where 1 = 1 ");
+
+        // if param has value of searchName
+        if (serial != null && !serial.trim().isEmpty()) {
+            sql.append(" and pt.serial like ? ");
+        }
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            // if searchName has value -> set value to query
+            if (serial != null) {
+                ps.setString(1, "%" + serial + "%");
+            }
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

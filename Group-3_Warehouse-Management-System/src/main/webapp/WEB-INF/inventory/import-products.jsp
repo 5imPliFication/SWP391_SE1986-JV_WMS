@@ -15,27 +15,21 @@
 
 <main class="main-content">
     <!-- search product -->
-    <form class="form-inline mb-3"
-          action="${pageContext.request.contextPath}"
-          method="get">
+    <form class="form-inline mb-3" action="${pageContext.request.contextPath}" method="get">
 
-        <input type="text"
-               name="name"
-               class="form-control mr-2"
-               placeholder="Search name product"
+        <input type="text" name="name" class="form-control mr-2" placeholder="Search name product"
                value="${param.name}">
 
         <button type="submit" class="btn btn-primary mr-2" name="action" value="search">
             Search
         </button>
         <div class="ml-auto">
-            <%--        link to create new product--%>
-            <a href="${pageContext.request.contextPath}/products/new"
-               class="btn btn-primary mr-2">
+            <%-- link to create new product--%>
+            <a href="${pageContext.request.contextPath}/products/new" class="btn btn-primary mr-2">
                 New products
             </a>
 
-            <%--      import product by excel--%>
+            <%-- import product by excel--%>
             <a href="${pageContext.request.contextPath}/products/import-excel"
                class="btn btn-primary mr-2">
                 Import excel
@@ -43,9 +37,8 @@
 
             <%-- save import product item--%>
             <%-- button link to form have id productItemsForm--%>
-            <button type="submit"
-                    form="productItemsForm"
-                    class="btn btn-primary" name="action" value="save">
+            <button type="submit" form="productItemsForm" class="btn btn-primary"
+                    name="action" value="save">
                 Save
             </button>
         </div>
@@ -80,14 +73,16 @@
                     <td>${product.description}</td>
                         <%--add product to import product item--%>
                     <td>
-                        <form action="${pageContext.request.contextPath}/import-products" method="post">
+                        <form
+                                action="${pageContext.request.contextPath}/import-products"
+                                method="post">
                                 <%--set name to forward--%>
-                            <input type="hidden" name="product-id" value="${product.id}">
-                            <input type="hidden" name="product-name" value="${product.name}">
-                            <button class="btn btn-success btn-sm"
-                                    type="submit"
-                                    name="action"
-                                    value="add">
+                            <input type="hidden" name="product-id"
+                                   value="${product.id}">
+                            <input type="hidden" name="product-name"
+                                   value="${product.name}">
+                            <button class="btn btn-success btn-sm" type="submit"
+                                    name="action" value="add">
                                 Import product
                             </button>
                         </form>
@@ -99,7 +94,8 @@
     </c:if>
 
 
-    <form id="productItemsForm" method="post" action="${pageContext.request.contextPath}/import-products">
+    <form id="productItemsForm" method="post"
+          action="${pageContext.request.contextPath}/import-products">
         <!-- table import product items-->
         <div>
             <%--set value for product_items--%>
@@ -120,7 +116,8 @@
                     <c:if test="${not empty product_items}">
                         <tbody>
                             <%--loop product_items--%>
-                        <c:forEach items="${product_items}" var="item" varStatus="status">
+                        <c:forEach items="${product_items}" var="item"
+                                   varStatus="status">
                             <tr>
                                     <%--STT--%>
                                 <td class="text-center align-middle">
@@ -128,19 +125,21 @@
                                 </td>
                                     <%--serial--%>
                                 <td>
-                                    <input type="text"
-                                           name="serial"
+                                    <input type="text" name="serial"
                                            class="form-control form-control-sm"
                                            required>
                                 </td>
                                     <%--name product (item)--%>
                                 <td class="align-middle">
-                                    <input type="hidden" name="product-name" value="${item.id}">
+                                    <input type="hidden"
+                                           name="product-id"
+                                           value="${item.id}">
                                         ${item.name}
                                 </td>
                                     <%--unit--%>
-                                <td class="text-center align-middle">
-                                    Item
+                                <td
+                                        class="text-center align-middle">
+                                    1 Item
                                 </td>
                                     <%--price--%>
                                 <td>
@@ -149,12 +148,10 @@
                                            class="form-control form-control-sm text-right"
                                            required>
                                 </td>
-                                    <%--total price--%>
-                                <td class="text-right align-middle font-weight-bold">
 
-                                </td>
                                     <%--delete product item--%>
-                                <td class="text-center align-middle">
+                                <td
+                                        class="text-center align-middle">
                                         <%--method get--%>
                                     <a href="${pageContext.request.contextPath}/import-products?action=delete&index=${status.index}"
                                        class="btn btn-danger btn-sm">
@@ -178,6 +175,13 @@
         </span>
     </div>
 
+    <%--  message  --%>
+    <c:if test="${not empty message}">
+        <div class="alert alert-${messageType}">
+                ${message}
+        </div>
+    </c:if>
+
     <c:if test="${totalPages > 1}">
         <nav class="mt-3">
             <ul class="pagination justify-content-center">
@@ -189,7 +193,7 @@
                     </a>
                 </li>
 
-                    <%-- current page  --%>
+                    <%-- current page --%>
                 <c:forEach begin="1" end="${totalPages}" var="i">
                     <li class="page-item ${i == pageNo ? 'active' : ''}">
                         <a class="page-link"
