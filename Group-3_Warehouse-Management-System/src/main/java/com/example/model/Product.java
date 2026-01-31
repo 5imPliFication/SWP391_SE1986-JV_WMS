@@ -26,4 +26,9 @@ public class Product {
         this.name = name;
         this.description = description;
     }
+
+    public Product(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

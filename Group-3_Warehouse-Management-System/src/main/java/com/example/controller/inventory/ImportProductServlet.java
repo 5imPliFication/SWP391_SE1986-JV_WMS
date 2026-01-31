@@ -30,6 +30,8 @@ public class ImportProductServlet extends HttpServlet {
             throws ServletException, IOException {
         // get action
         String action = request.getParameter("action");
+
+        // get session
         HttpSession session = request.getSession();
 
         if ("search".equals(action)) {
@@ -38,7 +40,7 @@ public class ImportProductServlet extends HttpServlet {
             // set search name product for session
             session.setAttribute("searchName", name);
             // call service to get list products
-            List<Product> products = productService.searchProductByName(name);
+            List<Product> products = productService.findProductByName(name);
             if (products == null || products.isEmpty()) {
                 request.setAttribute("error", "Product not found. Please add new product");
             } else {
@@ -46,11 +48,11 @@ public class ImportProductServlet extends HttpServlet {
             }
         } else if ("delete".equals(action)) {
             // get session
-            List<String> product_items = (List<String>) session.getAttribute("IMPORT_ITEMS");
+            List<Product> products = (List<Product>) session.getAttribute("IMPORT_ITEMS");
             // get id need delete
-            if (product_items != null) {
+            if (products != null) {
                 int index = Integer.parseInt(request.getParameter("index"));
-                product_items.remove(index);
+                products.remove(index);
             }
             response.sendRedirect(request.getContextPath() + "/import-products");
             return;
@@ -59,7 +61,7 @@ public class ImportProductServlet extends HttpServlet {
             String searchName = (String) session.getAttribute("searchName");
             // if exist -> view again
             if (searchName != null) {
-                List<Product> products = productService.searchProductByName(searchName);
+                List<Product> products = productService.findProductByName(searchName);
                 request.setAttribute("products", products);
             }
         }
@@ -73,40 +75,46 @@ public class ImportProductServlet extends HttpServlet {
         if ("add".equals(action)) {
             // get session
             HttpSession session = request.getSession();
-            List<String> product_items = (List<String>) session.getAttribute("IMPORT_ITEMS");
+            List<Product> products = (List<Product>) session.getAttribute("IMPORT_ITEMS");
 
             // if null -> init
-            if (product_items == null) {
-                product_items = new ArrayList<>();
+            if (products == null) {
+                products = new ArrayList<>();
             }
-            // get name
-            String productName = request.getParameter("product-name");
-            // set name for session
-            product_items.add(productName);
+            // get attribute product
+            Long id = Long.parseLong(request.getParameter("product-id"));
+            String name = request.getParameter("product-name");
+            // set product for session
+            products.add(new Product(id, name));
 
             // set attribute for session
-            session.setAttribute("IMPORT_ITEMS", product_items);
+            session.setAttribute("IMPORT_ITEMS", products);
             response.sendRedirect(request.getContextPath() + "/import-products");
         } else if ("save".equals(action)) {
             // get session
             HttpSession session = request.getSession();
-            List<String> product_items = (List<String>) session.getAttribute("IMPORT_ITEMS");
+            List<Product> products = (List<Product>) session.getAttribute("IMPORT_ITEMS");
             // get amount of record input product item
-            int amountRecord = product_items.size();
+            int amountRecord = products.size();
+            // get value
+            String[] serials = request.getParameterValues("serial");
+            String[] prices = request.getParameterValues("price");
+            String[] productIds = request.getParameterValues("product-id");
 
             // init list product items
             List<ProductItem> productItems = new ArrayList<>();
 
             // loop
             for (int i = 1; i <= amountRecord; i++) {
-                // get value of product items
-                String serial = request.getParameter("serial");
-                String productName = request.getParameter("product-name");
-                Double price = Double.parseDouble(request.getParameter("price"));
-                Long id = productService.findProductIdByName(productName);
-                productItems.add(new ProductItem(serial, price, id, LocalDateTime.now()));
+                String serial = serials[i-1];
+                Double price = Double.parseDouble(prices[i-1]);
+                Long productId = Long.parseLong(productIds[i-1]);
+                productItems.add(new ProductItem(serial, price, LocalDateTime.now(), productId));
             }
             productService.saveProductItems(productItems);
+
+            // delete session after save success
+            session.removeAttribute("IMPORT_ITEMS");
             response.sendRedirect(request.getContextPath() + "/import-products");
         }
     }

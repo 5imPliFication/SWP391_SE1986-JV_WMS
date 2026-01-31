@@ -12,8 +12,8 @@ public class ProductService {
     private final ProductDAO productDAO = new ProductDAO();
 
     // search product by name
-    public List<Product> searchProductByName(String name) {
-        return productDAO.searchProductByName(name);
+    public List<Product> findProductByName(String name) {
+        return productDAO.findProductByName(name);
     }
 
     // find id of product by name
@@ -30,5 +30,7 @@ public class ProductService {
     }
 
 
-
+    public String findProductNameById(String id) {
+        return productDAO.findProductNameById(id);
+    }
 }

@@ -19,7 +19,7 @@ public class ProductItem {
     private boolean isActive;
     private Long productId;
 
-    public ProductItem(String serial, Double importPrice, Long productId, LocalDateTime importDate) {
+    public ProductItem(String serial, Double importPrice, LocalDateTime importDate, Long productId) {
         this.serial = serial;
         this.importPrice = importPrice;
         this.productId = productId;

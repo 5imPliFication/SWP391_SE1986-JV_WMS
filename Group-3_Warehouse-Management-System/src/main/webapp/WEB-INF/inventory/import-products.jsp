@@ -82,6 +82,7 @@
                     <td>
                         <form action="${pageContext.request.contextPath}/import-products" method="post">
                                 <%--set name to forward--%>
+                            <input type="hidden" name="product-id" value="${product.id}">
                             <input type="hidden" name="product-name" value="${product.name}">
                             <button class="btn btn-success btn-sm"
                                     type="submit"
@@ -134,8 +135,8 @@
                                 </td>
                                     <%--name product (item)--%>
                                 <td class="align-middle">
-                                    <input type="hidden" name="product-name" value="${item}">
-                                        ${item}
+                                    <input type="hidden" name="product-name" value="${item.id}">
+                                        ${item.name}
                                 </td>
                                     <%--unit--%>
                                 <td class="text-center align-middle">

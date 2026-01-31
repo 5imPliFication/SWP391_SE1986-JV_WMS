@@ -15,7 +15,7 @@ import java.util.List;
 public class ProductDAO {
 
     // get list product by name
-    public List<Product> searchProductByName(String searchName) {
+    public List<Product> findProductByName(String searchName) {
         List<Product> listProducts = new ArrayList<>();
         StringBuilder sql = new StringBuilder("select id, `name`, description from products as p " +
                 " where 1 = 1 ");
@@ -100,5 +100,35 @@ public class ProductDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String findProductNameById(String id) {
+        String name = "";
+        StringBuilder sql = new StringBuilder("select name from products as p " +
+                "where 1 = 1 ");
+
+        // if param has value of searchName
+        if (id != null) {
+            sql.append(" and p.id = ? ");
+        }
+
+        // access data
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            // if searchName has value -> set value to query
+            if (id != null) {
+                ps.setString(1, "%" + id + "%");
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                name = rs.getString("name");
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return name;
     }
 }
