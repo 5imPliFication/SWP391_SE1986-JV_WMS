@@ -129,4 +129,57 @@ public class BrandDAO {
             ps.executeUpdate();
         }
     }
+    
+    // Using for select box
+    public List<Brand> getAllActive() {
+        List<Brand> brands = new ArrayList<>();
+        String sql = """
+                    SELECT *
+                    FROM brands
+                    WHERE is_active = true
+                """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Brand brand = new Brand();
+
+                brand.setId(rs.getLong("id"));
+                brand.setName(rs.getString("name"));
+
+                // Add to list
+                brands.add(brand);
+            }
+            return brands;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Brand findById(long brandId) {
+        String sql = """
+                    SELECT *
+                    FROM brands
+                    WHERE id = ?
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            Brand brand = null;
+            ps.setLong(1, brandId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                brand = new Brand();
+
+                brand.setId(rs.getLong("id"));
+                brand.setName(rs.getString("name"));
+                brand.setDescription(rs.getString("description"));
+                brand.setActive(rs.getBoolean("is_active"));
+            }
+            return brand;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

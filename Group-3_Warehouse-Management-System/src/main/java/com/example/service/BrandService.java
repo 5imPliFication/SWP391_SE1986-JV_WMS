@@ -37,6 +37,11 @@ public class BrandService {
         return true;
     }
 
+    // Using for select box
+    public List<Brand> getActiveBrands() {
+        return b.getAllActive();
+    }
+  
     public void updateStatus(long id, boolean status) {
         b.changeStatus(id, status);
     }
@@ -66,5 +71,4 @@ public class BrandService {
         return true;
 
     }
-
 }
