@@ -6,6 +6,7 @@ import com.example.dao.ProductDAO;
 import com.example.model.Brand;
 import com.example.model.Category;
 import com.example.model.Product;
+import com.example.model.ProductItem;
 
 import java.util.List;
 
@@ -14,8 +15,8 @@ public class ProductService {
     private CategoryDAO categoryDAO = new CategoryDAO();
     private BrandDAO brandDAO = new BrandDAO();
 
-    public List<Product> findAll(String searchName, String brandName, String categoryName, Boolean isActive, int pageNo) {
-        return productDAO.getAll(searchName, brandName, categoryName,isActive, pageNo);
+    public List<Product> findAllProducts(String searchName, String brandName, String categoryName, Boolean isActive, int pageNo) {
+        return productDAO.getAllProducts(searchName, brandName, categoryName,isActive, pageNo);
     }
 
     public int getTotalProducts(String searchName, String brandName, String categoryName, Boolean isActive) {
@@ -33,11 +34,11 @@ public class ProductService {
         product.setBrand(brand);
         product.setCategory(category);
 
-        return productDAO.create(product);
+        return productDAO.createProduct(product);
     }
 
     public Product findProductById(long productId) {
-        return productDAO.findById(productId);
+        return productDAO.findProductById(productId);
     }
 
     public boolean updateProduct(long productId, String productName, String productDescription, String imgUrl, long brandId, long categoryId, boolean isActive) {
@@ -53,6 +54,14 @@ public class ProductService {
         product.setBrand(brand);
         product.setCategory(category);
 
-        return productDAO.update(product);
+        return productDAO.updateProduct(product);
+    }
+
+    public List<ProductItem> findItemsByProductId(long productId, String searchSerial, Boolean isActive, int pageNo) {
+        return productDAO.getItemsByProductId(productId, searchSerial,isActive, pageNo);
+    }
+
+    public int countProductItems(long productId, String searchSerial, Boolean isActive) {
+        return productDAO.countProductItems(productId, searchSerial, isActive);
     }
 }

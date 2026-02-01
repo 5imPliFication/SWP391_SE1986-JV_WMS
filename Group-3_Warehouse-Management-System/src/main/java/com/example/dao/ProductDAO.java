@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ProductDAO {
 
-    public List<Product> getAll(String searchName, String brandName, String categoryName, Boolean isActive, int pageNo) {
+    public List<Product> getAllProducts(String searchName, String brandName, String categoryName, Boolean isActive, int pageNo) {
         List<Product> products = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
                     SELECT p.id, p.name, p.description, p.img_url, p.is_active, b.name as brand_name , c.name as category_name , p.created_at, p.updated_at
@@ -153,7 +153,7 @@ public class ProductDAO {
     }
 
     // Create new product
-    public boolean create(Product product) {
+    public boolean createProduct(Product product) {
         String sql = """
                 INSERT INTO products (name, description, img_url, brand_id, category_id, is_active, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())
@@ -176,7 +176,7 @@ public class ProductDAO {
         }
     }
 
-    public Product findById(long productId) {
+    public Product findProductById(long productId) {
         String sql = """
                 SELECT p.id as product_id, p.name as product_name, p.description, p.img_url, p.is_active ,
                        b.id as brand_id, b.name as brand_name,
@@ -220,7 +220,7 @@ public class ProductDAO {
         }
     }
 
-    public boolean update(Product product) {
+    public boolean updateProduct(Product product) {
         String sql = """
                 UPDATE products
                 SET name = ?,
@@ -252,5 +252,106 @@ public class ProductDAO {
         }
     }
 
+    public List<ProductItem> getItemsByProductId(long productId, String searchSerial, Boolean isActive, int pageNo) {
+        List<ProductItem> productItems = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+                    SELECT pi.id, pi.serial, pi.import_price, pi.import_date, pi.is_active, pi.product_id
+                    FROM product_items pi
+                    WHERE 1 = 1
+                """);
+        // filter by productId
+        sql.append(" AND pi.product_id = ? ");
+
+        // search by serial
+        if (searchSerial != null && !searchSerial.trim().isEmpty()) {
+            sql.append(" AND pi.serial LIKE ? ");
+        }
+        // filter by active status
+        if (isActive != null) {
+            sql.append(" AND pi.is_active = ? ");
+        }
+
+        // filter by date created
+        sql.append(" ORDER BY pi.import_date DESC ");
+
+        // handle pagination
+        sql.append(" limit ? offset ? ");
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int index = 1;
+            ps.setLong(index++, productId);
+
+            if (searchSerial != null && !searchSerial.trim().isEmpty()) {
+                ps.setString(index++, "%" + searchSerial + "%");
+            }
+            if (isActive != null) {
+                ps.setBoolean(index++, isActive);
+            }
+            // set value for pagination of SQL
+            ps.setInt(index++, UserConstant.PAGE_SIZE);
+
+            int offset = (pageNo - 1) * UserConstant.PAGE_SIZE;
+            ps.setInt(index++, offset);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                ProductItem productItem = new ProductItem();
+                productItem.setId(rs.getLong("product_id"));
+                productItem.setSerial(rs.getString("serial"));
+                productItem.setImportPrice(rs.getDouble("import_price"));
+                productItem.setImportDate(rs.getTimestamp("import_date").toLocalDateTime());
+                productItem.setIsActive(rs.getBoolean("is_active"));
+                productItem.setProductId(rs.getLong("product_id"));
+
+                productItems.add(productItem);
+            }
+            return productItems;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int countProductItems(long productId, String searchSerial, Boolean isActive) {
+        int totalProductItems = 0;
+        StringBuilder sql = new StringBuilder("""
+                    SELECT count(*)
+                    FROM product_items pi
+                    WHERE 1 = 1
+                """);
+        // filter by productId
+        sql.append(" AND pi.product_id = ? ");
+
+        // search by serial
+        if (searchSerial != null && !searchSerial.trim().isEmpty()) {
+            sql.append(" AND pi.serial LIKE ? ");
+        }
+        // filter by active status
+        if (isActive != null) {
+            sql.append(" AND pi.is_active = ? ");
+        }
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int index = 1;
+            ps.setLong(index++, productId);
+
+            if (searchSerial != null && !searchSerial.trim().isEmpty()) {
+                ps.setString(index++, "%" + searchSerial + "%");
+            }
+            if (isActive != null) {
+                ps.setBoolean(index++, isActive);
+            }
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                totalProductItems = rs.getInt(1);
+            }
+            return totalProductItems;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
 

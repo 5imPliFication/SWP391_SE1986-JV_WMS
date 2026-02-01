@@ -111,6 +111,7 @@
             <th>Status</th>
             <th>Created Time</th>
             <th>Updated Time</th>
+            <th>Action</th>
         </tr>
         </thead>
 
@@ -119,7 +120,8 @@
             <tr>
                 <td><img src="${p.imgUrl}" class="product-img" alt="${p.name}"></td>
                 <td>
-                    <a href="${pageContext.request.contextPath}/products/update?productId=${p.id}">${p.name}</a>
+                        <%--Click -> Move to Product Item List--%>
+                    <a href="${pageContext.request.contextPath}/products/items?productId=${p.id}">${p.name}</a>
                 </td>
                 <td>${p.description}</td>
                 <td>${p.brand.name}</td>
@@ -127,6 +129,9 @@
                 <td>${(p.isActive == true) ? 'Active' : 'Inactive'}</td>
                 <td>${p.createdAt}</td>
                 <td>${p.updatedAt}</td>
+                <td>
+                    <a href="${pageContext.request.contextPath}/products/update?productId=${p.id}">EDIT</a>
+                </td>
 
             </tr>
         </c:forEach>

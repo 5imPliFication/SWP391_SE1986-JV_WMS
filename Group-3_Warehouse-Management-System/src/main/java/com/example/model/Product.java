@@ -3,6 +3,7 @@ package com.example.model;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,4 +18,6 @@ public class Product {
     private Category category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private List<ProductItem> productItems;
 }
