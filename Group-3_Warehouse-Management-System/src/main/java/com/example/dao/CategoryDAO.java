@@ -34,6 +34,23 @@ public class CategoryDAO {
         }
     }
 
+    public void updateCategory(Category category) {
+        String sql = "UPDATE categories SET name = ?, description = ?, is_active = ? WHERE id = ?";
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, category.getName());
+            ps.setString(2, category.getDescription());
+            ps.setBoolean(3, category.isActive());
+            ps.setLong(4, category.getId());
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error updating category", e);
+        }
+    }
+
     public Category getCategoryById(Long id) {
         String sql = "SELECT * FROM categories WHERE id = ?";
         try (Connection conn = DBConfig.getDataSource().getConnection();

@@ -24,6 +24,10 @@ public class CategoryService {
         categoryDAO.createCategory(category);
     }
 
+    public void updateCategory(Category category) {
+        categoryDAO.updateCategory(category);
+    }
+
     public Category getCategoryById(Long id) {
         return categoryDAO.getCategoryById(id);
     }
