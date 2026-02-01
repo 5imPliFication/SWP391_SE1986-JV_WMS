@@ -40,6 +40,13 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
+                <c:if test="${param.status == 'update_success'}">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Cập nhật thành công
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </c:if>
 
 
                 <div class="card mb-4 shadow-sm">
@@ -104,13 +111,26 @@
                                                 <td>${b.name}</td>
                                                 <td>${b.description}</td>
                                                 <td>
-                                                    <span class="badge ${b.active ? 'bg-success' : 'bg-secondary'}">
-                                                        ${b.active ? 'Active' : 'Deactive'}
-                                                    </span>
+                                                    <form action="/change-status" method="get" class="d-inline">
+                                                        <input type="hidden" name="brandId" value="${b.id}">
+                                                        <input type="hidden" name="status" value="${b.active}">
+                                                        <c:if test="${b.active == true}">
+                                                            <button type="submit" class="btn btn-sm btn-success">
+                                                                Active
+                                                            </button>
+                                                        </c:if>
+                                                        <c:if test="${b.active == false}">
+                                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                                Inactive
+                                                            </button>
+                                                        </c:if>
+                                                    </form>
                                                 </td>
                                                 <td>
-                                                    <button>edit</button>
-                                                    <button>delete</button>
+                                                    <a href="/brand-update?brandId=${b.id}" 
+                                                       class="btn btn-sm btn-warning">
+                                                        Edit
+                                                    </a>
                                                 </td>
                                             </tr>
                                         </c:forEach>
