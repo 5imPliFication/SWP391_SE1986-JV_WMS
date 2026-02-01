@@ -14,7 +14,7 @@ import java.util.List;
 
 @WebServlet("/import-product-items")
 @MultipartConfig
-public class ImportProductServlet extends HttpServlet {
+public class ImportProductItemServlet extends HttpServlet {
 
     private InventoryService inventoryService;
 
@@ -107,11 +107,11 @@ public class ImportProductServlet extends HttpServlet {
             String[] productIds = request.getParameterValues("product-id");
 
             // message
-            if (inventoryService.saveProductItems(serials, prices, productIds)) {
+            if (inventoryService.saveProductItems(serials, prices, productIds) == null) {
                 session.setAttribute("message", "Product item saved successfully");
                 session.setAttribute("messageType", "success");
             } else {
-                session.setAttribute("message", "Product items could not be saved");
+                session.setAttribute("message", inventoryService.saveProductItems(serials, prices, productIds));
                 session.setAttribute("messageType", "danger");
             }
 

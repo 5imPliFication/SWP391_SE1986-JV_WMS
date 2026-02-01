@@ -14,36 +14,40 @@
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
 <main class="main-content">
-    <!-- search product -->
-    <form class="form-inline mb-3" action="${pageContext.request.contextPath}" method="get">
-
-        <input type="text" name="name" class="form-control mr-2" placeholder="Search name product"
-               value="${param.name}">
-
-        <button type="submit" class="btn btn-primary mr-2" name="action" value="search">
-            Search
-        </button>
-        <div class="ml-auto">
-            <%-- link to create new product--%>
-            <a href="${pageContext.request.contextPath}/products/new" class="btn btn-primary mr-2">
-                New products
-            </a>
-
-            <%-- import product by excel--%>
-            <a href="${pageContext.request.contextPath}/products/import-excel"
-               class="btn btn-primary mr-2">
-                Import excel
-            </a>
-
-            <%-- save import product item--%>
-            <%-- button link to form have id productItemsForm--%>
-            <button type="submit" form="productItemsForm" class="btn btn-primary"
-                    name="action" value="save">
-                Save
+    <div class="d-flex align-items-center mb-3">
+        <%-- search product by name --%>
+        <form class="form-inline" action="${pageContext.request.contextPath}" method="get">
+            <input type="text" name="searchName" class="form-control mr-2"
+                   placeholder="Search name product" value="${param.searchName}">
+            <button type="submit" class="btn btn-primary mr-2" name="action" value="search">
+                Search
             </button>
-        </div>
+        </form>
 
-    </form>
+        <%-- link to create new product --%>
+        <a href="${pageContext.request.contextPath}/products/new" class="btn btn-primary ml-2">
+            New products
+        </a>
+
+        <%-- import excel --%>
+        <form action="${pageContext.request.contextPath}/import-product-items" method="post"
+              enctype="multipart/form-data" class="ml-2">
+
+            <label class="btn btn-primary mb-0">
+                <input type="hidden" name="action" value="file">
+                Import Excel
+                <input type="file" name="excelFile" accept=".xls,.xlsx" hidden
+                       onchange="this.form.submit()">
+            </label>
+        </form>
+
+        <%-- save --%>
+        <button type="submit" form="productItemsForm" class="btn btn-primary ml-2" name="action"
+                value="save">
+            Save
+        </button>
+    </div>
+
 
     <%--table list product search--%>
     <%--error if not found any product--%>
@@ -54,7 +58,6 @@
     </c:if>
 
     <%--table list product--%>
-
     <c:if test="${not empty products}">
         <table class="table table-bordered table-hover">
             <thead class="thead-dark">
@@ -74,15 +77,12 @@
                         <%--add product to import product item--%>
                     <td>
                         <form
-                                action="${pageContext.request.contextPath}/import-products"
+                                action="${pageContext.request.contextPath}/import-product-items"
                                 method="post">
                                 <%--set name to forward--%>
-                            <input type="hidden" name="product-id"
-                                   value="${product.id}">
-                            <input type="hidden" name="product-name"
-                                   value="${product.name}">
-                            <button class="btn btn-success btn-sm" type="submit"
-                                    name="action" value="add">
+                            <input type="hidden" name="product-id" value="${product.id}">
+                            <input type="hidden" name="product-name" value="${product.name}">
+                            <button class="btn btn-success btn-sm" type="submit" name="action" value="add">
                                 Import product
                             </button>
                         </form>
@@ -94,47 +94,46 @@
     </c:if>
 
 
-    <form id="productItemsForm" method="post"
-          action="${pageContext.request.contextPath}/import-products">
+    <form id="productItemsForm" method="post" action="${pageContext.request.contextPath}/import-product-items">
         <!-- table import product items-->
         <div>
-            <%--set value for product_items--%>
-            <c:set var="product_items" value="${sessionScope.IMPORT_ITEMS}"/>
+            <%--set value for product_items in scope--%>
+            <c:set var="productItems" value="${sessionScope.IMPORT_ITEMS}"/>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover table-sm">
                     <thead class="thead-dark text-center">
                     <tr>
                         <th style="width: 60px;">No.</th>
-                        <th>Serial / IMEI</th>
                         <th style="width: 200px;">Product</th>
+                        <th>Serial / IMEI</th>
                         <th style="width: 80px;">Unit</th>
                         <th style="width: 140px;">Price</th>
-                        <th style="width: 140px;">Total</th>
                         <th style="width: 90px;">Delete</th>
                     </tr>
                     </thead>
-                    <c:if test="${not empty product_items}">
+                    <%-- if productItems not empty -> display list product item need import --%>
+                    <c:if test="${not empty productItems}">
                         <tbody>
-                            <%--loop product_items--%>
-                        <c:forEach items="${product_items}" var="item"
+                            <%--loop productItems--%>
+                        <c:forEach items="${productItems}" var="item"
                                    varStatus="status">
                             <tr>
                                     <%--STT--%>
                                 <td class="text-center align-middle">
                                         ${status.index + 1}
                                 </td>
+
+                                    <%--name product (item)--%>
+                                <td class="align-middle">
+                                    <input type="hidden" name="product-id"
+                                           value="${item.productId}">
+                                        ${item.productName}
+                                </td>
                                     <%--serial--%>
                                 <td>
                                     <input type="text" name="serial"
                                            class="form-control form-control-sm"
-                                           required>
-                                </td>
-                                    <%--name product (item)--%>
-                                <td class="align-middle">
-                                    <input type="hidden"
-                                           name="product-id"
-                                           value="${item.id}">
-                                        ${item.name}
+                                           value="${item.serial}" required>
                                 </td>
                                     <%--unit--%>
                                 <td
@@ -146,14 +145,14 @@
                                     <input type="number"
                                            name="price"
                                            class="form-control form-control-sm text-right"
+                                           value="${item.importPrice}"
+                                           oninput="calcTotal()"
                                            required>
                                 </td>
-
                                     <%--delete product item--%>
-                                <td
-                                        class="text-center align-middle">
+                                <td class="text-center align-middle">
                                         <%--method get--%>
-                                    <a href="${pageContext.request.contextPath}/import-products?action=delete&index=${status.index}"
+                                    <a href="${pageContext.request.contextPath}/import-product-items?action=delete&index=${status.index}"
                                        class="btn btn-danger btn-sm">
                                         Delete
                                     </a>
@@ -168,14 +167,22 @@
     </form>
 
     <!-- TOTAL -->
-    <div class="font-weight-bold mb-3">
-        Total payment:
-        <span class="text-danger">
-            ${totalPayment}
-        </span>
+    <div class="text-dark font-weight-bolder">
+        Total payment <span id="totalPayment" class="text-danger">0</span>
     </div>
 
-    <%--  message  --%>
+    <script>
+        function calcTotal() {
+            let total = 0;
+            document.querySelectorAll('input[name="price"]').forEach(input => {
+                total += Number(input.value || 0);
+            });
+            document.getElementById("totalPayment").innerText = total.toLocaleString();
+        }
+    </script>
+
+
+    <%-- message --%>
     <c:if test="${not empty message}">
         <div class="alert alert-${messageType}">
                 ${message}

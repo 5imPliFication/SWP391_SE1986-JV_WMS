@@ -3,16 +3,12 @@ package com.example.dao;
 import com.example.config.DBConfig;
 import com.example.model.Product;
 import com.example.model.ProductItem;
-import com.example.model.Role;
-import com.example.model.User;
-import com.example.util.UserConstant;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProductDAO {
+public class InventoryDAO {
 
     // get list product by name
     public List<Product> findProductByName(String searchName) {
@@ -69,36 +65,6 @@ public class ProductDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public String findProductNameById(String id) {
-        String name = "";
-        StringBuilder sql = new StringBuilder("select name from products as p " +
-                "where 1 = 1 ");
-
-        // if param has value of searchName
-        if (id != null) {
-            sql.append(" and p.id = ? ");
-        }
-
-        // access data
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
-            // if searchName has value -> set value to query
-            if (id != null) {
-                ps.setString(1, "%" + id + "%");
-            }
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                name = rs.getString("name");
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return name;
     }
 
     public boolean isExistSerial(String serial) {
