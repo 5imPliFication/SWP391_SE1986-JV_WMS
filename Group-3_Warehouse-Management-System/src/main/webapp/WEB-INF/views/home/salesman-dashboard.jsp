@@ -16,50 +16,50 @@
 
         <div class="card-body">
             <%--            Staff section--%>
-            <c:if test="${sessionScope.user.role.name == 'Staff'}">
-                <div class="border-start border-primary border-4 ps-4 mb-4">
-                    <h4 class="mb-3 text-dark">
-                        <i class="bi bi-cart-check me-2"></i>Sales
-                    </h4>
+<%--            <c:if test="${sessionScope.user.role.name == 'Staff'}">--%>
+<%--                <div class="border-start border-primary border-4 ps-4 mb-4">--%>
+<%--                    <h4 class="mb-3 text-dark">--%>
+<%--                        <i class="bi bi-cart-check me-2"></i>Sales--%>
+<%--                    </h4>--%>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3">
-                            <div class="card h-100 border-0 shadow-sm">
-                                <div class="card-body">
-                                    <h6 class="card-subtitle mb-2 text-muted text-uppercase small">
-                                        Orders Created Today
-                                    </h6>
-<%--                                    <h3 class="card-title text-primary">${ordersCreatedToday}</h3>--%>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-<%--                            <div class="card h-100 border-0 shadow-sm ${pendingOrders > 0 ? 'border-warning' : ''}">--%>
+<%--                    <div class="row mb-3">--%>
+<%--                        <div class="col-md-6 mb-3">--%>
+<%--                            <div class="card h-100 border-0 shadow-sm">--%>
 <%--                                <div class="card-body">--%>
 <%--                                    <h6 class="card-subtitle mb-2 text-muted text-uppercase small">--%>
-<%--                                        Pending Orders--%>
+<%--                                        Orders Created Today--%>
 <%--                                    </h6>--%>
-<%--                                    <h3 class="card-title ${pendingOrders > 0 ? 'text-warning' : 'text-secondary'}">--%>
-<%--                                            ${pendingOrders}--%>
-<%--                                    </h3>--%>
+<%--&lt;%&ndash;                                    <h3 class="card-title text-primary">${ordersCreatedToday}</h3>&ndash;%&gt;--%>
 <%--                                </div>--%>
 <%--                            </div>--%>
-                        </div>
-                    </div>
+<%--                        </div>--%>
+<%--                        <div class="col-md-6 mb-3">--%>
+<%--&lt;%&ndash;                            <div class="card h-100 border-0 shadow-sm ${pendingOrders > 0 ? 'border-warning' : ''}">&ndash;%&gt;--%>
+<%--&lt;%&ndash;                                <div class="card-body">&ndash;%&gt;--%>
+<%--&lt;%&ndash;                                    <h6 class="card-subtitle mb-2 text-muted text-uppercase small">&ndash;%&gt;--%>
+<%--&lt;%&ndash;                                        Pending Orders&ndash;%&gt;--%>
+<%--&lt;%&ndash;                                    </h6>&ndash;%&gt;--%>
+<%--&lt;%&ndash;                                    <h3 class="card-title ${pendingOrders > 0 ? 'text-warning' : 'text-secondary'}">&ndash;%&gt;--%>
+<%--&lt;%&ndash;                                            ${pendingOrders}&ndash;%&gt;--%>
+<%--&lt;%&ndash;                                    </h3>&ndash;%&gt;--%>
+<%--&lt;%&ndash;                                </div>&ndash;%&gt;--%>
+<%--&lt;%&ndash;                            </div>&ndash;%&gt;--%>
+<%--                        </div>--%>
+<%--                    </div>--%>
 
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a href="new-order" class="btn btn-primary">
-                            <i class="bi bi-plus-circle me-1"></i>Create Order
-                        </a>
-                        <a href="orders" class="btn btn-outline-primary">
-                            <i class="bi bi-list-ul me-1"></i>View Orders
-                        </a>
-                    </div>
-                </div>
-            </c:if>
+<%--                    <div class="d-flex gap-2 flex-wrap">--%>
+<%--                        <a href="salesman/order/create" class="btn btn-primary">--%>
+<%--                            <i class="bi bi-plus-circle me-1"></i>Create Order--%>
+<%--                        </a>--%>
+<%--                        <a href="salesman/orders" class="btn btn-outline-primary">--%>
+<%--                            <i class="bi bi-list-ul me-1"></i>View Orders--%>
+<%--                        </a>--%>
+<%--                    </div>--%>
+<%--                </div>--%>
+<%--            </c:if>--%>
 
             <!-- SALESMAN Section -->
-            <c:if test="${sessionScope.user.role.name == 'Salesman'}">
+            <c:if test="${sessionScope.user.role.name eq 'Salesman'}">
                 <div class="border-start border-primary border-4 ps-4 mb-4">
                     <h4 class="mb-3 text-dark">
                         <i class="bi bi-cart-check me-2"></i>Sales
@@ -91,10 +91,10 @@
                     </div>
 
                     <div class="d-flex gap-2 flex-wrap">
-                        <a href="new-order" class="btn btn-primary">
+                        <a href="salesman/order/create" class="btn btn-primary">
                             <i class="bi bi-plus-circle me-1"></i>Create Order
                         </a>
-                        <a href="orders" class="btn btn-outline-primary">
+                        <a href="salesman/orders" class="btn btn-outline-primary">
                             <i class="bi bi-list-ul me-1"></i>View Orders
                         </a>
                     </div>

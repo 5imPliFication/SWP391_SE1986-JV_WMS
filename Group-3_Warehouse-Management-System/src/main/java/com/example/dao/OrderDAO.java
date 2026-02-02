@@ -1,0 +1,182 @@
+package com.example.dao;
+
+import com.example.config.DBConfig;
+import com.example.model.Order;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class OrderDAO {
+
+    private Order mapOrder(ResultSet rs) throws SQLException {
+        Order o = new Order();
+        o.setId(rs.getLong("id"));
+        o.setOrderCode(rs.getString("order_code"));
+        o.setCustomerName(rs.getString("customer_name"));
+        o.setCustomerPhone(rs.getString("customer_phone"));
+        o.setStatus(rs.getString("status"));
+        o.setCreatedBy(rs.getLong("created_by"));
+        o.setCreatedAt(rs.getTimestamp("order_date"));
+        o.setProcessedBy(rs.getLong("processed_by"));
+        o.setProcessedAt(rs.getTimestamp("processed_at"));
+        o.setNote(rs.getString("note"));
+        return o;
+    }
+
+    public int create(Order order) {
+        String sql = """
+        INSERT INTO orders (order_code, customer_name, customer_phone, note, status, created_by)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """;
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setString(1, order.getOrderCode());
+            ps.setString(2, order.getCustomerName());
+            ps.setString(3, order.getCustomerPhone());
+            ps.setString(4, order.getNote());
+            ps.setString(5, order.getStatus());
+            ps.setLong(6, order.getCreatedBy());
+
+            System.out.println("DAO LEVEL - Creating order");
+            System.out.println("Order Code: " + order.getOrderCode());
+
+            // Use executeUpdate() for INSERT statements
+            int affectedRows = ps.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new SQLException("Creating order failed, no rows affected.");
+            }
+
+            // Get the generated ID
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int generatedId = generatedKeys.getInt(1);
+                    System.out.println("Order created with ID: " + generatedId);
+                    return generatedId;
+                } else {
+                    throw new SQLException("Creating order failed, no ID obtained.");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("SQL Error: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Create order failed", e);
+        }
+    }
+
+
+    public Order findById(Long orderId) {
+        String sql = "SELECT * FROM orders WHERE id = ?";
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, orderId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return mapOrder(rs);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Find order by id failed", e);
+        }
+        return null;
+    }
+
+    public List<Order> findBySalesman(Long salesmanId) {
+        String sql = """
+            SELECT * FROM orders
+            WHERE created_by = ?
+            ORDER BY order_date DESC
+        """;
+
+        List<Order> list = new ArrayList<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, salesmanId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                list.add(mapOrder(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Find orders by salesman failed", e);
+        }
+        return list;
+    }
+
+    public List<Order> findByStatus(String status) {
+        String sql = """
+            SELECT * FROM orders
+            WHERE status = ?
+            ORDER BY order_date ASC
+        """;
+
+        List<Order> list = new ArrayList<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                list.add(mapOrder(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Find orders by status failed", e);
+        }
+        return list;
+    }
+
+    public boolean updateStatus(Long orderId, String status, Long processedBy, String note) {
+        String sql = """
+            UPDATE orders
+            SET status = ?, processed_by = ?, processed_at = NOW(), note = ?
+            WHERE id = ?
+        """;
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            if (processedBy != null) {
+                ps.setLong(2, processedBy);
+            } else {
+                ps.setNull(2, Types.BIGINT);
+            }
+            ps.setString(3, note);
+            ps.setLong(4, orderId);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Update order status failed", e);
+        }
+    }
+//    // Overloading
+//    public void updateStatus(Long orderId, String status) {
+//        String sql = "UPDATE orders SET status = ?, updated_at = NOW() WHERE id = ?";
+//
+//        try (Connection con = DBConfig.getDataSource().getConnection();
+//             PreparedStatement ps = con.prepareStatement(sql)) {
+//
+//            ps.setString(1, status);
+//            ps.setLong(2, orderId);
+//
+//            int affected = ps.executeUpdate();
+//
+//            if (affected == 0) {
+//                throw new SQLException("Order not found with ID: " + orderId);
+//            }
+//
+//        } catch (SQLException e) {
+//            throw new RuntimeException("Failed to update order status", e);
+//        }
+//    }
+}
