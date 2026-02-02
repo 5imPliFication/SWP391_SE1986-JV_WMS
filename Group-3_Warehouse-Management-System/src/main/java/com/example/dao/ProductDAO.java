@@ -178,12 +178,12 @@ public class ProductDAO {
 
     public Product findById(long productId) {
         String sql = """
-                SELECT p.id as product_id, p.name as product_name, p.description, p.image_url, p.is_active ,
+                SELECT p.id as product_id, p.name as product_name, p.description, p.img_url, p.is_active ,
                        b.id as brand_id, b.name as brand_name,
                        c.id as category_id, c.name as category_name
-                FROM product p
-                JOIN brand b on p.brand_id = b.id
-                JOIN category c on p.category_id = c.id
+                FROM products p
+                JOIN brands b on p.brand_id = b.id
+                JOIN categories c on p.category_id = c.id
                 WHERE p.id = ?;
                 """;
         try (Connection conn = DBConfig.getDataSource().getConnection();
@@ -199,7 +199,7 @@ public class ProductDAO {
                 product.setId(rs.getLong("product_id"));
                 product.setName(rs.getString("product_name"));
                 product.setDescription(rs.getString("description"));
-                product.setImgUrl(rs.getString("image_url"));
+                product.setImgUrl(rs.getString("img_url"));
                 product.setIsActive(rs.getBoolean("is_active"));
 
                 Brand brand = new Brand();

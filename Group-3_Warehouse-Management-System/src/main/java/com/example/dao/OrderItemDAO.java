@@ -39,7 +39,7 @@ public class OrderItemDAO {
                p.id AS product_id, p.name AS product_name, 
                p.description, p.price AS product_price
         FROM order_items oi
-        JOIN product p ON oi.product_id = p.id
+        JOIN products p ON oi.product_id = p.id
         WHERE oi.order_id = ?
         ORDER BY oi.id
     """;

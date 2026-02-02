@@ -17,7 +17,7 @@ public class OrderDAO {
         o.setCustomerPhone(rs.getString("customer_phone"));
         o.setStatus(rs.getString("status"));
         o.setCreatedBy(rs.getLong("created_by"));
-        o.setCreatedAt(rs.getTimestamp("created_at"));
+        o.setCreatedAt(rs.getTimestamp("order_date"));
         o.setProcessedBy(rs.getLong("processed_by"));
         o.setProcessedAt(rs.getTimestamp("processed_at"));
         o.setNote(rs.getString("note"));
@@ -91,7 +91,7 @@ public class OrderDAO {
         String sql = """
             SELECT * FROM orders
             WHERE created_by = ?
-            ORDER BY created_at DESC
+            ORDER BY order_date DESC
         """;
 
         List<Order> list = new ArrayList<>();
@@ -115,7 +115,7 @@ public class OrderDAO {
         String sql = """
             SELECT * FROM orders
             WHERE status = ?
-            ORDER BY created_at ASC
+            ORDER BY order_date ASC
         """;
 
         List<Order> list = new ArrayList<>();

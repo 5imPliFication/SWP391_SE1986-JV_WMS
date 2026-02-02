@@ -14,7 +14,7 @@ public class BrandDAO {
     public List<Brand> findAll() {
         List<Brand> list = new ArrayList<>();
         // Modified SQL to get both ID and Name, separated by colon
-        String sql = "SELECT * from brand";
+        String sql = "SELECT * from brands";
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
@@ -33,7 +33,7 @@ public class BrandDAO {
     }
 
     public boolean addBrand(Brand brand) {
-        String sql = "INSERT INTO brand (name, description, is_active) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO brands (name, description, is_active) VALUES (?, ?, ?)";
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -50,7 +50,7 @@ public class BrandDAO {
     }
 
     public boolean isBrandExist(String name) {
-        String sql = "SELECT 1 FROM brand WHERE name = ?";
+        String sql = "SELECT 1 FROM brands WHERE name = ?";
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             ResultSet rs = ps.executeQuery();
@@ -62,7 +62,7 @@ public class BrandDAO {
     }
 
     public boolean changeStatus(Long id, boolean status) {
-        String sql = "update brand set is_active = ? where id = ?;";
+        String sql = "update brands set is_active = ? where id = ?;";
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -78,7 +78,7 @@ public class BrandDAO {
     public List<Brand> findActiveBrand() {
         List<Brand> list = new ArrayList<>();
         // Modified SQL to get both ID and Name, separated by colon
-        String sql = "SELECT * from brand where is_active = 1";
+        String sql = "SELECT * from brands where is_active = 1";
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
@@ -98,7 +98,7 @@ public class BrandDAO {
 
     public Brand findBrandByID(Long id) {
         Brand brand = new Brand();
-        String sql = "SELECT * FROM brand WHERE id = ?";
+        String sql = "SELECT * FROM brands WHERE id = ?";
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, id);
@@ -119,7 +119,7 @@ public class BrandDAO {
     }
 
     public void updateBrand(Connection conn, Brand brand) throws SQLException {
-        String sql = "UPDATE brand SET name = ?, description = ?, is_active = ? WHERE id = ?";
+        String sql = "UPDATE brands SET name = ?, description = ?, is_active = ? WHERE id = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, brand.getName());
