@@ -2,8 +2,10 @@ package com.example.service;
 
 import com.example.dao.OrderDAO;
 import com.example.dao.OrderItemDAO;
+import com.example.dao.ProductDAO;
 import com.example.model.Order;
 import com.example.model.OrderItem;
+import com.example.model.Product;
 
 import java.util.List;
 import java.util.Objects;
@@ -12,10 +14,12 @@ import java.util.UUID;
 public class OrderService {
     private final OrderDAO orderDAO;
     private final OrderItemDAO orderItemDAO;
+    private final ProductDAO productDAO;
 
     public OrderService() {
         orderDAO = new OrderDAO();
         orderItemDAO = new OrderItemDAO();
+        productDAO = new ProductDAO();
     }
 
     /* ================= SALESMAN ================= */
@@ -35,6 +39,7 @@ public class OrderService {
 
     public void addItem(Long orderId, Long productId, Integer quantity, Long salesmanId) {
         Order order = orderDAO.findById(orderId);
+        Product product = productDAO.findById(productId);
 
         if (order == null)
             throw new IllegalArgumentException("Order not found");
@@ -46,8 +51,8 @@ public class OrderService {
             throw new SecurityException("Access denied");
 
         OrderItem item = new OrderItem();
-        item.setOrderId(orderId);
-        item.setProductId(productId);
+        item.setOrder(order);
+        item.setProduct(product);
         item.setQuantity(quantity);
 
         orderItemDAO.addItem(item);
@@ -115,5 +120,29 @@ public class OrderService {
             throw new IllegalStateException("Order not in processing");
 
         orderDAO.updateStatus(orderId, "FLAGGED", warehouseKeeperId, note);
+    }
+
+    public void cancelOrder(Long orderId, Long staffId) {
+        orderDAO.updateStatus(orderId, "CANCELLED", staffId, "Order cancelled");
+    }
+
+    public void addOrUpdateOrderItem(Long orderId, Long productId, int quantity) {
+        // Check if item already exists
+        OrderItem existing = orderItemDAO.findByOrderAndProduct(orderId, productId);
+
+        if (existing != null) {
+            // Update quantity
+            existing.setQuantity(existing.getQuantity() + quantity);
+            orderItemDAO.updateQuantity(existing.getId(), existing.getQuantity());
+        } else {
+            // Add new item
+            OrderItem orderItem = new OrderItem();
+            Order order = orderDAO.findById(orderId);
+            Product product = productDAO.findById(productId);
+            orderItem.setOrder(order);
+            orderItem.setProduct(product);
+            orderItem.setQuantity(quantity);
+            orderItemDAO.addItem(orderItem);
+        }
     }
 }

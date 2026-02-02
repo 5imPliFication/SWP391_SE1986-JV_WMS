@@ -61,7 +61,7 @@ public class CategoryUpdateServlet extends HttpServlet {
             category.setId(id);
             category.setName(name);
             category.setDescription(description);
-            category.setActive(isActive);
+            category.setIsActive(isActive);
 
             categoryService.updateCategory(category);
             response.sendRedirect("categories?status=updated");

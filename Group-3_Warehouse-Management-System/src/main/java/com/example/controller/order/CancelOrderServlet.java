@@ -10,8 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet("/salesman/order/item/add")
-public class AddOrderItemServlet extends HttpServlet {
+@WebServlet("/salesman/order/cancel")
+public class CancelOrderServlet extends HttpServlet {
 
     private OrderService orderService;
 
@@ -24,26 +24,34 @@ public class AddOrderItemServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
+        // Check authentication
         User user = (User) req.getSession().getAttribute("user");
         if (user == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
+        // Check role
+        if (!"Salesman".equals(user.getRole().getName())) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
         try {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
-            Long productId = Long.parseLong(req.getParameter("productId"));
-            int quantity = Integer.parseInt(req.getParameter("quantity"));
 
-            // Check if item already exists and update quantity instead
-            orderService.addOrUpdateOrderItem(orderId, productId, quantity);
+            // Cancel the order
+            orderService.cancelOrder(orderId, user.getId());
 
-            resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId);
+            // Redirect back to orders list
+            resp.sendRedirect(req.getContextPath() + "/salesman/orders?cancelled=true");
 
+        } catch (NumberFormatException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid order ID");
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Failed to add item: " + e.getMessage());
+            req.setAttribute("error", "Failed to cancel order: " + e.getMessage());
+            req.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(req, resp);
         }
     }
 }

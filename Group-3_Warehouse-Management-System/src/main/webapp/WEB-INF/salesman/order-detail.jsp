@@ -7,10 +7,12 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <html>
 <head>
     <title>Order Detail</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
@@ -47,26 +49,26 @@
                     <p class="text-muted mb-1">Status</p>
                     <c:choose>
                         <c:when test="${order.status == 'DRAFT'}">
-                            <span class="badge badge-warning badge-pill px-3 py-2">
+                            <span class="badge badge-secondary badge-pill px-3 py-2">
                                 <i class="fas fa-edit mr-1"></i>${order.status}
                             </span>
                         </c:when>
-                        <c:when test="${order.status == 'Pending'}">
-                            <span class="badge badge-info badge-pill px-3 py-2">
-                                <i class="fas fa-clock mr-1"></i>${order.status}
+                        <c:when test="${order.status == 'SUBMITTED'}">
+                            <span class="badge badge-warning badge-pill px-3 py-2">
+                                <i class="fas fa-paper-plane mr-1"></i>${order.status}
                             </span>
                         </c:when>
-                        <c:when test="${order.status == 'Processing'}">
-                            <span class="badge badge-primary badge-pill px-3 py-2">
+                        <c:when test="${order.status == 'PROCESSING'}">
+                            <span class="badge badge-info badge-pill px-3 py-2">
                                 <i class="fas fa-spinner mr-1"></i>${order.status}
                             </span>
                         </c:when>
-                        <c:when test="${order.status == 'Completed'}">
+                        <c:when test="${order.status == 'COMPLETED'}">
                             <span class="badge badge-success badge-pill px-3 py-2">
                                 <i class="fas fa-check-circle mr-1"></i>${order.status}
                             </span>
                         </c:when>
-                        <c:when test="${order.status == 'Cancelled'}">
+                        <c:when test="${order.status == 'CANCELLED'}">
                             <span class="badge badge-danger badge-pill px-3 py-2">
                                 <i class="fas fa-times-circle mr-1"></i>${order.status}
                             </span>
@@ -92,24 +94,52 @@
                     <tr>
                         <th class="py-3 px-4">#</th>
                         <th class="py-3 px-4">Product Name</th>
-                        <th class="py-3 px-4 text-right">Quantity</th>
+                        <th class="py-3 px-4">Unit Price</th>
+                        <th class="py-3 px-4 text-center">Quantity</th>
+                        <th class="py-3 px-4 text-right">Subtotal</th>
+                        <c:if test="${order.status == 'DRAFT'}">
+                            <th class="py-3 px-4 text-center">Action</th>
+                        </c:if>
                     </tr>
                     </thead>
                     <tbody>
+                    <c:set var="total" value="0"/>
                     <c:forEach items="${items}" var="i" varStatus="status">
+                        <c:set var="subtotal" value="${i.product.price * i.quantity}"/>
+                        <c:set var="total" value="${total + subtotal}"/>
                         <tr>
                             <td class="px-4 align-middle">${status.index + 1}</td>
-                            <td class="px-4 align-middle font-weight-bold">${i.productId}</td>
-                            <td class="px-4 align-middle text-right">
-                                <span class="badge badge-info">${i.quantity}</span>
+                            <td class="px-4 align-middle font-weight-bold">${i.product.name}</td>
+                            <td class="px-4 align-middle">
+                                <fmt:formatNumber value="${i.product.price}" type="number" groupingUsed="true"/> VND
                             </td>
+                            <td class="px-4 align-middle text-center">
+                                <span class="badge badge-info badge-pill">${i.quantity}</span>
+                            </td>
+                            <td class="px-4 align-middle text-right font-weight-bold text-primary">
+                                <fmt:formatNumber value="${subtotal}" type="number" groupingUsed="true"/> VND
+                            </td>
+                            <c:if test="${order.status == 'DRAFT'}">
+                                <td class="px-4 align-middle text-center">
+                                    <form action="${pageContext.request.contextPath}/salesman/order/item/remove"
+                                          method="post"
+                                          style="display:inline;"
+                                          onsubmit="return confirm('Remove this item from order?');">
+                                        <input type="hidden" name="itemId" value="${i.id}"/>
+                                        <input type="hidden" name="orderId" value="${order.id}"/>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </c:if>
                         </tr>
                     </c:forEach>
 
                     <!-- Empty State -->
                     <c:if test="${empty items}">
                         <tr>
-                            <td colspan="3" class="text-center py-5">
+                            <td colspan="${order.status == 'DRAFT' ? '6' : '5'}" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
                                     <h5>No Items in Order</h5>
@@ -123,6 +153,64 @@
             </div>
         </div>
     </div>
+
+    <!-- Order Summary -->
+    <c:if test="${not empty items}">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="mb-3"><i class="fas fa-receipt mr-2"></i>Order Summary</h5>
+
+                        <!-- Coupon Section (placeholder type shi) -->
+                        <div class="form-group">
+                            <label class="font-weight-bold text-muted">
+                                <i class="fas fa-tag mr-1"></i>Discount Code
+                            </label>
+                            <div class="input-group">
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Enter coupon code">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button">
+                                        Apply
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle mr-1"></i>Enter provided coupon code
+                            </small>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Subtotal:</span>
+                                    <span class="font-weight-bold">
+                                        <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> VND
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Discount:</span>
+                                    <span class="text-success">0 VND</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <span class="h5 mb-0">Total:</span>
+                                    <span class="h4 mb-0 text-primary font-weight-bold">
+                                        <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> VND
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </c:if>
 
     <!-- Add Item Form (Only for DRAFT) -->
     <c:if test="${order.status == 'DRAFT'}">
@@ -170,19 +258,42 @@
             </div>
         </div>
 
-        <!-- Submit Order Form -->
-        <div class="card shadow-sm border-primary">
-            <div class="card-body text-center py-4">
-                <h5 class="mb-3">Ready to submit this order?</h5>
-                <p class="text-muted mb-4">Once submitted, you won't be able to modify the order.</p>
-                <form action="${pageContext.request.contextPath}/salesman/order/submit"
-                      method="post"
-                      onsubmit="return confirm('Are you sure you want to submit this order? You will not be able to edit it afterwards.');">
-                    <input type="hidden" name="orderId" value="${order.id}"/>
-                    <button type="submit" class="btn btn-primary btn-lg px-5">
-                        <i class="fas fa-paper-plane mr-2"></i>Submit Order
-                    </button>
-                </form>
+        <!-- Action Buttons -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <!-- Submit Order Form -->
+                <div class="card shadow-sm border-primary h-100">
+                    <div class="card-body text-center py-4">
+                        <h5 class="mb-3"><i class="fas fa-paper-plane mr-2"></i>Submit Order</h5>
+                        <p class="text-muted mb-4">Ready to submit? You won't be able to modify afterwards.</p>
+                        <form action="${pageContext.request.contextPath}/salesman/order/submit"
+                              method="post"
+                              onsubmit="return confirm('Are you sure you want to submit this order? You will not be able to edit it afterwards.');">
+                            <input type="hidden" name="orderId" value="${order.id}"/>
+                            <button type="submit" class="btn btn-primary btn-lg btn-block">
+                                <i class="fas fa-paper-plane mr-2"></i>Submit Order
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <!-- Cancel Order Form -->
+                <div class="card shadow-sm border-danger h-100">
+                    <div class="card-body text-center py-4">
+                        <h5 class="mb-3"><i class="fas fa-times-circle mr-2"></i>Cancel Order</h5>
+                        <p class="text-muted mb-4">Discard this order? This action cannot be undone.</p>
+                        <form action="${pageContext.request.contextPath}/salesman/order/cancel"
+                              method="post"
+                              onsubmit="return confirm('Are you sure you want to CANCEL this order? This cannot be undone!');">
+                            <input type="hidden" name="orderId" value="${order.id}"/>
+                            <button type="submit" class="btn btn-danger btn-lg btn-block">
+                                <i class="fas fa-times-circle mr-2"></i>Cancel Order
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </c:if>
@@ -191,9 +302,18 @@
     <c:if test="${order.status != 'DRAFT'}">
         <div class="alert alert-info shadow-sm" role="alert">
             <h5 class="alert-heading">
-                <i class="fas fa-lock mr-2"></i>Order Locked
+                <i class="fas fa-lock mr-2"></i>Order ${order.status}
             </h5>
-            <p class="mb-0">This order has been submitted and cannot be modified.</p>
+            <p class="mb-0">
+                <c:choose>
+                    <c:when test="${order.status == 'CANCELLED'}">
+                        This order has been cancelled and cannot be modified.
+                    </c:when>
+                    <c:otherwise>
+                        This order has been submitted and cannot be modified.
+                    </c:otherwise>
+                </c:choose>
+            </p>
         </div>
     </c:if>
 </main>

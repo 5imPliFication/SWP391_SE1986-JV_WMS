@@ -28,7 +28,7 @@
         </h2>
         <a href="${pageContext.request.contextPath}/salesman/order/create"
            class="btn btn-primary btn-lg shadow-sm">
-            <i class="bi bi-plus-circle me-2"></i>Create New Order
+            Create New Order
         </a>
     </div>
 
@@ -53,41 +53,29 @@
                             <td class="px-4">${o.customerName}</td>
                             <td class="px-4">
                                 <c:choose>
-                                    <c:when test="${o.status == 'Pending'}">
+                                    <c:when test="${o.status == 'SUBMITTED'}">
                                             <span class="badge bg-warning text-dark">
                                                 <i class="bi bi-clock-history me-1"></i>${o.status}
                                             </span>
                                     </c:when>
-                                    <c:when test="${o.status == 'Processing'}">
+                                    <c:when test="${o.status == 'PROCESSING'}">
                                             <span class="badge bg-info text-dark">
                                                 <i class="bi bi-arrow-repeat me-1"></i>${o.status}
                                             </span>
                                     </c:when>
-                                    <c:when test="${o.status == 'Completed'}">
+                                    <c:when test="${o.status == 'COMPLETED'}">
                                             <span class="badge bg-success">
                                                 <i class="bi bi-check-circle me-1"></i>${o.status}
                                             </span>
                                     </c:when>
-                                    <c:when test="${o.status == 'Cancelled'}">
+                                    <c:when test="${o.status == 'CANCELLED'}">
                                             <span class="badge bg-danger">
-                                                <i class="bi bi-x-circle me-1"></i>${o.status}
+                                                <i class="bi bi-x-circle me-1 text-white"></i>${o.status}
                                             </span>
                                     </c:when>
                                     <c:otherwise>
                                         <c:if test="${o.status eq 'DRAFT'}">
-                                            <span class="badge bg-secondary">${o.status}</span>
-                                        </c:if>
-                                        <c:if test="${o.status eq 'SUBMITTED'}">
-                                            <span class="badge bg-warning">${o.status}</span>
-                                        </c:if>
-                                        <c:if test="${o.status eq 'PROCESSING'}">
-                                            <span class="badge bg-primary">${o.status}</span>
-                                        </c:if>
-                                        <c:if test="${o.status eq 'APPROVED'}">
-                                            <span class="badge bg-success text-white">${o.status}</span>
-                                        </c:if>
-                                        <c:if test="${o.status eq 'FLAGGED'}">
-                                            <span class="badge bg-danger text-white">${o.status}</span>
+                                            <span class="badge bg-secondary text-white">${o.status}</span>
                                         </c:if>
                                     </c:otherwise>
                                 </c:choose>

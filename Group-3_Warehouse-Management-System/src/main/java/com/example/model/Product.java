@@ -2,6 +2,7 @@ package com.example.model;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,6 +13,7 @@ public class Product {
     private Long id;
     private String name;
     private String description;
+    private BigDecimal price;
     private String imgUrl;
     private Boolean isActive;
     private Brand brand;
