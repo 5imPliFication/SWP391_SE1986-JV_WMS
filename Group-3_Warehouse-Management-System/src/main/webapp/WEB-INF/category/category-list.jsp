@@ -33,7 +33,7 @@
                             <table class="table table-hover align-middle">
                                 <thead class="table-light">
                                     <tr>
-                                        th>ID</th>
+
                                         <th>Name</th>
                                         <th>Description</th>
                                         <th>Status</th>
@@ -43,7 +43,7 @@
                                 <tbody>
                                     <c:forEach var="category" items="${categories}">
                                         <tr>
-                                            <td>${category.id}</td>
+
                                             <td>${category.name}</td>
                                             <td>${category.description}</td>
                                             <td>
@@ -57,6 +57,10 @@
                                                 </c:choose>
                                             </td>
                                             <td>
+                                                <a href="update-category?id=${category.id}"
+                                                    class="btn btn-sm btn-warning text-white me-2" title="Edit">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
                                                 <a href="category-detail?id=${category.id}"
                                                     class="btn btn-sm btn-info text-white me-2" title="View Detail">
                                                     <i class="fas fa-eye"></i> View
