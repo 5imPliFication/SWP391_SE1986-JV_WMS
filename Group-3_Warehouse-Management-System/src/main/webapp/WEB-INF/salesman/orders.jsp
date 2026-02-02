@@ -74,7 +74,21 @@
                                             </span>
                                     </c:when>
                                     <c:otherwise>
-                                        <span class="badge bg-secondary">${o.status}</span>
+                                        <c:if test="${o.status eq 'DRAFT'}">
+                                            <span class="badge bg-secondary">${o.status}</span>
+                                        </c:if>
+                                        <c:if test="${o.status eq 'SUBMITTED'}">
+                                            <span class="badge bg-warning">${o.status}</span>
+                                        </c:if>
+                                        <c:if test="${o.status eq 'PROCESSING'}">
+                                            <span class="badge bg-primary">${o.status}</span>
+                                        </c:if>
+                                        <c:if test="${o.status eq 'APPROVED'}">
+                                            <span class="badge bg-success text-white">${o.status}</span>
+                                        </c:if>
+                                        <c:if test="${o.status eq 'FLAGGED'}">
+                                            <span class="badge bg-danger text-white">${o.status}</span>
+                                        </c:if>
                                     </c:otherwise>
                                 </c:choose>
                             </td>
