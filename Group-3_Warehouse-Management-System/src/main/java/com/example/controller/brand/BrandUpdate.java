@@ -56,7 +56,7 @@ public class BrandUpdate extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/product/brand/update-brand.jsp").forward(request, response);
                 return;
             }
-            response.sendRedirect("brand?status=update_success");
+            response.sendRedirect("brands?status=update_success");
         } catch (Exception e) {
             throw new ServletException(e);
         }

@@ -2,27 +2,27 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
 
-            <form action="brand" method="post">
+            <form action="brands" method="post">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Add New Brand</h5>
+                    <h5 class="modal-title fw-bold">Add New Brand</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
 
                     <div class="mb-3">
-                        <label class="form-label text-center">Brand name</label>
+                            <label class="form-label fw-bold">Brand names</label>
                         <input type="text" name="name" class="form-control" required>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Description</label>
+                        <label class="form-label fw-bold">Description</label>
                         <textarea name="description" class="form-control"></textarea>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Status</label>
+                        <label class="form-label fw-bold">Status</label>
                         <select name="active" class="form-select">
                             <option value="true">Active</option>
                             <option value="false">Deactive</option>

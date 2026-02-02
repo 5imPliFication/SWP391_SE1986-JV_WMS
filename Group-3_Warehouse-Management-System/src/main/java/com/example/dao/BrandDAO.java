@@ -11,12 +11,19 @@ import java.util.List;
 
 public class BrandDAO {
 
-    public List<Brand> findAll() {
+    public List<Brand> findAll(int pageNo, int pageSize) {
         List<Brand> list = new ArrayList<>();
-        // Modified SQL to get both ID and Name, separated by colon
-        String sql = "SELECT * from brand";
 
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        String sql = "SELECT * FROM brands ORDER BY id DESC LIMIT ? OFFSET ?";
+
+        int offset = (pageNo - 1) * pageSize;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, pageSize);
+            ps.setInt(2, offset);
+
+            ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
                 Brand brand = new Brand();
@@ -26,14 +33,29 @@ public class BrandDAO {
                 brand.setActive(rs.getBoolean("is_active"));
                 list.add(brand);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return list;
     }
 
+    public int countBrands() {
+        String sql = "SELECT COUNT(*) FROM brands";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public boolean addBrand(Brand brand) {
-        String sql = "INSERT INTO brand (name, description, is_active) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO brands (name, description, is_active) VALUES (?, ?, ?)";
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -50,7 +72,7 @@ public class BrandDAO {
     }
 
     public boolean isBrandExist(String name) {
-        String sql = "SELECT 1 FROM brand WHERE name = ?";
+        String sql = "SELECT 1 FROM brands WHERE name = ?";
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             ResultSet rs = ps.executeQuery();
@@ -62,7 +84,7 @@ public class BrandDAO {
     }
 
     public boolean changeStatus(Long id, boolean status) {
-        String sql = "update brand set is_active = ? where id = ?;";
+        String sql = "update brands set is_active = ? where id = ?;";
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -78,7 +100,7 @@ public class BrandDAO {
     public List<Brand> findActiveBrand() {
         List<Brand> list = new ArrayList<>();
         // Modified SQL to get both ID and Name, separated by colon
-        String sql = "SELECT * from brand where is_active = 1";
+        String sql = "SELECT * from brands where is_active = 1";
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
@@ -98,7 +120,7 @@ public class BrandDAO {
 
     public Brand findBrandByID(Long id) {
         Brand brand = new Brand();
-        String sql = "SELECT * FROM brand WHERE id = ?";
+        String sql = "SELECT * FROM brands WHERE id = ?";
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, id);
@@ -119,7 +141,7 @@ public class BrandDAO {
     }
 
     public void updateBrand(Connection conn, Brand brand) throws SQLException {
-        String sql = "UPDATE brand SET name = ?, description = ?, is_active = ? WHERE id = ?";
+        String sql = "UPDATE brands SET name = ?, description = ?, is_active = ? WHERE id = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, brand.getName());
@@ -129,7 +151,7 @@ public class BrandDAO {
             ps.executeUpdate();
         }
     }
-    
+
     // Using for select box
     public List<Brand> getAllActive() {
         List<Brand> brands = new ArrayList<>();
@@ -139,8 +161,7 @@ public class BrandDAO {
                     WHERE is_active = true
                 """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -164,8 +185,7 @@ public class BrandDAO {
                     FROM brands
                     WHERE id = ?
                 """;
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             Brand brand = null;
             ps.setLong(1, brandId);
             ResultSet rs = ps.executeQuery();
@@ -182,4 +202,19 @@ public class BrandDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public boolean deleteById(long id) {
+        String sql = "DELETE FROM brands WHERE id = ?";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+            return ps.executeUpdate() > 0; // true nếu xóa thành công
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

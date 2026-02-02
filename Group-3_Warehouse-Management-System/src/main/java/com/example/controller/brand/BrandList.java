@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
-@WebServlet(name = "BrandList", urlPatterns = {"/brand"})
+@WebServlet(name = "BrandList", urlPatterns = {"/brands"})
 public class BrandList extends HttpServlet {
 
     private BrandService b;
@@ -28,9 +28,24 @@ public class BrandList extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Brand> list = b.getAllBrand();
-        request.setAttribute("brandList", list);
-        request.getRequestDispatcher("/WEB-INF/product/brand/brand-list.jsp").forward(request, response);
+        int pageNo = 1;
+        int pageSize = 6;
+
+        String pageParam = request.getParameter("pageNo");
+        if (pageParam != null) {
+            pageNo = Integer.parseInt(pageParam);
+        }
+
+        List<Brand> brandList = b.getBrandByPage(pageNo, pageSize);
+        int totalRecords = b.getTotalBrands();
+        int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+
+        request.setAttribute("brandList", brandList);
+        request.setAttribute("pageNo", pageNo);
+        request.setAttribute("totalPages", totalPages);
+
+        request.getRequestDispatcher("/WEB-INF/product/brand/brand-list.jsp")
+                .forward(request, response);
 
     }
 
@@ -50,13 +65,13 @@ public class BrandList extends HttpServlet {
             boolean checkName = b.addBrand(brand);
 
             if (!checkName) {
-                response.sendRedirect("brand?status=name_existed");
+                response.sendRedirect("brands?status=name_existed");
                 return;
             }
-            response.sendRedirect("brand?status=success");
+            response.sendRedirect("brands?status=success");
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("brand?status=error");
+            response.sendRedirect("brands?status=error");
         }
     }
 }

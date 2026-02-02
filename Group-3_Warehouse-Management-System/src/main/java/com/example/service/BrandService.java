@@ -25,8 +25,12 @@ public class BrandService {
         b = new BrandDAO();
     }
 
-    public List<Brand> getAllBrand() {
-        return b.findAll();
+    public List<Brand> getBrandByPage(int pageNo, int pageSize) {
+        return b.findAll(pageNo, pageSize);
+    }
+
+    public int getTotalBrands() {
+        return b.countBrands();
     }
 
     public boolean addBrand(Brand brand) {
@@ -37,11 +41,10 @@ public class BrandService {
         return true;
     }
 
-    // Using for select box
     public List<Brand> getActiveBrands() {
         return b.getAllActive();
     }
-  
+
     public void updateStatus(long id, boolean status) {
         b.changeStatus(id, status);
     }
@@ -70,5 +73,9 @@ public class BrandService {
         }
         return true;
 
+    }
+
+    public boolean deleteById(long id) {
+        return b.deleteById(id);
     }
 }

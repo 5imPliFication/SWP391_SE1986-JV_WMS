@@ -47,6 +47,13 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
+                <c:if test="${param.status == 'delete_success'}">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Xóa thành công
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </c:if>
 
 
                 <div class="card mb-4 shadow-sm">
@@ -104,43 +111,99 @@
 
                                     <tbody>
                                         <c:forEach items="${brandList}" var="b" varStatus="s">
-                                            <tr data-status="${b.active ? 1 : 0}" 
-                                                data-name="${fn:toLowerCase(b.name)}"
-                                                >
+                                            <tr class="${!b.active ? 'table-secondary text-muted' : ''}"
+                                                data-status="${b.active ? 1 : 0}"
+                                                data-name="${fn:toLowerCase(b.name)}">
+
                                                 <td>${s.index + 1}</td>
                                                 <td>${b.name}</td>
                                                 <td>${b.description}</td>
-                                                <td>
-                                                    <form action="/change-status" method="get" class="d-inline">
+
+                                                <!-- STATUS -->
+                                                <td class="text-center">
+                                                    <form action="${pageContext.request.contextPath}/change-status"
+                                                          method="get" class="d-inline">
+
                                                         <input type="hidden" name="brandId" value="${b.id}">
                                                         <input type="hidden" name="status" value="${b.active}">
-                                                        <c:if test="${b.active == true}">
-                                                            <button type="submit" class="btn btn-sm btn-success">
-                                                                Active
-                                                            </button>
-                                                        </c:if>
-                                                        <c:if test="${b.active == false}">
-                                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                                Inactive
-                                                            </button>
-                                                        </c:if>
+
+                                                        <c:choose>
+                                                            <c:when test="${b.active}">
+                                                                <button type="submit" class="btn btn-sm btn-success">
+                                                                    Active
+                                                                </button>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <button type="submit" class="btn btn-sm btn-secondary">
+                                                                    Activate
+                                                                </button>
+                                                            </c:otherwise>
+                                                        </c:choose>
+
                                                     </form>
                                                 </td>
-                                                <td>
-                                                    <a href="/brand-update?brandId=${b.id}" 
-                                                       class="btn btn-sm btn-warning">
-                                                        Edit
-                                                    </a>
+
+                                                <!-- ACTION -->
+                                                <td class="text-center">
+                                                    <!-- DELETE -->
+                                                    <c:if test="${b.active}">
+                                                        <a href="${pageContext.request.contextPath}/brand-update?brandId=${b.id}"
+                                                           class="btn btn-sm btn-warning">
+                                                            Edit
+                                                        </a>
+                                                        <form action="${pageContext.request.contextPath}/change-status"
+                                                              method="post" style="display:inline;"
+                                                              onsubmit="return confirm('Bạn có chắc muốn xóa brand này không?');">
+                                                            <input type="hidden" name="brandId" value="${b.id}">
+                                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                                Delete
+                                                            </button>
+                                                        </form>
+                                                    </c:if>
+
+                                                    <c:if test="${!b.active}">
+                                                        <span class="text-muted ms-2">Disabled</span>
+                                                    </c:if>
+
                                                 </td>
                                             </tr>
                                         </c:forEach>
                                     </tbody>
                                 </table>
+                                <c:if test="${totalPages > 1}">
+                                    <nav class="mt-3">
+                                        <ul class="pagination justify-content-center">
+
+                                            <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
+                                                <a class="page-link"
+                                                   href="${pageContext.request.contextPath}/brands?pageNo=${pageNo - 1}">
+                                                    Previous
+                                                </a>
+                                            </li>
+
+                                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                                <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                                    <a class="page-link"
+                                                       href="${pageContext.request.contextPath}/brands?pageNo=${i}">
+                                                        ${i}
+                                                    </a>
+                                                </li>
+                                            </c:forEach>
+
+                                            <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
+                                                <a class="page-link"
+                                                   href="${pageContext.request.contextPath}/brands?pageNo=${pageNo + 1}">
+                                                    Next
+                                                </a>
+                                            </li>
+
+                                        </ul>
+                                    </nav>
+                                </c:if>
+
                             </div>
                         </div>
-
                     </div>
-
                 </div>
 
         </main>
@@ -148,33 +211,33 @@
     </body>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const statusSelect = document.getElementById("a");
-        const searchInput = document.getElementById("searchName");
+                                                                  const statusSelect = document.getElementById("a");
+                                                                  const searchInput = document.getElementById("searchName");
 
-        function filterTable() {
-            const selectedStatus = statusSelect.value;   // "", "1", "0"
-            const searchText = searchInput.value.toLowerCase().trim();
+                                                                  function filterTable() {
+                                                                      const selectedStatus = statusSelect.value;   // "", "1", "0"
+                                                                      const searchText = searchInput.value.toLowerCase().trim();
 
-            document.querySelectorAll("tbody tr").forEach(row => {
-                const rowStatus = row.dataset.status;
-                const rowName = row.dataset.name;
+                                                                      document.querySelectorAll("tbody tr").forEach(row => {
+                                                                          const rowStatus = row.dataset.status;
+                                                                          const rowName = row.dataset.name;
 
-                let show = true;
+                                                                          let show = true;
 
-                if (selectedStatus !== "") {
-                    show = rowStatus === selectedStatus;
-                }
+                                                                          if (selectedStatus !== "") {
+                                                                              show = rowStatus === selectedStatus;
+                                                                          }
 
-                if (show && searchText !== "") {
-                    show = rowName.includes(searchText);
-                }
+                                                                          if (show && searchText !== "") {
+                                                                              show = rowName.includes(searchText);
+                                                                          }
 
-                row.style.display = show ? "" : "none";
-            });
-        }
+                                                                          row.style.display = show ? "" : "none";
+                                                                      });
+                                                                  }
 
-        statusSelect.addEventListener("change", filterTable);
-        searchInput.addEventListener("keyup", filterTable);
+                                                                  statusSelect.addEventListener("change", filterTable);
+                                                                  searchInput.addEventListener("keyup", filterTable);
     </script>
 
 </html>

@@ -33,14 +33,22 @@ public class ChangeBrandStatus extends HttpServlet {
         boolean isActive = Boolean.parseBoolean(request.getParameter("status"));
         b.updateStatus(id, !isActive);
 
-        response.sendRedirect("brand?status=success");
+        response.sendRedirect("brands?status=update_success");
 
     }
 
- 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        long id = Long.parseLong(request.getParameter("brandId"));
+
+        boolean success = b.deleteById(id);
+        if (!success) {
+            response.sendRedirect("brands?status=delete_failed");
+            return;
+        }
+
+        response.sendRedirect("brands?status=delete_success");
     }
 
 }

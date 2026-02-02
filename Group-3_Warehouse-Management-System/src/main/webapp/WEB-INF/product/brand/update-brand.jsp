@@ -58,7 +58,7 @@
                     <div class="d-flex justify-content-between">
                         <button type="submit" class="btn btn-primary">Save Change</button>
                         <div >
-                            <a href="brand" class="btn btn-outline-secondary ">Back to List</a>
+                            <a href="brands" class="btn btn-outline-secondary ">Back to List</a>
                         </div>
                     </div>
 
