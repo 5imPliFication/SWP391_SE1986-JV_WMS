@@ -2,12 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-package com.example.controller.role;
+package com.example.controller.brand;
 
-import com.example.dao.RoleDAO;
-
+import com.example.service.BrandService;
 import java.io.IOException;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -18,26 +16,31 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author PC
  */
-@WebServlet(name = "RoleChangeStatusServlet", urlPatterns = {"/change_role_status"})
-public class RoleChangeStatusServlet extends HttpServlet {
+@WebServlet(urlPatterns = {"/change-status"})
+public class ChangeBrandStatus extends HttpServlet {
 
-    private RoleDAO d;
+    private BrandService b;
 
     @Override
     public void init() {
-        d = new RoleDAO();
+        b = new BrandService();
     }
 
     @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        Long id = Long.parseLong(request.getParameter("brandId"));
+        boolean isActive = Boolean.parseBoolean(request.getParameter("status"));
+        b.updateStatus(id, !isActive);
+
+        response.sendRedirect("brand?status=success");
+
+    }
+
+ 
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Long id = Long.parseLong(request.getParameter("roleId"));
-        boolean test = !Boolean.parseBoolean(request.getParameter("currentStatus"));
-        System.out.println("id = " + id);
-        System.out.println("status " + test);
-        d.changeStatus(id, test);
-
-        response.sendRedirect(request.getContextPath() + "/roles");
     }
 
 }

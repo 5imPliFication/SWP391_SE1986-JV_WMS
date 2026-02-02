@@ -39,7 +39,6 @@ public class RoleListServlet extends HttpServlet {
         List<Role> roleList = r.getAllRoles();
         List<Permission> allPermissions = p.getAllPermissions();
         
-        // Populate permission IDs for each role to support JSP checkbox rendering
         if (roleList != null) {
             for (Role role : roleList) {
                 List<Long> pIds = new java.util.ArrayList<>();
