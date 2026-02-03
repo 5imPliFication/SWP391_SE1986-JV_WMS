@@ -53,7 +53,7 @@
                             <label for="customerPhone" class="font-weight-bold">
                                 <i class="fas fa-user mr-1"></i>Customer Phone
                             </label>
-                            <input type="text"
+                            <input type="number"
                                    class="form-control form-control-lg"
                                    id="customerPhone"
                                    name="customerPhone"

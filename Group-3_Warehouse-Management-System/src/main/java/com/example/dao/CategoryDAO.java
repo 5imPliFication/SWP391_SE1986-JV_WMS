@@ -7,11 +7,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryDAO {
+
+    protected LocalDateTime getLocalDateTime(ResultSet rs, String column)
+            throws SQLException {
+        Timestamp ts = rs.getTimestamp(column);
+        return ts == null ? null : ts.toLocalDateTime();
+    }
 
     // Using for select box
     public List<Category> getAllActive() {
@@ -22,9 +29,7 @@ public class CategoryDAO {
                 WHERE is_active = true
                 """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 Category category = new Category();
@@ -42,8 +47,7 @@ public class CategoryDAO {
     public void createCategory(Category category) {
         String sql = "INSERT INTO categories (name, description, is_active) VALUES (?, ?, ?)";
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, category.getName());
             ps.setString(2, category.getDescription());
@@ -58,8 +62,7 @@ public class CategoryDAO {
     public void updateCategory(Category category) {
         String sql = "UPDATE categories SET name = ?, description = ?, is_active = ? WHERE id = ?";
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, category.getName());
             ps.setString(2, category.getDescription());
@@ -72,41 +75,38 @@ public class CategoryDAO {
         }
     }
 
-    public Category findById(long categoryId) {
-        String sql = """
-                SELECT *
-                FROM categories
-                WHERE id = ?
-                """;
+    public Category findById(long id) {
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        String sql = "SELECT * FROM categories WHERE id = ?";
 
-            ps.setLong(1, categoryId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Category category = new Category();
-                    category.setId(rs.getLong("id"));
-                    category.setName(rs.getString("name"));
-                    category.setDescription(rs.getString("description"));
-                    category.setIsActive(rs.getBoolean("is_active"));
-                    category.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-                    category.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
-                    return category;
-                }
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Category category = new Category();
+                category.setId(rs.getLong("id"));
+                category.setName(rs.getString("name"));
+
+                // ✅ SAFE timestamp
+                category.setCreatedAt(getLocalDateTime(rs, "created_at"));
+                category.setUpdatedAt(getLocalDateTime(rs, "updated_at"));
+
+                return category;
             }
 
+            return null;
+
         } catch (SQLException e) {
-            throw new RuntimeException("Error finding category by id", e);
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     public Category getCategoryById(Long id) {
         String sql = "SELECT * FROM categories WHERE id = ?";
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -130,9 +130,7 @@ public class CategoryDAO {
         List<Category> categories = new ArrayList<>();
         String sql = "SELECT * FROM categories";
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 Category category = new Category();

@@ -8,48 +8,55 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ProductDAO {
 
-    public List<Product> getAll(String searchName, String brandName, String categoryName, Boolean isActive, int pageNo) {
-        List<Product> products = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("""
-                    SELECT p.id, p.name, p.description, p.img_url, p.is_active, b.name as brand_name , c.name as category_name , p.created_at, p.updated_at
-                    FROM products p
-                    JOIN brands b on p.brand_id = b.id
-                    JOIN categories c on p.category_id = c.id
-                    WHERE 1=1
-                """);
+    protected LocalDateTime getLocalDateTime(ResultSet rs, String column)
+            throws SQLException {
+        Timestamp ts = rs.getTimestamp(column);
+        return ts == null ? null : ts.toLocalDateTime();
+    }
 
-        // search by name
+    public List<Product> getAll(String searchName, String brandName,
+            String categoryName, Boolean isActive, int pageNo) {
+
+        List<Product> products = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("""
+            SELECT p.id, p.name, p.description, p.img_url, p.is_active,
+                   b.name AS brand_name,
+                   c.name AS category_name,
+                   p.created_at, p.updated_at
+            FROM products p
+            JOIN brands b ON p.brand_id = b.id
+            JOIN categories c ON p.category_id = c.id
+            WHERE 1=1
+        """);
+
         if (searchName != null && !searchName.trim().isEmpty()) {
             sql.append(" AND p.name LIKE ? ");
         }
-        // filter by brand name
         if (brandName != null && !brandName.trim().isEmpty()) {
             sql.append(" AND b.name = ? ");
         }
-        // filter by category name
         if (categoryName != null && !categoryName.trim().isEmpty()) {
             sql.append(" AND c.name = ? ");
         }
-        // filter by active status
         if (isActive != null) {
             sql.append(" AND p.is_active = ? ");
         }
 
-        // filter by date created
         sql.append(" ORDER BY p.created_at DESC ");
+        sql.append(" LIMIT ? OFFSET ? ");
 
-        // handle pagination
-        sql.append(" limit ? offset ? ");
-
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
+
             if (searchName != null && !searchName.trim().isEmpty()) {
                 ps.setString(index++, "%" + searchName + "%");
             }
@@ -62,13 +69,12 @@ public class ProductDAO {
             if (isActive != null) {
                 ps.setBoolean(index++, isActive);
             }
-            // set value for pagination of SQL
-            ps.setInt(index++, UserConstant.PAGE_SIZE);
 
-            int offset = (pageNo - 1) * UserConstant.PAGE_SIZE;
-            ps.setInt(index++, offset);
+            ps.setInt(index++, UserConstant.PAGE_SIZE);
+            ps.setInt(index++, (pageNo - 1) * UserConstant.PAGE_SIZE);
 
             ResultSet rs = ps.executeQuery();
+
             while (rs.next()) {
                 Product product = new Product();
                 product.setId(rs.getLong("id"));
@@ -76,59 +82,58 @@ public class ProductDAO {
                 product.setDescription(rs.getString("description"));
                 product.setImgUrl(rs.getString("img_url"));
                 product.setIsActive(rs.getBoolean("is_active"));
-                product.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-                product.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+
+                // ✅ SAFE timestamp
+                product.setCreatedAt(getLocalDateTime(rs, "created_at"));
+                product.setUpdatedAt(getLocalDateTime(rs, "updated_at"));
 
                 Brand brand = new Brand();
                 brand.setName(rs.getString("brand_name"));
+
                 Category category = new Category();
                 category.setName(rs.getString("category_name"));
 
                 product.setBrand(brand);
                 product.setCategory(category);
 
-                // Add to list
                 products.add(product);
             }
+
             return products;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public int countProducts(String searchName, String brandName, String categoryName, Boolean isActive) {
-        int totalProducts = 0;
-        StringBuilder sql = new StringBuilder("""
-                    SELECT count(*)
-                    FROM products p
-                    JOIN brands b on p.brand_id = b.id
-                    JOIN categories c on p.category_id = c.id
-                    WHERE 1=1
-                """);
+    public int countProducts(String searchName, String brandName,
+            String categoryName, Boolean isActive) {
 
-        // search by name
+        StringBuilder sql = new StringBuilder("""
+            SELECT COUNT(*)
+            FROM products p
+            JOIN brands b ON p.brand_id = b.id
+            JOIN categories c ON p.category_id = c.id
+            WHERE 1=1
+        """);
+
         if (searchName != null && !searchName.trim().isEmpty()) {
             sql.append(" AND p.name LIKE ? ");
         }
-        // filter by brand name
         if (brandName != null && !brandName.trim().isEmpty()) {
             sql.append(" AND b.name = ? ");
         }
-
-        // filter by category name
         if (categoryName != null && !categoryName.trim().isEmpty()) {
             sql.append(" AND c.name = ? ");
         }
-
-        // filter by active status
         if (isActive != null) {
             sql.append(" AND p.is_active = ? ");
         }
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
+
             if (searchName != null && !searchName.trim().isEmpty()) {
                 ps.setString(index++, "%" + searchName + "%");
             }
@@ -143,10 +148,8 @@ public class ProductDAO {
             }
 
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                totalProducts = rs.getInt(1);
-            }
-            return totalProducts;
+            return rs.next() ? rs.getInt(1) : 0;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -158,8 +161,7 @@ public class ProductDAO {
                 INSERT INTO products (name, description, img_url, brand_id, category_id, is_active, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())
                 """;
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, product.getName());
             ps.setString(2, product.getDescription());
@@ -186,8 +188,7 @@ public class ProductDAO {
                 JOIN categories c on p.category_id = c.id
                 WHERE p.id = ?;
                 """;
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             Product product = null;
 
             ps.setLong(1, productId);
@@ -233,8 +234,7 @@ public class ProductDAO {
                 WHERE id = ?
                 """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, product.getName());
             ps.setString(2, product.getDescription());
@@ -253,4 +253,3 @@ public class ProductDAO {
     }
 
 }
-
