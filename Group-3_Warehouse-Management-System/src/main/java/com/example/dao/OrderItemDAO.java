@@ -58,7 +58,7 @@ public class OrderItemDAO {
                     product.setId(rs.getLong("product_id"));
                     product.setName(rs.getString("product_name"));
                      product.setDescription(rs.getString("description"));
-                     product.setPrice(rs.getBigDecimal("product_price"));
+//                     product.setPrice(rs.getBigDecimal("product_price"));
 
                     // Create OrderItem
                     OrderItem item = new OrderItem();
