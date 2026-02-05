@@ -50,7 +50,7 @@ public class ProductUpdateServlet extends HttpServlet {
         String imgUrl = request.getParameter("imgUrl");
         long brandId = Long.parseLong(request.getParameter("brandId"));
         long categoryId = Long.parseLong(request.getParameter("categoryId"));
-        boolean productIsActive = Boolean.parseBoolean(request.getParameter("isActive"));
+        boolean productIsActive = Boolean.parseBoolean(request.getParameter("productIsActive"));
 
         int pageNo = Integer.parseInt(request.getParameter("pageNo"));
         String searchName = request.getParameter("searchName");
