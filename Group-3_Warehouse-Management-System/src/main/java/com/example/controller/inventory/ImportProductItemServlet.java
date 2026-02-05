@@ -64,6 +64,45 @@ public class ImportProductItemServlet extends HttpServlet {
                 request.setAttribute("products", products);
             }
         }
+
+        // pagination for IMPORT_ITEMS
+        List<ImportProductItemDTO> importItems = (List<ImportProductItemDTO>) session.getAttribute("IMPORT_ITEMS");
+        if (importItems != null && !importItems.isEmpty()) {
+            int pageSize = 10;
+            int totalItems = importItems.size();
+            int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+
+            // get pageNo
+            String pageNoStr = request.getParameter("pageNo");
+            // default value
+            int pageNo = 1;
+            if (pageNoStr != null && !pageNoStr.isEmpty()) {
+                try {
+                    pageNo = Integer.parseInt(pageNoStr);
+                } catch (NumberFormatException e) {
+                    pageNo = 1;
+                }
+            }
+
+           // validate pageNo in range
+            if (pageNo < 1)
+                pageNo = 1;
+            if (pageNo > totalPages)
+                pageNo = totalPages;
+
+            // index start cut in IMPORT_ITEMS
+            int start = (pageNo - 1) * pageSize;
+            // index end cut in IMPORT_ITEMS
+            int end = Math.min(start + pageSize, totalItems);
+
+            // cut
+            List<ImportProductItemDTO> pageItems = importItems.subList(start, end);
+
+            request.setAttribute("importItems", pageItems);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("pageNo", pageNo);
+        }
+
         request.getRequestDispatcher("/WEB-INF/inventory/import-products.jsp").forward(request, response);
     }
 
