@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
 </head>
 <body>
+<body>
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
 <main class="main-content">
@@ -26,29 +27,34 @@
         <p class="text-muted mb-0">Review and process incoming orders</p>
     </div>
 
-    <!-- Stats Row -->
+    <!-- Stats Row - DYNAMIC -->
     <div class="row mb-4">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-left-warning h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h3 class="font-weight-bold text-warning mb-1">12</h3>
-                            <p class="text-muted mb-0 small">Submitted Orders</p>
+                            <h3 class="font-weight-bold text-warning mb-1">
+                                ${submittedCount != null ? submittedCount : 0}
+                            </h3>
+                            <p class="text-muted mb-0 small">Submitted</p>
                         </div>
                         <div class="text-warning">
-                            <i class="fas fa-clock fa-2x"></i>
+                            <i class="fas fa-paper-plane fa-2x"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+
+        <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-left-primary h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h3 class="font-weight-bold text-primary mb-1">5</h3>
+                            <h3 class="font-weight-bold text-primary mb-1">
+                                ${processingCount != null ? processingCount : 0}
+                            </h3>
                             <p class="text-muted mb-0 small">Processing</p>
                         </div>
                         <div class="text-primary">
@@ -58,16 +64,37 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+
+        <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-left-success h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h3 class="font-weight-bold text-success mb-1">89</h3>
-                            <p class="text-muted mb-0 small">Approved Today</p>
+                            <h3 class="font-weight-bold text-success mb-1">
+                                ${completedCount != null ? completedCount : 0}
+                            </h3>
+                            <p class="text-muted mb-0 small">Completed</p>
                         </div>
                         <div class="text-success">
                             <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-left-danger h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="font-weight-bold text-danger mb-1">
+                                ${cancelledCount != null ? cancelledCount : 0}
+                            </h3>
+                            <p class="text-muted mb-0 small">Cancelled</p>
+                        </div>
+                        <div class="text-danger">
+                            <i class="fas fa-times-circle fa-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -88,6 +115,7 @@
                         <th class="py-3 px-4">Order Code</th>
                         <th class="py-3 px-4">Customer</th>
                         <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4">Created At</th>
                         <th class="py-3 px-4 text-center">Actions</th>
                     </tr>
                     </thead>
@@ -100,9 +128,14 @@
                             <td class="px-4 align-middle">${o.customerName}</td>
                             <td class="px-4 align-middle">
                                 <c:choose>
+                                    <c:when test="${o.status == 'DRAFT'}">
+                                            <span class="badge badge-secondary">
+                                                <i class="fas fa-edit mr-1"></i>${o.status}
+                                            </span>
+                                    </c:when>
                                     <c:when test="${o.status == 'SUBMITTED'}">
                                             <span class="badge badge-warning">
-                                                <i class="fas fa-clock mr-1"></i>${o.status}
+                                                <i class="fas fa-paper-plane mr-1"></i>${o.status}
                                             </span>
                                     </c:when>
                                     <c:when test="${o.status == 'PROCESSING'}">
@@ -110,14 +143,14 @@
                                                 <i class="fas fa-spinner mr-1"></i>${o.status}
                                             </span>
                                     </c:when>
-                                    <c:when test="${o.status == 'APPROVED'}">
+                                    <c:when test="${o.status == 'COMPLETED'}">
                                             <span class="badge badge-success">
                                                 <i class="fas fa-check-circle mr-1"></i>${o.status}
                                             </span>
                                     </c:when>
-                                    <c:when test="${o.status == 'FLAGGED'}">
+                                    <c:when test="${o.status == 'CANCELLED'}">
                                             <span class="badge badge-danger">
-                                                <i class="fas fa-flag mr-1"></i>${o.status}
+                                                <i class="fas fa-times-circle mr-1"></i>${o.status}
                                             </span>
                                     </c:when>
                                     <c:otherwise>
@@ -125,25 +158,16 @@
                                     </c:otherwise>
                                 </c:choose>
                             </td>
+                            <td class="px-4 align-middle text-muted">
+                                <i class="fas fa-calendar mr-1"></i>
+                                    ${o.createdAt}
+                            </td>
                             <td class="px-4 align-middle text-center">
-                                <div class="btn-group" role="group">
-                                    <a href="${pageContext.request.contextPath}/warehouse/order/detail?id=${o.id}"
-                                       class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye mr-1"></i>View
-                                    </a>
-
-                                    <c:if test="${o.status == 'SUBMITTED'}">
-                                        <form action="${pageContext.request.contextPath}/warehouse/order/process"
-                                              method="post"
-                                              class="d-inline"
-                                              onsubmit="return confirm('Start processing this order?');">
-                                            <input type="hidden" name="orderId" value="${o.id}"/>
-                                            <button type="submit" class="btn btn-sm btn-success">
-                                                <i class="fas fa-play-circle mr-1"></i>Process
-                                            </button>
-                                        </form>
-                                    </c:if>
-                                </div>
+                                <!-- Only View button - Actions performed in detail page -->
+                                <a href="${pageContext.request.contextPath}/warehouse/order/detail?id=${o.id}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye mr-1"></i>View Details
+                                </a>
                             </td>
                         </tr>
                     </c:forEach>
@@ -151,7 +175,7 @@
                     <!-- Empty State -->
                     <c:if test="${empty orders}">
                         <tr>
-                            <td colspan="4" class="text-center py-5">
+                            <td colspan="5" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
                                     <h5>No Orders in Queue</h5>

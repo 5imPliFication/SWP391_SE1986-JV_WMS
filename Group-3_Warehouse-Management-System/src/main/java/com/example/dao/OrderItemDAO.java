@@ -77,19 +77,22 @@ public class OrderItemDAO {
         return items;
     }
 
-    public boolean deleteByOrderId(Long orderId) {
-        String sql = "DELETE FROM order_items WHERE order_id = ?";
+    public boolean deleteByOrderAndProduct(Long orderId, Long productId) {
+        String sql = "DELETE FROM order_items WHERE order_id = ? AND product_id = ?";
 
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setLong(1, orderId);
+            ps.setLong(2, productId);
+
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Delete order items failed", e);
+            throw new RuntimeException("Delete order item failed", e);
         }
     }
+
 
     public OrderItem findByOrderAndProduct(Long orderId, Long productId) {
         String sql = "SELECT * FROM order_items WHERE order_id = ? AND product_id = ?";

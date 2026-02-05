@@ -10,44 +10,58 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet("/salesman/order/cancel")
+
+@WebServlet("/order/cancel")
 public class CancelOrderServlet extends HttpServlet {
 
     private OrderService orderService;
 
     @Override
     public void init() {
+        // Prefer DI / context lookup if you already use it
         orderService = new OrderService();
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
+            throws IOException, ServletException {
 
-        // Check authentication
+        // Authentication (filter may already handle this)
         User user = (User) req.getSession().getAttribute("user");
         if (user == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
-        // Check role
-        if (!"Salesman".equals(user.getRole().getName())) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
         try {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
+            String note = req.getParameter("note");
 
-            // Cancel the order
-            orderService.cancelOrder(orderId, user.getId());
+            orderService.cancelOrder(
+                    orderId,
+                    user.getId(),
+                    note
+            );
 
-            // Redirect back to orders list
-            resp.sendRedirect(req.getContextPath() + "/salesman/orders?cancelled=true");
+            // Redirect based on role (UX concern, not permission)
+            String role = user.getRole().getName();
+            if ("Salesman".equalsIgnoreCase(role)) {
+                resp.sendRedirect(req.getContextPath()
+                        + "/salesman/orders?cancelled=true");
+            } else if ("Warehouse".equalsIgnoreCase(role)) {
+                resp.sendRedirect(req.getContextPath()
+                        + "/warehouse/orders?cancelled=true");
+            } else {
+                resp.sendRedirect(req.getContextPath()
+                        + "/orders?cancelled=true");
+            }
 
         } catch (NumberFormatException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid order ID");
+        } catch (SecurityException e) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        } catch (IllegalStateException e) {
+            resp.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             req.setAttribute("error", "Failed to cancel order: " + e.getMessage());
