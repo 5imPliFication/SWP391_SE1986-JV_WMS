@@ -42,8 +42,8 @@
         </form>
 
         <%-- save --%>
-        <button type="submit" form="productItemsForm" class="btn btn-primary ml-2" name="action"
-                value="save">
+        <button type="submit" form="productItemsForm" class="btn btn-primary ml-2"
+                name="action" value="save">
             Save
         </button>
     </div>
@@ -80,9 +80,12 @@
                                 action="${pageContext.request.contextPath}/import-product-items"
                                 method="post">
                                 <%--set name to forward--%>
-                            <input type="hidden" name="product-id" value="${product.id}">
-                            <input type="hidden" name="product-name" value="${product.name}">
-                            <button class="btn btn-success btn-sm" type="submit" name="action" value="add">
+                            <input type="hidden" name="product-id"
+                                   value="${product.id}">
+                            <input type="hidden" name="product-name"
+                                   value="${product.name}">
+                            <button class="btn btn-success btn-sm" type="submit"
+                                    name="action" value="add">
                                 Import product
                             </button>
                         </form>
@@ -94,11 +97,12 @@
     </c:if>
 
 
-    <form id="productItemsForm" method="post" action="${pageContext.request.contextPath}/import-product-items">
+    <form id="productItemsForm" method="post"
+          action="${pageContext.request.contextPath}/import-product-items">
         <!-- table import product items-->
         <div>
-            <%--set value for product_items in scope--%>
-            <c:set var="productItems" value="${sessionScope.IMPORT_ITEMS}"/>
+            <%--set value for product_items in scope from paged request attribute--%>
+            <c:set var="productItems" value="${importItems}"/>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover table-sm">
                     <thead class="thead-dark text-center">
@@ -111,7 +115,8 @@
                         <th style="width: 90px;">Delete</th>
                     </tr>
                     </thead>
-                    <%-- if productItems not empty -> display list product item need import --%>
+                    <%-- if productItems not empty -> display list product item need import
+                        --%>
                     <c:if test="${not empty productItems}">
                         <tbody>
                             <%--loop productItems--%>
@@ -125,7 +130,8 @@
 
                                     <%--name product (item)--%>
                                 <td class="align-middle">
-                                    <input type="hidden" name="product-id"
+                                    <input type="hidden"
+                                           name="product-id"
                                            value="${item.productId}">
                                         ${item.productName}
                                 </td>
@@ -133,7 +139,8 @@
                                 <td>
                                     <input type="text" name="serial"
                                            class="form-control form-control-sm"
-                                           value="${item.serial}" required>
+                                           value="${item.serial}"
+                                           required>
                                 </td>
                                     <%--unit--%>
                                 <td
@@ -150,9 +157,10 @@
                                            required>
                                 </td>
                                     <%--delete product item--%>
-                                <td class="text-center align-middle">
+                                <td
+                                        class="text-center align-middle">
                                         <%--method get--%>
-                                    <a href="${pageContext.request.contextPath}/import-product-items?action=delete&index=${status.index}"
+                                    <a href="${pageContext.request.contextPath}/import-product-items?action=delete&index=${(pageNo - 1) * 10 + status.index}"
                                        class="btn btn-danger btn-sm">
                                         Delete
                                     </a>
@@ -189,13 +197,15 @@
         </div>
     </c:if>
 
+    <%--pagination--%>
     <c:if test="${totalPages > 1}">
         <nav class="mt-3">
             <ul class="pagination justify-content-center">
                     <%-- previous page --%>
+                    <%--pageNo = 1 -> disable button previous, else -> ""--%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/user-list?pageNo=${pageNo - 1}&searchName=${param.searchName}&sortName=${param.sortName}">
+                       href="${pageContext.request.contextPath}/import-product-items?pageNo=${pageNo - 1}&searchName=${param.searchName}">
                         Previous
                     </a>
                 </li>
@@ -204,16 +214,17 @@
                 <c:forEach begin="1" end="${totalPages}" var="i">
                     <li class="page-item ${i == pageNo ? 'active' : ''}">
                         <a class="page-link"
-                           href="${pageContext.request.contextPath}/user-list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
+                           href="${pageContext.request.contextPath}/import-product-items?pageNo=${i}&searchName=${param.searchName}">
                                 ${i}
                         </a>
                     </li>
                 </c:forEach>
 
                     <%-- next page--%>
-                <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
+                <li
+                        class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/user-list?pageNo=${pageNo + 1}&searchName=${param.searchName}&sortName=${param.sortName}">
+                       href="${pageContext.request.contextPath}/import-product-items?pageNo=${pageNo + 1}&searchName=${param.searchName}">
                         Next
                     </a>
                 </li>
