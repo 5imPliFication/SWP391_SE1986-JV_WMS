@@ -8,6 +8,7 @@ import com.example.model.OrderItem;
 import com.example.model.Product;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -22,9 +23,17 @@ public class OrderService {
         productDAO = new ProductDAO();
     }
 
+    public List<Order> getAllOrders() {
+        return orderDAO.findAll();
+    }
+
+    public Map<String, Integer> getOrderStatistics() {
+        return orderDAO.getStatistics();
+    }
+
     /* ================= SALESMAN ================= */
 
-    public int createDraftOrder(String customerName, String customerPhone,  String note, Long salesmanId) {
+    public int createDraftOrder(String customerName, String customerPhone, String note, Long salesmanId) {
         Order order = new Order();
         order.setOrderCode("ORD-" + UUID.randomUUID());
         order.setCustomerName(customerName);
@@ -33,33 +42,34 @@ public class OrderService {
         order.setNote(note);
         order.setCreatedBy(salesmanId);
         System.out.println("Service layer ----------");
-        System.out.println(order.getOrderCode()+" ++ "+order.getStatus()+" ++ "+order.getCreatedBy());
+        System.out.println(order.getOrderCode() + " ++ " + order.getStatus() + " ++ " + order.getCreatedBy());
         return orderDAO.create(order);
     }
 
-    public void addItem(Long orderId, Long productId, Integer quantity, Long salesmanId) {
-        Order order = orderDAO.findById(orderId);
-        Product product = productDAO.findById(productId);
+    public void removeItem(Long orderId, Long productId) {
 
+        Order order = orderDAO.findById(orderId);
         if (order == null)
             throw new IllegalArgumentException("Order not found");
 
-        if (!order.getStatus().equals("DRAFT"))
+        if (!"DRAFT".equals(order.getStatus()))
             throw new IllegalStateException("Order is not editable");
 
-        if (!Objects.equals(order.getCreatedBy(), salesmanId))
-            throw new SecurityException("Access denied");
+        OrderItem orderItem = orderItemDAO.findByOrderAndProduct(orderId, productId);
+        if (orderItem == null)
+            throw new IllegalArgumentException("Item not found");
 
-        OrderItem item = new OrderItem();
-        item.setOrder(order);
-        item.setProduct(product);
-        item.setQuantity(quantity);
-
-        orderItemDAO.addItem(item);
+        orderItemDAO.deleteByOrderAndProduct(orderId, productId);
     }
+
 
     public void submitOrder(Long orderId, Long salesmanId) {
         Order order = orderDAO.findById(orderId);
+
+        List<OrderItem> orderItems = orderItemDAO.findByOrderId(orderId);
+        if (orderItems.isEmpty()) {
+            throw new IllegalStateException("Cannot submit an order with no items");
+        }
 
         if (!order.getCreatedBy().equals(salesmanId))
             throw new SecurityException("Not your order");
@@ -67,7 +77,7 @@ public class OrderService {
         if (!order.getStatus().equals("DRAFT"))
             throw new IllegalStateException("Order already submitted");
 
-        orderDAO.updateStatus(orderId, "SUBMITTED", null, null);
+        orderDAO.updateStatus(orderId, "SUBMITTED", salesmanId, null);
     }
 
     public List<Order> getOrdersBySalesman(Long salesmanId) {
@@ -80,7 +90,7 @@ public class OrderService {
         Order order = orderDAO.findById(orderId);
         if (order == null) return null;
 
-        if ("SALESMAN".equals(role) && !Objects.equals(order.getCreatedBy(), userId))
+        if ("Salesman".equals(role) && !Objects.equals(order.getCreatedBy(), userId))
             throw new SecurityException("Access denied");
 
         return order;
@@ -101,16 +111,16 @@ public class OrderService {
         orderDAO.updateStatus(orderId, "PROCESSING", warehouseKeeperId, null);
     }
 
-    public void approveOrder(Long orderId, Long warehouseKeeperId) {
+    public void completeProcessing(Long orderId, Long warehouseKeeperId) {
         Order order = orderDAO.findById(orderId);
 
         if (!order.getStatus().equals("PROCESSING"))
-            throw new IllegalStateException("Order not in processing");
+            throw new IllegalStateException("Order is not in queue");
 
-        orderDAO.updateStatus(orderId, "APPROVED", warehouseKeeperId, null);
+        orderDAO.updateStatus(orderId, "COMPLETED", warehouseKeeperId, null);
     }
 
-    public void flagOrder(Long orderId, Long warehouseKeeperId, String note) {
+    public void cancelOrder(Long orderId, Long warehouseKeeperId, String note) {
         if (note == null || note.isBlank())
             throw new IllegalArgumentException("Flag reason required");
 
@@ -119,11 +129,7 @@ public class OrderService {
         if (!order.getStatus().equals("PROCESSING"))
             throw new IllegalStateException("Order not in processing");
 
-        orderDAO.updateStatus(orderId, "FLAGGED", warehouseKeeperId, note);
-    }
-
-    public void cancelOrder(Long orderId, Long staffId) {
-        orderDAO.updateStatus(orderId, "CANCELLED", staffId, "Order cancelled");
+        orderDAO.updateStatus(orderId, "CANCELLED", warehouseKeeperId, note);
     }
 
     public void addOrUpdateOrderItem(Long orderId, Long productId, int quantity) {
