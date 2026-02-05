@@ -132,7 +132,7 @@
                 <td>${p.createdAt}</td>
                 <td>${p.updatedAt}</td>
                 <td>
-                    <a href="${pageContext.request.contextPath}/products/update?productId=${p.id}">EDIT</a>
+                    <a href="${pageContext.request.contextPath}/products/update?productId=${p.id}&pageNo=${pageNo}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&isActive=${param.isActive}">EDIT</a>
                 </td>
 
             </tr>

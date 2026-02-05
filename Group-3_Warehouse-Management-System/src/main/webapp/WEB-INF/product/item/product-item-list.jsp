@@ -115,7 +115,7 @@
 
         <c:if test="${empty productItems}">
             <tr>
-                <td colspan="5">No data</td>
+                <td colspan="7">No data</td>
             </tr>
         </c:if>
         </tbody>
