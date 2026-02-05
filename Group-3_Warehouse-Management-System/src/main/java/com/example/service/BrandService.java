@@ -72,10 +72,5 @@ public class BrandService {
             throw new RuntimeException("Update Brand failed", e);
         }
         return true;
-
-    }
-
-    public boolean deleteById(long id) {
-        return b.deleteById(id);
     }
 }

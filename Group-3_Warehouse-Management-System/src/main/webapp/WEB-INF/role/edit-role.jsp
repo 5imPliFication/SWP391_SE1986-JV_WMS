@@ -80,18 +80,6 @@
                 </div>
             </form>
 
-            <!-- DELETE FORM -->
-            <form action="roles" method="post" class="d-inline"
-                  onsubmit="return confirm('Xóa role ${role.name}?')">
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="id" value="${role.id}">
-                <div class="d-grid m-1">
-                    <button class="btn btn-danger">
-                        Delete
-                    </button>
-                </div>
-            </form>
-
             <!-- BACK -->
             <div class="d-grid m-1">
                 <a href="roles" class="btn btn-outline-secondary">Back to List</a>
