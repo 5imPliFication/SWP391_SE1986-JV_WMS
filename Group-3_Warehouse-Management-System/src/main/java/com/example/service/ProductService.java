@@ -6,6 +6,7 @@ import com.example.dao.ProductDAO;
 import com.example.model.Brand;
 import com.example.model.Category;
 import com.example.model.Product;
+import com.example.model.ProductItem;
 
 import java.util.List;
 
@@ -54,5 +55,13 @@ public class ProductService {
         product.setCategory(category);
 
         return productDAO.update(product);
+    }
+
+    public List<ProductItem> findItemsByProductId(long productId, String searchSerial, Boolean isActive, int pageNo) {
+        return productDAO.getItemsByProductId(productId, searchSerial,isActive, pageNo);
+    }
+
+    public int countProductItems(long productId, String searchSerial, Boolean isActive) {
+        return productDAO.countProductItems(productId, searchSerial, isActive);
     }
 }
