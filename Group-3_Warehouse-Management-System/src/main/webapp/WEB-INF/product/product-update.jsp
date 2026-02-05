@@ -105,6 +105,20 @@
                             </button>
                         </div>
 
+                        <div>
+                            <c:if test="${not empty sessionScope.successMessage}">
+                                <div class="alert alert-success">
+                                        ${sessionScope.successMessage}
+                                </div>
+                                <c:remove var="successMessage" scope="session"/>
+                            </c:if>
+                            <c:if test="${not empty sessionScope.errorMessage}">
+                                <div class="alert alert-danger">
+                                        ${sessionScope.errorMessage}
+                                </div>
+                                <c:remove var="errorMessage" scope="session"/>
+                            </c:if>
+                        </div>
                     </form>
                 </div>
             </div>

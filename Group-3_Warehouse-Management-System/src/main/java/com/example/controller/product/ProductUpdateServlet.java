@@ -53,9 +53,9 @@ public class ProductUpdateServlet extends HttpServlet {
         boolean isActive = Boolean.parseBoolean(request.getParameter("isActive"));
 
         if(productService.updateProduct(productId, productName, productDescription, imgUrl, brandId, categoryId, isActive)) {
-            request.getSession().setAttribute("success-message", "Product updated successfully");
+            request.getSession().setAttribute("successMessage", "Product updated successfully");
         } else {
-            request.getSession().setAttribute("error-message", "Product update failed");
+            request.getSession().setAttribute("errorMessage", "Product update failed");
         }
         response.sendRedirect("/products/update?productId=" + productId);
     }

@@ -24,8 +24,10 @@
                 <div class="card-body">
                     <form action="${pageContext.request.contextPath}/products/items/update" method="post">
 
-                        <%--Product Item ID hidden--%>
                         <input type="hidden" name="productItemId" value="${productItem.id}">
+                        <input type="hidden" name="pageNo" value="${param.pageNo}">
+                        <input type="hidden" name="searchSerial" value="${param.searchSerial}">
+                        <input type="hidden" name="isActive" value="${param.isActive}">
 
                         <!-- Serial Number -->
                         <div class="mb-3">
@@ -34,6 +36,7 @@
                                    name="productItemSerial"
                                    class="form-control"
                                    value="${productItem.serial}"
+                                   style="background-color: #adb5bd;"
                                    readonly>
                         </div>
 
@@ -43,39 +46,58 @@
                             <input type="text"
                                    name="productItemImportedPrice"
                                    class="form-control"
-                                   value="${productItem.importedPrice}"
+                                   value="<fmt:formatNumber value='${productItem.importedPrice}' type='number' groupingUsed='true' /> đ"
+                                   style="background-color: #adb5bd;"
                                    readonly>
                         </div>
 
                         <!-- Current Price -->
                         <div class="mb-3">
                             <label class="form-label">Current Price</label>
-                            <input type="text"
+                            <input type="number"
                                    name="productItemCurrentPrice"
                                    class="form-control"
                                    value="${productItem.currentPrice}"
-                                   placeholder="Input price"
+                                   placeholder="Input current price"
                                    required>
                         </div>
 
                         <%--Status--%>
                         <div class="mb-3">
                             <label class="form-label">Status</label>
-                            <select name="isActive" class="form-select">
-                                <option value="true"  ${product.isActive == 'true' ? 'selected' : ''}>Available</option>
-                                <option value="false" ${product.isActive == 'false' ? 'selected' : ''}>Unavailable</option>
+                            <select name="productItemIsActive" class="form-select">
+                                <option value="true"  ${productItem.isActive == 'true' ? 'selected' : ''}>Available
+                                </option>
+                                <option value="false" ${productItem.isActive == 'false' ? 'selected' : ''}>Unavailable
+                                </option>
                             </select>
                         </div>
 
                         <!-- Buttons -->
                         <div class="d-flex justify-content-between">
-                            <a href="${pageContext.request.contextPath}/products"
+                            <a href="${pageContext.request.contextPath}/products/items?productId=${productItem.productId}&pageNo=${param.pageNo}&searchSerial=${param.searchSerial}&isActive=${param.isActive}"
                                class="btn btn-secondary">
                                 Back to product item list
                             </a>
+
                             <button type="submit" class="btn btn-primary">
-                                Update item
+                                Update Item
                             </button>
+                        </div>
+
+                        <div>
+                            <c:if test="${not empty sessionScope.successMessage}">
+                                <div class="alert alert-success">
+                                        ${sessionScope.successMessage}
+                                </div>
+                                <c:remove var="successMessage" scope="session"/>
+                            </c:if>
+                            <c:if test="${not empty sessionScope.errorMessage}">
+                                <div class="alert alert-danger">
+                                        ${sessionScope.errorMessage}
+                                </div>
+                                <c:remove var="errorMessage" scope="session"/>
+                            </c:if>
                         </div>
 
                     </form>

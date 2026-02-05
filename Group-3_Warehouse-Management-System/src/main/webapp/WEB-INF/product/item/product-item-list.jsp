@@ -92,20 +92,22 @@
         </thead>
 
         <tbody>
-        <c:forEach items="${productItems}" var="p">
+        <c:forEach items="${productItems}" var="pi">
             <tr>
-                <td>${p.serial}</td>
+                <td>${pi.serial}</td>
                 <td>
-                    <fmt:formatNumber value="${p.importedPrice" type="number" groupingUsed="true"/> đ
+                    <fmt:formatNumber value="${pi.importedPrice}" type="number" groupingUsed="true"/> đ
                 </td>
                 <td>
-                    <fmt:formatNumber value="${p.currentPrice}" type="number" groupingUsed="true"/> đ
+                    <fmt:formatNumber value="${pi.currentPrice}" type="number" groupingUsed="true"/> đ
                 </td>
-                <td>${p.importedAt}</td>
-                <td>${p.updatedAt}</td>
-                <td>${(p.isActive == true) ? 'Available' : 'Unavailable'}</td>
+                <td>${pi.importedAt}</td>
+                <td>${pi.updatedAt}</td>
+                <td>${(pi.isActive == true) ? 'Available' : 'Unavailable'}</td>
                 <td>
-                    <a href="${pageContext.request.contextPath}/products/items/update?productItemId=${p.id}">EDIT</a>
+                    <a href="${pageContext.request.contextPath}/products/items/update?productItemId=${pi.id}&pageNo=${pageNo}&searchSerial=${param.searchSerial}&isActive=${param.isActive}">
+                        EDIT
+                    </a>
                 </td>
 
             </tr>
@@ -118,6 +120,8 @@
         </c:if>
         </tbody>
     </table>
+
+    <a href="${pageContext.request.contextPath}/products">Back to product list</a>
 
     <%-- pagination--%>
     <c:if test="${totalPages > 1}">

@@ -301,7 +301,7 @@ public class ProductDAO {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 ProductItem productItem = new ProductItem();
-                productItem.setId(rs.getLong("product_id"));
+                productItem.setId(rs.getLong("id"));
                 productItem.setSerial(rs.getString("serial"));
                 productItem.setImportedPrice(rs.getDouble("imported_price"));
                 productItem.setCurrentPrice(rs.getDouble("current_price"));
@@ -354,6 +354,62 @@ public class ProductDAO {
                 totalProductItems = rs.getInt(1);
             }
             return totalProductItems;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ProductItem findItemById(long productItemId) {
+        String sql = """
+                SELECT *
+                FROM product_items pi
+                WHERE pi.id = ?;
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ProductItem productItem = null;
+
+            ps.setLong(1, productItemId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                productItem = new ProductItem();
+
+                productItem.setId(rs.getLong("id"));
+                productItem.setSerial(rs.getString("serial"));
+                productItem.setImportedPrice(rs.getDouble("imported_price"));
+                productItem.setCurrentPrice(rs.getDouble("current_price"));
+                productItem.setImportedAt(rs.getTimestamp("imported_at").toLocalDateTime());
+                productItem.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+                productItem.setIsActive(rs.getBoolean("is_active"));
+                productItem.setProductId(rs.getLong("product_id"));
+
+            }
+
+            return productItem;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean updateItem(ProductItem productItem) {
+        String sql = """
+                UPDATE product_items
+                SET current_price = ?,
+                    is_active = ?,
+                    updated_at = NOW()
+                WHERE id = ?
+                """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setDouble(1, productItem.getCurrentPrice());
+            ps.setBoolean(2, productItem.getIsActive());
+            ps.setLong(3, productItem.getId());
+
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

@@ -64,4 +64,18 @@ public class ProductService {
     public int countProductItems(long productId, String searchSerial, Boolean isActive) {
         return productDAO.countProductItems(productId, searchSerial, isActive);
     }
+
+    public ProductItem findProductItemById(long productItemId) {
+        return productDAO.findItemById(productItemId);
+    }
+
+    public boolean updateProductItem(long productItemId, double currentPrice, Boolean isActive) {
+        ProductItem productItem = new ProductItem();
+        productItem.setId(productItemId);
+        productItem.setCurrentPrice(currentPrice);
+        productItem.setIsActive(isActive);
+
+        return productDAO.updateItem(productItem);
+    }
+
 }
