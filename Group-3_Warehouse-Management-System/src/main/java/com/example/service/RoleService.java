@@ -29,10 +29,6 @@ public class RoleService {
         return roleDAO.findAll();
     }
 
-    public void deleteRole(Long roleId) {
-        roleDAO.deleteRole(roleId);
-    }
-
     public Role getRoleById(Long id) {
         return roleDAO.findById(id);
     }

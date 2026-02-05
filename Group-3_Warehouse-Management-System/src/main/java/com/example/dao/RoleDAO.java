@@ -194,44 +194,4 @@ public class RoleDAO {
         }
     }
 
-    public void deleteRole(Long roleId) {
-        String sqlDeleteMapping = "DELETE FROM role_permissions WHERE role_id = ?";
-        String sqlDeleteRole = "DELETE FROM roles WHERE id = ?";
-
-        Connection conn = null;
-        try {
-            conn = DBConfig.getDataSource().getConnection();
-            conn.setAutoCommit(false);
-
-            try (PreparedStatement ps1 = conn.prepareStatement(sqlDeleteMapping)) {
-                ps1.setLong(1, roleId);
-                ps1.executeUpdate();
-            }
-
-            try (PreparedStatement ps2 = conn.prepareStatement(sqlDeleteRole)) {
-                ps2.setLong(1, roleId);
-                ps2.executeUpdate();
-            }
-
-            conn.commit(); // Hoàn tất
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            e.printStackTrace();
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
 }
