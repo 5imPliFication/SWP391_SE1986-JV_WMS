@@ -44,7 +44,6 @@ public class ProductItemUpdateServlet extends HttpServlet {
 
         int pageNo = Integer.parseInt(request.getParameter("pageNo"));
         String searchSerial =  request.getParameter("searchSerial");
-        String isActiveParam = request.getParameter("isActive");
         String isActive = request.getParameter("isActive");
 
         if(productService.updateProductItem(productItemId, productItemCurrentPrice, productItemIsActive)) {
