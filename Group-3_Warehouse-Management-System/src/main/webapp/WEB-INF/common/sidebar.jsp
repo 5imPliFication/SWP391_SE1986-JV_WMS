@@ -1,4 +1,4 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <% String uri = request.getRequestURI(); %>
@@ -28,9 +28,9 @@
 
         <!-- USER -->
         <c:if test="${sessionScope.user != null
-                         and sessionScope.user.role != null
-                         and sessionScope.user.role.active
-                         and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
             <li>
                 <a href="${pageContext.request.contextPath}/user-list"
                    class="<%= (uri.contains("user")) ? "active" : "" %>">
@@ -39,95 +39,53 @@
             </li>
         </c:if>
 
-<<<<<<< Updated upstream
         <!-- ROLE -->
         <c:if test="${sessionScope.user != null
-                         and sessionScope.user.role != null
-                         and sessionScope.user.role.active
-                         and fn:contains(sessionScope.userPermissions, 'READ_ROLE')}">
-=======
-            <!-- USER -->
-            <c:if test="${sessionScope.user != null
-                          and sessionScope.user.role != null
-                          and sessionScope.user.role.active
-                          and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
-                  <li>
-                      <a href="${pageContext.request.contextPath}/user-list"
-                         class="<%= (uri.contains("user")) ? "active" : "" %>">
-                          <span>User</span>
-                      </a>
-                  </li>
-            </c:if>
-
-            <!-- ROLE -->
-            <c:if test="${sessionScope.user != null
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
                           and fn:contains(sessionScope.userPermissions, 'READ_ROLE')}">
-                  <li>
-                      <a href="${pageContext.request.contextPath}/roles"
-                         class="<%= (uri.contains("roles")) ? "active" : "" %>">
-                          <span>Role</span>
-                      </a>
-                  </li>
-            </c:if>
-
-            <!-- Order (salesman) -->
-            <c:if test="${sessionScope.user != null
-                          and sessionScope.user.role.name eq 'Salesman'
-                          and sessionScope.user.role.active
-                          and fn:contains(sessionScope.userPermissions, 'READ_ORDER')}">
-                <li>
-                    <a href="${pageContext.request.contextPath}/salesman/orders"
-                       class="<%= (uri.contains("order")) ? "active" : "" %>">
-                        <span>Order</span>
-                    </a>
-                </li>
-            </c:if>
-            <!-- Order (warehouse) -->
-            <c:if test="${sessionScope.user != null
-                          and sessionScope.user.role.name eq 'Warehouse'
-                          and sessionScope.user.role.active
-                          and fn:contains(sessionScope.userPermissions, 'READ_ORDER')}">
-                <li>
-                    <a href="${pageContext.request.contextPath}/warehouse/orders"
-                       class="<%= (uri.contains("order")) ? "active" : "" %>">
-                        <span>Order</span>
-                    </a>
-                </li>
-            </c:if>
-
-            <!-- Request Password Reset -->
-            <c:if test="${sessionScope.user != null
-                          and sessionScope.user.role.name eq 'Salesman'
-                          and sessionScope.user.role.active
-                          and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
-                  <li>
-                      <a href="${pageContext.request.contextPath}/admin/password-reset"
-                         class="<%= (uri.contains("admin/password-reset")) ? "active" : "" %>">
-                          <span>Password Reset Request</span>
-                      </a>
-                  </li>
-            </c:if>
-
-            <!-- Import/Export -->
-            <c:if test="${sessionScope.user != null
-                          and sessionScope.user.role != null
-                          and sessionScope.user.role.active
-                          and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
-                  <li>
-                      <a href="${pageContext.request.contextPath}/import-product-items"
-                         class="<%= (uri.contains("import-product")) ? "active" : "" %>">
-                          <span>Import Product</span>
-                      </a>
-                  </li>
-            </c:if>
-
->>>>>>> Stashed changes
             <li>
                 <a href="${pageContext.request.contextPath}/roles"
                    class="<%= (uri.contains("roles")) ? "active" : "" %>">
                     <span>Role</span>
+                </a>
+            </li>
+        </c:if>
+
+        <!-- Order (salesman) -->
+        <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role.name eq 'Salesman'
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'READ_ORDER')}">
+            <li>
+                <a href="${pageContext.request.contextPath}/salesman/orders"
+                   class="<%= (uri.contains("order")) ? "active" : "" %>">
+                    <span>Order</span>
+                </a>
+            </li>
+        </c:if>
+        <!-- Order (warehouse) -->
+        <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role.name eq 'Warehouse'
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'READ_ORDER')}">
+            <li>
+                <a href="${pageContext.request.contextPath}/warehouse/orders"
+                   class="<%= (uri.contains("order")) ? "active" : "" %>">
+                    <span>Order</span>
+                </a>
+            </li>
+        </c:if>
+
+        <!-- Request Password Reset -->
+        <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role.name eq 'Salesman'
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
+            <li>
+                <a href="${pageContext.request.contextPath}/admin/password-reset"
+                   class="<%= (uri.contains("admin/password-reset")) ? "active" : "" %>">
+                    <span>Password Reset Request</span>
                 </a>
             </li>
         </c:if>

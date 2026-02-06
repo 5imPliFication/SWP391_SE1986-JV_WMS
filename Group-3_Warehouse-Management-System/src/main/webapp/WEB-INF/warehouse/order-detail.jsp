@@ -212,8 +212,6 @@
                 <i class="fas fa-info-circle mr-2"></i>Order Status: ${order.status}
             </h5>
             <p class="mb-0">
-                <!-- Add these action buttons for different statuses in the warehouse order-detail.jsp -->
-
                 <!-- Action Buttons Based on Status -->
                 <c:choose>
                     <%-- SUBMITTED orders can be set to PROCESSING or CANCELLED --%>
@@ -245,7 +243,7 @@
                         </div>
                         <div class="card-body text-center d-flex flex-column justify-content-center">
                             <p class="mb-4">Cancel this order</p>
-                            <form action="${pageContext.request.contextPath}/warehouse/order/cancel"
+                            <form action="${pageContext.request.contextPath}/order/cancel"
                                   method="post"
                                   onsubmit="return confirm('Are you sure you want to cancel this order?');">
                                 <input type="hidden" name="orderId" value="${order.id}"/>
@@ -259,8 +257,8 @@
             </div>
             </c:when>
 
-                <%-- PROCESSING orders can be COMPLETED or CANCELLED --%>
-            <c:when test="${order.status == 'PROCESSING'}">
+                <%-- PROCESSING and SUBMITTED orders can be COMPLETED or CANCELLED --%>
+            <c:when test="${order.status == 'PROCESSING' and order.status == 'SUBMITTED'}">
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <div class="card shadow-sm border-success h-100">

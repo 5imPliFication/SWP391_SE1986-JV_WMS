@@ -121,12 +121,9 @@ public class OrderService {
     }
 
     public void cancelOrder(Long orderId, Long warehouseKeeperId, String note) {
-        if (note == null || note.isBlank())
-            throw new IllegalArgumentException("Flag reason required");
-
         Order order = orderDAO.findById(orderId);
 
-        if (!order.getStatus().equals("PROCESSING"))
+        if (!order.getStatus().equals("PROCESSING") && !order.getStatus().equals("SUBMITTED"))
             throw new IllegalStateException("Order not in processing");
 
         orderDAO.updateStatus(orderId, "CANCELLED", warehouseKeeperId, note);
