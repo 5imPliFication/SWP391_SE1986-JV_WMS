@@ -1,11 +1,10 @@
 package com.example.service;
 
-import com.example.dao.OrderDAO;
-import com.example.dao.OrderItemDAO;
-import com.example.dao.ProductDAO;
+import com.example.dao.*;
 import com.example.model.Order;
 import com.example.model.OrderItem;
 import com.example.model.Product;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
@@ -16,11 +15,15 @@ public class OrderService {
     private final OrderDAO orderDAO;
     private final OrderItemDAO orderItemDAO;
     private final ProductDAO productDAO;
+    private final CouponDAO couponDAO;
+    private final UserDAO userDAO;
 
     public OrderService() {
         orderDAO = new OrderDAO();
         orderItemDAO = new OrderItemDAO();
         productDAO = new ProductDAO();
+        couponDAO = new CouponDAO();
+        userDAO = new UserDAO();
     }
 
     public List<Order> getAllOrders() {
@@ -40,7 +43,7 @@ public class OrderService {
         order.setCustomerPhone(customerPhone);
         order.setStatus("DRAFT");
         order.setNote(note);
-        order.setCreatedBy(salesmanId);
+        order.setCreatedBy(userDAO.findUserById(salesmanId));
         System.out.println("Service layer ----------");
         System.out.println(order.getOrderCode() + " ++ " + order.getStatus() + " ++ " + order.getCreatedBy());
         return orderDAO.create(order);
@@ -93,7 +96,36 @@ public class OrderService {
         if ("Salesman".equals(role) && !Objects.equals(order.getCreatedBy(), userId))
             throw new SecurityException("Access denied");
 
+        // Load creator user
+        if (order.getCreatedBy() != null) {
+            userDAO.findUserById(order.getCreatedBy().getId());
+        }
+
+        // Load coupon if applied
+        if (order.getCoupon() != null) {
+            couponDAO.findById(order.getCoupon().getId()).ifPresent(order::setCoupon);
+        }
+
         return order;
+    }
+
+    // Load creator info for a single order (when needed)
+    public void loadCreator(Order order) {
+        if (order.getCreatedBy() != null) {
+            userDAO.findUserById(order.getCreatedBy().getId());
+        }
+    }
+
+    // Load coupon info for a single order (when needed)
+    public void loadCoupon(Order order) {
+        if (order.getCoupon() != null) {
+            couponDAO.findById(order.getCoupon().getId()).ifPresent(order::setCoupon);
+        }
+    }
+
+    // Batch load creators for multiple orders (more efficient)
+    public void loadCreatorsForOrders(List<Order> orders) {
+        orders.forEach(this::loadCreator);
     }
 
     /* ================= WAREHOUSE ================= */
