@@ -78,6 +78,18 @@
                   </li>
             </c:if>
 
+            <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
+                <li>
+                    <a href="${pageContext.request.contextPath}/export-product-items"
+                       class="<%= (uri.contains("export-products")) ? "active" : "" %>">
+                        <span>Export Product</span>
+                    </a>
+                </li>
+            </c:if>
+
             <li>
                 <a href="${pageContext.request.contextPath}/products"
                    class="<%= (uri.contains("products")) ? "active" : "" %>">
