@@ -4,8 +4,10 @@ import com.example.config.DBConfig;
 import com.example.model.Order;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import com.example.dto.ExportOrderDTO;
 
 public class OrderDAO {
 
@@ -67,7 +69,6 @@ public class OrderDAO {
             throw new RuntimeException("Create order failed", e);
         }
     }
-
 
     public Order findById(Long orderId) {
         String sql = "SELECT * FROM orders WHERE id = ?";
@@ -159,24 +160,4 @@ public class OrderDAO {
             throw new RuntimeException("Update order status failed", e);
         }
     }
-//    // Overloading
-//    public void updateStatus(Long orderId, String status) {
-//        String sql = "UPDATE orders SET status = ?, updated_at = NOW() WHERE id = ?";
-//
-//        try (Connection con = DBConfig.getDataSource().getConnection();
-//             PreparedStatement ps = con.prepareStatement(sql)) {
-//
-//            ps.setString(1, status);
-//            ps.setLong(2, orderId);
-//
-//            int affected = ps.executeUpdate();
-//
-//            if (affected == 0) {
-//                throw new SQLException("Order not found with ID: " + orderId);
-//            }
-//
-//        } catch (SQLException e) {
-//            throw new RuntimeException("Failed to update order status", e);
-//        }
-//    }
 }

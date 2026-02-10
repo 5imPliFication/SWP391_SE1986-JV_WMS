@@ -7,9 +7,10 @@ import com.example.model.Order;
 import com.example.model.OrderItem;
 import com.example.model.Product;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.*;
+
+import com.example.dto.ExportOrderDTO;
 
 public class OrderService {
     private final OrderDAO orderDAO;
@@ -24,7 +25,7 @@ public class OrderService {
 
     /* ================= SALESMAN ================= */
 
-    public int createDraftOrder(String customerName, String customerPhone,  String note, Long salesmanId) {
+    public int createDraftOrder(String customerName, String customerPhone, String note, Long salesmanId) {
         Order order = new Order();
         order.setOrderCode("ORD-" + UUID.randomUUID());
         order.setCustomerName(customerName);
@@ -33,7 +34,7 @@ public class OrderService {
         order.setNote(note);
         order.setCreatedBy(salesmanId);
         System.out.println("Service layer ----------");
-        System.out.println(order.getOrderCode()+" ++ "+order.getStatus()+" ++ "+order.getCreatedBy());
+        System.out.println(order.getOrderCode() + " ++ " + order.getStatus() + " ++ " + order.getCreatedBy());
         return orderDAO.create(order);
     }
 
@@ -78,7 +79,8 @@ public class OrderService {
 
     public Order getOrderDetail(Long orderId, Long userId, String role) {
         Order order = orderDAO.findById(orderId);
-        if (order == null) return null;
+        if (order == null)
+            return null;
 
         if ("SALESMAN".equals(role) && !Objects.equals(order.getCreatedBy(), userId))
             throw new SecurityException("Access denied");
