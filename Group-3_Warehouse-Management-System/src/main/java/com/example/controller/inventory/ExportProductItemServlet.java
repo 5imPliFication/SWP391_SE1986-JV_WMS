@@ -1,10 +1,7 @@
 package com.example.controller.inventory;
 
-import com.example.dao.InventoryDAO;
 import com.example.service.InventoryService;
-import com.example.service.OrderService;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,10 +13,11 @@ import java.util.Map;
 @WebServlet({ "/export-products", "/export-product-items" })
 public class ExportProductItemServlet extends HttpServlet {
 
-    private final InventoryService inventoryService;
+    private InventoryService inventoryService;
 
-    public ExportProductItemServlet(InventoryService inventoryService) {
-        this.inventoryService = inventoryService;
+    @Override
+    public void init() throws ServletException {
+        inventoryService = new InventoryService();
     }
 
     @Override
