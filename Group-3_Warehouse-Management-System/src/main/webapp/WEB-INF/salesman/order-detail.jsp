@@ -125,7 +125,7 @@
                                           method="post"
                                           style="display:inline;"
                                           onsubmit="return confirm('Remove this item from order?');">
-                                        <input type="hidden" name="itemId" value="${i.id}"/>
+                                        <input type="hidden" name="productId" value="${i.product.id}"/>
                                         <input type="hidden" name="orderId" value="${order.id}"/>
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
                                             <i class="fas fa-trash"></i>
@@ -264,16 +264,38 @@
                 <!-- Submit Order Form -->
                 <div class="card shadow-sm border-primary h-100">
                     <div class="card-body text-center py-4">
-                        <h5 class="mb-3"><i class="fas fa-paper-plane mr-2"></i>Submit Order</h5>
-                        <p class="text-muted mb-4">Ready to submit? You won't be able to modify afterwards.</p>
-                        <form action="${pageContext.request.contextPath}/salesman/order/submit"
-                              method="post"
-                              onsubmit="return confirm('Are you sure you want to submit this order? You will not be able to edit it afterwards.');">
-                            <input type="hidden" name="orderId" value="${order.id}"/>
-                            <button type="submit" class="btn btn-primary btn-lg btn-block">
-                                <i class="fas fa-paper-plane mr-2"></i>Submit Order
-                            </button>
-                        </form>
+                        <h5 class="mb-3">
+                            <i class="fas fa-paper-plane mr-2"></i>Submit Order
+                        </h5>
+
+                        <c:choose>
+                            <c:when test="${not empty items}">
+                                <p class="text-muted mb-4">
+                                    Ready to submit? You won't be able to modify afterwards.
+                                </p>
+
+                                <form action="${pageContext.request.contextPath}/salesman/order/submit"
+                                      method="post"
+                                      onsubmit="return confirm('Are you sure you want to submit this order?');">
+
+                                    <input type="hidden" name="orderId" value="${order.id}"/>
+
+                                    <button type="submit" class="btn btn-primary btn-lg btn-block">
+                                        <i class="fas fa-paper-plane mr-2"></i>Submit Order
+                                    </button>
+                                </form>
+                            </c:when>
+
+                            <c:otherwise>
+                                <p class="text-danger mb-4">
+                                    You must add at least one item before submitting the order.
+                                </p>
+
+                                <button class="btn btn-secondary btn-lg btn-block" disabled>
+                                    <i class="fas fa-paper-plane mr-2"></i>Submit Order
+                                </button>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </div>
             </div>

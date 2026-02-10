@@ -6,10 +6,72 @@ import com.example.model.Order;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import com.example.dto.ExportOrderDTO;
 
 public class OrderDAO {
+
+    public List<Order> findAll() {
+        String sql = """
+        SELECT o.*, u.fullname AS created_by_name
+        FROM orders o
+        LEFT JOIN users u ON o.created_by = u.id
+        WHERE o.status not like 'DRAFT'
+        ORDER BY o.order_date DESC
+    """;
+
+        List<Order> orders = new ArrayList<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Order order = new Order();
+                order.setId(rs.getLong("id"));
+                order.setOrderCode(rs.getString("order_code"));
+                order.setCustomerName(rs.getString("customer_name"));
+                order.setCustomerPhone(rs.getString("customer_phone"));
+                order.setNote(rs.getString("note"));
+                order.setStatus(rs.getString("status"));
+                order.setCreatedBy(rs.getLong("created_by"));
+                order.setCreatedAt(rs.getTimestamp("order_date"));
+                order.setProcessedAt(rs.getTimestamp("processed_at"));
+
+                orders.add(order);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch all orders", e);
+        }
+
+        return orders;
+    }
+
+    public Map<String, Integer> getStatistics() {
+        String sql = """
+        SELECT status, COUNT(*) as count
+        FROM orders
+        GROUP BY status
+    """;
+
+        Map<String, Integer> stats = new HashMap<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                stats.put(rs.getString("status"), rs.getInt("count"));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch statistics", e);
+        }
+
+        return stats;
+    }
 
     private Order mapOrder(ResultSet rs) throws SQLException {
         Order o = new Order();
