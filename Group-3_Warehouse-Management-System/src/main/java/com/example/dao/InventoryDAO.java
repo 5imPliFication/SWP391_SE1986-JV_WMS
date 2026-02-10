@@ -1,10 +1,12 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
+import com.example.dto.ExportOrderDTO;
 import com.example.model.Product;
 import com.example.model.ProductItem;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,5 +93,78 @@ public class InventoryDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    public List<ExportOrderDTO> searchExportOrders(LocalDate fromDate, LocalDate toDate, int offset, int limit) {
+        StringBuilder sql = new StringBuilder("""
+                    SELECT o.id, o.order_code, o.order_date, u.fullname as salesman_name, o.customer_name, o.status
+                    FROM orders o
+                    JOIN users u ON o.created_by = u.id
+                    WHERE 1=1
+                """);
+
+        // handle date
+        if (fromDate != null)
+            sql.append(" AND CAST(o.order_date AS DATE) >= ?");
+        if (toDate != null)
+            sql.append(" AND CAST(o.order_date AS DATE) <= ?");
+
+        // pagination
+        sql.append(" ORDER BY o.order_date DESC LIMIT ? OFFSET ?");
+
+        List<ExportOrderDTO> list = new ArrayList<>();
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int index = 1;
+            if (fromDate != null)
+                ps.setDate(index++, Date.valueOf(fromDate));
+            if (toDate != null)
+                ps.setDate(index++, Date.valueOf(toDate));
+            ps.setInt(index++, limit);
+            ps.setInt(index, offset);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                ExportOrderDTO dto = new ExportOrderDTO();
+                dto.setId(rs.getLong("id"));
+                dto.setCode(rs.getString("order_code"));
+                dto.setExportDate(rs.getTimestamp("order_date"));
+                dto.setSalesmanName(rs.getString("salesman_name"));
+                dto.setCustomerName(rs.getString("customer_name"));
+                dto.setStatus(rs.getString("status"));
+                list.add(dto);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Find order fail", e);
+        }
+        return list;
+    }
+
+    // count total export product order
+    public int countExportOrders(LocalDate fromDate, LocalDate toDate) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders o WHERE 1=1");
+        if (fromDate != null)
+            sql.append(" AND CAST(o.order_date AS DATE) >= ?");
+        if (toDate != null)
+            sql.append(" AND CAST(o.order_date AS DATE) <= ?");
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int index = 1;
+            if (fromDate != null)
+                ps.setDate(index++, Date.valueOf(fromDate));
+            if (toDate != null)
+                ps.setDate(index++, Date.valueOf(toDate));
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return rs.getInt(1);
+        } catch (SQLException e) {
+            throw new RuntimeException("Count fail", e);
+        }
+        return 0;
     }
 }
