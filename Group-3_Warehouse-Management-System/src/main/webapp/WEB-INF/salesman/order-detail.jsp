@@ -304,8 +304,12 @@
                 <!-- Cancel Order Form -->
                 <div class="card shadow-sm border-danger h-100">
                     <div class="card-body text-center py-4">
-                        <h5 class="mb-3"><i class="fas fa-times-circle mr-2"></i>Cancel Order</h5>
-                        <p class="text-muted mb-4">Discard this order? This action cannot be undone.</p>
+                        <h5 class="mb-3">
+                            <i class="fas fa-times-circle mr-2"></i>Cancel Order
+                        </h5>
+                        <p class="text-muted mb-4">
+                            Discard this draft order? This action cannot be undone.
+                        </p>
                         <form action="${pageContext.request.contextPath}/salesman/order/cancel"
                               method="post"
                               onsubmit="return confirm('Are you sure you want to CANCEL this order? This cannot be undone!');">

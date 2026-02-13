@@ -6,6 +6,7 @@ import com.example.model.Order;
 import com.example.model.User;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -266,10 +267,30 @@ public class OrderDAO {
 
     public List<Order> findBySalesman(Long salesmanId) {
         String sql = """
-                    SELECT * FROM orders
-                    WHERE created_by = ?
-                    ORDER BY order_date DESC
-                """;
+        SELECT
+            o.id AS order_id,
+            o.order_code,
+            o.customer_name,
+            o.customer_phone,
+            o.note,
+            o.status,
+            o.total_price as total,
+            o.order_date,
+            o.processed_at,
+
+            u.id AS created_user_id,
+            u.fullname AS created_user_name,
+
+            c.id AS coupon_id,
+            c.code AS coupon_code,
+            c.discount_type,
+            c.discount_value
+        FROM orders o
+        JOIN users u ON o.created_by = u.id
+        LEFT JOIN coupons c ON o.coupon_id = c.id
+        WHERE o.created_by = ?
+        ORDER BY o.order_date DESC
+    """;
 
         List<Order> list = new ArrayList<>();
 
@@ -290,10 +311,30 @@ public class OrderDAO {
 
     public List<Order> findByStatus(String status) {
         String sql = """
-                    SELECT * FROM orders
-                    WHERE status = ?
-                    ORDER BY order_date ASC
-                """;
+        SELECT
+            o.id AS order_id,
+            o.order_code,
+            o.customer_name,
+            o.customer_phone,
+            o.note,
+            o.status,
+            o.total_price as total,
+            o.order_date,
+            o.processed_at,
+
+            u.id AS created_user_id,
+            u.fullname AS created_user_name,
+
+            c.id AS coupon_id,
+            c.code AS coupon_code,
+            c.discount_type,
+            c.discount_value
+        FROM orders o
+        JOIN users u ON o.created_by = u.id
+        LEFT JOIN coupons c ON o.coupon_id = c.id
+        WHERE o.status = ?
+        ORDER BY o.order_date ASC
+    """;
 
         List<Order> list = new ArrayList<>();
 
@@ -312,28 +353,60 @@ public class OrderDAO {
         return list;
     }
 
-    public boolean updateStatus(Long orderId, String status, Long processedBy, String note) {
+    public boolean updateStatus(Long orderId,
+                                String status,
+                                Long processedBy,
+                                String note) {
+
         String sql = """
-                    UPDATE orders
-                    SET status = ?, processed_by = ?, processed_at = NOW(), note = ?
-                    WHERE id = ?
-                """;
+        UPDATE orders
+        SET status = ?,
+            processed_by = ?,
+            processed_at = ?,
+            note = ?
+        WHERE id = ?
+    """;
 
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, status);
+
             if (processedBy != null) {
                 ps.setLong(2, processedBy);
+                ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
             } else {
                 ps.setNull(2, Types.BIGINT);
+                ps.setNull(3, Types.TIMESTAMP);
             }
-            ps.setString(3, note);
-            ps.setLong(4, orderId);
+
+            ps.setString(4, note);
+            ps.setLong(5, orderId);
 
             return ps.executeUpdate() > 0;
+
         } catch (SQLException e) {
             throw new RuntimeException("Update order status failed", e);
+        }
+    }
+
+    public void updateNote(Long orderId, String note) {
+        String sql = "UPDATE orders SET note = ?, processed_at = NOW() WHERE id = ?";
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, note);
+            ps.setLong(2, orderId);
+
+            int affected = ps.executeUpdate();
+
+            if (affected == 0) {
+                throw new SQLException("Order not found with ID: " + orderId);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update order note", e);
         }
     }
 }

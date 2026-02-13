@@ -4,6 +4,7 @@ import com.example.dao.*;
 import com.example.model.Order;
 import com.example.model.OrderItem;
 import com.example.model.Product;
+import com.example.model.User;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -74,7 +75,7 @@ public class OrderService {
             throw new IllegalStateException("Cannot submit an order with no items");
         }
 
-        if (!order.getCreatedBy().equals(salesmanId))
+        if (!order.getCreatedBy().getId().equals(salesmanId))
             throw new SecurityException("Not your order");
 
         if (!order.getStatus().equals("DRAFT"))
@@ -93,7 +94,7 @@ public class OrderService {
         Order order = orderDAO.findById(orderId);
         if (order == null) return null;
 
-        if ("Salesman".equals(role) && !Objects.equals(order.getCreatedBy(), userId))
+        if ("Salesman".equals(role) && !Objects.equals(order.getCreatedBy().getId(), userId))
             throw new SecurityException("Access denied");
 
         // Load creator user
@@ -152,13 +153,57 @@ public class OrderService {
         orderDAO.updateStatus(orderId, "COMPLETED", warehouseKeeperId, null);
     }
 
-    public void cancelOrder(Long orderId, Long warehouseKeeperId, String note) {
+    // Salesman cancel (no note required)
+    public void cancelOrder(Long orderId, Long userId) {
+        cancelOrder(orderId, userId, null);
+    }
+
+    // Warehouse cancel (with note)
+    public void cancelOrder(Long orderId, Long userId, String note) {
         Order order = orderDAO.findById(orderId);
 
-        if (!order.getStatus().equals("PROCESSING") && !order.getStatus().equals("SUBMITTED"))
-            throw new IllegalStateException("Order not in processing");
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found with ID: " + orderId);
+        }
 
-        orderDAO.updateStatus(orderId, "CANCELLED", warehouseKeeperId, note);
+        // Authorization check
+        // Salesman can only cancel their own DRAFT orders
+        // Warehouse can cancel SUBMITTED or PROCESSING orders
+
+        User user = userDAO.findUserById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        String userRole = user.getRole().getName();
+
+        if ("Salesman".equalsIgnoreCase(userRole)) {
+            // Salesman can only cancel their own draft orders
+            if (!order.getCreatedBy().getId().equals(userId)) {
+                throw new SecurityException("You can only cancel your own orders");
+            }
+            if (!"DRAFT".equals(order.getStatus())) {
+                throw new IllegalStateException("You can only cancel draft orders. This order is " + order.getStatus());
+            }
+        } else if ("Warehouse".equalsIgnoreCase(userRole)) {
+            // Warehouse can cancel SUBMITTED or PROCESSING orders
+            if (!"SUBMITTED".equals(order.getStatus()) && !"PROCESSING".equals(order.getStatus())) {
+                throw new IllegalStateException("Can only cancel SUBMITTED or PROCESSING orders. This order is " + order.getStatus());
+            }
+            // Note is required for warehouse cancellations
+            if (note == null || note.trim().isEmpty()) {
+                throw new IllegalArgumentException("Cancellation reason is required");
+            }
+        } else {
+            throw new SecurityException("You don't have permission to cancel orders");
+        }
+
+        // Update status and note
+        orderDAO.updateStatus(orderId, "CANCELLED", userId, note);
+
+        if (note != null && !note.trim().isEmpty()) {
+            orderDAO.updateNote(orderId, "CANCELLED: " + note);
+        }
     }
 
     public void addOrUpdateOrderItem(Long orderId, Long productId, int quantity) {

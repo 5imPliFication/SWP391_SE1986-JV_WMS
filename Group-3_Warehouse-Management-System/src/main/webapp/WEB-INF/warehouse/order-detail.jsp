@@ -372,7 +372,7 @@
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-gradient-primary text-white">
                     <h5 class="mb-0 font-weight-bold">
-                        <i class="fas fa-tasks mr-2 text-dark"></i>Available Actions
+                        <i class="fas fa-tasks mr-2"></i>Available Actions
                     </h5>
                 </div>
                 <div class="card-body p-3">
@@ -382,21 +382,44 @@
                             <form action="${pageContext.request.contextPath}/warehouse/order/process"
                                   method="post"
                                   onsubmit="return confirm('Start processing this order?');"
-                                  class="mb-2">
+                                  class="mb-3">
                                 <input type="hidden" name="orderId" value="${order.id}"/>
                                 <button type="submit" class="btn btn-primary btn-block btn-lg action-card">
                                     <i class="fas fa-play-circle mr-2"></i>Start Processing
                                 </button>
                             </form>
 
-                            <form action="${pageContext.request.contextPath}/warehouse/order/cancel"
-                                  method="post"
-                                  onsubmit="return confirm('Cancel this order? This cannot be undone!');">
-                                <input type="hidden" name="orderId" value="${order.id}"/>
-                                <button type="submit" class="btn btn-outline-danger btn-block">
-                                    <i class="fas fa-times-circle mr-2"></i>Cancel Order
-                                </button>
-                            </form>
+                            <div class="card border-danger">
+                                <div class="card-body p-3">
+                                    <h6 class="text-danger mb-3">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>Cancel Order
+                                    </h6>
+                                    <form action="${pageContext.request.contextPath}/warehouse/order/cancel"
+                                          method="post"
+                                          onsubmit="return confirm('Are you sure you want to cancel this order? This cannot be undone!');">
+                                        <input type="hidden" name="orderId" value="${order.id}"/>
+
+                                        <div class="form-group mb-3">
+                                            <label for="cancelNote" class="font-weight-bold small">
+                                                <i class="fas fa-comment mr-1"></i>Cancellation Reason *
+                                            </label>
+                                            <textarea class="form-control form-control-sm"
+                                                      id="cancelNote"
+                                                      name="note"
+                                                      rows="3"
+                                                      placeholder="Required: Why is this order being cancelled?"
+                                                      required></textarea>
+                                            <small class="form-text text-muted">
+                                                Provide a clear reason for the cancellation
+                                            </small>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-danger btn-block">
+                                            <i class="fas fa-times-circle mr-2"></i>Cancel Order
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </c:when>
 
                         <%-- PROCESSING: Can complete or cancel --%>
@@ -404,21 +427,44 @@
                             <form action="${pageContext.request.contextPath}/warehouse/order/complete"
                                   method="post"
                                   onsubmit="return confirm('Mark this order as completed?');"
-                                  class="mb-2">
+                                  class="mb-3">
                                 <input type="hidden" name="orderId" value="${order.id}"/>
                                 <button type="submit" class="btn btn-success btn-block btn-lg action-card">
                                     <i class="fas fa-check-circle mr-2"></i>Mark as Completed
                                 </button>
                             </form>
 
-                            <form action="${pageContext.request.contextPath}/warehouse/order/cancel"
-                                  method="post"
-                                  onsubmit="return confirm('Cancel this order? This cannot be undone!');">
-                                <input type="hidden" name="orderId" value="${order.id}"/>
-                                <button type="submit" class="btn btn-outline-danger btn-block">
-                                    <i class="fas fa-times-circle mr-2"></i>Cancel Order
-                                </button>
-                            </form>
+                            <div class="card border-danger">
+                                <div class="card-body p-3">
+                                    <h6 class="text-danger mb-3">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>Cancel Order
+                                    </h6>
+                                    <form action="${pageContext.request.contextPath}/warehouse/order/cancel"
+                                          method="post"
+                                          onsubmit="return confirm('Are you sure you want to cancel this order? This cannot be undone!');">
+                                        <input type="hidden" name="orderId" value="${order.id}"/>
+
+                                        <div class="form-group mb-3">
+                                            <label for="cancelNoteProcessing" class="font-weight-bold small">
+                                                <i class="fas fa-comment mr-1"></i>Cancellation Reason *
+                                            </label>
+                                            <textarea class="form-control form-control-sm"
+                                                      id="cancelNoteProcessing"
+                                                      name="note"
+                                                      rows="3"
+                                                      placeholder="Required: Why is this order being cancelled?"
+                                                      required></textarea>
+                                            <small class="form-text text-muted">
+                                                Provide a clear reason for the cancellation
+                                            </small>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-danger btn-block">
+                                            <i class="fas fa-times-circle mr-2"></i>Cancel Order
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </c:when>
 
                         <%-- COMPLETED or CANCELLED: No actions available --%>
@@ -433,8 +479,20 @@
                                     <c:when test="${order.status == 'CANCELLED'}">
                                         <strong>Order Cancelled</strong><br>
                                         This order has been cancelled.
+                                        <c:if test="${not empty order.note && order.note.startsWith('CANCELLED:')}">
+                                            <hr class="my-2">
+                                            <small class="text-muted d-block mt-2">
+                                                <strong>Reason:</strong><br>
+                                                    ${order.note.substring(10).trim()}
+                                            </small>
+                                        </c:if>
+                                    </c:when>
+                                    <c:when test="${order.status == 'DRAFT'}">
+                                        <strong>Draft Order</strong><br>
+                                        This order is still being prepared by the salesman.
                                     </c:when>
                                     <c:otherwise>
+                                        <strong>Status: ${order.status}</strong><br>
                                         No actions available for this order status.
                                     </c:otherwise>
                                 </c:choose>

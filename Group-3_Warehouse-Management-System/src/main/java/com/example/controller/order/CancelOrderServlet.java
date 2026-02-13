@@ -10,15 +10,14 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-
-@WebServlet("/order/cancel")
+// Multiple URL mappings for different roles
+@WebServlet({"/salesman/order/cancel", "/warehouse/order/cancel"})
 public class CancelOrderServlet extends HttpServlet {
 
     private OrderService orderService;
 
     @Override
     public void init() {
-        // Prefer DI / context lookup if you already use it
         orderService = new OrderService();
     }
 
@@ -26,7 +25,7 @@ public class CancelOrderServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
 
-        // Authentication (filter may already handle this)
+        // Authentication
         User user = (User) req.getSession().getAttribute("user");
         if (user == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
@@ -35,37 +34,54 @@ public class CancelOrderServlet extends HttpServlet {
 
         try {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
-            String note = req.getParameter("note");
+            String note = req.getParameter("note"); // Can be null for salesman
 
-            orderService.cancelOrder(
-                    orderId,
-                    user.getId(),
-                    note
-            );
-
-            // Redirect based on role (UX concern, not permission)
             String role = user.getRole().getName();
-            if ("Salesman".equalsIgnoreCase(role)) {
-                resp.sendRedirect(req.getContextPath()
-                        + "/salesman/orders?cancelled=true");
-            } else if ("Warehouse".equalsIgnoreCase(role)) {
-                resp.sendRedirect(req.getContextPath()
-                        + "/warehouse/orders?cancelled=true");
+
+            // Role-based authorization
+            if (!"Salesman".equalsIgnoreCase(role) && !"Warehouse".equalsIgnoreCase(role)) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "You don't have permission to cancel orders");
+                return;
+            }
+
+            // Cancel the order
+            if (note != null && !note.trim().isEmpty()) {
+                // Warehouse cancellation with note
+                orderService.cancelOrder(orderId, user.getId(), note);
             } else {
-                resp.sendRedirect(req.getContextPath()
-                        + "/orders?cancelled=true");
+                // Salesman cancellation without note
+                orderService.cancelOrder(orderId, user.getId());
+            }
+
+            // Redirect based on role
+            if ("Salesman".equalsIgnoreCase(role)) {
+                resp.sendRedirect(req.getContextPath() + "/salesman/orders?cancelled=true");
+            } else if ("Warehouse".equalsIgnoreCase(role)) {
+                resp.sendRedirect(req.getContextPath() + "/warehouse/orders?cancelled=true");
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/home");
             }
 
         } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid order ID");
+            req.setAttribute("error", "Invalid order ID format");
+            req.setAttribute("code", "400");
+            req.getRequestDispatcher("/WEB-INF/views/error/error.jsp").forward(req, resp);
+
         } catch (SecurityException e) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+            req.setAttribute("error", e.getMessage());
+            req.setAttribute("code", "403");
+            req.getRequestDispatcher("/WEB-INF/views/error/error.jsp").forward(req, resp);
+
         } catch (IllegalStateException e) {
-            resp.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
+            req.setAttribute("error", e.getMessage());
+            req.setAttribute("code", "409");
+            req.getRequestDispatcher("/WEB-INF/views/error/error.jsp").forward(req, resp);
+
         } catch (Exception e) {
             e.printStackTrace();
             req.setAttribute("error", "Failed to cancel order: " + e.getMessage());
-            req.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(req, resp);
+            req.setAttribute("code", "500");
+            req.getRequestDispatcher("/WEB-INF/views/error/error.jsp").forward(req, resp);
         }
     }
 }
