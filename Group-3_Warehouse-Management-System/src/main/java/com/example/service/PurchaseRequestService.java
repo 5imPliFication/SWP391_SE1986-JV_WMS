@@ -15,9 +15,14 @@ public class PurchaseRequestService {
         p = new PurchaseRequestDAO();
     }
 
-    public List<PurchaseRequest> getList(Long userId, String roleName) {
-        boolean isManager = "Manager".equalsIgnoreCase(roleName);
-        return p.findAll(userId, isManager);
+    public List<PurchaseRequest> getList(
+            Long userId,
+            boolean isManager,
+            String requestCode,
+            String status,
+            String createdDate
+    ) {
+        return p.search(userId, isManager, requestCode, status, createdDate);
     }
 
     public long createPurchaseRequest(

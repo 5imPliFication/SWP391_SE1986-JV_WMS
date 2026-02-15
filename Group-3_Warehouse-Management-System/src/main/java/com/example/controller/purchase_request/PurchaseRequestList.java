@@ -6,6 +6,7 @@ import com.example.service.PurchaseRequestService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -33,9 +34,28 @@ public class PurchaseRequestList extends HttpServlet {
             return;
         }
 
-        List<PurchaseRequest> list= pr.getList(user.getId(), user.getRole().getName());
+        // ===== ROLE CHECK =====
+        boolean isManager = "MANAGER".equalsIgnoreCase(user.getRole().getName());
+
+        // ===== Dùng cho JSP ẩn/hiện cột =====
+        request.setAttribute("showCreatedBy", isManager);
+
+        // ===== FILTER PARAMS =====
+        String requestCode  = request.getParameter("requestCode");
+        String status       = request.getParameter("status");
+        String createdDate  = request.getParameter("createdDate");
+
+        // ===== LOAD LIST =====
+        List<PurchaseRequest> list = pr.getList(
+                user.getId(),
+                isManager,
+                requestCode,
+                status,
+                createdDate
+        );
 
         request.setAttribute("purchaseRequests", list);
+
         request.getRequestDispatcher(
                 "/WEB-INF/purchase_request/PurchaseRequestList.jsp"
         ).forward(request, response);

@@ -162,4 +162,84 @@ public class PurchaseRequestDAO {
         return list;
     }
 
+    public List<PurchaseRequest> search(
+            Long userId,
+            boolean isManager,
+            String requestCode,
+            String status,
+            String createdDate
+    ) {
+
+        List<PurchaseRequest> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT pr.id, pr.request_code, pr.status, pr.note, pr.created_at,
+               u1.id AS created_by, u1.fullname AS created_by_name,
+               u2.id AS approved_by, u2.fullname AS approved_by_name
+        FROM purchase_requests pr
+        JOIN users u1 ON pr.created_by = u1.id
+        LEFT JOIN users u2 ON pr.approved_by = u2.id
+        WHERE 1 = 1
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        /* ===== ROLE FILTER ===== */
+        if (!isManager) {
+            sql.append(" AND pr.created_by = ?");
+            params.add(userId);
+        }
+
+        /* ===== REQUEST CODE ===== */
+        if (requestCode != null && !requestCode.isBlank()) {
+            sql.append(" AND pr.request_code LIKE ?");
+            params.add("%" + requestCode + "%");
+        }
+
+        /* ===== STATUS ===== */
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND pr.status = ?");
+            params.add(status);
+        }
+
+        /* ===== CREATED DATE (1 ngày) ===== */
+        if (createdDate != null && !createdDate.isBlank()) {
+            sql.append(" AND DATE(pr.created_at) = ?");
+            params.add(createdDate);
+        }
+
+        sql.append(" ORDER BY pr.created_at DESC");
+
+        try (
+                Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                PurchaseRequest pr = new PurchaseRequest();
+                pr.setId(rs.getLong("id"));
+                pr.setRequestCode(rs.getString("request_code"));
+                pr.setStatus(rs.getString("status"));
+                pr.setNote(rs.getString("note"));
+                pr.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+
+                pr.setCreatedBy(rs.getLong("created_by"));
+                pr.setCreatedByName(rs.getString("created_by_name"));
+
+                pr.setApprovedBy(rs.getLong("approved_by"));
+                pr.setApprovedByName(rs.getString("approved_by_name"));
+
+                list.add(pr);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Search purchase request failed", e);
+        }
+
+        return list;
+    }
+
 }

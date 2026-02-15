@@ -19,6 +19,63 @@
 
 
             <div class="card-body p-2">
+                <div class="d-flex mb-3">
+                    <c:if test="${!showCreatedBy}">
+                        <a href="${pageContext.request.contextPath}/purchase-request/create"
+                           class="btn btn-success">
+                            + Create Purchase Request
+                        </a>
+                    </c:if>
+                </div>
+                <form method="get"
+                      action="${pageContext.request.contextPath}/purchase-request/list"
+                      class="row g-3 mb-3 align-items-end">
+
+                    <!-- Request Code -->
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Request Code</label>
+                        <input type="text"
+                               name="requestCode"
+                               value="${param.requestCode}"
+                               class="form-control"
+                               placeholder="PR-xxxxx">
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">All</option>
+                            <option value="PENDING"  ${param.status == 'PENDING' ? 'selected' : ''}>PENDING</option>
+                            <option value="APPROVED" ${param.status == 'APPROVED' ? 'selected' : ''}>APPROVED</option>
+                            <option value="REJECTED" ${param.status == 'REJECTED' ? 'selected' : ''}>REJECTED</option>
+                        </select>
+                    </div>
+
+                    <!-- Created Date (1 filter ngày) -->
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Created Date</label>
+                        <input type="date"
+                               name="createdDate"
+                               value="${param.createdDate}"
+                               class="form-control">
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Search
+                        </button>
+
+                        <a href="${pageContext.request.contextPath}/purchase-request/list"
+                           class="btn btn-secondary w-100">
+                            Clear
+                        </a>
+                    </div>
+                </form>
+
+
+
                 <div style="overflow-x: auto;">   <!-- Cho phép scroll ngang nếu nhiều role -->
 
                     <table class="table table-bordered mb-0">
@@ -26,18 +83,26 @@
                             <tr>
                                 <th>Request Code</th>
                                 <th>Status</th>
-                                <th>Created By</th>
+
+                                <c:if test="${showCreatedBy}">
+                                    <th>Created By</th>
+                                    </c:if>
+
                                 <th>Approved By</th>
                                 <th>Created At</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             <c:forEach items="${purchaseRequests}" var="pr">
                                 <tr>
                                     <td>${pr.requestCode}</td>
                                     <td>${pr.status}</td>
-                                    <td>${pr.createdByName}</td>
+                                    <c:if test="${showCreatedBy}">
+                                        <td>${pr.createdByName}</td>
+                                    </c:if>
+
                                     <td>${pr.approvedByName}</td>
                                     <td>${pr.createdAt}</td>
                                     <td>
@@ -48,6 +113,7 @@
                                 </tr>
                             </c:forEach>
                         </tbody>
+
                     </table>
                     <c:if test="${totalPages > 1}">
                         <nav class="mt-3">
