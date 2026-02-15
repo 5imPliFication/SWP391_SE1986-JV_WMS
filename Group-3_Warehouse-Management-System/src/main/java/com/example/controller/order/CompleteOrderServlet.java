@@ -10,8 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet("/warehouse/order/process")
-public class ProcessOrderServlet extends HttpServlet {
+@WebServlet("/warehouse/order/complete")
+public class CompleteOrderServlet extends HttpServlet {
 
     private OrderService orderService;
 
@@ -32,8 +32,8 @@ public class ProcessOrderServlet extends HttpServlet {
 
         try {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
-            orderService.startProcessing(orderId, user.getId());
-            resp.sendRedirect(req.getContextPath() + "/warehouse/order/detail?id=" + orderId);
+            orderService.completeProcessing(orderId, user.getId());
+            resp.sendRedirect(req.getContextPath() + "/warehouse/orders?completed=true");
         } catch (Exception e) {
             e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

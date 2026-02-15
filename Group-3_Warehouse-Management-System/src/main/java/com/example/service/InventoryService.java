@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.dao.InventoryDAO;
+import com.example.dto.ExportOrderDTO;
 import com.example.dto.ImportProductItemDTO;
 import com.example.model.Product;
 import com.example.model.ProductItem;
@@ -13,9 +14,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InventoryService {
 
@@ -67,7 +71,7 @@ public class InventoryService {
             return null;
         } else {
             try (InputStream inputStream = filePart.getInputStream();
-                 Workbook workbook = new XSSFWorkbook(inputStream)) {
+                    Workbook workbook = new XSSFWorkbook(inputStream)) {
 
                 // get first sheet
                 Sheet sheet = workbook.getSheetAt(0);
@@ -129,5 +133,35 @@ public class InventoryService {
             }
         }
         return importItems;
+    }
+
+    // handle export product items
+    public Map<String, Object> getExportOrders(String fromDateStr, String toDateStr, int page, int pageSize) {
+        LocalDate fromDate;
+        LocalDate toDate;
+        if (fromDateStr != null && !fromDateStr.isEmpty()) {
+            fromDate = LocalDate.parse(fromDateStr);
+        } else {
+            fromDate = null;
+        }
+
+        if (toDateStr != null && !toDateStr.isEmpty()) {
+            toDate = LocalDate.parse(toDateStr);
+        } else {
+            toDate = null;
+        }
+
+        int offset = (page - 1) * pageSize;
+        List<ExportOrderDTO> orders = inventoryDAO.searchExportOrders(fromDate, toDate, offset, pageSize);
+        int totalOrders = inventoryDAO.countExportOrders(fromDate, toDate);
+        int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
+
+        // create map
+        Map<String, Object> result = new HashMap<>();
+
+        // set value for map
+        result.put("orders", orders);
+        result.put("totalPages", totalPages);
+        return result;
     }
 }

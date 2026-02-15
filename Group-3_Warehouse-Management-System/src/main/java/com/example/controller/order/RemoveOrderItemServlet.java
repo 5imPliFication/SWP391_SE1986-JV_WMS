@@ -10,9 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet("/warehouse/order/process")
-public class ProcessOrderServlet extends HttpServlet {
-
+@WebServlet("/salesman/order/item/remove")
+public class RemoveOrderItemServlet extends HttpServlet {
     private OrderService orderService;
 
     @Override
@@ -25,18 +24,24 @@ public class ProcessOrderServlet extends HttpServlet {
             throws ServletException, IOException {
 
         User user = (User) req.getSession().getAttribute("user");
-        if (user == null || !"Warehouse".equals(user.getRole().getName())) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+        if (user == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
         try {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
-            orderService.startProcessing(orderId, user.getId());
-            resp.sendRedirect(req.getContextPath() + "/warehouse/order/detail?id=" + orderId);
+            Long productId = Long.parseLong(req.getParameter("productId"));
+
+            orderService.removeItem(orderId, productId);
+
+            resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId);
+
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Failed to remove item: " + e.getMessage());
         }
+
     }
 }
