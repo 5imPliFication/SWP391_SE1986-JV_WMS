@@ -5,6 +5,9 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
+import com.example.model.Brand;
+import com.example.model.Category;
+import com.example.model.Product;
 import com.example.model.PurchaseRequest;
 import com.example.model.PurchaseRequestItem;
 import java.sql.Connection;
@@ -237,6 +240,73 @@ public class PurchaseRequestDAO {
 
         } catch (Exception e) {
             throw new RuntimeException("Search purchase request failed", e);
+        }
+
+        return list;
+    }
+
+    public List<Product> getActiveProductDropdown() {
+
+        List<Product> list = new ArrayList<>();
+
+        String sql = """
+        SELECT id, name
+        FROM products
+        WHERE is_active = true
+        ORDER BY name
+    """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Product p = new Product();
+                p.setId(rs.getLong("id"));
+                p.setName(rs.getString("name"));
+                list.add(p);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return list;
+    }
+
+    public List<Brand> getActiveBrands() {
+        List<Brand> list = new ArrayList<>();
+
+        String sql = "SELECT id, name FROM brands ORDER BY name";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Brand b = new Brand();
+                b.setId(rs.getLong("id"));
+                b.setName(rs.getString("name"));
+                list.add(b);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return list;
+    }
+
+    public List<Category> getActiveCategories() {
+        List<Category> list = new ArrayList<>();
+
+        String sql = "SELECT id, name FROM categories ORDER BY name";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Category c = new Category();
+                c.setId(rs.getLong("id"));
+                c.setName(rs.getString("name"));
+                list.add(c);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         return list;

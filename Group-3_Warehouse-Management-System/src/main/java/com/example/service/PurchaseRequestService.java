@@ -1,6 +1,9 @@
 package com.example.service;
 
 import com.example.dao.PurchaseRequestDAO;
+import com.example.model.Brand;
+import com.example.model.Category;
+import com.example.model.Product;
 import com.example.model.PurchaseRequest;
 import com.example.model.PurchaseRequestItem;
 
@@ -72,4 +75,17 @@ public class PurchaseRequestService {
             throw new RuntimeException("Create purchase request failed", e);
         }
     }
+
+    public List<Product> getProductDropdown() {
+        return p.getActiveProductDropdown();
+    }
+
+    public List<Brand> getBrandsDropdown() {
+        return p.getActiveBrands();
+    }
+
+    public List<Category> getCategoryDropdown() {
+        return p.getActiveCategories();
+    }
+
 }

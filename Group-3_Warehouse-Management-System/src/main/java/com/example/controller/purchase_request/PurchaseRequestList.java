@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @WebServlet("/purchase-request/list")
@@ -41,9 +42,9 @@ public class PurchaseRequestList extends HttpServlet {
         request.setAttribute("showCreatedBy", isManager);
 
         // ===== FILTER PARAMS =====
-        String requestCode  = request.getParameter("requestCode");
-        String status       = request.getParameter("status");
-        String createdDate  = request.getParameter("createdDate");
+        String requestCode = request.getParameter("requestCode");
+        String status = request.getParameter("status");
+        String createdDate = request.getParameter("createdDate");
 
         // ===== LOAD LIST =====
         List<PurchaseRequest> list = pr.getList(
@@ -53,7 +54,6 @@ public class PurchaseRequestList extends HttpServlet {
                 status,
                 createdDate
         );
-
         request.setAttribute("purchaseRequests", list);
 
         request.getRequestDispatcher(

@@ -29,8 +29,10 @@ public class PurchaseRequest extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // load product list nếu cần
-        // req.setAttribute("products", productService.findAll());
+        request.setAttribute("productName", p.getProductDropdown());
+        request.setAttribute("BrandName", p.getBrandsDropdown());
+        request.setAttribute("CategoryName", p.getCategoryDropdown());
+
         request.getRequestDispatcher("/WEB-INF/purchase_request/CreatePurchaseRequest.jsp")
                 .forward(request, response);
     }
@@ -51,8 +53,8 @@ public class PurchaseRequest extends HttpServlet {
 
             String[] productIds = request.getParameterValues("productId[]");
             String[] productNames = request.getParameterValues("productName[]");
-            String[] brandNames = request.getParameterValues("brandName[]");
-            String[] categoryNames = request.getParameterValues("categoryName[]");
+            String[] brandNames = request.getParameterValues("brandId[]");
+            String[] categoryNames = request.getParameterValues("categoryId[]");
             String[] quantities = request.getParameterValues("quantity[]");
 
             if (quantities == null || quantities.length == 0) {
