@@ -77,6 +77,17 @@
                       </a>
                   </li>
             </c:if>
+            <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'READ_PURCHASE_REQUEST')}">
+                  <li>
+                      <a href="${pageContext.request.contextPath}/purchase-request/list"
+                         class="<%= (uri.contains("roles")) ? "active" : "" %>">
+                          <span>Purchase Request</span>
+                      </a>
+                  </li>
+            </c:if>
 
             <li>
                 <a href="${pageContext.request.contextPath}/products"

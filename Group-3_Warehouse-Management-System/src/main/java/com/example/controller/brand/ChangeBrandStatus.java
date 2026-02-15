@@ -37,18 +37,4 @@ public class ChangeBrandStatus extends HttpServlet {
 
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        long id = Long.parseLong(request.getParameter("brandId"));
-
-        boolean success = b.deleteById(id);
-        if (!success) {
-            response.sendRedirect("brands?status=delete_failed");
-            return;
-        }
-
-        response.sendRedirect("brands?status=delete_success");
-    }
-
 }
