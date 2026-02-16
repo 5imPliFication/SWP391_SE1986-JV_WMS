@@ -49,9 +49,11 @@ public class WarehouseOrderDetailServlet extends HttpServlet {
 
             req.setAttribute("order", order);
             req.setAttribute("items", items);
+            System.out.println(order.getCreatedBy().getFullName());
 
             req.getRequestDispatcher("/WEB-INF/warehouse/order-detail.jsp")
                     .forward(req, resp);
+
 
         } catch (NumberFormatException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid order ID");

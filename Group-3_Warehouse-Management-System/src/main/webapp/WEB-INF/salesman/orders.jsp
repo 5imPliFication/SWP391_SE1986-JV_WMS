@@ -59,17 +59,17 @@
                                             </span>
                                     </c:when>
                                     <c:when test="${o.status == 'PROCESSING'}">
-                                            <span class="badge bg-info text-dark">
+                                            <span class="badge bg-info text-white">
                                                 <i class="bi bi-arrow-repeat me-1"></i>${o.status}
                                             </span>
                                     </c:when>
                                     <c:when test="${o.status == 'COMPLETED'}">
-                                            <span class="badge bg-success">
+                                            <span class="badge bg-success text-white">
                                                 <i class="bi bi-check-circle me-1"></i>${o.status}
                                             </span>
                                     </c:when>
                                     <c:when test="${o.status == 'CANCELLED'}">
-                                            <span class="badge bg-danger">
+                                            <span class="badge bg-danger text-white">
                                                 <i class="bi bi-x-circle me-1 text-white"></i>${o.status}
                                             </span>
                                     </c:when>

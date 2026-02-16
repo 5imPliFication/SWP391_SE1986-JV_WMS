@@ -13,11 +13,31 @@
     <title>Order Detail</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/order-detail-salesman.css">
 </head>
 <body>
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 <main class="main-content">
     <jsp:include page="/WEB-INF/common/header.jsp"/>
+
+    <!-- Success/Error Messages -->
+    <c:if test="${not empty param.success}">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i>${param.success}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </c:if>
+    
+    <c:if test="${not empty param.error}">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle mr-2"></i>${param.error}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </c:if>
 
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -162,26 +182,78 @@
                     <div class="col-md-8">
                         <h5 class="mb-3"><i class="fas fa-receipt mr-2"></i>Order Summary</h5>
 
-                        <!-- Coupon Section (placeholder type shi) -->
-                        <div class="form-group">
-                            <label class="font-weight-bold text-muted">
-                                <i class="fas fa-tag mr-1"></i>Discount Code
-                            </label>
-                            <div class="input-group">
-                                <input type="text"
-                                       class="form-control"
-                                       placeholder="Enter coupon code">
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button">
-                                        Apply
-                                    </button>
+                        <!-- Coupon Section - INTEGRATED -->
+                        <c:choose>
+                            <c:when test="${not empty order.coupon}">
+                                <!-- Coupon Applied -->
+                                <div class="coupon-applied-box">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="mb-2">
+                                                <span class="coupon-badge">
+                                                    <i class="fas fa-ticket-alt mr-1"></i>${order.coupon.code}
+                                                </span>
+                                            </div>
+                                            <h6 class="mb-1 font-weight-bold text-success">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                <c:choose>
+                                                    <c:when test="${order.coupon.discountType == 'PERCENTAGE'}">
+                                                        <fmt:formatNumber value="${order.coupon.discountValue}" pattern="#"/>% OFF Applied
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <fmt:formatNumber value="${order.coupon.discountValue}" type="number" groupingUsed="true"/> VND OFF Applied
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle mr-1"></i>${order.coupon.description}
+                                            </small>
+                                        </div>
+                                        <c:if test="${order.status == 'DRAFT'}">
+                                            <form action="${pageContext.request.contextPath}/salesman/order/remove-coupon"
+                                                  method="post"
+                                                  onsubmit="return confirm('Remove this coupon from the order?');">
+                                                <input type="hidden" name="orderId" value="${order.id}"/>
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-times mr-1"></i>Remove
+                                                </button>
+                                            </form>
+                                        </c:if>
+                                    </div>
                                 </div>
-                            </div>
-                            <small class="form-text text-muted">
-                                <i class="fas fa-info-circle mr-1"></i>Enter provided coupon code
-                            </small>
-                        </div>
-
+                            </c:when>
+                            <c:otherwise>
+                                <!-- Apply Coupon Form (Only for DRAFT orders) -->
+                                <c:if test="${order.status == 'DRAFT'}">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold text-muted">
+                                            <i class="fas fa-tag mr-1"></i>Discount Coupon
+                                        </label>
+                                        <form action="${pageContext.request.contextPath}/salesman/order/apply-coupon" method="post">
+                                            <input type="hidden" name="orderId" value="${order.id}"/>
+                                            <div class="input-group">
+                                                <input type="text"
+                                                       name="couponCode"
+                                                       class="form-control coupon-input-uppercase"
+                                                       placeholder="Enter coupon code"
+                                                       pattern="[A-Z0-9]+"
+                                                       title="Coupon codes contain only uppercase letters and numbers"
+                                                       maxlength="50"
+                                                       required>
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-outline-primary" type="submit">
+                                                        <i class="fas fa-check mr-1"></i>Apply
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                <i class="fas fa-info-circle mr-1"></i>Enter a valid coupon code to receive a discount
+                                            </small>
+                                        </form>
+                                    </div>
+                                </c:if>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
 
                     <div class="col-md-4">
@@ -193,17 +265,43 @@
                                         <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> VND
                                     </span>
                                 </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted">Discount:</span>
-                                    <span class="text-success">0 VND</span>
-                                </div>
-                                <hr>
-                                <div class="d-flex justify-content-between">
-                                    <span class="h5 mb-0">Total:</span>
-                                    <span class="h4 mb-0 text-primary font-weight-bold">
-                                        <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> VND
-                                    </span>
-                                </div>
+                                
+                                <!-- Show discount if coupon applied -->
+                                <c:choose>
+                                    <c:when test="${not empty order.coupon}">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">
+                                                <i class="fas fa-tag mr-1"></i>Discount:
+                                            </span>
+                                            <span class="discount-highlight">
+                                                -<fmt:formatNumber value="${order.discountAmount}" type="number" groupingUsed="true"/> VND
+                                            </span>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="h5 mb-0">Total:</span>
+                                            <span class="h4 mb-0 text-success font-weight-bold">
+                                                <fmt:formatNumber value="${order.finalTotal}" type="number" groupingUsed="true"/> VND
+                                            </span>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">
+                                            <i class="fas fa-save mr-1"></i>You saved <fmt:formatNumber value="${order.discountAmount}" type="number" groupingUsed="true"/> VND!
+                                        </small>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">Discount:</span>
+                                            <span class="text-success">0 VND</span>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="h5 mb-0">Total:</span>
+                                            <span class="h4 mb-0 text-primary font-weight-bold">
+                                                <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> VND
+                                            </span>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                         </div>
                     </div>
@@ -304,8 +402,12 @@
                 <!-- Cancel Order Form -->
                 <div class="card shadow-sm border-danger h-100">
                     <div class="card-body text-center py-4">
-                        <h5 class="mb-3"><i class="fas fa-times-circle mr-2"></i>Cancel Order</h5>
-                        <p class="text-muted mb-4">Discard this order? This action cannot be undone.</p>
+                        <h5 class="mb-3">
+                            <i class="fas fa-times-circle mr-2"></i>Cancel Order
+                        </h5>
+                        <p class="text-muted mb-4">
+                            Discard this draft order? This action cannot be undone.
+                        </p>
                         <form action="${pageContext.request.contextPath}/salesman/order/cancel"
                               method="post"
                               onsubmit="return confirm('Are you sure you want to CANCEL this order? This cannot be undone!');">
@@ -341,5 +443,20 @@
 </main>
 
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Auto-uppercase coupon input
+    document.querySelector('.coupon-input-uppercase')?.addEventListener('input', function(e) {
+        this.value = this.value.toUpperCase();
+    });
+    
+    // Auto-dismiss alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert-dismissible');
+        alerts.forEach(alert => {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+</script>
 </body>
 </html>
