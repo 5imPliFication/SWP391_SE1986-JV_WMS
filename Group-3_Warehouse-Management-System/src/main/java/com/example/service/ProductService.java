@@ -6,7 +6,6 @@ import com.example.dao.ProductDAO;
 import com.example.model.Brand;
 import com.example.model.Category;
 import com.example.model.Product;
-import com.example.model.ProductItem;
 
 import java.util.List;
 
@@ -56,26 +55,4 @@ public class ProductService {
 
         return productDAO.update(product);
     }
-
-    public List<ProductItem> findItemsByProductId(long productId, String searchSerial, Boolean isActive, int pageNo) {
-        return productDAO.getItemsByProductId(productId, searchSerial,isActive, pageNo);
-    }
-
-    public int countProductItems(long productId, String searchSerial, Boolean isActive) {
-        return productDAO.countProductItems(productId, searchSerial, isActive);
-    }
-
-    public ProductItem findProductItemById(long productItemId) {
-        return productDAO.findItemById(productItemId);
-    }
-
-    public boolean updateProductItem(long productItemId, double currentPrice, Boolean isActive) {
-        ProductItem productItem = new ProductItem();
-        productItem.setId(productItemId);
-        productItem.setCurrentPrice(currentPrice);
-        productItem.setIsActive(isActive);
-
-        return productDAO.updateItem(productItem);
-    }
-
 }

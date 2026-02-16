@@ -13,8 +13,8 @@ public class Product {
     private Long id;
     private String name;
     private String description;
+    private BigDecimal price;
     private String imgUrl;
-    private Long totalQuantity;
     private Boolean isActive;
     private Brand brand;
     private Category category;

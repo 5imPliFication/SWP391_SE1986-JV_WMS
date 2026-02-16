@@ -56,8 +56,8 @@ public class InventoryDAO {
                 PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (ProductItem item : productItems) {
                 ps.setString(1, item.getSerial());
-                ps.setDouble(2, item.getImportedPrice());
-                ps.setTimestamp(3, Timestamp.valueOf(item.getImportedAt()));
+                ps.setDouble(2, item.getImportPrice());
+                ps.setTimestamp(3, Timestamp.valueOf(item.getImportDate()));
                 ps.setBoolean(4, true);
                 ps.setLong(5, item.getProductId());
                 ps.addBatch();
