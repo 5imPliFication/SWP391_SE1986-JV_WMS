@@ -170,7 +170,9 @@ public class PurchaseRequestDAO {
             boolean isManager,
             String requestCode,
             String status,
-            String createdDate
+            String createdDate,
+            int pageNo,
+            int pageSize
     ) {
 
         List<PurchaseRequest> list = new ArrayList<>();
@@ -205,16 +207,23 @@ public class PurchaseRequestDAO {
             params.add(status);
         }
 
-        /* ===== CREATED DATE (1 ngày) ===== */
+        /* ===== CREATED DATE ===== */
         if (createdDate != null && !createdDate.isBlank()) {
             sql.append(" AND DATE(pr.created_at) = ?");
             params.add(createdDate);
         }
 
+        /* ===== ORDER + PAGINATION ===== */
         sql.append(" ORDER BY pr.created_at DESC");
+        sql.append(" LIMIT ? OFFSET ?");
+
+        int offset = (pageNo - 1) * pageSize;
+        params.add(pageSize);
+        params.add(offset);
 
         try (
                 Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -243,6 +252,61 @@ public class PurchaseRequestDAO {
         }
 
         return list;
+    }
+
+    public int count(
+            Long userId,
+            boolean isManager,
+            String requestCode,
+            String status,
+            String createdDate
+    ) {
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(*)
+        FROM purchase_requests pr
+        WHERE 1 = 1
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (!isManager) {
+            sql.append(" AND pr.created_by = ?");
+            params.add(userId);
+        }
+
+        if (requestCode != null && !requestCode.isBlank()) {
+            sql.append(" AND pr.request_code LIKE ?");
+            params.add("%" + requestCode + "%");
+        }
+
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND pr.status = ?");
+            params.add(status);
+        }
+
+        if (createdDate != null && !createdDate.isBlank()) {
+            sql.append(" AND DATE(pr.created_at) = ?");
+            params.add(createdDate);
+        }
+
+        try (
+                Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Count purchase request failed", e);
+        }
+
+        return 0;
     }
 
     public List<Product> getActiveProductDropdown() {

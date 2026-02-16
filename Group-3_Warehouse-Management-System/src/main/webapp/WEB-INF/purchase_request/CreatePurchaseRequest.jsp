@@ -23,8 +23,7 @@
 
             <form action="${pageContext.request.contextPath}/purchase-request/create"
                   method="post"
-                  id="purchaseForm"
-                  style="max-width: 1000px;">
+                  id="purchaseForm">
                 <!-- NOTE -->
                 <div class="mb-3">
                     <label for="note" class="form-label fw-semibold">

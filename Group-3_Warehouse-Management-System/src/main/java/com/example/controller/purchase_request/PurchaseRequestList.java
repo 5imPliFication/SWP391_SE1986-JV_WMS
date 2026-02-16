@@ -46,15 +46,45 @@ public class PurchaseRequestList extends HttpServlet {
         String status = request.getParameter("status");
         String createdDate = request.getParameter("createdDate");
 
-        // ===== LOAD LIST =====
+        // ===== PAGINATION PARAM =====
+        int pageNo = 1;
+        int pageSize = 6;
+
+        try {
+            String pageStr = request.getParameter("pageNo");
+            if (pageStr != null) {
+                pageNo = Integer.parseInt(pageStr);
+            }
+        } catch (NumberFormatException e) {
+            pageNo = 1;
+        }
+
+        // ===== LOAD LIST (THEO PAGE) =====
         List<PurchaseRequest> list = pr.getList(
+                user.getId(),
+                isManager,
+                requestCode,
+                status,
+                createdDate,
+                pageNo,
+                pageSize
+        );
+
+        // ===== COUNT TOTAL =====
+        int totalRecords = pr.count(
                 user.getId(),
                 isManager,
                 requestCode,
                 status,
                 createdDate
         );
+
+        int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+
+        // ===== SET ATTRIBUTE =====
         request.setAttribute("purchaseRequests", list);
+        request.setAttribute("pageNo", pageNo);
+        request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher(
                 "/WEB-INF/purchase_request/PurchaseRequestList.jsp"

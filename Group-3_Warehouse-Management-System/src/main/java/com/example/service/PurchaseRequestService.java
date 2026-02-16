@@ -23,9 +23,21 @@ public class PurchaseRequestService {
             boolean isManager,
             String requestCode,
             String status,
+            String createdDate,
+            int pageNo,
+            int pageSize
+    ) {
+        return p.search(userId, isManager, requestCode, status, createdDate, pageNo, pageSize);
+    }
+
+    public int count(
+            Long userId,
+            boolean isManager,
+            String requestCode,
+            String status,
             String createdDate
     ) {
-        return p.search(userId, isManager, requestCode, status, createdDate);
+        return p.count(userId, isManager, requestCode, status, createdDate);
     }
 
     public long createPurchaseRequest(

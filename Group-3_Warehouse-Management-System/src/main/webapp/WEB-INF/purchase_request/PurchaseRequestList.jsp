@@ -121,25 +121,28 @@
                         <nav class="mt-3">
                             <ul class="pagination justify-content-center">
 
+                                <!-- Previous -->
                                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                                     <a class="page-link"
-                                       href="${pageContext.request.contextPath}/brands?pageNo=${pageNo - 1}">
+                                       href="${pageContext.request.contextPath}/purchase-request/list?pageNo=${pageNo - 1}&requestCode=${param.requestCode}&status=${param.status}&createdDate=${param.createdDate}">
                                         Previous
                                     </a>
                                 </li>
 
+                                <!-- Page numbers -->
                                 <c:forEach begin="1" end="${totalPages}" var="i">
                                     <li class="page-item ${i == pageNo ? 'active' : ''}">
                                         <a class="page-link"
-                                           href="${pageContext.request.contextPath}/brands?pageNo=${i}">
+                                           href="${pageContext.request.contextPath}/purchase-request/list?pageNo=${i}&requestCode=${param.requestCode}&status=${param.status}&createdDate=${param.createdDate}">
                                             ${i}
                                         </a>
                                     </li>
                                 </c:forEach>
 
+                                <!-- Next -->
                                 <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                                     <a class="page-link"
-                                       href="${pageContext.request.contextPath}/brands?pageNo=${pageNo + 1}">
+                                       href="${pageContext.request.contextPath}/purchase-request/list?pageNo=${pageNo + 1}&requestCode=${param.requestCode}&status=${param.status}&createdDate=${param.createdDate}">
                                         Next
                                     </a>
                                 </li>
@@ -147,6 +150,7 @@
                             </ul>
                         </nav>
                     </c:if>
+
 
                 </div>
             </div>
