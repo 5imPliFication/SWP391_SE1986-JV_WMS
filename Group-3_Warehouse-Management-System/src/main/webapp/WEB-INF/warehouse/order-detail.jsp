@@ -371,7 +371,7 @@
             <!-- Action Buttons -->
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-gradient-primary text-white">
-                    <h5 class="mb-0 font-weight-bold">
+                    <h5 class="mb-0 font-weight-bold text-dark">
                         <i class="fas fa-tasks mr-2"></i>Available Actions
                     </h5>
                 </div>

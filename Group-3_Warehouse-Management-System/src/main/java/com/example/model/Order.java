@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Getter
@@ -22,6 +23,10 @@ public class Order {
     private Timestamp createdAt;
     private User processedBy;
     private Timestamp processedAt;
+    private BigDecimal total;
     private Coupon coupon;
-    private double total;
+    private BigDecimal discountAmount;
+    private BigDecimal finalTotal;
+
+
 }

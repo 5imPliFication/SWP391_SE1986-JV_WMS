@@ -5,6 +5,8 @@ import com.example.model.Coupon;
 import com.example.model.Order;
 import com.example.model.User;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,6 +15,23 @@ import java.util.List;
 import java.util.Map;
 
 public class OrderDAO {
+
+    private Coupon mapResultSetToCoupon(ResultSet rs) throws SQLException {
+        Coupon coupon = new Coupon();
+        coupon.setId(rs.getLong("id"));
+        coupon.setCode(rs.getString("code"));
+        coupon.setDescription(rs.getString("description"));
+        coupon.setDiscountType(rs.getString("discount_type"));
+        coupon.setDiscountValue(rs.getBigDecimal("discount_value"));
+        coupon.setMinOrderAmount(rs.getBigDecimal("min_order_amount"));
+        coupon.setValidFrom(rs.getTimestamp("valid_from"));
+        coupon.setValidUntil(rs.getTimestamp("valid_until"));
+        coupon.setUsageLimit(rs.getObject("usage_limit") != null ? rs.getInt("usage_limit") : null);
+        coupon.setUsedCount(rs.getInt("used_count"));
+        coupon.setIsActive(rs.getBoolean("is_active"));
+        coupon.setCreatedAt(rs.getTimestamp("created_at"));
+        return coupon;
+    }
 
     public Map<String, Integer> getStatistics() {
         String sql = """
@@ -75,7 +94,7 @@ public class OrderDAO {
             coupon.setId(couponId);
             coupon.setCode(rs.getString("coupon_code"));
             coupon.setDiscountType(rs.getString("discount_type"));
-            coupon.setDiscountValue(rs.getDouble("discount_value"));
+            coupon.setDiscountValue(rs.getBigDecimal("discount_value"));
             order.setCoupon(coupon);
         }
 
@@ -140,6 +159,8 @@ public class OrderDAO {
                          o.total_price as total,
                          o.order_date,
                          o.processed_at,
+                         o.discount_amount,
+                         o.final_total,
                  
                          cu.id           AS created_user_id,
                          cu.fullname     AS created_user_name,
@@ -176,7 +197,11 @@ public class OrderDAO {
                 order.setCustomerPhone(rs.getString("customer_phone"));
                 order.setNote(rs.getString("note"));
                 order.setStatus(rs.getString("status"));
-                order.setTotal(rs.getDouble("total"));
+                order.setTotal(rs.getBigDecimal("total"));
+                order.setDiscountAmount(rs.getBigDecimal("discount_amount") != null ?
+                        rs.getBigDecimal("discount_amount") : BigDecimal.ZERO);
+                order.setFinalTotal(rs.getBigDecimal("final_total") != null ?
+                        rs.getBigDecimal("final_total") : order.getTotal());
 
                 // ----- createdBy -----
                 User createdBy = new User();
@@ -210,7 +235,7 @@ public class OrderDAO {
                     coupon.setId(couponId);
                     coupon.setCode(rs.getString("coupon_code"));
                     coupon.setDiscountType(rs.getString("discount_type"));
-                    coupon.setDiscountValue(rs.getDouble("discount_value"));
+                    coupon.setDiscountValue(rs.getBigDecimal("discount_value"));
                     order.setCoupon(coupon);
                 }
 
@@ -407,6 +432,197 @@ public class OrderDAO {
 
         } catch (SQLException e) {
             throw new RuntimeException("Failed to update order note", e);
+        }
+    }
+
+    private BigDecimal calculateDiscountAmount(Coupon coupon, BigDecimal subtotal) {
+        if ("PERCENTAGE".equals(coupon.getDiscountType())) {
+            // Percentage discount: subtotal * (discountValue / 100)
+            BigDecimal percentage = coupon.getDiscountValue().divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
+            return subtotal.multiply(percentage).setScale(2, RoundingMode.HALF_UP);
+        } else {
+            // Fixed amount discount
+            BigDecimal fixedDiscount = coupon.getDiscountValue();
+
+            // Don't let discount exceed subtotal
+            if (fixedDiscount.compareTo(subtotal) > 0) {
+                return subtotal;
+            }
+
+            return fixedDiscount;
+        }
+    }
+
+    /**
+     * Apply coupon to order
+     */
+    public void applyCoupon(Long orderId, Long couponId) {
+        String selectOrderSql = "SELECT SUM(oi.quantity * p.price) as subtotal " +
+                "FROM order_items oi " +
+                "JOIN products p ON oi.product_id = p.id " +
+                "WHERE oi.order_id = ?";
+
+        String selectCouponSql = "SELECT * FROM coupons WHERE id = ?";
+
+        String updateOrderSql = "UPDATE orders SET coupon_id = ?, discount_amount = ?, final_total = ? WHERE id = ?";
+
+        String incrementUsageSql = "UPDATE coupons SET used_count = used_count + 1 WHERE id = ?";
+
+        try (Connection con = DBConfig.getDataSource().getConnection()) {
+
+            // Start transaction
+            con.setAutoCommit(false);
+
+            try {
+                // 1. Calculate order subtotal
+                BigDecimal subtotal = BigDecimal.ZERO;
+                try (PreparedStatement ps = con.prepareStatement(selectOrderSql)) {
+                    ps.setLong(1, orderId);
+                    ResultSet rs = ps.executeQuery();
+
+                    if (rs.next()) {
+                        subtotal = rs.getBigDecimal("subtotal");
+                        if (subtotal == null) {
+                            subtotal = BigDecimal.ZERO;
+                        }
+                    }
+                }
+
+                if (subtotal.compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new IllegalStateException("Cannot apply coupon to empty order");
+                }
+
+                // 2. Get coupon details
+                Coupon coupon = null;
+                try (PreparedStatement ps = con.prepareStatement(selectCouponSql)) {
+                    ps.setLong(1, couponId);
+                    ResultSet rs = ps.executeQuery();
+
+                    if (rs.next()) {
+                        coupon = mapResultSetToCoupon(rs);
+                    } else {
+                        throw new IllegalArgumentException("Coupon not found");
+                    }
+                }
+
+                // 3. Calculate discount amount
+                BigDecimal discountAmount = calculateDiscountAmount(coupon, subtotal);
+
+                // 4. Calculate final total
+                BigDecimal finalTotal = subtotal.subtract(discountAmount);
+
+                // Ensure final total is not negative
+                if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
+                    finalTotal = BigDecimal.ZERO;
+                }
+
+                // 5. Update order with coupon, discount, and final total
+                try (PreparedStatement ps = con.prepareStatement(updateOrderSql)) {
+                    ps.setLong(1, couponId);
+                    ps.setBigDecimal(2, discountAmount);
+                    ps.setBigDecimal(3, finalTotal);
+                    ps.setLong(4, orderId);
+
+                    int affected = ps.executeUpdate();
+
+                    if (affected == 0) {
+                        throw new SQLException("Order not found with ID: " + orderId);
+                    }
+                }
+
+                // 6. Increment coupon usage count
+                try (PreparedStatement ps = con.prepareStatement(incrementUsageSql)) {
+                    ps.setLong(1, couponId);
+                    ps.executeUpdate();
+                }
+
+                // Commit transaction
+                con.commit();
+
+            } catch (Exception e) {
+                // Rollback on error
+                con.rollback();
+                throw e;
+            } finally {
+                con.setAutoCommit(true);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to apply coupon to order", e);
+        }
+    }
+
+    /**
+     * Remove coupon from order
+     */
+    public void removeCoupon(Long orderId) {
+        String selectOrderSql = "SELECT SUM(oi.quantity * p.price) as subtotal, o.coupon_id " +
+                "FROM order_items oi " +
+                "JOIN products p ON oi.product_id = p.id " +
+                "JOIN orders o ON o.id = oi.order_id " +
+                "WHERE oi.order_id = ? " +
+                "GROUP BY o.coupon_id";
+
+        String updateOrderSql = "UPDATE orders SET coupon_id = NULL, discount_amount = 0, final_total = ? WHERE id = ?";
+
+        String decrementUsageSql = "UPDATE coupons SET used_count = used_count - 1 WHERE id = ? AND used_count > 0";
+
+        try (Connection con = DBConfig.getDataSource().getConnection()) {
+
+            // Start transaction
+            con.setAutoCommit(false);
+
+            try {
+                // 1. Get current order subtotal and coupon ID
+                BigDecimal subtotal = BigDecimal.ZERO;
+                Long couponId = null;
+
+                try (PreparedStatement ps = con.prepareStatement(selectOrderSql)) {
+                    ps.setLong(1, orderId);
+                    ResultSet rs = ps.executeQuery();
+
+                    if (rs.next()) {
+                        subtotal = rs.getBigDecimal("subtotal");
+                        if (subtotal == null) {
+                            subtotal = BigDecimal.ZERO;
+                        }
+                        couponId = rs.getObject("coupon_id") != null ? rs.getLong("coupon_id") : null;
+                    }
+                }
+
+                // 2. Update order - remove coupon and set final_total to subtotal
+                try (PreparedStatement ps = con.prepareStatement(updateOrderSql)) {
+                    ps.setBigDecimal(1, subtotal); // final_total = subtotal (no discount)
+                    ps.setLong(2, orderId);
+
+                    int affected = ps.executeUpdate();
+
+                    if (affected == 0) {
+                        throw new SQLException("Order not found with ID: " + orderId);
+                    }
+                }
+
+                // 3. Decrement coupon usage count if there was a coupon
+                if (couponId != null) {
+                    try (PreparedStatement ps = con.prepareStatement(decrementUsageSql)) {
+                        ps.setLong(1, couponId);
+                        ps.executeUpdate();
+                    }
+                }
+
+                // Commit transaction
+                con.commit();
+
+            } catch (Exception e) {
+                // Rollback on error
+                con.rollback();
+                throw e;
+            } finally {
+                con.setAutoCommit(true);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to remove coupon from order", e);
         }
     }
 }

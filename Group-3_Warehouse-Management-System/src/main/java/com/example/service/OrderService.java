@@ -1,16 +1,13 @@
 package com.example.service;
 
 import com.example.dao.*;
-import com.example.model.Order;
-import com.example.model.OrderItem;
-import com.example.model.Product;
-import com.example.model.User;
+import com.example.model.*;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.util.*;
 
 public class OrderService {
     private final OrderDAO orderDAO;
@@ -67,27 +64,6 @@ public class OrderService {
     }
 
 
-    public void submitOrder(Long orderId, Long salesmanId) {
-        Order order = orderDAO.findById(orderId);
-
-        List<OrderItem> orderItems = orderItemDAO.findByOrderId(orderId);
-        if (orderItems.isEmpty()) {
-            throw new IllegalStateException("Cannot submit an order with no items");
-        }
-
-        if (!order.getCreatedBy().getId().equals(salesmanId))
-            throw new SecurityException("Not your order");
-
-        if (!order.getStatus().equals("DRAFT"))
-            throw new IllegalStateException("Order already submitted");
-
-        orderDAO.updateStatus(orderId, "SUBMITTED", salesmanId, null);
-    }
-
-    public List<Order> getOrdersBySalesman(Long salesmanId) {
-        return orderDAO.findBySalesman(salesmanId);
-    }
-
     /* ================= SHARED ================= */
 
     public Order getOrderDetail(Long orderId, Long userId, String role) {
@@ -104,7 +80,7 @@ public class OrderService {
 
         // Load coupon if applied
         if (order.getCoupon() != null) {
-            couponDAO.findById(order.getCoupon().getId()).ifPresent(order::setCoupon);
+            couponDAO.findById(order.getCoupon().getId());
         }
 
         return order;
@@ -120,7 +96,7 @@ public class OrderService {
     // Load coupon info for a single order (when needed)
     public void loadCoupon(Order order) {
         if (order.getCoupon() != null) {
-            couponDAO.findById(order.getCoupon().getId()).ifPresent(order::setCoupon);
+            couponDAO.findById(order.getCoupon().getId());
         }
     }
 
@@ -224,5 +200,162 @@ public class OrderService {
             orderItem.setQuantity(quantity);
             orderItemDAO.addItem(orderItem);
         }
+    }
+
+    /**
+     * Calculate total amount for an order
+     */
+    public BigDecimal calculateOrderTotal(Long orderId) {
+        List<OrderItem> items = orderItemDAO.findByOrderId(orderId);
+
+        if (items == null || items.isEmpty()) {
+            System.out.println("Order Empty!!!");
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (OrderItem item : items) {
+            if (item.getProduct() == null) {
+                throw new RuntimeException("Product not loaded for item ID: " + item.getId());
+            }
+
+            BigDecimal itemTotal = item.getProduct().getPrice()
+                    .multiply(new BigDecimal(item.getQuantity()));
+            total = total.add(itemTotal);
+        }
+
+        return total.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Calculate subtotal (before discount)
+     */
+    public BigDecimal calculateSubtotal(Long orderId) {
+        return calculateOrderTotal(orderId);
+    }
+
+    /**
+     * Calculate discount amount
+     */
+    public BigDecimal calculateDiscountAmount(Long orderId) {
+        Order order = orderDAO.findById(orderId);
+        if (order == null || order.getCoupon() == null) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal subtotal = calculateOrderTotal(orderId);
+        return calculateDiscount(order.getCoupon(), subtotal);
+    }
+
+    /**
+     * Calculate final total (after coupon discount)
+     */
+    public BigDecimal calculateFinalTotal(Long orderId) {
+        BigDecimal subtotal = calculateOrderTotal(orderId);
+        BigDecimal discount = calculateDiscountAmount(orderId);
+
+        return subtotal.subtract(discount).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Calculate discount amount based on coupon
+     */
+    public BigDecimal calculateDiscount(Coupon coupon, BigDecimal orderTotal) {
+        if (coupon.getDiscountType().equals("PERCENTAGE")) {
+            // Percentage discount
+            BigDecimal percentage = coupon.getDiscountValue().divide(new BigDecimal("100"));
+            return orderTotal.multiply(percentage).setScale(2, RoundingMode.HALF_UP);
+        } else {
+            // Fixed amount discount
+            return coupon.getDiscountValue();
+        }
+    }
+
+    /**
+     * Apply coupon to order
+     */
+    public void applyCouponToOrder(Long orderId, Long couponId) {
+        Order order = orderDAO.findById(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found");
+        }
+
+        if (!"DRAFT".equals(order.getStatus())) {
+            throw new IllegalStateException("Can only apply coupons to draft orders");
+        }
+
+        Coupon coupon = couponDAO.findById(couponId);
+        if (coupon==null) {
+            throw new IllegalArgumentException("Coupon not found");
+        }
+
+        if (!coupon.isValid()) {
+            throw new IllegalStateException("Coupon is no longer valid");
+        }
+
+        BigDecimal orderTotal = calculateOrderTotal(orderId);
+
+        if (coupon.getMinOrderAmount() != null &&
+                orderTotal.compareTo(coupon.getMinOrderAmount()) < 0) {
+            throw new IllegalArgumentException(
+                    String.format("Order total must be at least %s VND to use this coupon",
+                            coupon.getMinOrderAmount().toPlainString())
+            );
+        }
+
+        orderDAO.applyCoupon(orderId, couponId);
+    }
+
+    /**
+     * Remove coupon from order
+     */
+    public void removeCouponFromOrder(Long orderId) {
+        Order order = orderDAO.findById(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found");
+        }
+
+        if (!"DRAFT".equals(order.getStatus())) {
+            throw new IllegalStateException("Can only remove coupons from draft orders");
+        }
+
+        orderDAO.removeCoupon(orderId);
+    }
+
+    public void submitOrder(Long orderId, Long userId) {
+        Order order = orderDAO.findById(orderId);
+
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found");
+        }
+
+        if (!order.getCreatedBy().equals(userId)) {
+            throw new SecurityException("You can only submit your own orders");
+        }
+
+        if (!"DRAFT".equals(order.getStatus())) {
+            throw new IllegalStateException("Order is not in draft status");
+        }
+
+        List<OrderItem> items = orderItemDAO.findByOrderId(orderId);
+        if (items == null || items.isEmpty()) {
+            throw new IllegalStateException("Cannot submit empty order");
+        }
+
+        // Increment coupon usage if coupon was applied
+        if (order.getCoupon().getId() != null) {
+            couponDAO.incrementUsageCount(order.getCoupon().getId());
+        }
+
+        orderDAO.updateStatus(orderId, "SUBMITTED", userId, null);
+    }
+
+    public List<Order> getOrdersBySalesman(Long salesmanId){
+        List<Order> orders = orderDAO.findBySalesman(salesmanId);
+        if (orders.isEmpty()) {
+            throw new IllegalArgumentException("Order not found");
+        }
+        return orders;
     }
 }

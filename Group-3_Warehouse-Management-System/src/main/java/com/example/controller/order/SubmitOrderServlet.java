@@ -2,6 +2,7 @@ package com.example.controller.order;
 
 import com.example.model.User;
 import com.example.service.OrderService;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,15 +22,48 @@ public class SubmitOrderServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
+            throws IOException, ServletException {
 
         User user = (User) req.getSession().getAttribute("user");
-        Long orderId = Long.parseLong(req.getParameter("orderId"));
+        if (user == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
 
-        orderService.submitOrder(orderId, user.getId());
+        if (!"Salesman".equals(user.getRole().getName())) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
-        resp.sendRedirect(req.getContextPath()
-                + "/salesman/orders");
+        try {
+            Long orderId = Long.parseLong(req.getParameter("orderId"));
+
+            // This will increment coupon usage if coupon is applied
+            orderService.submitOrder(orderId, user.getId());
+
+            resp.sendRedirect(req.getContextPath() + "/salesman/orders?submitted=true");
+
+        } catch (IllegalArgumentException e) {
+            req.setAttribute("error", e.getMessage());
+            req.setAttribute("code", "400");
+            req.getRequestDispatcher("/WEB-INF/views/error/error.jsp").forward(req, resp);
+
+        } catch (SecurityException e) {
+            req.setAttribute("error", e.getMessage());
+            req.setAttribute("code", "403");
+            req.getRequestDispatcher("/WEB-INF/views/error/error.jsp").forward(req, resp);
+
+        } catch (IllegalStateException e) {
+            req.setAttribute("error", e.getMessage());
+            req.setAttribute("code", "409");
+            req.getRequestDispatcher("/WEB-INF/views/error/error.jsp").forward(req, resp);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            req.setAttribute("error", "Failed to submit order: " + e.getMessage());
+            req.setAttribute("code", "500");
+            req.getRequestDispatcher("/WEB-INF/views/error/error.jsp").forward(req, resp);
+        }
     }
 }
 
