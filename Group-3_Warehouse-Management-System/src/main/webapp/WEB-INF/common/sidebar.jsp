@@ -116,11 +116,23 @@
                       </a>
                   </li>
             </c:if>
-
+            <%--import product--%>
             <c:if test="${sessionScope.user != null
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
                           and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
+                <li>
+                    <a href="${pageContext.request.contextPath}/import-product-items"
+                       class="<%= (uri.contains("import-product-items")) ? "active" : "" %>">
+                        <span>Import Product</span>
+                    </a>
+                </li>
+            </c:if>
+<%--            Export product--%>
+            <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'EXPORT_PRODUCT')}">
                   <li>
                       <a href="${pageContext.request.contextPath}/export-product-items"
                          class="<%= (uri.contains("export-products")) ? "active" : "" %>">
@@ -139,16 +151,18 @@
                       </a>
                   </li>
             </c:if>
+
+<%--            import history--%>
             <c:if test="${sessionScope.user != null
                           and sessionScope.user.role != null
-                          and sessionScope.user.role.active}">
-
-                  <li>
-                      <a href="${pageContext.request.contextPath}/import-product-items"
-                         class="<%= (uri.contains("import-products")) ? "active" : "" %>">
-                          <span>Import Product</span>
-                      </a>
-                  </li>
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
+                <li>
+                    <a href="${pageContext.request.contextPath}/import-history"
+                       class="<%= (uri.contains("import-history")) ? "active" : "" %>">
+                        <span>Import History</span>
+                    </a>
+                </li>
             </c:if>
         </ul>
     </aside>
