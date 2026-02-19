@@ -75,9 +75,15 @@ public class PurchaseRequestDetail extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        processRequest(request, response);
+
+        User user = (User) req.getSession().getAttribute("user");
+        Long id = Long.valueOf(req.getParameter("id"));
+
+        pr.cancelRequest(id, user);
+
+        resp.sendRedirect(req.getContextPath() + "/purchase-request/list");
     }
 
 }

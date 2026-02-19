@@ -423,4 +423,49 @@ public class PurchaseRequestDAO {
         return items;
     }
 
+    public void cancel(Long prId, Long userId) {
+        String sql = """
+        UPDATE purchase_requests
+        SET status = 'CANCELLED'
+        WHERE id = ?
+          AND created_by = ?
+          AND status = 'PENDING'
+    """;
+
+        try (Connection con = DBConfig.getDataSource().getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, prId);
+            ps.setLong(2, userId);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getStatusById(Long prId) {
+
+        String sql = """
+        SELECT status
+        FROM purchase_requests
+        WHERE id = ?
+    """;
+
+        try (Connection con = DBConfig.getDataSource().getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, prId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("status");
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot get purchase request status", e);
+        }
+
+        return null; // không tìm thấy
+    }
+
 }

@@ -122,4 +122,22 @@ public class PurchaseRequestService {
         return p.findItemsByRequestId(requestId);
     }
 
+    public String getStatus(Long prId) {
+
+        String status = p.getStatusById(prId);
+
+        if (status == null) {
+            throw new RuntimeException("Purchase Request not found");
+        }
+
+        return status;
+    }
+
+    public void cancelRequest(Long prId, User user) {
+        if (!"PENDING".equals(getStatus(prId))) {
+            throw new RuntimeException("Only PENDING request can be cancelled");
+        }
+        p.cancel(prId, user.getId());
+    }
+
 }

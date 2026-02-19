@@ -1,5 +1,6 @@
 package com.example.controller.purchase_request;
 
+import com.example.enums.PurchaseRequestStatus;
 import com.example.model.PurchaseRequest;
 import com.example.model.User;
 import com.example.service.PurchaseRequestService;
@@ -85,6 +86,7 @@ public class PurchaseRequestList extends HttpServlet {
         request.setAttribute("purchaseRequests", list);
         request.setAttribute("pageNo", pageNo);
         request.setAttribute("totalPages", totalPages);
+        request.setAttribute( "statuses",PurchaseRequestStatus.values());
 
         request.getRequestDispatcher(
                 "/WEB-INF/purchase_request/PurchaseRequestList.jsp"

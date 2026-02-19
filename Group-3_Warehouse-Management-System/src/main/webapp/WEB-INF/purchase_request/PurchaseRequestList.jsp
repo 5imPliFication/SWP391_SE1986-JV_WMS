@@ -48,10 +48,14 @@
                         <label class="form-label fw-semibold">Status</label>
                         <select name="status" class="form-select">
                             <option value="">All</option>
-                            <option value="PENDING"  ${param.status == 'PENDING' ? 'selected' : ''}>PENDING</option>
-                            <option value="APPROVED" ${param.status == 'APPROVED' ? 'selected' : ''}>APPROVED</option>
-                            <option value="REJECTED" ${param.status == 'REJECTED' ? 'selected' : ''}>REJECTED</option>
+                            <c:forEach items="${statuses}" var="s">
+                                <option value="${s}"
+                                        ${param.status == s ? 'selected' : ''}>
+                                    ${s}
+                                </option>
+                            </c:forEach>
                         </select>
+
                     </div>
 
                     <!-- Created Date (1 filter ngày) -->
@@ -98,19 +102,53 @@
 
                         <tbody>
                             <c:forEach items="${purchaseRequests}" var="pr">
-                                <tr>
+                                <tr class="${pr.status == 'CANCELLED' ? 'table-secondary text-muted' : ''}">
                                     <td>${pr.requestCode}</td>
-                                    <td>${pr.status}</td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${pr.status == 'PENDING'}">
+                                                <span class="badge bg-warning text-dark">${pr.status}</span>
+                                            </c:when>
+
+                                            <c:when test="${pr.status == 'APPROVED'}">
+                                                <span class="badge bg-success">${pr.status}</span>
+                                            </c:when>
+
+                                            <c:when test="${pr.status == 'REJECTED'}">
+                                                <span class="badge bg-danger">${pr.status}</span>
+                                            </c:when>
+
+                                            <c:when test="${pr.status == 'CANCELLED'}">
+                                                <span class="badge bg-secondary">${pr.status}</span>
+                                            </c:when>
+
+                                            <c:when test="${pr.status == 'COMPLETED'}">
+                                                <span class="badge bg-primary">${pr.status}</span>
+                                            </c:when>
+
+                                            <c:otherwise>
+                                                <span class="badge bg-dark">${pr.status}</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
                                     <c:if test="${showCreatedBy}">
                                         <td>${pr.createdByName}</td>
                                     </c:if>
 
                                     <td>${pr.approvedByName}</td>
                                     <td>${pr.createdAt}</td>
-                                    <td>
-                                        <a href="${pageContext.request.contextPath}/purchase-request/detail?id=${pr.id}">
-                                            View
-                                        </a>
+                                    <td class="text-center">
+                                        <c:choose>
+                                            <c:when test="${pr.status == 'CANCELLED'}">
+                                                <span class="text-muted fst-italic">No action</span>
+                                            </c:when>
+
+                                            <c:otherwise>
+                                                <a href="${pageContext.request.contextPath}/purchase-request/detail?id=${pr.id}">
+                                                    Detail
+                                                </a>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </td>
                                 </tr>
                             </c:forEach>

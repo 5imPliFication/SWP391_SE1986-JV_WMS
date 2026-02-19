@@ -17,7 +17,31 @@
 
             <h3 class="mb-3">
                 Purchase Request Detail
-                <span class="badge bg-secondary">${prList.status}</span>
+                <c:choose>
+                    <c:when test="${prList.status == 'PENDING'}">
+                        <span class="badge bg-warning text-dark">PENDING</span>
+                    </c:when>
+
+                    <c:when test="${prList.status == 'APPROVED'}">
+                        <span class="badge bg-success">APPROVED</span>
+                    </c:when>
+
+                    <c:when test="${prList.status == 'REJECTED'}">
+                        <span class="badge bg-danger">REJECTED</span>
+                    </c:when>
+
+                    <c:when test="${prList.status == 'CANCELLED'}">
+                        <span class="badge bg-secondary">CANCELLED</span>
+                    </c:when>
+
+                    <c:when test="${prList.status == 'COMPLETED'}">
+                        <span class="badge bg-primary">COMPLETED</span>
+                    </c:when>
+
+                    <c:otherwise>
+                        <span class="badge bg-dark">${prList.status}</span>
+                    </c:otherwise>
+                </c:choose>
             </h3>
 
             <!-- ===== HEADER INFO ===== -->
@@ -99,14 +123,16 @@
                     ← Back
                 </a>
 
-                <!-- Delete chỉ khi PENDING & là creator -->
-                <c:if test="${prList.status == 'PENDING' && prList.createdBy == user.id}">
-                    <a href="${pageContext.request.contextPath}/purchase-request/delete?id=${pr.id}"
-                       class="btn btn-danger"
-                       onclick="return confirm('Delete this request?')">
-                        Delete
-                    </a>
+                <!-- Cancel chỉ khi PENDING & là creator -->
+                <c:if test="${prList.status != 'APPROVED'}">
+                    <form action="${pageContext.request.contextPath}/purchase-request/detail"
+                          method="post"
+                          onsubmit="return confirm('Cancel this request?')">
+                        <input type="hidden" name="id" value="${prList.id}">
+                        <button class="btn btn-danger">Cancel</button>
+                    </form>
                 </c:if>
+
             </div>
 
         </main>
