@@ -114,57 +114,6 @@ public class PurchaseRequestDAO {
         ps.executeUpdate();
     }
 
-    public List<PurchaseRequest> findAll(Long userId, boolean isManager) {
-
-        List<PurchaseRequest> list = new ArrayList<>();
-
-        String sql = """
-            SELECT pr.id, pr.request_code, pr.status, pr.note, pr.created_at,
-                   u1.id AS created_by, u1.fullname AS created_by_name,
-                   u2.id AS approved_by, u2.fullname AS approved_by_name
-            FROM purchase_requests pr
-            JOIN users u1 ON pr.created_by = u1.id
-            LEFT JOIN users u2 ON pr.approved_by = u2.id
-        """;
-
-        if (!isManager) {
-            sql += " WHERE pr.created_by = ?";
-        }
-
-        sql += " ORDER BY pr.created_at DESC";
-
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            if (!isManager) {
-                ps.setLong(1, userId);
-            }
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                PurchaseRequest pr = new PurchaseRequest();
-                pr.setId(rs.getLong("id"));
-                pr.setRequestCode(rs.getString("request_code"));
-                pr.setStatus(rs.getString("status"));
-                pr.setNote(rs.getString("note"));
-                pr.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-
-                pr.setCreatedBy(rs.getLong("created_by"));
-                pr.setCreatedByName(rs.getString("created_by_name"));
-
-                pr.setApprovedBy(rs.getLong("approved_by"));
-                pr.setApprovedByName(rs.getString("approved_by_name"));
-
-                list.add(pr);
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return list;
-    }
-
     public List<PurchaseRequest> search(
             Long userId,
             boolean isManager,
@@ -374,6 +323,104 @@ public class PurchaseRequestDAO {
         }
 
         return list;
+    }
+
+    public PurchaseRequest findById(
+            Long requestId,
+            Long userId,
+            boolean isManager
+    ) {
+
+        String sql = """
+        SELECT pr.id, pr.request_code, pr.status, pr.note, pr.created_at,
+               u1.id AS created_by, u1.fullname AS created_by_name,
+               u2.id AS approved_by, u2.fullname AS approved_by_name
+        FROM purchase_requests pr
+        JOIN users u1 ON pr.created_by = u1.id
+        LEFT JOIN users u2 ON pr.approved_by = u2.id
+        WHERE pr.id = ?
+    """;
+
+        if (!isManager) {
+            sql += " AND pr.created_by = ?";
+        }
+
+        try (
+                Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, requestId);
+            if (!isManager) {
+                ps.setLong(2, userId);
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                PurchaseRequest pr = new PurchaseRequest();
+                pr.setId(rs.getLong("id"));
+                pr.setRequestCode(rs.getString("request_code"));
+                pr.setStatus(rs.getString("status"));
+                pr.setNote(rs.getString("note"));
+                pr.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+
+                pr.setCreatedBy(rs.getLong("created_by"));
+                pr.setCreatedByName(rs.getString("created_by_name"));
+
+                pr.setApprovedBy(rs.getLong("approved_by"));
+                pr.setApprovedByName(rs.getString("approved_by_name"));
+
+                return pr;
+            }
+
+            return null;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Find purchase request by id failed", e);
+        }
+    }
+
+    public List<PurchaseRequestItem> findItemsByRequestId(Long requestId) {
+
+        List<PurchaseRequestItem> items = new ArrayList<>();
+
+        String sql = """
+        SELECT
+            pri.product_id,
+            COALESCE(p.name, pri.product_name) AS product_name,
+            b.name AS brand_name,
+            c.name AS category_name,
+            pri.specs,
+            pri.quantity
+        FROM purchase_request_items pri
+        LEFT JOIN products p ON pri.product_id = p.id
+        LEFT JOIN brands b ON p.brand_id = b.id
+        LEFT JOIN categories c ON p.category_id = c.id
+        WHERE pri.purchase_request_id = ?
+    """;
+
+        try (
+                Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, requestId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                PurchaseRequestItem item = new PurchaseRequestItem();
+
+                item.setProductId(rs.getLong("product_id"));
+                item.setProductName(rs.getString("product_name"));
+                item.setBrandName(rs.getString("brand_name"));
+                item.setCategoryName(rs.getString("category_name"));
+                item.setSpecs(rs.getString("specs"));
+                item.setQuantity(rs.getLong("quantity"));
+
+                items.add(item);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Find purchase request items failed", e);
+        }
+
+        return items;
     }
 
 }

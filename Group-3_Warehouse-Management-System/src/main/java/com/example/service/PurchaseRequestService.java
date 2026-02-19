@@ -6,6 +6,7 @@ import com.example.model.Category;
 import com.example.model.Product;
 import com.example.model.PurchaseRequest;
 import com.example.model.PurchaseRequestItem;
+import com.example.model.User;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -98,6 +99,27 @@ public class PurchaseRequestService {
 
     public List<Category> getCategoryDropdown() {
         return p.getActiveCategories();
+    }
+
+    public PurchaseRequest getDetail(
+            Long requestId,
+            User user
+    ) {
+        boolean isManager
+                = "MANAGER".equalsIgnoreCase(user.getRole().getName());
+
+        PurchaseRequest pr
+                = p.findById(requestId, user.getId(), isManager);
+
+        if (pr == null) {
+            throw new RuntimeException("Purchase request not found or access denied");
+        }
+
+        return pr;
+    }
+
+    public List<PurchaseRequestItem> getItems(Long requestId) {
+        return p.findItemsByRequestId(requestId);
     }
 
 }
