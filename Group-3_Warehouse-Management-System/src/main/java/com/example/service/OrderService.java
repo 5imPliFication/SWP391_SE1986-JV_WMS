@@ -220,8 +220,11 @@ public class OrderService {
                 throw new RuntimeException("Product not loaded for item ID: " + item.getId());
             }
 
-            BigDecimal itemTotal = item.getProduct().getPrice()
-                    .multiply(new BigDecimal(item.getQuantity()));
+//            BigDecimal itemTotal = item.getProduct().getPrice()
+//                    .multiply(new BigDecimal(item.getQuantity()));
+
+            // Tạm thời để 0 vì Ko có price trong product, sau này sẽ sửa lại
+            BigDecimal itemTotal = BigDecimal.ZERO;
             total = total.add(itemTotal);
         }
 

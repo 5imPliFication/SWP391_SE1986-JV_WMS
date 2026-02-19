@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -14,15 +15,17 @@ import java.time.LocalDateTime;
 public class ProductItem {
     private Long id;
     private String serial;
-    private Double importPrice;
-    private LocalDateTime importDate;
-    private boolean isActive;
+    private Double importedPrice;
+    private Double currentPrice;
+    private LocalDateTime importedAt;
+    private LocalDateTime updatedAt;
+    private Boolean isActive;
     private Long productId;
 
-    public ProductItem(String serial, Double importPrice, LocalDateTime importDate, Long productId) {
+    public ProductItem(String serial, Double importedPrice, LocalDateTime importedAt, Long productId) {
         this.serial = serial;
-        this.importPrice = importPrice;
+        this.importedPrice = importedPrice;
         this.productId = productId;
-        this.importDate = importDate;
+        this.importedAt = importedAt;
     }
 }
