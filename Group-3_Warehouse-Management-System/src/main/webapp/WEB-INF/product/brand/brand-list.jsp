@@ -151,7 +151,16 @@
                                                            class="btn btn-sm btn-warning">
                                                             Edit
                                                         </a>
+                                                        <form action="${pageContext.request.contextPath}/change-status"
+                                                              method="post" style="display:inline;"
+                                                              onsubmit="return confirm('Bạn có chắc muốn xóa brand này không?');">
+                                                            <input type="hidden" name="brandId" value="${b.id}">
+                                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                                Delete
+                                                            </button>
+                                                        </form>
                                                     </c:if>
+
                                                     <c:if test="${!b.active}">
                                                         <span class="text-muted ms-2">Disabled</span>
                                                     </c:if>
@@ -202,33 +211,33 @@
     </body>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const statusSelect = document.getElementById("a");
-        const searchInput = document.getElementById("searchName");
+                                                                  const statusSelect = document.getElementById("a");
+                                                                  const searchInput = document.getElementById("searchName");
 
-        function filterTable() {
-            const selectedStatus = statusSelect.value;   // "", "1", "0"
-            const searchText = searchInput.value.toLowerCase().trim();
+                                                                  function filterTable() {
+                                                                      const selectedStatus = statusSelect.value;   // "", "1", "0"
+                                                                      const searchText = searchInput.value.toLowerCase().trim();
 
-            document.querySelectorAll("tbody tr").forEach(row => {
-                const rowStatus = row.dataset.status;
-                const rowName = row.dataset.name;
+                                                                      document.querySelectorAll("tbody tr").forEach(row => {
+                                                                          const rowStatus = row.dataset.status;
+                                                                          const rowName = row.dataset.name;
 
-                let show = true;
+                                                                          let show = true;
 
-                if (selectedStatus !== "") {
-                    show = rowStatus === selectedStatus;
-                }
+                                                                          if (selectedStatus !== "") {
+                                                                              show = rowStatus === selectedStatus;
+                                                                          }
 
-                if (show && searchText !== "") {
-                    show = rowName.includes(searchText);
-                }
+                                                                          if (show && searchText !== "") {
+                                                                              show = rowName.includes(searchText);
+                                                                          }
 
-                row.style.display = show ? "" : "none";
-            });
-        }
+                                                                          row.style.display = show ? "" : "none";
+                                                                      });
+                                                                  }
 
-        statusSelect.addEventListener("change", filterTable);
-        searchInput.addEventListener("keyup", filterTable);
+                                                                  statusSelect.addEventListener("change", filterTable);
+                                                                  searchInput.addEventListener("keyup", filterTable);
     </script>
 
 </html>
