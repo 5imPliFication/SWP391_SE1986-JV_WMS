@@ -23,8 +23,12 @@
                 <div class="card-body">
                     <form action="${pageContext.request.contextPath}/products/update" method="post">
 
-                        <%--Product ID hidden--%>
                         <input type="hidden" name="productId" value="${product.id}">
+                        <input type="hidden" name="pageNo" value="${param.pageNo}">
+                        <input type="hidden" name="searchName" value="${param.searchName}">
+                        <input type="hidden" name="brandName" value="${param.categoryName}">
+                        <input type="hidden" name="categoryName" value="${param.categoryName}">
+                        <input type="hidden" name="isActive" value="${param.isActive}">
 
                         <!-- Product Name -->
                         <div class="mb-3">
@@ -88,7 +92,7 @@
                         <%--Status--%>
                         <div class="mb-3">
                             <label class="form-label">Status</label>
-                            <select name="isActive" class="form-select">
+                            <select name="productIsActive" class="form-select">
                                 <option value="true"  ${product.isActive == 'true' ? 'selected' : ''}>Active</option>
                                 <option value="false" ${product.isActive == 'false' ? 'selected' : ''}>Inactive</option>
                             </select>
@@ -96,7 +100,7 @@
 
                         <!-- Buttons -->
                         <div class="d-flex justify-content-between">
-                            <a href="${pageContext.request.contextPath}/products"
+                            <a href="${pageContext.request.contextPath}/products?pageNo=${param.pageNo}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&isActive=${param.isActive}"
                                class="btn btn-secondary">
                                 Back to products list
                             </a>
@@ -105,6 +109,20 @@
                             </button>
                         </div>
 
+                        <div>
+                            <c:if test="${not empty sessionScope.successMessage}">
+                                <div class="alert alert-success">
+                                        ${sessionScope.successMessage}
+                                </div>
+                                <c:remove var="successMessage" scope="session"/>
+                            </c:if>
+                            <c:if test="${not empty sessionScope.errorMessage}">
+                                <div class="alert alert-danger">
+                                        ${sessionScope.errorMessage}
+                                </div>
+                                <c:remove var="errorMessage" scope="session"/>
+                            </c:if>
+                        </div>
                     </form>
                 </div>
             </div>

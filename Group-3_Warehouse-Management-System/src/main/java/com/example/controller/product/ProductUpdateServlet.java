@@ -44,19 +44,26 @@ public class ProductUpdateServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        long  productId = Long.parseLong(request.getParameter("productId"));
+        long productId = Long.parseLong(request.getParameter("productId"));
         String productName = request.getParameter("productName");
         String productDescription = request.getParameter("productDescription");
         String imgUrl = request.getParameter("imgUrl");
         long brandId = Long.parseLong(request.getParameter("brandId"));
         long categoryId = Long.parseLong(request.getParameter("categoryId"));
-        boolean isActive = Boolean.parseBoolean(request.getParameter("isActive"));
+        boolean productIsActive = Boolean.parseBoolean(request.getParameter("productIsActive"));
 
-        if(productService.updateProduct(productId, productName, productDescription, imgUrl, brandId, categoryId, isActive)) {
-            request.getSession().setAttribute("success-message", "Product updated successfully");
+        int pageNo = Integer.parseInt(request.getParameter("pageNo"));
+        String searchName = request.getParameter("searchName");
+        String brandName = request.getParameter("brandName");
+        String categoryName = request.getParameter("categoryName");
+        String isActive = request.getParameter("isActive");
+
+        if (productService.updateProduct(productId, productName, productDescription, imgUrl, brandId, categoryId, productIsActive)) {
+            request.getSession().setAttribute("successMessage", "Product updated successfully");
         } else {
-            request.getSession().setAttribute("error-message", "Product update failed");
+            request.getSession().setAttribute("errorMessage", "Product update failed");
         }
-        response.sendRedirect("/products/update?productId=" + productId);
+        response.sendRedirect("/products/update?productId=" + productId + "&pageNo=" + pageNo + "&searchName=" + searchName
+                + "&brandName=" + brandName + "&categoryName=" + categoryName + "&isActive=" + isActive);
     }
 }
