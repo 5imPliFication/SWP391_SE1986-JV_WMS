@@ -100,8 +100,8 @@ public class PurchaseRequestDAO {
         String sql = """
             INSERT INTO purchase_request_items
             (purchase_request_id, product_name, brand_name,
-             category_name, specs, quantity)
-            VALUES (?, ?, ?, ?, ?, ?)
+             category_name, quantity)
+            VALUES (?, ?, ?, ?, ?)
         """;
 
         PreparedStatement ps = conn.prepareStatement(sql);
@@ -109,8 +109,7 @@ public class PurchaseRequestDAO {
         ps.setString(2, item.getProductName());
         ps.setString(3, item.getBrandName());
         ps.setString(4, item.getCategoryName());
-        ps.setString(5, item.getSpecs());
-        ps.setLong(6, item.getQuantity());
+        ps.setLong(5, item.getQuantity());
         ps.executeUpdate();
     }
 
@@ -379,16 +378,27 @@ public class PurchaseRequestDAO {
     }
 
     public List<PurchaseRequestItem> findItemsByRequestId(Long requestId) {
-
         List<PurchaseRequestItem> items = new ArrayList<>();
 
         String sql = """
         SELECT
             pri.product_id,
-            COALESCE(p.name, pri.product_name) AS product_name,
-            b.name AS brand_name,
-            c.name AS category_name,
-            pri.specs,
+
+            CASE
+                WHEN pri.product_id IS NOT NULL THEN p.name
+                ELSE pri.product_name
+            END AS product_name,
+
+            CASE
+                WHEN pri.product_id IS NOT NULL THEN b.name
+                ELSE pri.brand_name
+            END AS brand_name,
+
+            CASE
+                WHEN pri.product_id IS NOT NULL THEN c.name
+                ELSE pri.category_name
+            END AS category_name,
+
             pri.quantity
         FROM purchase_request_items pri
         LEFT JOIN products p ON pri.product_id = p.id
@@ -399,18 +409,21 @@ public class PurchaseRequestDAO {
 
         try (
                 Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setLong(1, requestId);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
                 PurchaseRequestItem item = new PurchaseRequestItem();
 
-                item.setProductId(rs.getLong("product_id"));
+                Long productId = rs.getLong("product_id");
+                if (rs.wasNull()) {
+                    productId = null;
+                }
+
+                item.setProductId(productId);
                 item.setProductName(rs.getString("product_name"));
                 item.setBrandName(rs.getString("brand_name"));
                 item.setCategoryName(rs.getString("category_name"));
-                item.setSpecs(rs.getString("specs"));
                 item.setQuantity(rs.getLong("quantity"));
 
                 items.add(item);
@@ -423,20 +436,21 @@ public class PurchaseRequestDAO {
         return items;
     }
 
-    public void cancel(Long prId, Long userId) {
+    public boolean updateStatus(Long prId, String status) {
+
         String sql = """
         UPDATE purchase_requests
-        SET status = 'CANCELLED'
+        SET status = ?
         WHERE id = ?
-          AND created_by = ?
           AND status = 'PENDING'
     """;
 
         try (Connection con = DBConfig.getDataSource().getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setLong(1, prId);
-            ps.setLong(2, userId);
-            ps.executeUpdate();
+            ps.setString(1, status);
+            ps.setLong(2, prId);
+
+            return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -468,4 +482,71 @@ public class PurchaseRequestDAO {
         return null; // không tìm thấy
     }
 
+    public void updateItems(Long requestId, List<PurchaseRequestItem> items) {
+
+        String deleteSql = """
+            DELETE FROM purchase_request_items
+            WHERE purchase_request_id = ?
+        """;
+
+        String insertSql = """
+            INSERT INTO purchase_request_items
+            (purchase_request_id, product_id, product_name, brand_name, category_name, quantity)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection()) {
+
+            try (PreparedStatement ps = conn.prepareStatement(deleteSql)) {
+                ps.setLong(1, requestId);
+                ps.executeUpdate();
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+
+                for (PurchaseRequestItem i : items) {
+                    ps.setLong(1, requestId);
+
+                    if (i.getProductId() != null) {
+                        ps.setLong(2, i.getProductId());
+                        ps.setNull(3, java.sql.Types.VARCHAR);
+                        ps.setNull(4, java.sql.Types.VARCHAR);
+                        ps.setNull(5, java.sql.Types.VARCHAR);
+                    } else {
+                        ps.setNull(2, java.sql.Types.BIGINT);
+                        ps.setString(3, i.getProductName());
+                        ps.setString(4, i.getBrandName());
+                        ps.setString(5, i.getCategoryName());
+                    }
+
+                    ps.setLong(6, i.getQuantity());
+                    ps.addBatch();
+                }
+
+                ps.executeBatch();
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Update purchase request items failed", e);
+        }
+    }
+
+    public void updateNote(Long requestId, String note) {
+
+        String sql = """
+            UPDATE purchase_requests
+            SET note = ?
+            WHERE id = ? AND status = 'PENDING'
+        """;
+
+        try (
+                Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, note);
+            ps.setLong(2, requestId);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Update purchase request failed", e);
+        }
+    }
 }

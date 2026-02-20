@@ -155,7 +155,7 @@
             <select name="brandId[]" class="new-product-field">
                 <option value="">-- Select Brand --</option>
             <c:forEach var="b" items="${BrandName}">
-                    <option value="${b.id}">${b.name}</option>
+                    <option value="${b.name}">${b.name}</option>
             </c:forEach>
             </select>
         </td>
@@ -164,7 +164,7 @@
             <select name="categoryId[]" class="new-product-field">
                 <option value="">-- Select Category --</option>
             <c:forEach var="c" items="${CategoryName}">
-                    <option value="${c.id}">${c.name}</option>
+                    <option value="${c.name}">${c.name}</option>
             </c:forEach>
             </select>
         </td>

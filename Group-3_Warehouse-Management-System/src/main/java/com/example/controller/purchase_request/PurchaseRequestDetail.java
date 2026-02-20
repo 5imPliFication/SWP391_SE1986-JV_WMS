@@ -68,6 +68,9 @@ public class PurchaseRequestDetail extends HttpServlet {
         request.setAttribute("prList", list);
         request.setAttribute("items", items);
         request.setAttribute("user", user);
+        request.setAttribute("productName", pr.getProductDropdown());
+        request.setAttribute("BrandName", pr.getBrandsDropdown());
+        request.setAttribute("CategoryName", pr.getCategoryDropdown());
 
         request.getRequestDispatcher(
                 "/WEB-INF/purchase_request/PurchaseRequestDetail.jsp"
@@ -79,9 +82,27 @@ public class PurchaseRequestDetail extends HttpServlet {
             throws ServletException, IOException {
 
         User user = (User) req.getSession().getAttribute("user");
-        Long id = Long.valueOf(req.getParameter("id"));
+        if (user == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
 
-        pr.cancelRequest(id, user);
+        Long id = Long.valueOf(req.getParameter("id"));
+        String action = req.getParameter("action"); // cancel | approve | reject
+
+        switch (action) {
+            case "cancel":
+                pr.cancel(id);
+                break;
+
+            case "approve":
+                pr.approve(id);
+                break;
+
+            case "reject":
+                pr.reject(id);
+                break;
+        }
 
         resp.sendRedirect(req.getContextPath() + "/purchase-request/list");
     }
