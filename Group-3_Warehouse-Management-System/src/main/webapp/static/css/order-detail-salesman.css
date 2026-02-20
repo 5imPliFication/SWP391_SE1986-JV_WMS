@@ -1,0 +1,31 @@
+.coupon-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.coupon-applied-box {
+    background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+    border: 2px solid #48bb78;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.discount-highlight {
+    background: #c6f6d5;
+    border-left: 4px solid #48bb78;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #22543d;
+}
+
+.coupon-input-uppercase {
+    text-transform: uppercase;
+}

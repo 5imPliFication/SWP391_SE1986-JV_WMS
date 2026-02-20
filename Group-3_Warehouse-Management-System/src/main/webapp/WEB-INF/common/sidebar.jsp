@@ -7,8 +7,10 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/home.css">
-        <title>JSP Page</title>
+        <title>Error Page</title>
     </head>
     <aside class="sidebar">
         <div class="sidebar-header">
@@ -77,15 +79,15 @@
                   </li>
             </c:if>
 
-            <!-- Request Password Reset -->
+            <!-- Coupons (manager) -->
             <c:if test="${sessionScope.user != null
-                          and sessionScope.user.role.name eq 'Salesman'
+                          and sessionScope.user.role.name eq 'Manager'
                           and sessionScope.user.role.active
-                          and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
+                          and fn:contains(sessionScope.userPermissions, 'READ_COUPON')}">
                   <li>
-                      <a href="${pageContext.request.contextPath}/admin/password-reset"
-                         class="<%= (uri.contains("admin/password-reset")) ? "active" : "" %>">
-                          <span>Password Reset Request</span>
+                      <a href="${pageContext.request.contextPath}/coupons"
+                         class="<%= (uri.contains("coupons")) ? "active" : "" %>">
+                          <span>Coupons</span>
                       </a>
                   </li>
             </c:if>

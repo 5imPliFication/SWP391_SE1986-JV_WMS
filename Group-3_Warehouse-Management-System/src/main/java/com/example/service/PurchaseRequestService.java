@@ -6,6 +6,7 @@ import com.example.model.Category;
 import com.example.model.Product;
 import com.example.model.PurchaseRequest;
 import com.example.model.PurchaseRequestItem;
+import com.example.model.User;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -23,9 +24,21 @@ public class PurchaseRequestService {
             boolean isManager,
             String requestCode,
             String status,
+            String createdDate,
+            int pageNo,
+            int pageSize
+    ) {
+        return p.search(userId, isManager, requestCode, status, createdDate, pageNo, pageSize);
+    }
+
+    public int count(
+            Long userId,
+            boolean isManager,
+            String requestCode,
+            String status,
             String createdDate
     ) {
-        return p.search(userId, isManager, requestCode, status, createdDate);
+        return p.count(userId, isManager, requestCode, status, createdDate);
     }
 
     public long createPurchaseRequest(
@@ -86,6 +99,45 @@ public class PurchaseRequestService {
 
     public List<Category> getCategoryDropdown() {
         return p.getActiveCategories();
+    }
+
+    public PurchaseRequest getDetail(
+            Long requestId,
+            User user
+    ) {
+        boolean isManager
+                = "MANAGER".equalsIgnoreCase(user.getRole().getName());
+
+        PurchaseRequest pr
+                = p.findById(requestId, user.getId(), isManager);
+
+        if (pr == null) {
+            throw new RuntimeException("Purchase request not found or access denied");
+        }
+
+        return pr;
+    }
+
+    public List<PurchaseRequestItem> getItems(Long requestId) {
+        return p.findItemsByRequestId(requestId);
+    }
+
+    public String getStatus(Long prId) {
+
+        String status = p.getStatusById(prId);
+
+        if (status == null) {
+            throw new RuntimeException("Purchase Request not found");
+        }
+
+        return status;
+    }
+
+    public void cancelRequest(Long prId, User user) {
+        if (!"PENDING".equals(getStatus(prId))) {
+            throw new RuntimeException("Only PENDING request can be cancelled");
+        }
+        p.cancel(prId, user.getId());
     }
 
 }
