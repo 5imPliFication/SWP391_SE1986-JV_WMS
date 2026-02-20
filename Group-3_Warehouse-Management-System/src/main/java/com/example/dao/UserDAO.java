@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +73,7 @@ public class UserDAO {
     public User findUserById(long id) {
 
         String sql = """
-                    SELECT u.id, u.fullname, u.email, u.is_active,
+                    SELECT u.id, u.fullname, u.email, u.is_active, u.created_at,
                            r.id AS role_id, r.name AS role_name
                     FROM users u
                     JOIN roles r ON u.role_id = r.id
@@ -95,6 +96,7 @@ public class UserDAO {
                 userDetail.setFullName(rs.getString("fullname"));
                 userDetail.setEmail(rs.getString("email"));
                 userDetail.setActive(rs.getBoolean("is_active"));
+                userDetail.setCreatedAt((rs.getTimestamp("created_at")).toLocalDateTime());
 
                 role.setId(rs.getLong("role_id"));
                 role.setName(rs.getString("role_name"));

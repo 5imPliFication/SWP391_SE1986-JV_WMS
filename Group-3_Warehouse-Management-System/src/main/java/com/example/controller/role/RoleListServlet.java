@@ -38,7 +38,7 @@ public class RoleListServlet extends HttpServlet {
             throws ServletException, IOException {
         List<Role> roleList = r.getAllRoles();
         List<Permission> allPermissions = p.getAllPermissions();
-        
+
         if (roleList != null) {
             for (Role role : roleList) {
                 List<Long> pIds = new java.util.ArrayList<>();
@@ -50,28 +50,10 @@ public class RoleListServlet extends HttpServlet {
                 request.setAttribute("rolePermissionIds_" + role.getId(), pIds);
             }
         }
-        
+
         request.setAttribute("roleList", roleList);
         request.setAttribute("allPermissions", allPermissions);
         request.getRequestDispatcher("/WEB-INF/role/roles.jsp").forward(request, response);
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String action = request.getParameter("action");
-
-        if ("delete".equals(action)) {
-            try {
-                Long roleId = Long.parseLong(request.getParameter("id"));
-                r.deleteRole(roleId);
-                response.sendRedirect("roles?msg=delete_success");
-                return;
-            } catch (Exception e) {
-                e.printStackTrace();
-                response.sendRedirect("roles?msg=error");
-                return;
-            }
-        }
-    }
 }

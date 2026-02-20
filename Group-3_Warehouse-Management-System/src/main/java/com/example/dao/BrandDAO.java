@@ -203,18 +203,4 @@ public class BrandDAO {
         }
     }
 
-    public boolean deleteById(long id) {
-        String sql = "DELETE FROM brands WHERE id = ?";
-
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setLong(1, id);
-            return ps.executeUpdate() > 0; // true nếu xóa thành công
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
 }

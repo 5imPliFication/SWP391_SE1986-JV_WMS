@@ -1,8 +1,10 @@
 package com.example.controller.order;
 
+import com.example.model.Coupon;
 import com.example.model.Order;
 import com.example.model.OrderItem;
 import com.example.model.User;
+import com.example.service.CouponService;
 import com.example.service.OrderItemService;
 import com.example.service.OrderService;
 import jakarta.servlet.ServletException;
@@ -46,6 +48,13 @@ public class SalesmanOrderDetailServlet extends HttpServlet {
 
             Order order = orderService.getOrderDetail(orderId, user.getId(), "Salesman");
             List<OrderItem> items = orderItemService.getItemsByOrder(orderId, user.getId(), "Salesman");
+
+            // If order has a coupon, load it
+            if (order.getCoupon() != null) {
+                CouponService couponService = new CouponService();
+                Coupon coupon = couponService.getCouponById(order.getCoupon().getId());
+                order.setCoupon(coupon);
+            }
 
             req.setAttribute("order", order);
             req.setAttribute("items", items);

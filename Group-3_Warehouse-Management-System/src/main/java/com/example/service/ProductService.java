@@ -3,6 +3,7 @@ package com.example.service;
 import com.example.dao.BrandDAO;
 import com.example.dao.CategoryDAO;
 import com.example.dao.ProductDAO;
+import com.example.dto.ProductDTO;
 import com.example.model.Brand;
 import com.example.model.Category;
 import com.example.model.Product;
@@ -15,15 +16,17 @@ public class ProductService {
     private CategoryDAO categoryDAO = new CategoryDAO();
     private BrandDAO brandDAO = new BrandDAO();
 
-    public List<Product> findAll(String searchName, String brandName, String categoryName, Boolean isActive, int pageNo) {
-        return productDAO.getAll(searchName, brandName, categoryName,isActive, pageNo);
+    public List<Product> findAll(String searchName, String brandName, String categoryName, Boolean isActive,
+            int pageNo) {
+        return productDAO.getAll(searchName, brandName, categoryName, isActive, pageNo);
     }
 
     public int getTotalProducts(String searchName, String brandName, String categoryName, Boolean isActive) {
         return productDAO.countProducts(searchName, brandName, categoryName, isActive);
     }
 
-    public boolean addProduct(String productName, String productDescription, String imgUrl, long brandId, long categoryId) {
+    public boolean addProduct(String productName, String productDescription, String imgUrl, long brandId,
+            long categoryId) {
         Brand brand = brandDAO.findById(brandId);
         Category category = categoryDAO.findById(categoryId);
 
@@ -41,7 +44,8 @@ public class ProductService {
         return productDAO.findById(productId);
     }
 
-    public boolean updateProduct(long productId, String productName, String productDescription, String imgUrl, long brandId, long categoryId, boolean isActive) {
+    public boolean updateProduct(long productId, String productName, String productDescription, String imgUrl,
+            long brandId, long categoryId, boolean isActive) {
         Brand brand = brandDAO.findById(brandId);
         Category category = categoryDAO.findById(categoryId);
 
@@ -58,7 +62,7 @@ public class ProductService {
     }
 
     public List<ProductItem> findItemsByProductId(long productId, String searchSerial, Boolean isActive, int pageNo) {
-        return productDAO.getItemsByProductId(productId, searchSerial,isActive, pageNo);
+        return productDAO.getItemsByProductId(productId, searchSerial, isActive, pageNo);
     }
 
     public int countProductItems(long productId, String searchSerial, Boolean isActive) {
@@ -78,4 +82,7 @@ public class ProductService {
         return productDAO.updateItem(productItem);
     }
 
+    public List<ProductDTO> getOutOfStockAlertProducts() {
+        return productDAO.getLowStockProducts();
+    }
 }
