@@ -118,6 +118,21 @@
                       </a>
                   </li>
             </c:if>
+
+            <!-- Products -->
+            <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
+                <li>
+                    <a href="${pageContext.request.contextPath}/products"
+                       class="<%= (uri.contains("products")) ? "active" : "" %>">
+                        <span>Products</span>
+                    </a>
+                </li>
+            </c:if>
+
+            
             <%--import product--%>
             <c:if test="${sessionScope.user != null
                           and sessionScope.user.role != null
