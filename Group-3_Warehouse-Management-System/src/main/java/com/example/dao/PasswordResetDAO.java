@@ -71,8 +71,8 @@ public class PasswordResetDAO {
 
     public boolean insert(long userId, String status) {
         String sql = """
-                    INSERT INTO password_resets (user_id, status)
-                    VALUES (?, ?)
+                    INSERT INTO password_resets (user_id, status, created_at, updated_at)
+                    VALUES (?, ?, NOW(), NOW())
                 """;
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
