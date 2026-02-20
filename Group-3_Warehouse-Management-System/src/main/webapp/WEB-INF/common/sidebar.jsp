@@ -166,6 +166,19 @@
                     </a>
                 </li>
             </c:if>
+
+            <%--  out of stock--%>
+            <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
+                <li>
+                    <a href="${pageContext.request.contextPath}/out-of-stock-alert"
+                       class="<%= (uri.contains("out-of-stock-alert")) ? "active" : "" %>">
+                        <span>Out of stock alert</span>
+                    </a>
+                </li>
+            </c:if>
         </ul>
     </aside>
 </html>
