@@ -167,15 +167,15 @@
                 </li>
             </c:if>
 
-            <!-- Products -->
+            <%--  out of stock--%>
             <c:if test="${sessionScope.user != null
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
-                          and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
+                          and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
                 <li>
-                    <a href="${pageContext.request.contextPath}/products"
-                       class="<%= (uri.contains("products")) ? "active" : "" %>">
-                        <span>Products</span>
+                    <a href="${pageContext.request.contextPath}/out-of-stock-alert"
+                       class="<%= (uri.contains("out-of-stock-alert")) ? "active" : "" %>">
+                        <span>Out of stock alert</span>
                     </a>
                 </li>
             </c:if>

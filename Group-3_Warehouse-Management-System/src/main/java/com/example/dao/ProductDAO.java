@@ -3,7 +3,7 @@ package com.example.dao;
 import com.example.config.DBConfig;
 import com.example.model.*;
 import com.example.util.UserConstant;
-
+import com.example.dto.ProductDTO;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,20 +23,20 @@ public class ProductDAO {
     }
 
     public List<Product> getAll(String searchName, String brandName,
-                                String categoryName, Boolean isActive, int pageNo) {
+            String categoryName, Boolean isActive, int pageNo) {
 
         List<Product> products = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("""
-            SELECT p.id, p.name, p.description, p.img_url, p.is_active, p.total_quantity,
-                   b.name AS brand_name,
-                   c.name AS category_name,
-                   p.created_at, p.updated_at
-            FROM products p
-            JOIN brands b ON p.brand_id = b.id
-            JOIN categories c ON p.category_id = c.id
-            WHERE 1=1
-        """);
+                    SELECT p.id, p.name, p.description, p.img_url, p.is_active, p.total_quantity,
+                           b.name AS brand_name,
+                           c.name AS category_name,
+                           p.created_at, p.updated_at
+                    FROM products p
+                    JOIN brands b ON p.brand_id = b.id
+                    JOIN categories c ON p.category_id = c.id
+                    WHERE 1=1
+                """);
 
         if (searchName != null && !searchName.trim().isEmpty()) {
             sql.append(" AND p.name LIKE ? ");
@@ -54,7 +54,8 @@ public class ProductDAO {
         sql.append(" ORDER BY p.created_at DESC ");
         sql.append(" LIMIT ? OFFSET ? ");
 
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
 
@@ -109,15 +110,15 @@ public class ProductDAO {
     }
 
     public int countProducts(String searchName, String brandName,
-                             String categoryName, Boolean isActive) {
+            String categoryName, Boolean isActive) {
 
         StringBuilder sql = new StringBuilder("""
-            SELECT COUNT(*)
-            FROM products p
-            JOIN brands b ON p.brand_id = b.id
-            JOIN categories c ON p.category_id = c.id
-            WHERE 1=1
-        """);
+                    SELECT COUNT(*)
+                    FROM products p
+                    JOIN brands b ON p.brand_id = b.id
+                    JOIN categories c ON p.category_id = c.id
+                    WHERE 1=1
+                """);
 
         if (searchName != null && !searchName.trim().isEmpty()) {
             sql.append(" AND p.name LIKE ? ");
@@ -132,7 +133,8 @@ public class ProductDAO {
             sql.append(" AND p.is_active = ? ");
         }
 
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
 
@@ -163,7 +165,8 @@ public class ProductDAO {
                 INSERT INTO products (name, description, img_url, brand_id, category_id, is_active, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())
                 """;
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, product.getName());
             ps.setString(2, product.getDescription());
@@ -190,7 +193,8 @@ public class ProductDAO {
                 JOIN categories c on p.category_id = c.id
                 WHERE p.id = ?;
                 """;
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             Product product = null;
 
             ps.setLong(1, productId);
@@ -237,7 +241,8 @@ public class ProductDAO {
                 WHERE id = ?
                 """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, product.getName());
             ps.setString(2, product.getDescription());
@@ -257,11 +262,12 @@ public class ProductDAO {
 
     public List<ProductItem> getItemsByProductId(long productId, String searchSerial, Boolean isActive, int pageNo) {
         List<ProductItem> productItems = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("""
-                    SELECT pi.id, pi.serial, pi.imported_price, pi.current_price, pi.imported_at, pi.updated_at, pi.is_active, pi.product_id
-                    FROM product_items pi
-                    WHERE 1 = 1
-                """);
+        StringBuilder sql = new StringBuilder(
+                """
+                            SELECT pi.id, pi.serial, pi.imported_price, pi.current_price, pi.imported_at, pi.updated_at, pi.is_active, pi.product_id
+                            FROM product_items pi
+                            WHERE 1 = 1
+                        """);
         // filter by productId
         sql.append(" AND pi.product_id = ? ");
 
@@ -281,7 +287,7 @@ public class ProductDAO {
         sql.append(" limit ? offset ? ");
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
             ps.setLong(index++, productId);
@@ -338,7 +344,7 @@ public class ProductDAO {
         }
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
             ps.setLong(index++, productId);
@@ -365,7 +371,8 @@ public class ProductDAO {
                 FROM product_items pi
                 WHERE pi.id = ?;
                 """;
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ProductItem productItem = null;
 
             ps.setLong(1, productItemId);
@@ -401,7 +408,8 @@ public class ProductDAO {
                 WHERE id = ?
                 """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setDouble(1, productItem.getCurrentPrice());
             ps.setBoolean(2, productItem.getIsActive());
@@ -413,5 +421,32 @@ public class ProductDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<ProductDTO> getLowStockProducts() {
+        List<ProductDTO> products = new ArrayList<>();
+        String sql = """
+                    SELECT p.id, p.name, p.total_quantity
+                    FROM products p
+                    WHERE p.total_quantity <= 20 AND p.is_active = 1
+                    ORDER BY p.total_quantity ASC
+                """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                ProductDTO product = new ProductDTO();
+                product.setId(rs.getLong("id"));
+                product.setName(rs.getString("name"));
+                product.setStock(rs.getLong("total_quantity"));
+                products.add(product);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return products;
     }
 }
