@@ -48,18 +48,24 @@ public class InventoryDAO {
 
     // save list products item to db
     public boolean saveProductItems(List<ProductItem> productItems) {
-        StringBuilder sql = new StringBuilder(
-                "insert into product_items(serial, import_price, import_date, is_active, product_id) values (?, ?, ?, ?, ?);");
+        String sql = "INSERT INTO product_items(serial, imported_price, current_price, is_active, imported_at, updated_at, product_id) "
+                +
+                "VALUES (?, ?, ?, ?, NOW(), NOW(), ?)";
 
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            // iterate each item
             for (ProductItem item : productItems) {
-                ps.setString(1, item.getSerial());
-                ps.setDouble(2, item.getImportedPrice());
-                ps.setTimestamp(3, Timestamp.valueOf(item.getImportedAt()));
-                ps.setBoolean(4, true);
-                ps.setLong(5, item.getProductId());
+
+                // set data
+                int index = 1;
+                ps.setString(index++, item.getSerial());
+                ps.setDouble(index++, item.getImportedPrice());
+                ps.setDouble(index++, item.getImportedPrice());
+                ps.setBoolean(index++, true);
+                ps.setLong(index++, item.getProductId());
                 ps.addBatch();
             }
             ps.executeBatch();
@@ -80,7 +86,7 @@ public class InventoryDAO {
 
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // if searchName has value -> set value to query
             if (serial != null) {
@@ -94,7 +100,6 @@ public class InventoryDAO {
             throw new RuntimeException(e);
         }
     }
-
 
     public List<ExportOrderDTO> searchExportOrders(LocalDate fromDate, LocalDate toDate, int offset, int limit) {
         StringBuilder sql = new StringBuilder("""
@@ -115,7 +120,7 @@ public class InventoryDAO {
 
         List<ExportOrderDTO> list = new ArrayList<>();
         try (Connection con = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+                PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             int index = 1;
             if (fromDate != null)
@@ -151,7 +156,7 @@ public class InventoryDAO {
             sql.append(" AND CAST(o.order_date AS DATE) <= ?");
 
         try (Connection con = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+                PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             int index = 1;
             if (fromDate != null)
