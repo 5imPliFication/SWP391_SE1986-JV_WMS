@@ -27,43 +27,34 @@ public class PurchaseRequestList extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        User user = (session != null)
-                ? (User) session.getAttribute("user")
-                : null;
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
 
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // ===== ROLE CHECK =====
-        boolean isManager = "MANAGER".equalsIgnoreCase(user.getRole().getName());
+        String role = user.getRole().getName(); // MANAGER / STAFF / WAREHOUSE
 
-        // ===== Dùng cho JSP ẩn/hiện cột =====
-        request.setAttribute("showCreatedBy", isManager);
-
-        // ===== FILTER PARAMS =====
+        // ===== FILTER PARAM =====
         String requestCode = request.getParameter("requestCode");
         String status = request.getParameter("status");
         String createdDate = request.getParameter("createdDate");
 
-        // ===== PAGINATION PARAM =====
+        // ===== PAGINATION =====
         int pageNo = 1;
         int pageSize = 6;
-
         try {
-            String pageStr = request.getParameter("pageNo");
-            if (pageStr != null) {
-                pageNo = Integer.parseInt(pageStr);
+            if (request.getParameter("pageNo") != null) {
+                pageNo = Integer.parseInt(request.getParameter("pageNo"));
             }
-        } catch (NumberFormatException e) {
-            pageNo = 1;
+        } catch (NumberFormatException ignored) {
         }
 
-        // ===== LOAD LIST (THEO PAGE) =====
+        // ===== LOAD DATA =====
         List<PurchaseRequest> list = pr.getList(
                 user.getId(),
-                isManager,
+                role,
                 requestCode,
                 status,
                 createdDate,
@@ -71,10 +62,9 @@ public class PurchaseRequestList extends HttpServlet {
                 pageSize
         );
 
-        // ===== COUNT TOTAL =====
         int totalRecords = pr.count(
                 user.getId(),
-                isManager,
+                role,
                 requestCode,
                 status,
                 createdDate
@@ -86,7 +76,9 @@ public class PurchaseRequestList extends HttpServlet {
         request.setAttribute("purchaseRequests", list);
         request.setAttribute("pageNo", pageNo);
         request.setAttribute("totalPages", totalPages);
-        request.setAttribute( "statuses",PurchaseRequestStatus.values());
+        request.setAttribute("statuses", PurchaseRequestStatus.values());
+        request.setAttribute("showCreatedBy", "MANAGER".equalsIgnoreCase(role));
+        request.setAttribute("isWarehouse", "WAREHOUSE".equalsIgnoreCase(role));
 
         request.getRequestDispatcher(
                 "/WEB-INF/purchase_request/PurchaseRequestList.jsp"
