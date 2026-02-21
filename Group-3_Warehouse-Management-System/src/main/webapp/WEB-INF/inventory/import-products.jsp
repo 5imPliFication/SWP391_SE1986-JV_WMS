@@ -25,8 +25,8 @@
         </form>
 
         <%-- link to create new product --%>
-        <a href="${pageContext.request.contextPath}/products/new" class="btn btn-primary ml-2">
-            New products
+        <a href="${pageContext.request.contextPath}/products/add" class="btn btn-primary ml-2">
+            Add new products
         </a>
 
         <%-- import excel --%>
