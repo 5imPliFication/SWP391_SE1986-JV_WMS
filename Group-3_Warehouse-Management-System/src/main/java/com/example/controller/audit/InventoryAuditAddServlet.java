@@ -1,10 +1,7 @@
 package com.example.controller.audit;
 
 import com.example.dto.ImportProductItemDTO;
-import com.example.model.Brand;
-import com.example.model.Category;
-import com.example.model.InventoryAuditItem;
-import com.example.model.Product;
+import com.example.model.*;
 import com.example.service.*;
 import com.example.util.UserConstant;
 import jakarta.servlet.ServletException;
@@ -13,6 +10,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,7 +128,27 @@ public class InventoryAuditAddServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/inventory-audits/add");
 
         } else if ("create".equals(action)) {
-            System.out.println("OK");
+            // Get session
+            HttpSession session = request.getSession();
+            List<InventoryAuditItem> tmpInventoryAuditItems = (List<InventoryAuditItem>) session.getAttribute("TMP_INVENTORY_AUDIT_ITEMS");
+            if(tmpInventoryAuditItems == null) {
+                session.setAttribute("auditNoProductMessage", "No product in audit list");
+                response.sendRedirect(request.getContextPath() + "/inventory-audits/add");
+                return;
+            } else {
+                User user = (User) session.getAttribute("user");
+                Long createdBy = user.getId();
+                try {
+                    inventoryAuditService.createFullAudit(createdBy, tmpInventoryAuditItems);
+                    // remove session after create success
+                    session.removeAttribute("TMP_INVENTORY_AUDIT_ITEMS");
+                    session.setAttribute("auditCreatedSuccessMessage", "Inventory audit created successfully");
+                    response.sendRedirect(request.getContextPath() + "/inventory-audits/add");
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
         }
     }
 }

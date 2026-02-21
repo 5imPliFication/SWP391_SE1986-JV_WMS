@@ -204,6 +204,21 @@
                         <td colspan="5">No data</td>
                     </tr>
                 </c:if>
+
+                <c:if test="${not empty sessionScope.auditCreatedSuccessMessage}">
+                    <div class="alert alert-success">
+                            ${sessionScope.auditCreatedSuccessMessage}
+                    </div>
+                    <c:remove var="auditCreatedSuccessMessage" scope="session"/>
+                </c:if>
+
+                <c:if test="${not empty sessionScope.auditNoProductMessage}">
+                    <div class="alert alert-warning">
+                            ${sessionScope.auditNoProductMessage}
+                    </div>
+                    <c:remove var="auditNoProductMessage" scope="session"/>
+                </c:if>
+
             </div>
         </div>
     </form>
