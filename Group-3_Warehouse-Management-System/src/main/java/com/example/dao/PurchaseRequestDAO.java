@@ -115,7 +115,7 @@ public class PurchaseRequestDAO {
 
     public List<PurchaseRequest> search(
             Long userId,
-            boolean isManager,
+            String role,
             String requestCode,
             String status,
             String createdDate,
@@ -127,8 +127,8 @@ public class PurchaseRequestDAO {
 
         StringBuilder sql = new StringBuilder("""
         SELECT pr.id, pr.request_code, pr.status, pr.note, pr.created_at,
-               u1.id AS created_by, u1.fullname AS created_by_name,
-               u2.id AS approved_by, u2.fullname AS approved_by_name
+               u1.fullname AS created_by_name,
+               u2.fullname AS approved_by_name
         FROM purchase_requests pr
         JOIN users u1 ON pr.created_by = u1.id
         LEFT JOIN users u2 ON pr.approved_by = u2.id
@@ -138,9 +138,13 @@ public class PurchaseRequestDAO {
         List<Object> params = new ArrayList<>();
 
         /* ===== ROLE FILTER ===== */
-        if (!isManager) {
+        if ("STAFF".equalsIgnoreCase(role)) {
             sql.append(" AND pr.created_by = ?");
             params.add(userId);
+        }
+
+        if ("WAREHOUSE".equalsIgnoreCase(role)) {
+            sql.append(" AND pr.status IN ('APPROVED', 'COMPLETED')");
         }
 
         /* ===== REQUEST CODE ===== */
@@ -149,8 +153,11 @@ public class PurchaseRequestDAO {
             params.add("%" + requestCode + "%");
         }
 
-        /* ===== STATUS ===== */
-        if (status != null && !status.isBlank()) {
+        /* ===== STATUS FILTER (KHÔNG ÁP DỤNG CHO WAREHOUSE) ===== */
+        if (!"WAREHOUSE".equalsIgnoreCase(role)
+                && status != null
+                && !status.isBlank()) {
+
             sql.append(" AND pr.status = ?");
             params.add(status);
         }
@@ -161,13 +168,10 @@ public class PurchaseRequestDAO {
             params.add(createdDate);
         }
 
-        /* ===== ORDER + PAGINATION ===== */
-        sql.append(" ORDER BY pr.created_at DESC");
-        sql.append(" LIMIT ? OFFSET ?");
-
-        int offset = (pageNo - 1) * pageSize;
+        /* ===== PAGINATION ===== */
+        sql.append(" ORDER BY pr.created_at DESC LIMIT ? OFFSET ?");
         params.add(pageSize);
-        params.add(offset);
+        params.add((pageNo - 1) * pageSize);
 
         try (
                 Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -185,13 +189,8 @@ public class PurchaseRequestDAO {
                 pr.setStatus(rs.getString("status"));
                 pr.setNote(rs.getString("note"));
                 pr.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-
-                pr.setCreatedBy(rs.getLong("created_by"));
                 pr.setCreatedByName(rs.getString("created_by_name"));
-
-                pr.setApprovedBy(rs.getLong("approved_by"));
                 pr.setApprovedByName(rs.getString("approved_by_name"));
-
                 list.add(pr);
             }
 
@@ -204,7 +203,7 @@ public class PurchaseRequestDAO {
 
     public int count(
             Long userId,
-            boolean isManager,
+            String role,
             String requestCode,
             String status,
             String createdDate
@@ -218,9 +217,14 @@ public class PurchaseRequestDAO {
 
         List<Object> params = new ArrayList<>();
 
-        if (!isManager) {
+        if ("STAFF".equalsIgnoreCase(role)) {
             sql.append(" AND pr.created_by = ?");
             params.add(userId);
+        }
+
+        if ("WAREHOUSE".equalsIgnoreCase(role)) {
+            sql.append(" AND pr.status = ?");
+            params.add("APPROVED");
         }
 
         if (requestCode != null && !requestCode.isBlank()) {
@@ -238,8 +242,7 @@ public class PurchaseRequestDAO {
             params.add(createdDate);
         }
 
-        try (
-                Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
@@ -251,7 +254,7 @@ public class PurchaseRequestDAO {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Count purchase request failed", e);
+            throw new RuntimeException(e);
         }
 
         return 0;
@@ -327,10 +330,10 @@ public class PurchaseRequestDAO {
     public PurchaseRequest findById(
             Long requestId,
             Long userId,
-            boolean isManager
+            String role
     ) {
 
-        String sql = """
+        StringBuilder sql = new StringBuilder("""
         SELECT pr.id, pr.request_code, pr.status, pr.note, pr.created_at,
                u1.id AS created_by, u1.fullname AS created_by_name,
                u2.id AS approved_by, u2.fullname AS approved_by_name
@@ -338,17 +341,26 @@ public class PurchaseRequestDAO {
         JOIN users u1 ON pr.created_by = u1.id
         LEFT JOIN users u2 ON pr.approved_by = u2.id
         WHERE pr.id = ?
-    """;
+    """);
 
-        if (!isManager) {
-            sql += " AND pr.created_by = ?";
+        List<Object> params = new ArrayList<>();
+        params.add(requestId);
+
+        // ===== ROLE RULE =====
+        if ("STAFF".equalsIgnoreCase(role)) {
+            sql.append(" AND pr.created_by = ?");
+            params.add(userId);
         }
 
-        try (
-                Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, requestId);
-            if (!isManager) {
-                ps.setLong(2, userId);
+        if ("WAREHOUSE".equalsIgnoreCase(role)) {
+            sql.append(" AND pr.status = 'APPROVED'");
+        }
+
+        // MANAGER → không thêm điều kiện
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
             }
 
             ResultSet rs = ps.executeQuery();
@@ -360,13 +372,10 @@ public class PurchaseRequestDAO {
                 pr.setStatus(rs.getString("status"));
                 pr.setNote(rs.getString("note"));
                 pr.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-
                 pr.setCreatedBy(rs.getLong("created_by"));
                 pr.setCreatedByName(rs.getString("created_by_name"));
-
                 pr.setApprovedBy(rs.getLong("approved_by"));
                 pr.setApprovedByName(rs.getString("approved_by_name"));
-
                 return pr;
             }
 
