@@ -28,7 +28,7 @@
                         </div>
 
                         <div class="card-body">
-                            <form action="${pageContext.request.contextPath}/user-create" method="post">
+                            <form action="${pageContext.request.contextPath}/user/create" method="post">
 
                                 <!-- Full Name -->
                                 <div class="mb-3">
@@ -54,7 +54,8 @@
                                     <input type="password"
                                            name="password"
                                            class="form-control"
-                                           placeholder="Enter password">
+                                           placeholder="Enter password"
+                                           autocomplete="new-password">
                                 </div>
 
                                 <!-- Role -->
@@ -73,7 +74,7 @@
 
                                 <!-- Buttons -->
                                 <div class="d-flex justify-content-between">
-                                    <a href="${pageContext.request.contextPath}/user-list"
+                                    <a href="${pageContext.request.contextPath}/user/list"
                                        class="btn btn-secondary">
                                         Back
                                     </a>

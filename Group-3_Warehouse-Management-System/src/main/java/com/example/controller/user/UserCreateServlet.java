@@ -15,7 +15,7 @@ import java.io.IOException;
 import static com.example.util.PasswordUtil.hashPassword;
 import java.util.List;
 
-@WebServlet("/user-create")
+@WebServlet("/user/create")
 public class UserCreateServlet extends HttpServlet {
 
     private UserService userService;
