@@ -50,4 +50,18 @@ public class InventoryAuditListServlet extends HttpServlet {
         request.setAttribute("pageNo", pageNo);
         request.getRequestDispatcher("/WEB-INF/audit/inventory-audit-list.jsp").forward(request, response);
     }
+
+    // Change status of inventory audit
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Long inventoryAuditId = Long.parseLong(request.getParameter("inventoryAuditId"));
+        inventoryAuditService.cancelInventoryAudit(inventoryAuditId);
+
+        // Redirect to the inventory audit list page after canceling
+        String pageNo = request.getParameter("pageNo");
+        String auditCode = request.getParameter("auditCode");
+        String status = request.getParameter("status");
+
+        response.sendRedirect(request.getContextPath() + "/inventory-audits?pageNo=" + pageNo + "&auditCode=" + auditCode + "&status=" + status);
+    }
 }

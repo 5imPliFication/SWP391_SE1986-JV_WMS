@@ -60,7 +60,6 @@
                 <select name="status" class="form-select">
                     <option value="">All Status</option>
                     <option value="PENDING"  ${param.status == 'PENDING' ? 'selected' : ''}>PENDING</option>
-                    <option value="IN_PROGRESS" ${param.status == 'IN_PROGRESS' ? 'selected' : ''}>IN PROGRESS</option>
                     <option value="COMPLETED" ${param.status == 'COMPLETED' ? 'selected' : ''}>COMPLETED</option>
                     <option value="CANCELLED" ${param.status == 'CANCELLED' ? 'selected' : ''}>CANCELLED</option>
                 </select>
@@ -98,11 +97,31 @@
                 <td>${i.updatedAt}</td>
 
                 <td>
-                    <a href="${pageContext.request.contextPath}/inventory-audits/update?inventoryAuditId=${i.id}&pageNo=${pageNo}&auditCode=${param.auditCode}&status=${param.status}">EDIT</a>
-                    |
-                    <a href="${pageContext.request.contextPath}/inventory-audits/perform?inventoryAuditId=${i.id}&pageNo=${pageNo}&auditCode=${param.auditCode}&status=${param.status}">PERFORM</a>
+                    <c:if test="${i.status == 'PENDING'}">
+                        <div class="d-flex justify-content-around">
+                            <form action="${pageContext.request.contextPath}/inventory-audits" method="post">
+                                <input type="hidden" name="inventoryAuditId" value="${i.id}">
+                                <input type="hidden" name="pageNo" value="${pageNo}">
+                                <input type="hidden" name="auditCode" value="${param.auditCode}">
+                                <input type="hidden" name="status" value="${param.status}">
+                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline"
+                                        style="text-decoration: none; color: red;">
+                                    CANCEL
+                                </button>
+                            </form>
+                            <form action="${pageContext.request.contextPath}/inventory-audits/perform" method="get">
+                                <input type="hidden" name="inventoryAuditId" value="${i.id}">
+                                <input type="hidden" name="pageNo" value="${pageNo}">
+                                <input type="hidden" name="auditCode" value="${param.auditCode}">
+                                <input type="hidden" name="status" value="${param.status}">
+                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline"
+                                        style="text-decoration: none; color: blue;">
+                                    PERFORM
+                                </button>
+                            </form>
+                        </div>
+                    </c:if>
                 </td>
-
             </tr>
         </c:forEach>
 

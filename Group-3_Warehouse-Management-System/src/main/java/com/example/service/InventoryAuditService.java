@@ -61,4 +61,9 @@ public class InventoryAuditService {
     public List<InventoryAuditItem> getInventoryAuditItemsByAuditId(Long auditId) {
         return inventoryAuditDAO.findItemsByAuditId(auditId);
     }
+
+    // Manager can change PENDING -> CANCELLED
+    public boolean cancelInventoryAudit(Long auditId) {
+         return inventoryAuditDAO.updateInventoryAuditStatus(auditId, InventoryAuditStatus.CANCELLED);
+    }
 }

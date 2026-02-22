@@ -237,4 +237,20 @@ public class InventoryAuditDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public boolean updateInventoryAuditStatus(Long auditId, InventoryAuditStatus status) {
+        String sql = """
+                UPDATE inventory_audits
+                SET status = ?, updated_at = NOW()
+                WHERE id = ?
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status.name());
+            ps.setLong(2, auditId);
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
