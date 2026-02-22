@@ -90,7 +90,7 @@
             <tr>
                 <td>
                         <%--Click -> Move to Inventory Audit Item List--%>
-                    <a href="${pageContext.request.contextPath}/inventory-audits/items?inventoryAuditId=${i.id}">${i.auditCode}</a>
+                    <a href="${pageContext.request.contextPath}/inventory-audits/detail?inventoryAuditId=${i.id}">${i.auditCode}</a>
                 </td>
                 <td>${i.user.fullName}</td>
                 <td>${i.status}</td>

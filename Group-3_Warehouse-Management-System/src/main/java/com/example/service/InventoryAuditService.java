@@ -53,4 +53,12 @@ public class InventoryAuditService {
             if (conn != null) conn.close();
         }
     }
+
+    public InventoryAudit getInventoryAuditById(Long auditId) {
+        return inventoryAuditDAO.findById(auditId);
+    }
+
+    public List<InventoryAuditItem> getInventoryAuditItemsByAuditId(Long auditId) {
+        return inventoryAuditDAO.findItemsByAuditId(auditId);
+    }
 }

@@ -155,4 +155,86 @@ public class InventoryAuditDAO {
         }
     }
 
+    public InventoryAudit findById(Long id) {
+        String sql = """
+                SELECT i.id, i.audit_code, u.id as user_id, u.fullname, i.status, i.created_at, i.updated_at
+                FROM inventory_audits i
+                JOIN users u ON i.created_by = u.id
+                WHERE i.id = ?
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                InventoryAudit inventoryAudit = new InventoryAudit();
+                inventoryAudit.setId(rs.getLong("id"));
+                inventoryAudit.setAuditCode(rs.getString("audit_code"));
+                inventoryAudit.setStatus(InventoryAuditStatus.valueOf(rs.getString("status")));
+                inventoryAudit.setCreatedAt(getLocalDateTime(rs, "created_at"));
+                inventoryAudit.setUpdatedAt(getLocalDateTime(rs, "updated_at"));
+
+                User user = new User();
+                user.setId(rs.getLong("user_id"));
+                user.setFullName(rs.getString("fullname"));
+                inventoryAudit.setUser(user);
+
+                return inventoryAudit;
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<InventoryAuditItem> findItemsByAuditId(Long auditId) {
+        List<InventoryAuditItem> items = new ArrayList<>();
+        String sql = """
+                SELECT ai.id, ai.audit_id, ai.product_id, ai.system_quantity, ai.physical_quantity, ai.discrepancy, ai.reason, p.name as product_name
+                FROM inventory_audit_items ai
+                JOIN products p ON ai.product_id = p.id
+                WHERE ai.audit_id = ?
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, auditId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                InventoryAuditItem item = new InventoryAuditItem();
+                item.setId(rs.getLong("id"));
+                item.setAuditId(rs.getLong("audit_id"));
+
+                Product product = new Product();
+                product.setId(rs.getLong("product_id"));
+                product.setName(rs.getString("product_name"));
+                item.setProduct(product);
+
+                item.setSystemQuantity(rs.getLong("system_quantity"));
+
+                long physicalQuantity = rs.getLong("physical_quantity");
+                if (rs.wasNull()) {
+                    item.setPhysicalQuantity(null); // Gán null thật sự vào object
+                } else {
+                    item.setPhysicalQuantity(physicalQuantity);
+                }
+
+                long discrepancy = rs.getLong("discrepancy");
+                if (rs.wasNull()) {
+                    item.setDiscrepancy(null); // Gán null thật sự vào object
+                } else {
+                    item.setDiscrepancy(discrepancy);
+                }
+
+                String reason = rs.getString("reason");
+                if (rs.wasNull()) {
+                    item.setReason(null); // Gán null thật sự vào object
+                } else {
+                    item.setReason(reason);
+                }
+
+                items.add(item);
+            }
+            return items;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
