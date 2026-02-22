@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -25,8 +26,8 @@
         </form>
 
         <%-- link to create new product --%>
-        <a href="${pageContext.request.contextPath}/products/new" class="btn btn-primary ml-2">
-            New products
+        <a href="${pageContext.request.contextPath}/products/add" class="btn btn-primary ml-2">
+            Add new products
         </a>
 
         <%-- import excel --%>
@@ -148,11 +149,12 @@
                                     1 Item
                                 </td>
                                     <%--price--%>
+                                    <%--groupingUsed: dont use , between numbers--%>
                                 <td>
                                     <input type="number"
                                            name="price"
                                            class="form-control form-control-sm text-right"
-                                           value="${item.importPrice}"
+                                           value="<fmt:formatNumber value='${item.importPrice}' groupingUsed='false' />"
                                            oninput="calcTotal()"
                                            required>
                                 </td>
@@ -197,12 +199,11 @@
         </div>
     </c:if>
 
-    <%--pagination--%>
+    <%-- pagination --%>
     <c:if test="${totalPages > 1}">
         <nav class="mt-3">
             <ul class="pagination justify-content-center">
-                    <%-- previous page --%>
-                    <%--pageNo = 1 -> disable button previous, else -> ""--%>
+                    <%-- previous page--%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
                        href="${pageContext.request.contextPath}/import-product-items?pageNo=${pageNo - 1}&searchName=${param.searchName}">
@@ -210,19 +211,49 @@
                     </a>
                 </li>
 
-                    <%-- current page --%>
+                <c:set var="left" value="${pageNo - 2}"/>
+                <c:set var="right" value="${pageNo + 2}"/>
+
                 <c:forEach begin="1" end="${totalPages}" var="i">
-                    <li class="page-item ${i == pageNo ? 'active' : ''}">
-                        <a class="page-link"
-                           href="${pageContext.request.contextPath}/import-product-items?pageNo=${i}&searchName=${param.searchName}">
-                                ${i}
-                        </a>
-                    </li>
+                    <c:choose>
+                        <%-- alway display first page --%>
+                        <c:when test="${i == 1}">
+                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/import-product-items?pageNo=${i}&searchName=${param.searchName}">
+                                        ${i}
+                                </a>
+                            </li>
+                        </c:when>
+                        <%-- alway display last page --%>
+                        <c:when test="${i == totalPages}">
+                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/import-product-items?pageNo=${i}&searchName=${param.searchName}">
+                                        ${i}
+                                </a>
+                            </li>
+                        </c:when>
+                        <%-- display between page--%>
+                        <c:when test="${i >= left && i <= right}">
+                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/import-product-items?pageNo=${i}&searchName=${param.searchName}">
+                                        ${i}
+                                </a>
+                            </li>
+                        </c:when>
+                        <%-- display hidden page by ... --%>
+                        <c:when test="${i == left - 1 || i == right + 1}">
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        </c:when>
+                    </c:choose>
                 </c:forEach>
 
-                    <%-- next page--%>
-                <li
-                        class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
+                    <%--next page--%>
+                <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
                        href="${pageContext.request.contextPath}/import-product-items?pageNo=${pageNo + 1}&searchName=${param.searchName}">
                         Next

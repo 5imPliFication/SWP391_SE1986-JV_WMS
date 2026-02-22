@@ -17,6 +17,5 @@ public class PurchaseRequestItem {
     private String productName;
     private String brandName;
     private String categoryName;
-    private String specs;
     private Long quantity;
 }

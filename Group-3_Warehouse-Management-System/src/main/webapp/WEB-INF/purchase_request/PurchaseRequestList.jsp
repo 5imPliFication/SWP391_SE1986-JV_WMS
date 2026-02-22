@@ -46,7 +46,9 @@
                     <!-- Status -->
                     <div class="col-md-2">
                         <label class="form-label fw-semibold">Status</label>
-                        <select name="status" class="form-select">
+                        <select name="status" class="form-select" 
+                                ${isWarehouse ? "disabled" : ""}              
+                                >
                             <option value="">All</option>
                             <c:forEach items="${statuses}" var="s">
                                 <option value="${s}"

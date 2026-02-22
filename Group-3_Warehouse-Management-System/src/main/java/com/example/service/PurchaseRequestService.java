@@ -21,24 +21,24 @@ public class PurchaseRequestService {
 
     public List<PurchaseRequest> getList(
             Long userId,
-            boolean isManager,
+            String role,
             String requestCode,
             String status,
             String createdDate,
             int pageNo,
             int pageSize
     ) {
-        return p.search(userId, isManager, requestCode, status, createdDate, pageNo, pageSize);
+        return p.search(userId, role, requestCode, status, createdDate, pageNo, pageSize);
     }
 
     public int count(
             Long userId,
-            boolean isManager,
+            String role,
             String requestCode,
             String status,
             String createdDate
     ) {
-        return p.count(userId, isManager, requestCode, status, createdDate);
+        return p.count(userId, role, requestCode, status, createdDate);
     }
 
     public long createPurchaseRequest(
@@ -101,15 +101,15 @@ public class PurchaseRequestService {
         return p.getActiveCategories();
     }
 
-    public PurchaseRequest getDetail(
-            Long requestId,
-            User user
-    ) {
-        boolean isManager
-                = "MANAGER".equalsIgnoreCase(user.getRole().getName());
+    public PurchaseRequest getDetail(Long requestId, User user) {
 
-        PurchaseRequest pr
-                = p.findById(requestId, user.getId(), isManager);
+        String role = user.getRole().getName();
+
+        PurchaseRequest pr = p.findById(
+                requestId,
+                user.getId(),
+                role
+        );
 
         if (pr == null) {
             throw new RuntimeException("Purchase request not found or access denied");
@@ -133,11 +133,39 @@ public class PurchaseRequestService {
         return status;
     }
 
-    public void cancelRequest(Long prId, User user) {
-        if (!"PENDING".equals(getStatus(prId))) {
-            throw new RuntimeException("Only PENDING request can be cancelled");
+    public void cancel(Long id) {
+        if (!p.updateStatus(id, "CANCELLED")) {
+            throw new RuntimeException("Cancel failed");
         }
-        p.cancel(prId, user.getId());
     }
 
+    public void approve(Long id) {
+        if (!p.updateStatus(id, "APPROVED")) {
+            throw new RuntimeException("Approve failed");
+        }
+    }
+
+    public void reject(Long id) {
+        if (!p.updateStatus(id, "REJECTED")) {
+            throw new RuntimeException("Reject failed");
+        }
+    }
+
+    public void updatePurchaseRequest(
+            Long requestId,
+            String note,
+            List<PurchaseRequestItem> items,
+            User user
+    ) {
+        // (Optional) check quyền
+        if (user == null) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        // Update header
+        p.updateNote(requestId, note);
+
+        // Update items
+        p.updateItems(requestId, items);
+    }
 }

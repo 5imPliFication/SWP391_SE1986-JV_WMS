@@ -24,23 +24,6 @@ import com.example.model.PurchaseRequest;
 @WebServlet(name = "PurchaseRequestDetail", urlPatterns = {"/purchase-request/detail"})
 public class PurchaseRequestDetail extends HttpServlet {
 
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet PurchaseRequestDetail</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet PurchaseRequestDetail at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
     private PurchaseRequestService pr;
 
     @Override
@@ -58,16 +41,34 @@ public class PurchaseRequestDetail extends HttpServlet {
             return;
         }
 
-        Long id = Long.parseLong(request.getParameter("id"));
+        String idRaw = request.getParameter("id");
+        if (idRaw == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
-        PurchaseRequestService service = new PurchaseRequestService();
+        Long id;
+        try {
+            id = Long.parseLong(idRaw);
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
-        PurchaseRequest list = pr.getDetail(id, user);
-        List<PurchaseRequestItem> items = service.getItems(id);
+        PurchaseRequest prDetail = pr.getDetail(id, user);
+        if (prDetail == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
 
-        request.setAttribute("prList", list);
+        List<PurchaseRequestItem> items = pr.getItems(id);
+
+        request.setAttribute("prList", prDetail);
         request.setAttribute("items", items);
         request.setAttribute("user", user);
+        request.setAttribute("productName", pr.getProductDropdown());
+        request.setAttribute("BrandName", pr.getBrandsDropdown());
+        request.setAttribute("CategoryName", pr.getCategoryDropdown());
 
         request.getRequestDispatcher(
                 "/WEB-INF/purchase_request/PurchaseRequestDetail.jsp"
@@ -79,11 +80,23 @@ public class PurchaseRequestDetail extends HttpServlet {
             throws ServletException, IOException {
 
         User user = (User) req.getSession().getAttribute("user");
-        Long id = Long.valueOf(req.getParameter("id"));
+        if (user == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
 
-        pr.cancelRequest(id, user);
+        Long id = Long.valueOf(req.getParameter("id"));
+        String action = req.getParameter("action");
+
+        switch (action) {
+            case "cancel" ->
+                pr.cancel(id);
+            case "approve" ->
+                pr.approve(id);
+            case "reject" ->
+                pr.reject(id);
+        }
 
         resp.sendRedirect(req.getContextPath() + "/purchase-request/list");
     }
-
 }

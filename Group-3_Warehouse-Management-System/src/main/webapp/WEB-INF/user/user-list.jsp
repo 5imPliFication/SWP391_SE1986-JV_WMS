@@ -11,6 +11,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>User List</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -35,7 +36,7 @@
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 <div class="main-content">
     <h2>List user</h2>
-    <%--            create new user--%>
+    <%-- create new user--%>
     <c:if test="${fn:contains(sessionScope.userPermissions, 'CREATE_USER')}">
         <a href="${pageContext.request.contextPath}/user-create">
             <button class="btn btn-primary mb-3">Create new user</button>
@@ -48,8 +49,8 @@
         <%--search user by name--%>
         <div class="col-auto">
             <label>
-                <input type="text" class="form-control" name="searchName" placeholder="Search by name"
-                       value="${searchName}">
+                <input type="text" class="form-control" name="searchName"
+                       placeholder="Search by name" value="${searchName}">
             </label>
         </div>
 
@@ -58,10 +59,10 @@
             <label>
                 <select name="sortName" class="form-select">
                     <option value="">Sort</option>
-                    <option value="asc"  ${typeSort == 'asc' ? 'selected' : ''}>
+                    <option value="asc" ${typeSort=='asc' ? 'selected' : '' }>
                         Name ASC
                     </option>
-                    <option value="desc" ${typeSort == 'desc' ? 'selected' : ''}>
+                    <option value="desc" ${typeSort=='desc' ? 'selected' : '' }>
                         Name DESC
                     </option>
                 </select>
@@ -94,9 +95,11 @@
                 <td>${u.fullName}</td>
                 <td>${u.email}</td>
                 <td>${u.role.name}</td>
-                    <%--active/inactive user--%>
+                    <%--active /inactive user--%>
                 <td>
-                    <form action="${pageContext.request.contextPath}/change-user-status" method="post" class="d-inline">
+                    <form
+                            action="${pageContext.request.contextPath}/change-user-status"
+                            method="post" class="d-inline">
                         <input type="hidden" name="userId" value="${u.id}">
                         <c:if test="${u.active == true}">
                             <button type="submit" class="btn btn-sm btn-danger">
@@ -111,7 +114,8 @@
                     </form>
                 </td>
                 <td>
-                    <a href="${pageContext.request.contextPath}/user?id=${u.id}" target="_blank">Detail</a>
+                    <a href="${pageContext.request.contextPath}/user?id=${u.id}"
+                       target="_blank">Detail</a>
                 </td>
             </tr>
         </c:forEach>
@@ -124,6 +128,7 @@
         </tbody>
     </table>
     <%-- pagination--%>
+    <%--    when total page > 1 -> display--%>
     <c:if test="${totalPages > 1}">
         <nav class="mt-3">
             <ul class="pagination justify-content-center">
@@ -135,18 +140,57 @@
                     </a>
                 </li>
 
-                    <%-- current page  --%>
+                    <%-- current page --%>
+                    <%-- display 2 page left--%>
+                <c:set var="left" value="${pageNo - 2}"/>
+                    <%-- display 2 page right--%>
+                <c:set var="right" value="${pageNo + 2}"/>
+
                 <c:forEach begin="1" end="${totalPages}" var="i">
-                    <li class="page-item ${i == pageNo ? 'active' : ''}">
-                        <a class="page-link"
-                           href="${pageContext.request.contextPath}/user-list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
-                                ${i}
-                        </a>
-                    </li>
+                    <c:choose>
+                        <%-- alway display first page --%>
+                        <c:when test="${i == 1}">
+                            <li
+                                    class="page-item ${i == pageNo ? 'active' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/user-list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
+                                        ${i}
+                                </a>
+                            </li>
+                        </c:when>
+                        <%-- alway display last page --%>
+                        <c:when test="${i == totalPages}">
+                            <li
+                                    class="page-item ${i == pageNo ? 'active' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/user-list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
+                                        ${i}
+                                </a>
+                            </li>
+                        </c:when>
+                        <%-- display page between --%>
+                        <c:when test="${i >= left && i <= right}">
+                            <li
+                                    class="page-item ${i == pageNo ? 'active' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/user-list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
+                                        ${i}
+                                </a>
+                            </li>
+                        </c:when>
+                        <%-- display hidden page by ...--%>
+                        <c:when
+                                test="${i == left - 1 || i == right + 1}">
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        </c:when>
+                    </c:choose>
                 </c:forEach>
 
                     <%-- next page--%>
-                <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
+                <li
+                        class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
                        href="${pageContext.request.contextPath}/user-list?pageNo=${pageNo + 1}&searchName=${param.searchName}&sortName=${param.sortName}">
                         Next
@@ -171,4 +215,3 @@
 
 </body>
 </html>
-
