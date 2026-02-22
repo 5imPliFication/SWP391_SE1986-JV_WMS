@@ -34,7 +34,7 @@
                           and sessionScope.user.role.active
                           and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
                   <li>
-                      <a href="${pageContext.request.contextPath}/user-list"
+                      <a href="${pageContext.request.contextPath}/user/list"
                          class="<%= (uri.contains("user")) ? "active" : "" %>">
                           <span>User</span>
                       </a>

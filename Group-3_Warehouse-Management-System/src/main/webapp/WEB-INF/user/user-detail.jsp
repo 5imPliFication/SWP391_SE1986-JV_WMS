@@ -86,7 +86,7 @@
                                 Save Changes
                             </button>
 
-                            <a href="user-list" class="btn btn-secondary px-4 ms-2">
+                            <a href="user/list" class="btn btn-secondary px-4 ms-2">
                                 Back
                             </a>
                         </div>

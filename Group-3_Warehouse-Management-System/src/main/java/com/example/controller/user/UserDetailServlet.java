@@ -59,7 +59,7 @@ public class UserDetailServlet extends HttpServlet {
 
             userDAO.updateUserInformation(user);
 
-            response.sendRedirect(request.getContextPath() + "/user-list?status=success");
+            response.sendRedirect(request.getContextPath() + "/user/list?status=success");
 
         } catch (Exception e) {
             e.printStackTrace();

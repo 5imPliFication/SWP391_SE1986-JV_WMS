@@ -38,13 +38,13 @@
     <h2>List user</h2>
     <%-- create new user--%>
     <c:if test="${fn:contains(sessionScope.userPermissions, 'CREATE_USER')}">
-        <a href="${pageContext.request.contextPath}/user-create">
+        <a href="${pageContext.request.contextPath}/user/create">
             <button class="btn btn-primary mb-3">Create new user</button>
         </a>
     </c:if>
     <br>
     <%--form submit for search and sort--%>
-    <form action="${pageContext.request.contextPath}/user-list" method="get"
+    <form action="${pageContext.request.contextPath}/user/list" method="get"
           class="row g-2 align-items-center mb-3">
         <%--search user by name--%>
         <div class="col-auto">
@@ -83,7 +83,6 @@
             <th>Full Name</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Active/Inactive</th>
             <th>Details</th>
         </tr>
         </thead>
@@ -95,27 +94,11 @@
                 <td>${u.fullName}</td>
                 <td>${u.email}</td>
                 <td>${u.role.name}</td>
-                    <%--active /inactive user--%>
-                <td>
-                    <form
-                            action="${pageContext.request.contextPath}/change-user-status"
-                            method="post" class="d-inline">
-                        <input type="hidden" name="userId" value="${u.id}">
-                        <c:if test="${u.active == true}">
-                            <button type="submit" class="btn btn-sm btn-danger">
-                                Inactive this user
-                            </button>
-                        </c:if>
-                        <c:if test="${u.active == false}">
-                            <button type="submit" class="btn btn-sm btn-success">
-                                Active this user
-                            </button>
-                        </c:if>
-                    </form>
-                </td>
                 <td>
                     <a href="${pageContext.request.contextPath}/user?id=${u.id}"
-                       target="_blank">Detail</a>
+                       class="btn btn-info btn-sm">
+                        Detail
+                    </a>
                 </td>
             </tr>
         </c:forEach>
@@ -135,7 +118,7 @@
                     <%-- previous page --%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/user-list?pageNo=${pageNo - 1}&searchName=${param.searchName}&sortName=${param.sortName}">
+                       href="${pageContext.request.contextPath}/user/list?pageNo=${pageNo - 1}&searchName=${param.searchName}&sortName=${param.sortName}">
                         Previous
                     </a>
                 </li>
@@ -153,7 +136,7 @@
                             <li
                                     class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/user-list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
+                                   href="${pageContext.request.contextPath}/user/list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
                                         ${i}
                                 </a>
                             </li>
@@ -163,7 +146,7 @@
                             <li
                                     class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/user-list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
+                                   href="${pageContext.request.contextPath}/user/list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
                                         ${i}
                                 </a>
                             </li>
@@ -173,7 +156,7 @@
                             <li
                                     class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/user-list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
+                                   href="${pageContext.request.contextPath}/user/list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
                                         ${i}
                                 </a>
                             </li>
@@ -192,7 +175,7 @@
                 <li
                         class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/user-list?pageNo=${pageNo + 1}&searchName=${param.searchName}&sortName=${param.sortName}">
+                       href="${pageContext.request.contextPath}/user/list?pageNo=${pageNo + 1}&searchName=${param.searchName}&sortName=${param.sortName}">
                         Next
                     </a>
                 </li>
