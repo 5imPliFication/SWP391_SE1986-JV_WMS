@@ -114,6 +114,7 @@
     <c:if test="${totalPages > 1}">
         <nav class="mt-3">
             <ul class="pagination justify-content-center">
+                    <%-- previous page--%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
                        href="${pageContext.request.contextPath}/import-history?pageNo=${pageNo - 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
@@ -121,15 +122,49 @@
                     </a>
                 </li>
 
+                <c:set var="left" value="${pageNo - 2}"/>
+                <c:set var="right" value="${pageNo + 2}"/>
+
                 <c:forEach begin="1" end="${totalPages}" var="i">
-                    <li class="page-item ${i == pageNo ? 'active' : ''}">
-                        <a class="page-link"
-                           href="${pageContext.request.contextPath}/import-history?pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
-                                ${i}
-                        </a>
-                    </li>
+                    <c:choose>
+                        <%-- alway display first page --%>
+                        <c:when test="${i == 1}">
+                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/import-history?pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                                        ${i}
+                                </a>
+                            </li>
+                        </c:when>
+                        <%-- alway display last page --%>
+                        <c:when test="${i == totalPages}">
+                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/import-history?pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                                        ${i}
+                                </a>
+                            </li>
+                        </c:when>
+                        <%-- display between page--%>
+                        <c:when test="${i >= left && i <= right}">
+                            <li
+                                    class="page-item ${i == pageNo ? 'active' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/import-history?pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                                        ${i}
+                                </a>
+                            </li>
+                        </c:when>
+                        <%-- display hidden page by ... --%>
+                        <c:when test="${i == left - 1 || i == right + 1}">
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        </c:when>
+                    </c:choose>
                 </c:forEach>
 
+                    <%--next page--%>
                 <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
                        href="${pageContext.request.contextPath}/import-history?pageNo=${pageNo + 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
