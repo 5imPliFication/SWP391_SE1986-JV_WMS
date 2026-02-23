@@ -69,6 +69,26 @@
             </label>
         </div>
 
+        <%-- filter by role --%>
+        <div class="col-auto">
+            <label>
+                <select name="roleId" class="form-select">
+
+                    <%-- default --%>
+                    <option value="" ${empty selectedRoleId ? 'selected' : '' }>
+                        All Roles
+                    </option>
+
+                    <c:forEach items="${roleList}" var="r">
+                        <option value="${r.id}"
+                            ${selectedRoleId == r.id.toString() ? 'selected' : '' }>
+                                ${r.name}
+                        </option>
+                    </c:forEach>
+
+                </select>
+            </label>
+        </div>
         <div class="col-auto">
             <button type="submit" class="btn btn-outline-primary">
                 Search
@@ -118,7 +138,7 @@
                     <%-- previous page --%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/user/list?pageNo=${pageNo - 1}&searchName=${param.searchName}&sortName=${param.sortName}">
+                       href="${pageContext.request.contextPath}/user/list?pageNo=${pageNo - 1}&searchName=${param.searchName}&sortName=${param.sortName}&roleId=${selectedRoleId}">
                         Previous
                     </a>
                 </li>
@@ -136,7 +156,7 @@
                             <li
                                     class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/user/list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
+                                   href="${pageContext.request.contextPath}/user/list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}&roleId=${selectedRoleId}">
                                         ${i}
                                 </a>
                             </li>
@@ -146,7 +166,7 @@
                             <li
                                     class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/user/list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
+                                   href="${pageContext.request.contextPath}/user/list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}&roleId=${selectedRoleId}">
                                         ${i}
                                 </a>
                             </li>
@@ -156,7 +176,7 @@
                             <li
                                     class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/user/list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}">
+                                   href="${pageContext.request.contextPath}/user/list?pageNo=${i}&searchName=${param.searchName}&sortName=${param.sortName}&roleId=${selectedRoleId}">
                                         ${i}
                                 </a>
                             </li>
@@ -175,7 +195,7 @@
                 <li
                         class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/user/list?pageNo=${pageNo + 1}&searchName=${param.searchName}&sortName=${param.sortName}">
+                       href="${pageContext.request.contextPath}/user/list?pageNo=${pageNo + 1}&searchName=${param.searchName}&sortName=${param.sortName}&roleId=${selectedRoleId}">
                         Next
                     </a>
                 </li>
