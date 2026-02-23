@@ -40,7 +40,7 @@ public class InventoryAuditService {
             long auditId = inventoryAuditDAO.createInventoryAudit(conn, inventoryAudit);
 
             // Create InventoryAuditItems
-            for(InventoryAuditItem inventoryAuditItem : inventoryAuditItems) {
+            for (InventoryAuditItem inventoryAuditItem : inventoryAuditItems) {
                 inventoryAuditItem.setAuditId(auditId);
                 inventoryAuditDAO.createInventoryAuditItem(conn, inventoryAuditItem);
             }
@@ -64,6 +64,37 @@ public class InventoryAuditService {
 
     // Manager can change PENDING -> CANCELLED
     public boolean cancelInventoryAudit(Long auditId) {
-         return inventoryAuditDAO.updateInventoryAuditStatus(auditId, InventoryAuditStatus.CANCELLED);
+        return inventoryAuditDAO.updateInventoryAuditStatus(auditId, InventoryAuditStatus.CANCELLED);
+    }
+
+    // Save loop --> need Transaction, if any error -> rollback
+    public void performInventoryAudit(Long auditId, String[] inventoryAuditItemIds, String[] physicalQuantities, String[] reasons) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DBConfig.getDataSource().getConnection();
+            conn.setAutoCommit(false); // Bắt đầu Transaction
+
+            for (int i = 0; i < inventoryAuditItemIds.length; i++) {
+                Long itemId = Long.parseLong(inventoryAuditItemIds[i]);
+                Long physicalQty = Long.parseLong(physicalQuantities[i]);
+                String reasonText = reasons[i];
+
+                inventoryAuditDAO.updateInventoryAuditItem(conn, itemId, physicalQty, reasonText);
+            }
+
+            // Update status of InventoryAudit to COMPLETED
+            inventoryAuditDAO.updateInventoryAuditStatus(auditId, InventoryAuditStatus.COMPLETED);
+
+            conn.commit();
+        } catch (Exception e) {
+            if (conn != null) conn.rollback();
+            e.printStackTrace();
+        } finally {
+            if (conn != null) try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

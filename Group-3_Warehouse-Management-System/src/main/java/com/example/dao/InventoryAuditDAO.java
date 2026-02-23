@@ -90,7 +90,7 @@ public class InventoryAuditDAO {
             sql.append(" AND i.audit_code LIKE ? ");
         }
         if (status != null && !status.trim().isEmpty()) {
-            sql.append(" AND b.name = ? ");
+            sql.append(" AND i.status = ? ");
         }
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -247,6 +247,25 @@ public class InventoryAuditDAO {
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status.name());
             ps.setLong(2, auditId);
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean updateInventoryAuditItem(Connection conn, Long itemId, Long physicalQuantity, String reason) {
+        String sql = """
+                UPDATE inventory_audit_items
+                SET physical_quantity = ?, reason = ?, discrepancy = system_quantity - ?
+                WHERE id = ?
+                """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, physicalQuantity);
+            ps.setString(2, reason);
+            ps.setLong(3, physicalQuantity);
+            ps.setLong(4, itemId);
+
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {
