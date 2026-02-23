@@ -194,6 +194,19 @@
                     </a>
                 </li>
             </c:if>
+
+            <!-- Audit -->
+            <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
+                <li>
+                    <a href="${pageContext.request.contextPath}/inventory-audits"
+                       class="<%= (uri.contains("inventory-audits")) ? "active" : "" %>">
+                        <span>Inventory Audit</span>
+                    </a>
+                </li>
+            </c:if>
         </ul>
     </aside>
 </html>
