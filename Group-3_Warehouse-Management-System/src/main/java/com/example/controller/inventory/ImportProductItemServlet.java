@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@WebServlet("/import-product-items")
+@WebServlet("/inventory/import")
 @MultipartConfig
 public class ImportProductItemServlet extends HttpServlet {
 
@@ -53,7 +53,7 @@ public class ImportProductItemServlet extends HttpServlet {
                 importItems.remove(index);
             }
             session.setAttribute("IMPORT_ITEMS", importItems);
-            response.sendRedirect(request.getContextPath() + "/import-product-items");
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
             return;
         } else {
             // view or refresh
@@ -133,9 +133,9 @@ public class ImportProductItemServlet extends HttpServlet {
 
             importItems.add(importProductItemDTO);
 
-            // Lưu lại vào session
+            // save in session
             session.setAttribute("IMPORT_ITEMS", importItems);
-            response.sendRedirect(request.getContextPath() + "/import-product-items");
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
         } else if ("save".equals(action)) {
             // get session
             HttpSession session = request.getSession();
@@ -156,7 +156,7 @@ public class ImportProductItemServlet extends HttpServlet {
 
             // delete session after save success
             session.removeAttribute("IMPORT_ITEMS");
-            response.sendRedirect(request.getContextPath() + "/import-product-items");
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
         } else if ("file".equals(action)) {
             HttpSession session = request.getSession();
             // get file excel import
@@ -166,7 +166,7 @@ public class ImportProductItemServlet extends HttpServlet {
             List<ImportProductItemDTO> importProductItemDTOs = inventoryService.readProductItemsFromExcel(filePart);
             // set session
             session.setAttribute("IMPORT_ITEMS", importProductItemDTOs);
-            response.sendRedirect(request.getContextPath() + "/import-product-items");
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
         }
     }
 }

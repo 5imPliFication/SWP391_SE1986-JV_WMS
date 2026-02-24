@@ -18,7 +18,7 @@
     <div class="d-flex justify-content-between align-items-end mb-3">
 
         <%--        filter date--%>
-        <form action="${pageContext.request.contextPath}/export-products"
+        <form action="${pageContext.request.contextPath}/inventory/export"
               method="get"
               class="form-row align-items-end">
 
@@ -48,11 +48,9 @@
             </div>
         </form>
 
-        <%--        import excel--%>
+        <%--        export excel--%>
         <div>
-            <a href="${pageContext.request.contextPath}/export-products?action=excel
-                &fromDate=${param.fromDate}
-                &toDate=${param.toDate}"
+            <a href="${pageContext.request.contextPath}/inventory/export?action=excel&fromDate=${param.fromDate}&toDate=${param.toDate}"
                class="btn btn-primary btn-sm">
                 Export Excel
             </a>
@@ -100,7 +98,7 @@
                                 ${order.status}
                         </td>
                         <td class="text-center align-middle">
-                            <a href="${pageContext.request.contextPath}/export-products?action=detail&id=${order.id}"
+                            <a href="${pageContext.request.contextPath}/inventory/export?action=detail&id=${order.id}"
                                class="btn btn-info btn-sm">
                                 View
                             </a>
@@ -127,7 +125,7 @@
                 <!-- previous -->
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/export-products?pageNo=${pageNo - 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                       href="${pageContext.request.contextPath}/inventory/export?pageNo=${pageNo - 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
                         Previous
                     </a>
                 </li>
@@ -136,7 +134,7 @@
                 <c:forEach begin="1" end="${totalPages}" var="i">
                     <li class="page-item ${i == pageNo ? 'active' : ''}">
                         <a class="page-link"
-                           href="${pageContext.request.contextPath}/export-product-items?pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                           href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
                                 ${i}
                         </a>
                     </li>
@@ -145,7 +143,7 @@
                 <!-- next -->
                 <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/export-product-items?pageNo=${pageNo + 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                       href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${pageNo + 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
                         Next
                     </a>
                 </li>

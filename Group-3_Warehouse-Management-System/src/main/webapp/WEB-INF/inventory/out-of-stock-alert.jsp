@@ -51,7 +51,7 @@
                             </td>
 
                             <td>
-                                <a href="product-detail?id=${product.id}"
+                                <a href="${pageContext.request.contextPath}/products/items?productId=${product.id}"
                                    class="btn btn-sm btn-primary">
                                     View
                                 </a>
