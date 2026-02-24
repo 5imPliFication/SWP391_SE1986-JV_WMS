@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
-@WebServlet({ "/export-products", "/export-product-items" })
+@WebServlet("/inventory/export")
 public class ExportProductItemServlet extends HttpServlet {
 
     private InventoryService inventoryService;
@@ -72,7 +72,7 @@ public class ExportProductItemServlet extends HttpServlet {
 
     private void showDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.sendRedirect(request.getContextPath() + "/export-products");
+        response.sendRedirect(request.getContextPath() + "/inventory/export");
     }
 
     @Override

@@ -31,7 +31,7 @@
         </a>
 
         <%-- import excel --%>
-        <form action="${pageContext.request.contextPath}/import-product-items" method="post"
+        <form action="${pageContext.request.contextPath}/inventory/import" method="post"
               enctype="multipart/form-data" class="ml-2">
 
             <label class="btn btn-primary mb-0">
@@ -77,8 +77,7 @@
                     <td>${product.description}</td>
                         <%--add product to import product item--%>
                     <td>
-                        <form
-                                action="${pageContext.request.contextPath}/import-product-items"
+                        <form action="${pageContext.request.contextPath}/inventory/import"
                                 method="post">
                                 <%--set name to forward--%>
                             <input type="hidden" name="product-id"
@@ -99,7 +98,7 @@
 
 
     <form id="productItemsForm" method="post"
-          action="${pageContext.request.contextPath}/import-product-items">
+          action="${pageContext.request.contextPath}/inventory/import">
         <!-- table import product items-->
         <div>
             <%--set value for product_items in scope from paged request attribute--%>
@@ -162,7 +161,7 @@
                                 <td
                                         class="text-center align-middle">
                                         <%--method get--%>
-                                    <a href="${pageContext.request.contextPath}/import-product-items?action=delete&index=${(pageNo - 1) * 10 + status.index}"
+                                    <a href="${pageContext.request.contextPath}/inventory/import?action=delete&index=${(pageNo - 1) * 10 + status.index}"
                                        class="btn btn-danger btn-sm">
                                         Delete
                                     </a>
@@ -206,7 +205,7 @@
                     <%-- previous page--%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/import-product-items?pageNo=${pageNo - 1}&searchName=${param.searchName}">
+                       href="${pageContext.request.contextPath}/inventory/import?pageNo=${pageNo - 1}&searchName=${param.searchName}">
                         Previous
                     </a>
                 </li>
@@ -220,7 +219,7 @@
                         <c:when test="${i == 1}">
                             <li class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/import-product-items?pageNo=${i}&searchName=${param.searchName}">
+                                   href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}&searchName=${param.searchName}">
                                         ${i}
                                 </a>
                             </li>
@@ -229,7 +228,7 @@
                         <c:when test="${i == totalPages}">
                             <li class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/import-product-items?pageNo=${i}&searchName=${param.searchName}">
+                                   href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}&searchName=${param.searchName}">
                                         ${i}
                                 </a>
                             </li>
@@ -238,7 +237,7 @@
                         <c:when test="${i >= left && i <= right}">
                             <li class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/import-product-items?pageNo=${i}&searchName=${param.searchName}">
+                                   href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}&searchName=${param.searchName}">
                                         ${i}
                                 </a>
                             </li>
@@ -255,7 +254,7 @@
                     <%--next page--%>
                 <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/import-product-items?pageNo=${pageNo + 1}&searchName=${param.searchName}">
+                       href="${pageContext.request.contextPath}/inventory/import?pageNo=${pageNo + 1}&searchName=${param.searchName}">
                         Next
                     </a>
                 </li>
