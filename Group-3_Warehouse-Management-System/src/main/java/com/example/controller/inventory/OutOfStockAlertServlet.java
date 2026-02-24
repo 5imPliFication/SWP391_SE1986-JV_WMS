@@ -11,7 +11,7 @@ import java.util.List;
 import com.example.dto.ProductDTO;
 import com.example.service.ProductService;
 
-@WebServlet("/out-of-stock-alert")
+@WebServlet("/inventory/alert")
 public class OutOfStockAlertServlet extends HttpServlet {
 
     private final ProductService productService = new ProductService();

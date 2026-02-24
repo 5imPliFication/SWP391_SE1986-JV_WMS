@@ -39,7 +39,7 @@ public class UserService {
         }
 
         // check exist email
-        if(userDAO.isExistEmail(user.getEmail())){
+        if (userDAO.isExistEmail(user.getEmail())) {
             return "Email exist, please input other email !!!";
         }
 
@@ -50,9 +50,9 @@ public class UserService {
         return statusCreate ? null : "Can not create new user";
     }
 
-    //get list user by name + pagination
-    public List<User> getListUsers(String name, String typeSort, int pageNo) {
-        return userDAO.findAll(name, typeSort, pageNo);
+    // get list user by name + pagination
+    public List<User> getListUsers(String name, Integer roleId, String typeSort, int pageNo) {
+        return userDAO.findAll(name, roleId, typeSort, pageNo);
     }
 
     public User findUserById(long id) {
@@ -79,8 +79,7 @@ public class UserService {
             // 2. Load permissions for role
             Role role = user.getRole();
             if (role != null && role.getId() > 0) {
-                List<Permission> permissions =
-                        permissionDAO.findByRoleId(conn, role.getId());
+                List<Permission> permissions = permissionDAO.findByRoleId(conn, role.getId());
                 role.setPermissions(permissions);
             }
             return user;
@@ -91,8 +90,8 @@ public class UserService {
     }
 
     public boolean changePassword(String email,
-                                  String currentRawPassword,
-                                  String newRawPassword) {
+            String currentRawPassword,
+            String newRawPassword) {
         try (Connection conn = DBConfig.getDataSource().getConnection()) {
 
             String currentHash = userDAO.getPassword(conn, email);
@@ -113,7 +112,6 @@ public class UserService {
             throw new RuntimeException("Password change failed", e);
         }
     }
-
 
     public boolean resetPasswordByEmail(String email) {
 
@@ -160,7 +158,7 @@ public class UserService {
         return userDAO.updateUserInformation(user);
     }
 
-    public int getTotalUsers(String searchName) {
-        return userDAO.countUsers(searchName);
+    public int getTotalUsers(String searchName, Integer roleId) {
+        return userDAO.countUsers(searchName, roleId);
     }
 }

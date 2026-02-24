@@ -80,7 +80,6 @@ public class UserDAO {
                     WHERE u.id = ?
                 """;
 
-
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -231,7 +230,6 @@ public class UserDAO {
         }
     }
 
-
     public Role findRoleByID(int roleId) {
         // Sửa SQL để lấy cả ID và Name của Permission, nối bằng dấu hai chấm
         String sql = "SELECT r.id, r.name, r.description, r.is_active, "
@@ -279,14 +277,19 @@ public class UserDAO {
         return null;
     }
 
-    public List<User> findAll(String searchName, String typeSort, int pageNo) {
-        StringBuilder sql = new StringBuilder("select u.id, u.fullname, u.email, r.id as role_id, r.name as role_name, u.is_active from users u\n" +
-                "join roles r on u.role_id = r.id where 1 = 1 ");
+    public List<User> findAll(String searchName, Integer roleId, String typeSort, int pageNo) {
+        StringBuilder sql = new StringBuilder(
+                "select u.id, u.fullname, u.email, r.id as role_id, r.name as role_name, u.is_active from users u\n" +
+                        "join roles r on u.role_id = r.id where 1 = 1 ");
         List<User> listUsers = new ArrayList<>();
 
         // if param has value of searchName
         if (searchName != null && !searchName.trim().isEmpty()) {
             sql.append(" and u.fullname like ? ");
+        }
+
+        if (roleId != null && roleId > 0) {
+            sql.append(" and u.role_id = ? ");
         }
 
         // handle type sort
@@ -304,11 +307,15 @@ public class UserDAO {
         int index = 1;
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // if searchName has value -> set value to query
             if (searchName != null && !searchName.trim().isEmpty()) {
                 ps.setString(index++, "%" + searchName + "%");
+            }
+
+            if (roleId != null && roleId > 0) {
+                ps.setInt(index++, roleId);
             }
 
             // set value for pagination of SQL
@@ -336,22 +343,32 @@ public class UserDAO {
     }
 
     // count amount of user by name
-    public int countUsers(String searchName) {
+    public int countUsers(String searchName, Integer roleId) {
         int totalOfUsers = 0;
-        StringBuilder sql = new StringBuilder("select count(*) from users ");
+        StringBuilder sql = new StringBuilder("select count(*) from users where 1 = 1 ");
 
         // if it has searchName
         if (searchName != null && !searchName.trim().isEmpty()) {
-            sql.append(" where fullname like ?");
+            sql.append(" and fullname like ?");
+        }
+
+        if (roleId != null && roleId > 0) {
+            sql.append(" and role_id = ?");
         }
 
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
+            int index = 1;
             // if searchName has value -> set value to query
             if (searchName != null && !searchName.trim().isEmpty()) {
-                ps.setString(1, "%" + searchName + "%");
+                ps.setString(index++, "%" + searchName + "%");
+            }
+
+            // set value for roleId
+            if (roleId != null && roleId > 0) {
+                ps.setInt(index++, roleId);
             }
             ResultSet rs = ps.executeQuery();
             // return value of column 1
@@ -364,10 +381,12 @@ public class UserDAO {
         }
         return totalOfUsers;
     }
+
     public int countAllUsers() {
         String sql = "SELECT COUNT(*) FROM users";
         return executeCount(sql);
     }
+
     public int countActiveUsers() {
         String sql = "SELECT COUNT(*) FROM users WHERE is_active = 1";
         return executeCount(sql);
