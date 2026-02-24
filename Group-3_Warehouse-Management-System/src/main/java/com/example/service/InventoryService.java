@@ -3,6 +3,7 @@ package com.example.service;
 import com.example.dao.InventoryDAO;
 import com.example.dto.ExportOrderDTO;
 import com.example.dto.ImportProductItemDTO;
+import com.example.dto.ProductDTO;
 import com.example.model.Product;
 import com.example.model.ProductItem;
 import com.example.validator.ImportProductItemValidator;
@@ -27,7 +28,7 @@ public class InventoryService {
     private final InventoryDAO inventoryDAO = new InventoryDAO();
 
     // search product by name
-    public List<Product> findProductByName(String name) {
+    public List<ProductDTO> findProductByName(String name) {
         return inventoryDAO.findProductByName(name);
     }
 
@@ -101,14 +102,14 @@ public class InventoryService {
                     String productName = nameCell.getStringCellValue().trim();
 
                     // get product id by name
-                    List<Product> products = inventoryDAO.findProductByName(productName);
+                    List<ProductDTO> products = inventoryDAO.findProductByName(productName);
                     if (products == null || products.isEmpty()) {
                         // if not exist product -> skip
                         continue;
                     }
 
                     // get first product in list
-                    Product product = products.get(0);
+                    ProductDTO product = products.get(0);
                     Long productId = product.getId();
 
                     // get serial

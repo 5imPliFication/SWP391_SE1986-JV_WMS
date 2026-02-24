@@ -1,7 +1,7 @@
 package com.example.controller.inventory;
 
 import com.example.dto.ImportProductItemDTO;
-import com.example.model.Product;
+import com.example.dto.ProductDTO;
 import com.example.service.InventoryService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -37,7 +37,7 @@ public class ImportProductItemServlet extends HttpServlet {
             // set search name product for session
             session.setAttribute("searchName", searchName);
             // call service to get list products
-            List<Product> products = inventoryService.findProductByName(searchName);
+            List<ProductDTO> products = inventoryService.findProductByName(searchName);
             if (products == null || products.isEmpty()) {
                 request.setAttribute("error", "Product not found. Please add new product");
             } else {
@@ -60,7 +60,7 @@ public class ImportProductItemServlet extends HttpServlet {
             String searchName = (String) session.getAttribute("searchName");
             // if exist -> view again
             if (searchName != null) {
-                List<Product> products = inventoryService.findProductByName(searchName);
+                List<ProductDTO> products = inventoryService.findProductByName(searchName);
                 request.setAttribute("products", products);
             }
         }
@@ -84,7 +84,7 @@ public class ImportProductItemServlet extends HttpServlet {
                 }
             }
 
-           // validate pageNo in range
+            // validate pageNo in range
             if (pageNo < 1)
                 pageNo = 1;
             if (pageNo > totalPages)
