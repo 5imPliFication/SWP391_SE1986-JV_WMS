@@ -441,7 +441,7 @@ public class ProductDAO {
                 ProductDTO product = new ProductDTO();
                 product.setId(rs.getLong("id"));
                 product.setName(rs.getString("name"));
-                product.setStock(rs.getLong("total_quantity"));
+                product.setTotalQuantity(rs.getLong("total_quantity"));
                 products.add(product);
             }
         } catch (SQLException e) {
