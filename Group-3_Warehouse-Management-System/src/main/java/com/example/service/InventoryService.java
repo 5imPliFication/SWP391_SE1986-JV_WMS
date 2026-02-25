@@ -135,7 +135,7 @@ public class InventoryService {
     }
 
     // handle export product items
-    public Map<String, Object> getExportOrders(String name, String fromDateStr, String toDateStr, int pageNo) {
+    public Map<String, Object> getExportOrders(String name, String fromDateStr, String toDateStr, String status, int pageNo) {
         LocalDate fromDate;
         LocalDate toDate;
 
@@ -153,10 +153,10 @@ public class InventoryService {
         }
 
         int offset = (pageNo - 1) * AppConstants.PAGE_SIZE;
-        List<OrderDTO> orders = inventoryDAO.searchExportOrders(name, fromDate, toDate, offset);
+        List<OrderDTO> orders = inventoryDAO.searchExportOrders(name, fromDate, toDate, status, offset);
 
         // handle pagination
-        int totalOrders = getTotalOrders(name, fromDate, toDate);
+        int totalOrders = getTotalOrders(name, fromDate, toDate, status);
         int totalPages = (int) Math.ceil((double) totalOrders / AppConstants.PAGE_SIZE);
 
         // create map
@@ -169,7 +169,7 @@ public class InventoryService {
     }
 
 
-    public int getTotalOrders(String name, LocalDate fromDate, LocalDate toDate) {
-        return inventoryDAO.countExportOrders(name, fromDate, toDate);
+    public int getTotalOrders(String name, LocalDate fromDate, LocalDate toDate, String status) {
+        return inventoryDAO.countExportOrders(name, fromDate, toDate, status);
     }
 }

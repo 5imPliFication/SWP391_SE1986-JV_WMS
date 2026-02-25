@@ -43,6 +43,7 @@ public class ExportProductItemServlet extends HttpServlet {
         String name = request.getParameter("name");
         String fromDate = request.getParameter("fromDate");
         String toDate = request.getParameter("toDate");
+        String status = request.getParameter("status");
         String pageStr = request.getParameter("pageNo");
 
         int pageNo = AppConstants.DEFAULT_PAGE_NO;
@@ -55,21 +56,17 @@ public class ExportProductItemServlet extends HttpServlet {
             pageNo = AppConstants.DEFAULT_PAGE_NO;
         }
 
-        Map<String, Object> result = inventoryService.getExportOrders(name, fromDate, toDate, pageNo);
+        Map<String, Object> result = inventoryService.getExportOrders(name, fromDate, toDate, status, pageNo);
 
         request.setAttribute("name", name);
         request.setAttribute("exportOrders", result.get("orders"));
         request.setAttribute("totalPages", result.get("totalPages"));
         request.setAttribute("fromDate", fromDate);
         request.setAttribute("toDate", toDate);
+        request.setAttribute("status", status);
         request.setAttribute("pageNo", pageNo);
 
         request.getRequestDispatcher("/WEB-INF/inventory/export-products.jsp").forward(request, response);
-    }
-
-    private void showDetail(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.sendRedirect(request.getContextPath() + "/inventory/export");
     }
 
     @Override

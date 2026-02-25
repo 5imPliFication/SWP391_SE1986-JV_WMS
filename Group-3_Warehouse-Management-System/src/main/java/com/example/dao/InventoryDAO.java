@@ -103,12 +103,12 @@ public class InventoryDAO {
         }
     }
 
-    public List<OrderDTO> searchExportOrders(String name, LocalDate fromDate, LocalDate toDate, int offset) {
+    public List<OrderDTO> searchExportOrders(String name, LocalDate fromDate, LocalDate toDate, String status, int offset) {
         StringBuilder sql = new StringBuilder("""
                     select o.id, o.order_code, o.order_date, u.fullname as salesman_name, o.customer_name, o.status
                     from orders o
                     join users u ON o.created_by = u.id
-                    where 1=1 and o.status not in ('SUBMITTED', 'COMPLETED', 'CANCELLED') 
+                    where 1=1
                 """);
 
         // name
@@ -117,10 +117,19 @@ public class InventoryDAO {
         }
 
         // handle date
-        if (fromDate != null)
+        if (fromDate != null){
             sql.append(" and CAST(o.order_date AS DATE) >= ?");
-        if (toDate != null)
+        }
+        if (toDate != null){
             sql.append(" and CAST(o.order_date AS DATE) <= ?");
+        }
+
+        // status
+        if(status != null && !status.trim().isEmpty()) {
+            sql.append(" and o.status like ? ");
+        } else {
+            sql.append(" and o.status not in ('DRAFT', 'COMPLETED', 'CANCELLED') ");
+        }
 
         // pagination
         sql.append(" ORDER BY o.order_date DESC LIMIT ? OFFSET ?");
@@ -133,10 +142,17 @@ public class InventoryDAO {
             if (name != null && !name.trim().isEmpty()) {
                 ps.setString(index++, "%" + name + "%");
             }
-            if (fromDate != null)
+
+            if (fromDate != null){
                 ps.setDate(index++, Date.valueOf(fromDate));
-            if (toDate != null)
+            }
+            if (toDate != null){
                 ps.setDate(index++, Date.valueOf(toDate));
+            }
+
+            if(status != null && !status.trim().isEmpty()) {
+                ps.setString(index++, "%" + status + "%");
+            }
             ps.setInt(index++, AppConstants.PAGE_SIZE);
             ps.setInt(index, offset);
 
@@ -158,16 +174,24 @@ public class InventoryDAO {
     }
 
     // count total export product order
-    public int countExportOrders(String name, LocalDate fromDate, LocalDate toDate) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders o WHERE 1=1 ");
+    public int countExportOrders(String name, LocalDate fromDate, LocalDate toDate, String  status) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders o WHERE 1=1 and o.status not in ('DRAFT', 'COMPLETED', 'CANCELLED') ");
         if (name != null && !name.trim().isEmpty()) {
             sql.append(" and o.customer_name like ? ");
         }
+
         if (fromDate != null) {
             sql.append(" and cast(o.order_date AS DATE) >= ?");
         }
         if (toDate != null) {
             sql.append(" and cast(o.order_date AS DATE) <= ?");
+        }
+
+        // status
+        if(status != null && !status.trim().isEmpty()) {
+            sql.append(" and o.status like ? ");
+        } else {
+            sql.append(" and o.status not in ('DRAFT', 'COMPLETED', 'CANCELLED') ");
         }
 
         try (Connection con = DBConfig.getDataSource().getConnection();
@@ -177,10 +201,17 @@ public class InventoryDAO {
             if(name != null && !name.trim().isEmpty()) {
                 ps.setString(index++, "%" + name + "%");
             }
-            if (fromDate != null)
+
+            if (fromDate != null){
                 ps.setDate(index++, Date.valueOf(fromDate));
-            if (toDate != null)
+            }
+            if (toDate != null){
                 ps.setDate(index++, Date.valueOf(toDate));
+            }
+
+            if(status != null && !status.trim().isEmpty()) {
+                ps.setString(index++, "%" + status + "%");
+            }
 
             ResultSet rs = ps.executeQuery();
             if (rs.next())

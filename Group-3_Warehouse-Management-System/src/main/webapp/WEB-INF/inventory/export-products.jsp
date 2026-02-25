@@ -43,6 +43,26 @@
                        class="form-control form-control-sm">
             </div>
 
+                <%-- filter by status --%>
+                <div class="col-auto">
+                    <label>
+                        <select name="status" class="form-select">
+                            <%-- default --%>
+                            <option value="" ${empty status ? 'selected' : ''}>
+                                All Status
+                            </option>
+
+                            <option value="SUBMITTED" ${status == 'SUBMITTED' ? 'selected' : ''}>
+                                SUBMITTED
+                            </option>
+
+                            <option value="PROCESSING" ${status == 'PROCESSING' ? 'selected' : ''}>
+                                PROCESSING
+                            </option>
+                        </select>
+                    </label>
+                </div>
+
             <%--    button search--%>
             <button type="submit"
                     class="btn btn-primary mr-2"
@@ -91,7 +111,7 @@
                         </td>
                         <td class="text-center align-middle">
                             <button class="btn btn-sm
-                                ${order.status == 'DRAFT' ? 'btn-warning' :
+                                ${order.status == 'SUMITTED' ? 'btn-warning' :
                                 order.status == 'PROCESSING' ? 'btn-success' : 'btn-secondary'}">
                                     ${order.status}
                             </button>
@@ -123,7 +143,7 @@
                     <%-- previous page--%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${pageNo - 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                       href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${pageNo - 1}&fromDate=${param.fromDate}&toDate=${param.toDate}&status=${param.status}">
                         Previous
                     </a>
                 </li>
@@ -137,7 +157,7 @@
                         <c:when test="${i == 1}">
                             <li class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                                   href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}&status=${param.status}">
                                         ${i}
                                 </a>
                             </li>
@@ -146,7 +166,7 @@
                         <c:when test="${i == totalPages}">
                             <li class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                                   href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}&status=${param.status}">
                                         ${i}
                                 </a>
                             </li>
@@ -156,7 +176,7 @@
                             <li
                                     class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                                   href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}&status=${param.status}">
                                         ${i}
                                 </a>
                             </li>
@@ -173,7 +193,7 @@
                     <%--next page--%>
                 <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${pageNo + 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                       href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${pageNo + 1}&fromDate=${param.fromDate}&toDate=${param.toDate}&status=${param.status}">
                         Next
                     </a>
                 </li>
