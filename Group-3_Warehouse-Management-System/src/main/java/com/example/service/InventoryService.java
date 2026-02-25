@@ -1,9 +1,10 @@
 package com.example.service;
 
 import com.example.dao.InventoryDAO;
-import com.example.dto.ExportOrderDTO;
+import com.example.dto.OrderDTO;
 import com.example.dto.ProductItemDTO;
 import com.example.dto.ProductDTO;
+import com.example.util.AppConstants;
 import com.example.validator.ImportProductItemValidator;
 import jakarta.servlet.http.Part;
 import org.apache.poi.ss.usermodel.Cell;
@@ -14,7 +15,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +70,7 @@ public class InventoryService {
             return null;
         } else {
             try (InputStream inputStream = filePart.getInputStream();
-                    Workbook workbook = new XSSFWorkbook(inputStream)) {
+                 Workbook workbook = new XSSFWorkbook(inputStream)) {
 
                 // get first sheet
                 Sheet sheet = workbook.getSheetAt(0);
@@ -135,9 +135,11 @@ public class InventoryService {
     }
 
     // handle export product items
-    public Map<String, Object> getExportOrders(String fromDateStr, String toDateStr, int page, int pageSize) {
+    public Map<String, Object> getExportOrders(String name, String fromDateStr, String toDateStr, int pageNo) {
         LocalDate fromDate;
         LocalDate toDate;
+
+        // parse into format date
         if (fromDateStr != null && !fromDateStr.isEmpty()) {
             fromDate = LocalDate.parse(fromDateStr);
         } else {
@@ -150,10 +152,12 @@ public class InventoryService {
             toDate = null;
         }
 
-        int offset = (page - 1) * pageSize;
-        List<ExportOrderDTO> orders = inventoryDAO.searchExportOrders(fromDate, toDate, offset, pageSize);
-        int totalOrders = inventoryDAO.countExportOrders(fromDate, toDate);
-        int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
+        int offset = (pageNo - 1) * AppConstants.PAGE_SIZE;
+        List<OrderDTO> orders = inventoryDAO.searchExportOrders(name, fromDate, toDate, offset);
+
+        // handle pagination
+        int totalOrders = getTotalOrders(name, fromDate, toDate);
+        int totalPages = (int) Math.ceil((double) totalOrders / AppConstants.PAGE_SIZE);
 
         // create map
         Map<String, Object> result = new HashMap<>();
@@ -162,5 +166,10 @@ public class InventoryService {
         result.put("orders", orders);
         result.put("totalPages", totalPages);
         return result;
+    }
+
+
+    public int getTotalOrders(String name, LocalDate fromDate, LocalDate toDate) {
+        return inventoryDAO.countExportOrders(name, fromDate, toDate);
     }
 }
