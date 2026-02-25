@@ -18,8 +18,8 @@
     <div class="d-flex align-items-center mb-3">
         <%-- search product by name --%>
         <form class="form-inline" action="${pageContext.request.contextPath}" method="get">
-            <input type="text" name="searchName" class="form-control mr-2"
-                   placeholder="Search name product" value="${param.searchName}">
+            <input type="text" name="name" class="form-control mr-2"
+                   placeholder="Search name product" value="${param.name}">
             <button type="submit" class="btn btn-primary mr-2" name="action" value="search">
                 Search
             </button>
@@ -58,7 +58,7 @@
         </div>
     </c:if>
 
-    <%--table list product--%>
+    <%--table list product when search by name--%>
     <c:if test="${not empty products}">
         <table class="table table-bordered table-hover">
             <thead class="thead-dark">
@@ -78,11 +78,11 @@
                         <%--add product to import product item--%>
                     <td>
                         <form action="${pageContext.request.contextPath}/inventory/import"
-                                method="post">
+                              method="post">
                                 <%--set name to forward--%>
-                            <input type="hidden" name="product-id"
+                            <input type="hidden" name="productId"
                                    value="${product.id}">
-                            <input type="hidden" name="product-name"
+                            <input type="hidden" name="productName"
                                    value="${product.name}">
                             <button class="btn btn-success btn-sm" type="submit"
                                     name="action" value="add">
@@ -96,14 +96,15 @@
         </table>
     </c:if>
 
-
+    <%--table import product items--%>
     <form id="productItemsForm" method="post"
           action="${pageContext.request.contextPath}/inventory/import">
-        <!-- table import product items-->
         <div>
             <%--set value for product_items in scope from paged request attribute--%>
-            <c:set var="productItems" value="${importItems}"/>
+            <c:set var="productItem" value="${importItems}"/>
             <div class="table-responsive">
+                <%-- if productItem not empty -> display list product item need import --%>
+                <c:if test="${not empty productItem}">
                 <table class="table table-bordered table-hover table-sm">
                     <thead class="thead-dark text-center">
                     <tr>
@@ -115,13 +116,9 @@
                         <th style="width: 90px;">Delete</th>
                     </tr>
                     </thead>
-                    <%-- if productItems not empty -> display list product item need import
-                        --%>
-                    <c:if test="${not empty productItems}">
                         <tbody>
-                            <%--loop productItems--%>
-                        <c:forEach items="${productItems}" var="item"
-                                   varStatus="status">
+                            <%--loop productItem--%>
+                        <c:forEach items="${productItem}" var="item" varStatus="status">
                             <tr>
                                     <%--STT--%>
                                 <td class="text-center align-middle">
@@ -131,7 +128,7 @@
                                     <%--name product (item)--%>
                                 <td class="align-middle">
                                     <input type="hidden"
-                                           name="product-id"
+                                           name="productId"
                                            value="${item.productId}">
                                         ${item.productName}
                                 </td>
@@ -148,7 +145,7 @@
                                     1 Item
                                 </td>
                                     <%--price--%>
-                                    <%--groupingUsed: dont use , between numbers--%>
+                                    <%--groupingUsed: prevent "," between numbers--%>
                                 <td>
                                     <input type="number"
                                            name="price"
@@ -160,7 +157,7 @@
                                     <%--delete product item--%>
                                 <td
                                         class="text-center align-middle">
-                                        <%--method get--%>
+                                        <%--index of row in importItems--%>
                                     <a href="${pageContext.request.contextPath}/inventory/import?action=delete&index=${(pageNo - 1) * 10 + status.index}"
                                        class="btn btn-danger btn-sm">
                                         Delete

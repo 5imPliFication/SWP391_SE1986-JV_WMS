@@ -2,6 +2,8 @@ package com.example.dao;
 
 import com.example.config.DBConfig;
 import com.example.dto.ExportOrderDTO;
+import com.example.dto.ProductDTO;
+import com.example.dto.ProductItemDTO;
 import com.example.model.Product;
 import com.example.model.ProductItem;
 
@@ -13,9 +15,9 @@ import java.util.List;
 public class InventoryDAO {
 
     // get list product by name
-    public List<Product> findProductByName(String searchName) {
-        List<Product> listProducts = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("select id, `name`, description from products as p " +
+    public List<ProductDTO> findProductByName(String searchName) {
+        List<ProductDTO> listProducts = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("select id, name, description, total_quantity from products as p " +
                 " where 1 = 1 ");
 
         // if param has value of searchName
@@ -38,7 +40,8 @@ public class InventoryDAO {
                 long id = rs.getLong("id");
                 String name = rs.getString("name");
                 String description = rs.getString("description");
-                listProducts.add(new Product(id, name, description));
+                long totalQuantity = rs.getLong("total_quantity");
+                listProducts.add(new ProductDTO(id, name, description, totalQuantity));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -47,7 +50,7 @@ public class InventoryDAO {
     }
 
     // save list products item to db
-    public boolean saveProductItems(List<ProductItem> productItems) {
+    public boolean saveProductItems(List<ProductItemDTO> productItemDTOs) {
         String sql = "INSERT INTO product_items(serial, imported_price, current_price, is_active, imported_at, updated_at, product_id) "
                 +
                 "VALUES (?, ?, ?, ?, NOW(), NOW(), ?)";
@@ -57,13 +60,13 @@ public class InventoryDAO {
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
             // iterate each item
-            for (ProductItem item : productItems) {
+            for (ProductItemDTO item : productItemDTOs) {
 
                 // set data
                 int index = 1;
                 ps.setString(index++, item.getSerial());
-                ps.setDouble(index++, item.getImportedPrice());
-                ps.setDouble(index++, item.getImportedPrice());
+                ps.setDouble(index++, item.getImportPrice());
+                ps.setDouble(index++, item.getImportPrice());
                 ps.setBoolean(index++, true);
                 ps.setLong(index++, item.getProductId());
                 ps.addBatch();
