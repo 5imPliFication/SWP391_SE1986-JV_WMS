@@ -152,7 +152,7 @@
                           and fn:contains(sessionScope.userPermissions, 'EXPORT_PRODUCT')}">
                   <li>
                       <a href="${pageContext.request.contextPath}/inventory/export"
-                         class="<%= (uri.contains("export-products")) ? "active" : "" %>">
+                         class="<%= (uri.contains("inventory/export")) ? "active" : "" %>">
                           <span>Export Product</span>
                       </a>
                   </li>
@@ -176,7 +176,7 @@
                           and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
                 <li>
                     <a href="${pageContext.request.contextPath}/inventory/import/history"
-                       class="<%= (uri.contains("import-history")) ? "active" : "" %>">
+                       class="<%= (uri.contains("inventoryt/import/history")) ? "active" : "" %>">
                         <span>Import History</span>
                     </a>
                 </li>

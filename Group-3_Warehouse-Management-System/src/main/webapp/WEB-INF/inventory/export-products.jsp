@@ -13,49 +13,44 @@
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
 <main class="main-content">
+    <h2 class="mb-4">Export Products</h2>
+    <div class="d-flex align-items-center mb-3">
+        <form class="form-inline"
+              action="${pageContext.request.contextPath}/inventory/export"
+              method="get">
+            <%--search name customer--%>
+            <input type="text"
+                   name="name"
+                   class="form-control mr-5"
+                   placeholder="Search name customer"
+                   value="${param.name}">
 
-    <%--    search and filter--%>
-    <div class="d-flex justify-content-between align-items-end mb-3">
-
-        <%--        filter date--%>
-        <form action="${pageContext.request.contextPath}/inventory/export"
-              method="get"
-              class="form-row align-items-end">
-
-            <div class="form-group mr-2">
-                <label class="small mb-1">From date</label>
+            <%--    from date--%>
+            <span class="mr-2">From Date</span>
+            <div class="form-group mr-5">
                 <input type="date"
                        name="fromDate"
                        value="${param.fromDate}"
                        class="form-control form-control-sm">
             </div>
 
+            <%--    to date--%>
+            <span class="mr-2">To Date</span>
             <div class="form-group mr-2">
-                <label class="small mb-1">To date</label>
                 <input type="date"
                        name="toDate"
                        value="${param.toDate}"
                        class="form-control form-control-sm">
             </div>
 
-            <div class="form-group mb-0">
-                <button type="submit"
-                        name="action"
-                        value="search"
-                        class="btn btn-primary btn-sm">
-                    Search
-                </button>
-            </div>
+            <%--    button search--%>
+            <button type="submit"
+                    class="btn btn-primary mr-2"
+                    name="action"
+                    value="search">
+                Search
+            </button>
         </form>
-
-        <%--        export excel--%>
-        <div>
-            <a href="${pageContext.request.contextPath}/inventory/export?action=excel&fromDate=${param.fromDate}&toDate=${param.toDate}"
-               class="btn btn-primary btn-sm">
-                Export Excel
-            </a>
-        </div>
-
     </div>
 
     <%--    message--%>
@@ -95,7 +90,11 @@
                                 ${order.customerName}
                         </td>
                         <td class="text-center align-middle">
-                                ${order.status}
+                            <button class="btn btn-sm
+                                ${order.status == 'DRAFT' ? 'btn-warning' :
+                                order.status == 'PROCESSING' ? 'btn-success' : 'btn-secondary'}">
+                                    ${order.status}
+                            </button>
                         </td>
                         <td class="text-center align-middle">
                             <a href="${pageContext.request.contextPath}/inventory/export?action=detail&id=${order.id}"
@@ -110,44 +109,74 @@
         </div>
     </c:if>
 
-<%--    empty message--%>
+    <%--    empty message--%>
     <c:if test="${empty exportOrders}">
         <div class="alert alert-warning">
             No export orders found.
         </div>
     </c:if>
 
-<%--   pagination --%>
+    <%--   pagination --%>
     <c:if test="${totalPages > 1}">
         <nav class="mt-3">
             <ul class="pagination justify-content-center">
-
-                <!-- previous -->
+                    <%-- previous page--%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/export?pageNo=${pageNo - 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                       href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${pageNo - 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
                         Previous
                     </a>
                 </li>
 
-                <!-- pages -->
+                <c:set var="left" value="${pageNo - 2}"/>
+                <c:set var="right" value="${pageNo + 2}"/>
+
                 <c:forEach begin="1" end="${totalPages}" var="i">
-                    <li class="page-item ${i == pageNo ? 'active' : ''}">
-                        <a class="page-link"
-                           href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
-                                ${i}
-                        </a>
-                    </li>
+                    <c:choose>
+                        <%-- alway display first page --%>
+                        <c:when test="${i == 1}">
+                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                                        ${i}
+                                </a>
+                            </li>
+                        </c:when>
+                        <%-- alway display last page --%>
+                        <c:when test="${i == totalPages}">
+                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                                        ${i}
+                                </a>
+                            </li>
+                        </c:when>
+                        <%-- display between page--%>
+                        <c:when test="${i >= left && i <= right}">
+                            <li
+                                    class="page-item ${i == pageNo ? 'active' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                                        ${i}
+                                </a>
+                            </li>
+                        </c:when>
+                        <%-- display hidden page by ... --%>
+                        <c:when test="${i == left - 1 || i == right + 1}">
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        </c:when>
+                    </c:choose>
                 </c:forEach>
 
-                <!-- next -->
+                    <%--next page--%>
                 <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${pageNo + 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                       href="${pageContext.request.contextPath}/inventory/export?name=${param.name}&pageNo=${pageNo + 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
                         Next
                     </a>
                 </li>
-
             </ul>
         </nav>
     </c:if>
