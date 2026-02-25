@@ -10,6 +10,13 @@
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/home.css">
+        <style>
+            .sidebar {
+                height: 100vh;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+        </style>
         <title>Error Page</title>
     </head>
     <aside class="sidebar">
@@ -62,7 +69,7 @@
                   <li>
                       <a href="${pageContext.request.contextPath}/salesman/orders"
                          class="<%= (uri.contains("order")) ? "active" : "" %>">
-                          <span>Order</span>
+                          <span>Orders</span>
                       </a>
                   </li>
             </c:if>
@@ -74,7 +81,7 @@
                   <li>
                       <a href="${pageContext.request.contextPath}/warehouse/orders"
                          class="<%= (uri.contains("order")) ? "active" : "" %>">
-                          <span>Order</span>
+                          <span>Orders</span>
                       </a>
                   </li>
             </c:if>
@@ -105,47 +112,34 @@
                   </li>
             </c:if>
 
-            <!-- ORDERS -->
-            <c:if test="${sessionScope.user != null
-                          and sessionScope.user.role != null
-                          and sessionScope.user.role.active
-                          and sessionScope.user.role.name eq 'Salesman'
-                          and fn:contains(sessionScope.userPermissions, 'READ_ORDER')}">
-                  <li>
-                      <a href="${pageContext.request.contextPath}/salesman/orders"
-                         class="<%= (uri.contains("order")) ? "active" : "" %>">
-                          <span>Orders</span>
-                      </a>
-                  </li>
-            </c:if>
 
             <!-- Products -->
             <c:if test="${sessionScope.user != null
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
                           and fn:contains(sessionScope.userPermissions, 'READ_PRODUCT')}">
-                <li>
-                    <a href="${pageContext.request.contextPath}/products"
-                       class="<%= (uri.contains("products")) ? "active" : "" %>">
-                        <span>Products</span>
-                    </a>
-                </li>
+                  <li>
+                      <a href="${pageContext.request.contextPath}/products"
+                         class="<%= (uri.contains("products")) ? "active" : "" %>">
+                          <span>Products</span>
+                      </a>
+                  </li>
             </c:if>
 
-            
+
             <%--import product--%>
             <c:if test="${sessionScope.user != null
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
                           and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
-                <li>
-                    <a href="${pageContext.request.contextPath}/inventory/import"
-                       class="<%= (uri.contains("inventory/import")) ? "active" : "" %>">
-                        <span>Import Product</span>
-                    </a>
-                </li>
+                  <li>
+                      <a href="${pageContext.request.contextPath}/inventory/import"
+                         class="<%= (uri.contains("inventory/import")) ? "active" : "" %>">
+                          <span>Import Product</span>
+                      </a>
+                  </li>
             </c:if>
-<%--            Export product--%>
+            <%--            Export product--%>
             <c:if test="${sessionScope.user != null
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
@@ -169,17 +163,17 @@
                   </li>
             </c:if>
 
-<%--            import history--%>
+            <%--            import history--%>
             <c:if test="${sessionScope.user != null
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
                           and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
-                <li>
-                    <a href="${pageContext.request.contextPath}/inventory/import/history"
-                       class="<%= (uri.contains("import-history")) ? "active" : "" %>">
-                        <span>Import History</span>
-                    </a>
-                </li>
+                  <li>
+                      <a href="${pageContext.request.contextPath}/inventory/import/history"
+                         class="<%= (uri.contains("import-history")) ? "active" : "" %>">
+                          <span>Import History</span>
+                      </a>
+                  </li>
             </c:if>
 
             <%--  out of stock--%>
@@ -187,12 +181,12 @@
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
                           and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
-                <li>
-                    <a href="${pageContext.request.contextPath}/inventory/alert"
-                       class="<%= (uri.contains("out-of-stock-alert")) ? "active" : "" %>">
-                        <span>Out of stock alert</span>
-                    </a>
-                </li>
+                  <li>
+                      <a href="${pageContext.request.contextPath}/inventory/alert"
+                         class="<%= (uri.contains("out-of-stock-alert")) ? "active" : "" %>">
+                          <span>Out of stock alert</span>
+                      </a>
+                  </li>
             </c:if>
 
             <!-- Audit -->
@@ -200,12 +194,12 @@
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
                           and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
-                <li>
-                    <a href="${pageContext.request.contextPath}/inventory-audits"
-                       class="<%= (uri.contains("inventory-audits")) ? "active" : "" %>">
-                        <span>Inventory Audit</span>
-                    </a>
-                </li>
+                  <li>
+                      <a href="${pageContext.request.contextPath}/inventory-audits"
+                         class="<%= (uri.contains("inventory-audits")) ? "active" : "" %>">
+                          <span>Inventory Audit</span>
+                      </a>
+                  </li>
             </c:if>
         </ul>
     </aside>
