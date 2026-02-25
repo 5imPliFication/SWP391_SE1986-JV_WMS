@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ImportProductItemDTO {
+public class ProductItemDTO {
     private Long productId;
     private String productName;
     private String serial;
