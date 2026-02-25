@@ -3,6 +3,7 @@ package com.example.dao;
 import com.example.config.DBConfig;
 import com.example.dto.ExportOrderDTO;
 import com.example.dto.ProductDTO;
+import com.example.dto.ProductItemDTO;
 import com.example.model.Product;
 import com.example.model.ProductItem;
 
@@ -16,7 +17,7 @@ public class InventoryDAO {
     // get list product by name
     public List<ProductDTO> findProductByName(String searchName) {
         List<ProductDTO> listProducts = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("select id, `name`, description, total_quantity from products as p " +
+        StringBuilder sql = new StringBuilder("select id, name, description, total_quantity from products as p " +
                 " where 1 = 1 ");
 
         // if param has value of searchName
@@ -49,7 +50,7 @@ public class InventoryDAO {
     }
 
     // save list products item to db
-    public boolean saveProductItems(List<ProductItem> productItems) {
+    public boolean saveProductItems(List<ProductItemDTO> productItemDTOs) {
         String sql = "INSERT INTO product_items(serial, imported_price, current_price, is_active, imported_at, updated_at, product_id) "
                 +
                 "VALUES (?, ?, ?, ?, NOW(), NOW(), ?)";
@@ -59,13 +60,13 @@ public class InventoryDAO {
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
             // iterate each item
-            for (ProductItem item : productItems) {
+            for (ProductItemDTO item : productItemDTOs) {
 
                 // set data
                 int index = 1;
                 ps.setString(index++, item.getSerial());
-                ps.setDouble(index++, item.getImportedPrice());
-                ps.setDouble(index++, item.getImportedPrice());
+                ps.setDouble(index++, item.getImportPrice());
+                ps.setDouble(index++, item.getImportPrice());
                 ps.setBoolean(index++, true);
                 ps.setLong(index++, item.getProductId());
                 ps.addBatch();

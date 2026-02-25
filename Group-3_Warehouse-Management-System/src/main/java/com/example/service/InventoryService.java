@@ -2,10 +2,8 @@ package com.example.service;
 
 import com.example.dao.InventoryDAO;
 import com.example.dto.ExportOrderDTO;
-import com.example.dto.ImportProductItemDTO;
+import com.example.dto.ProductItemDTO;
 import com.example.dto.ProductDTO;
-import com.example.model.Product;
-import com.example.model.ProductItem;
 import com.example.validator.ImportProductItemValidator;
 import jakarta.servlet.http.Part;
 import org.apache.poi.ss.usermodel.Cell;
@@ -28,15 +26,15 @@ public class InventoryService {
     private final InventoryDAO inventoryDAO = new InventoryDAO();
 
     // search product by name
-    public List<ProductDTO> findProductByName(String name) {
-        return inventoryDAO.findProductByName(name);
+    public List<ProductDTO> searchProducts(String searchName) {
+        return inventoryDAO.findProductByName(searchName);
     }
 
     // save list product items
-    public String saveProductItems(String[] serials, String[] prices, String[] productIds) {
+    public String saveProductItems(String[] productIds, String[] serials, String[] prices) {
 
-        // init list product items
-        List<ProductItem> productItems = new ArrayList<>();
+        // init list product item dto to store value
+        List<ProductItemDTO> productItemDTOs = new ArrayList<>();
         try {
             // loop
             for (int i = 0; i < serials.length; i++) {
@@ -56,17 +54,17 @@ public class InventoryService {
                 }
 
                 Long productId = Long.parseLong(productIds[i]);
-                productItems.add(new ProductItem(serial, price, LocalDateTime.now(), productId));
+                productItemDTOs.add(new ProductItemDTO(productId, serial, price));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return inventoryDAO.saveProductItems(productItems) ? null : "Save successfully";
+        return inventoryDAO.saveProductItems(productItemDTOs) ? null : "Save successfully";
     }
 
     // save list products items by Excel
-    public List<ImportProductItemDTO> readProductItemsFromExcel(Part filePart) {
-        List<ImportProductItemDTO> importItems = new ArrayList<>();
+    public List<ProductItemDTO> readProductItemsFromExcel(Part filePart) {
+        List<ProductItemDTO> importItems = new ArrayList<>();
         // if not have file upload -> return
         if (filePart == null || filePart.getSize() == 0) {
             return null;
@@ -115,11 +113,11 @@ public class InventoryService {
                     // get serial
                     String serial = serialCell.getStringCellValue().trim();
 
-                    // get price
+                    // get price of import product item
                     double importPrice = priceCell.getNumericCellValue();
 
                     // init dto
-                    ImportProductItemDTO dto = new ImportProductItemDTO();
+                    ProductItemDTO dto = new ProductItemDTO();
                     dto.setProductId(productId);
                     dto.setProductName(productName);
                     dto.setSerial(serial);

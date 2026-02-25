@@ -1,6 +1,6 @@
 package com.example.controller.audit;
 
-import com.example.dto.ImportProductItemDTO;
+import com.example.dto.ProductItemDTO;
 import com.example.model.*;
 import com.example.service.*;
 import com.example.util.UserConstant;
