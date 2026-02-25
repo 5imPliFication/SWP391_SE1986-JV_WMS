@@ -51,9 +51,6 @@
                         <thead class="table-primary text-center">
                             <tr>
                                 <th>Product</th>
-                                <th>Product Name</th>
-                                <th>Brand</th>
-                                <th>Category</th>
                                 <th>Qty</th>
                                 <th >Action</th>
                             </tr>
@@ -140,35 +137,11 @@
                 row.innerHTML = `
         <td>
             <select name="productId[]" onchange="onProductChange(this)">
-                <option value="">-- New Product --</option>
             <c:forEach var="p" items="${productName}">
                     <option value="${p.id}">${p.name}</option>
             </c:forEach>
             </select>
         </td>
-
-        <td>
-            <input type="text" name="productName[]" class="new-product-field">
-        </td>
-
-        <td>
-            <select name="brandId[]" class="new-product-field">
-                <option value="">-- Select Brand --</option>
-            <c:forEach var="b" items="${BrandName}">
-                    <option value="${b.name}">${b.name}</option>
-            </c:forEach>
-            </select>
-        </td>
-
-        <td>
-            <select name="categoryId[]" class="new-product-field">
-                <option value="">-- Select Category --</option>
-            <c:forEach var="c" items="${CategoryName}">
-                    <option value="${c.name}">${c.name}</option>
-            </c:forEach>
-            </select>
-        </td>
-
         <td>
             <input type="number" name="quantity[]" min="1" required>
         </td>

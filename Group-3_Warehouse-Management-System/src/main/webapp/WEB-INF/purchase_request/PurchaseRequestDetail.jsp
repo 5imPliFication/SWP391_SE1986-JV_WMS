@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html>
@@ -12,6 +13,7 @@
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
         <c:set var="isManager" value="${user.role.name eq 'Manager'}"/>
+        <c:set var="isWarehouse" value="${user.role.name eq 'Warehouse'}"/>
         <c:set var="isPending" value="${prList.status eq 'PENDING'}"/>
 
         <main class="main-content container mt-4 w-auto" >
@@ -94,6 +96,15 @@
                         <input type="hidden" name="id" value="${prList.id}">
                         <input type="hidden" name="action" value="cancel">
                         <button class="btn btn-danger">❌ Cancel</button>
+                    </form>
+                </c:if>
+                <c:if test="${isWarehouse}">
+                    <form method="post"
+                          action="${pageContext.request.contextPath}/purchase-request/detail"
+                          onsubmit="return confirm('Complete this purchase request?')">
+                        <input type="hidden" name="id" value="${prList.id}">
+                        <input type="hidden" name="action" value="complete">
+                        <button class="btn btn-warning">Complete</button>
                     </form>
                 </c:if>
 
