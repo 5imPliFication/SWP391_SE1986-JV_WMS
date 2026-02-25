@@ -47,6 +47,9 @@
     <%--Table of audit item--%>
     <form method="post" action="${pageContext.request.contextPath}/inventory-audits/perform">
         <input type="hidden" name="inventoryAuditId" value="${inventoryAudit.id}">
+        <input type="hidden" name="pageNo" value="${param.pageNo}">
+        <input type="hidden" name="auditCode" value="${param.auditCode}">
+        <input type="hidden" name="status" value="${param.status}">
 
         <table>
             <thead>
