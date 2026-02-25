@@ -18,6 +18,9 @@ public class PermissionChecker {
         urlPermissionMap.put("/create-role", "CREATE_ROLE");
         urlPermissionMap.put("/edit-role", "UPDATE_ROLE");
         urlPermissionMap.put("/role-delete", "UPDATE_ROLE");
+
+        // --- QUẢN LÝ PASSWORD RESET REQUEST ---
+        urlPermissionMap.put("/admin/password-reset", "READ_PASSWORD_RESET_REQUEST");
     }
 
     public static String getRequiredPermission(String url) {

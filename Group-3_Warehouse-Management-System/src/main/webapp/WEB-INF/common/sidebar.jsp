@@ -96,7 +96,7 @@
             <c:if test="${sessionScope.user != null
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
-                          and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
+                          and fn:contains(sessionScope.userPermissions, 'READ_PASSWORD_RESET_REQUEST')}">
                   <li>
                       <a href="${pageContext.request.contextPath}/admin/password-reset"
                          class="<%= (uri.contains("admin/password-reset")) ? "active" : "" %>">
