@@ -136,17 +136,17 @@
                 const row = document.createElement("tr");
                 row.innerHTML = `
         <td>
-            <select name="productId[]" onchange="onProductChange(this)">
+            <select name="productId[]" onchange="onProductChange(this)" class="form-control">
             <c:forEach var="p" items="${productName}">
                     <option value="${p.id}">${p.name}</option>
             </c:forEach>
             </select>
         </td>
         <td>
-            <input type="number" name="quantity[]" min="1" required>
+            <input class="form-control" type="number" name="quantity[]" min="1" required>
         </td>
 
-        <td>
+        <td class="text-center">
           <button type="button" onclick="removeRow(this)"
         class="btn btn-outline-danger btn-sm">
     ❌

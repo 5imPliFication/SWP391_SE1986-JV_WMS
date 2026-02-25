@@ -44,9 +44,6 @@
                             <thead class="table-primary text-center sticky-top">
                                 <tr>
                                     <th>Product</th>
-                                    <th>Product Name</th>
-                                    <th>Brand</th>
-                                    <th>Category</th>
                                     <th>Qty</th>
                                     <th>Action</th>
                                 </tr>
@@ -69,46 +66,15 @@
                                             </select>
                                         </td>
 
-                                        <td>
-                                            <input type="text"
-                                                   name="productName[]"
-                                                   class="form-control product-name"
-                                                   value="${i.productName}"
-                                                   <c:if test="${not empty i.productId}">readonly</c:if>>
-                                            </td>
 
-                                            <td>
-                                                <select name="brandId[]"
-                                                        class="form-select brand"
-                                                <c:if test="${not empty i.productId}">disabled</c:if>>
-                                                    <option value="">-- Select Brand --</option>
-                                                <c:forEach var="b" items="${BrandName}">
-                                                    <option value="${b.name}"
-                                                            <c:if test="${b.name == i.brandName}">selected</c:if>>
-                                                        ${b.name}
-                                                    </option>
-                                                </c:forEach>
-                                            </select>
-                                        </td>
 
-                                        <td>
-                                            <select name="categoryId[]"
-                                                    class="form-select category"
-                                                    <c:if test="${not empty i.productId}">disabled</c:if>>
-                                                        <option value="">-- Select Category --</option>
-                                                    <c:forEach var="c" items="${CategoryName}">
-                                                        <option value="${c.name}"
-                                                                <c:if test="${c.name == i.categoryName}">selected</c:if>>
-                                                            ${c.name}
-                                                        </option>
-                                                    </c:forEach>
-                                            </select>
-                                        </td>
+
+
 
                                         <td>
                                             <input type="number"
                                                    name="quantity[]"
-                                                   class="form-control text-center"
+                                                   class="form-control "
                                                    min="1"
                                                    value="${i.quantity}">
                                         </td>
@@ -188,31 +154,8 @@
             </td>
 
             <td>
-                <input type="text" name="productName[]"
-                       class="form-control product-name">
-            </td>
-
-            <td>
-                <select name="brandId[]" class="form-select brand">
-                    <option value="">-- Select Brand --</option>
-    <c:forEach var="b" items="${BrandName}">
-                    <option value="${b.name}">${b.name}</option>
-    </c:forEach>
-                </select>
-            </td>
-
-            <td>
-                <select name="categoryId[]" class="form-select category">
-                    <option value="">-- Select Category --</option>
-    <c:forEach var="c" items="${CategoryName}">
-                    <option value="${c.name}">${c.name}</option>
-    </c:forEach>
-                </select>
-            </td>
-
-            <td>
                 <input type="number" name="quantity[]" min="1"
-                       class="form-control text-center">
+                       class="form-control ">
             </td>
 
             <td class="text-center">
