@@ -139,15 +139,21 @@ public class PurchaseRequestService {
         }
     }
 
-    public void approve(Long id) {
-        if (!p.updateStatus(id, "APPROVED")) {
+    public void approve(Long id, Long mID) {
+        if (!p.updateStatusByManager(id, "APPROVED", mID)) {
             throw new RuntimeException("Approve failed");
         }
     }
 
-    public void reject(Long id) {
-        if (!p.updateStatus(id, "REJECTED")) {
+    public void reject(Long id, Long mID) {
+        if (!p.updateStatusByManager(id, "REJECTED", mID)) {
             throw new RuntimeException("Reject failed");
+        }
+    }
+
+    public void complete(Long id) {
+        if (!p.updateStatus(id, "COMPLETED")) {
+            throw new RuntimeException("complete failed");
         }
     }
 

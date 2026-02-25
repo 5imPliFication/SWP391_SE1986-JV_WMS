@@ -54,11 +54,7 @@ public class PurchaseRequestDAO {
 
             // 2. Insert items
             for (PurchaseRequestItem item : items) {
-                if (item.getProductId() != null) {
-                    insertExistingProduct(conn, purchaseRequestId, item);
-                } else {
-                    insertNewProductProposal(conn, purchaseRequestId, item);
-                }
+                insertExistingProduct(conn, purchaseRequestId, item);
             }
 
             conn.commit();
@@ -88,28 +84,6 @@ public class PurchaseRequestDAO {
         ps.setLong(1, prId);
         ps.setLong(2, item.getProductId());
         ps.setLong(3, item.getQuantity());
-        ps.executeUpdate();
-    }
-
-    private void insertNewProductProposal(
-            Connection conn,
-            long prId,
-            PurchaseRequestItem item
-    ) throws SQLException {
-
-        String sql = """
-            INSERT INTO purchase_request_items
-            (purchase_request_id, product_name, brand_name,
-             category_name, quantity)
-            VALUES (?, ?, ?, ?, ?)
-        """;
-
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setLong(1, prId);
-        ps.setString(2, item.getProductName());
-        ps.setString(3, item.getBrandName());
-        ps.setString(4, item.getCategoryName());
-        ps.setLong(5, item.getQuantity());
         ps.executeUpdate();
     }
 
@@ -144,7 +118,7 @@ public class PurchaseRequestDAO {
         }
 
         if ("WAREHOUSE".equalsIgnoreCase(role)) {
-            sql.append(" AND pr.status IN ('APPROVED', 'COMPLETED')");
+            sql.append(" AND pr.status IN ('APPROVED')");
         }
 
         /* ===== REQUEST CODE ===== */
@@ -390,27 +364,14 @@ public class PurchaseRequestDAO {
         List<PurchaseRequestItem> items = new ArrayList<>();
 
         String sql = """
-        SELECT
+      SELECT
             pri.product_id,
-
-            CASE
-                WHEN pri.product_id IS NOT NULL THEN p.name
-                ELSE pri.product_name
-            END AS product_name,
-
-            CASE
-                WHEN pri.product_id IS NOT NULL THEN b.name
-                ELSE pri.brand_name
-            END AS brand_name,
-
-            CASE
-                WHEN pri.product_id IS NOT NULL THEN c.name
-                ELSE pri.category_name
-            END AS category_name,
-
-            pri.quantity
+            pri.quantity,
+            p.name AS product_name,
+            b.name AS brand_name,
+            c.name AS category_name
         FROM purchase_request_items pri
-        LEFT JOIN products p ON pri.product_id = p.id
+        JOIN products p ON pri.product_id = p.id
         LEFT JOIN brands b ON p.brand_id = b.id
         LEFT JOIN categories c ON p.category_id = c.id
         WHERE pri.purchase_request_id = ?
@@ -445,13 +406,31 @@ public class PurchaseRequestDAO {
         return items;
     }
 
-    public boolean updateStatus(Long prId, String status) {
+    // Dành cho MANAGER
+    public boolean updateStatusByManager(Long prId, String status, Long managerId) {
+        String sql = """
+        UPDATE purchase_requests
+        SET status = ?, approved_by = ?
+        WHERE id = ?
+    """;
 
+        try (Connection con = DBConfig.getDataSource().getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ps.setLong(2, managerId);
+            ps.setLong(3, prId);
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean updateStatus(Long prId, String status) {
         String sql = """
         UPDATE purchase_requests
         SET status = ?
         WHERE id = ?
-          AND status = 'PENDING'
     """;
 
         try (Connection con = DBConfig.getDataSource().getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -460,7 +439,6 @@ public class PurchaseRequestDAO {
             ps.setLong(2, prId);
 
             return ps.executeUpdate() > 0;
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

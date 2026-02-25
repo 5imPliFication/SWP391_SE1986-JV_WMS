@@ -5,7 +5,7 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html>
@@ -21,14 +21,17 @@
 
 
             <div class="card-body p-2">
-                <div class="d-flex mb-3">
-                    <c:if test="${!showCreatedBy}">
-                        <a href="${pageContext.request.contextPath}/purchase-request/create"
-                           class="btn btn-success">
-                            + Create Purchase Request
-                        </a>
-                    </c:if>
-                </div>
+                <c:if test="${sessionScope.user != null
+                              and sessionScope.user.role != null
+                              and sessionScope.user.role.active
+                              and fn:contains(sessionScope.userPermissions, 'CREATE_PURCHASE_REQUEST')}">
+                      <div class="d-flex mb-3">
+                          <a href="${pageContext.request.contextPath}/purchase-request/create"
+                             class="btn btn-success">
+                              + Create Purchase Request
+                          </a>
+                      </div>
+                </c:if>
                 <form method="get"
                       action="${pageContext.request.contextPath}/purchase-request/list"
                       class="row g-3 mb-3 align-items-end">
