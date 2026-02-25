@@ -23,10 +23,12 @@ public class SummaryReportDAO {
 
             // 1. Total imports (sum of actual quantity from goods_receipts)
             StringBuilder importSql = new StringBuilder(
-                "SELECT COALESCE(SUM(total_actual_quantity), 0) AS total FROM goods_receipts WHERE 1=1"
+                "SELECT COALESCE(SUM(quantity),0) AS total\n" +
+                        "FROM stock_movements\n" +
+                        "WHERE type = 'IMPORT'"
             );
-            if (fromDate != null) importSql.append(" AND DATE(received_at) >= ?");
-            if (toDate != null)   importSql.append(" AND DATE(received_at) <= ?");
+            if (fromDate != null) importSql.append(" AND DATE(created_at) >= ?");
+            if (toDate != null)   importSql.append(" AND DATE(created_at) <= ?");
 
             try (PreparedStatement ps = conn.prepareStatement(importSql.toString())) {
                 int idx = 1;
@@ -40,10 +42,12 @@ public class SummaryReportDAO {
 
             // 2. Total exports (count of orders excluding DRAFT)
             StringBuilder exportSql = new StringBuilder(
-                "SELECT COUNT(*) AS total FROM orders WHERE status NOT IN ('DRAFT')"
+                "SELECT COALESCE(SUM(quantity),0) AS total\n" +
+                        "FROM stock_movements\n" +
+                        "WHERE type = 'EXPORT'"
             );
-            if (fromDate != null) exportSql.append(" AND DATE(order_date) >= ?");
-            if (toDate != null)   exportSql.append(" AND DATE(order_date) <= ?");
+            if (fromDate != null) exportSql.append(" AND DATE(created_at) >= ?");
+            if (toDate != null)   exportSql.append(" AND DATE(created_at) <= ?");
 
             try (PreparedStatement ps = conn.prepareStatement(exportSql.toString())) {
                 int idx = 1;
@@ -57,7 +61,13 @@ public class SummaryReportDAO {
 
             // 3. Current inventory (sum of total_quantity from active products)
             // Inventory is always current snapshot, not filtered by date
-            String inventorySql = "SELECT COALESCE(SUM(total_quantity), 0) AS total FROM products WHERE is_active = true";
+            String inventorySql = "SELECT COALESCE(SUM(\n" +
+                    "    CASE \n" +
+                    "        WHEN type = 'IMPORT' THEN quantity\n" +
+                    "        WHEN type = 'EXPORT' THEN -quantity\n" +
+                    "    END\n" +
+                    "),0) AS total\n" +
+                    "FROM stock_movements";
             try (PreparedStatement ps = conn.prepareStatement(inventorySql);
                  ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
