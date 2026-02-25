@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExportOrderDTO {
+public class OrderDTO {
     private Long id;
     private String code;
     private Timestamp exportDate;
