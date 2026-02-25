@@ -2,9 +2,9 @@ package com.example.dao;
 
 import com.example.config.DBConfig;
 import com.example.model.*;
-import com.example.util.UserConstant;
+import com.example.util.AppConstants;
 import com.example.dto.ProductDTO;
-import java.math.BigDecimal;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -72,8 +72,8 @@ public class ProductDAO {
                 ps.setBoolean(index++, isActive);
             }
 
-            ps.setInt(index++, UserConstant.PAGE_SIZE);
-            ps.setInt(index++, (pageNo - 1) * UserConstant.PAGE_SIZE);
+            ps.setInt(index++, AppConstants.PAGE_SIZE);
+            ps.setInt(index++, (pageNo - 1) * AppConstants.PAGE_SIZE);
 
             ResultSet rs = ps.executeQuery();
 
@@ -299,9 +299,9 @@ public class ProductDAO {
                 ps.setBoolean(index++, isActive);
             }
             // set value for pagination of SQL
-            ps.setInt(index++, UserConstant.PAGE_SIZE);
+            ps.setInt(index++, AppConstants.PAGE_SIZE);
 
-            int offset = (pageNo - 1) * UserConstant.PAGE_SIZE;
+            int offset = (pageNo - 1) * AppConstants.PAGE_SIZE;
             ps.setInt(index++, offset);
 
             ResultSet rs = ps.executeQuery();

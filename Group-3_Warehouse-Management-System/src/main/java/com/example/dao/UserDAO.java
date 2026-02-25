@@ -4,13 +4,12 @@ import com.example.config.DBConfig;
 import com.example.model.Permission;
 import com.example.model.Role;
 import com.example.model.User;
-import com.example.util.UserConstant;
+import com.example.util.AppConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -319,8 +318,8 @@ public class UserDAO {
             }
 
             // set value for pagination of SQL
-            ps.setInt(index++, UserConstant.PAGE_SIZE);
-            int offset = (pageNo - 1)* UserConstant.PAGE_SIZE;
+            ps.setInt(index++, AppConstants.PAGE_SIZE);
+            int offset = (pageNo - 1)* AppConstants.PAGE_SIZE;
             ps.setInt(index++, offset);
 
             ResultSet rs = ps.executeQuery();

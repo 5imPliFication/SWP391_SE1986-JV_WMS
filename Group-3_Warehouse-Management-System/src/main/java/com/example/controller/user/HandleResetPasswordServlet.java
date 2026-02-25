@@ -1,17 +1,14 @@
 package com.example.controller.user;
 
 import com.example.model.PasswordReset;
-import com.example.model.User;
 import com.example.service.PasswordResetService;
 import com.example.service.UserService;
-import com.example.util.EmailUtil;
-import com.example.util.UserConstant;
+import com.example.util.AppConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,7 +36,7 @@ public class HandleResetPasswordServlet extends HttpServlet {
         int totalPasswordResetRequest = passwordResetService.getTotalRequest(searchName, status);
         System.out.println("Total Password Reset Request: " + totalPasswordResetRequest);
         // Count total pages
-        int totalPages = (int)Math.ceil((double) totalPasswordResetRequest/ UserConstant.PAGE_SIZE);
+        int totalPages = (int)Math.ceil((double) totalPasswordResetRequest/ AppConstants.PAGE_SIZE);
         System.out.println("Total pages: " + totalPages);
 
         if (request.getParameter("pageNo") != null && !request.getParameter("pageNo").isEmpty()) {
