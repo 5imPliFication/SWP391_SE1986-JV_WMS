@@ -146,7 +146,7 @@
                           and fn:contains(sessionScope.userPermissions, 'EXPORT_PRODUCT')}">
                   <li>
                       <a href="${pageContext.request.contextPath}/inventory/export"
-                         class="<%= (uri.contains("export-products")) ? "active" : "" %>">
+                         class="<%= (uri.contains("inventory/export")) ? "active" : "" %>">
                           <span>Export Product</span>
                       </a>
                   </li>
@@ -168,12 +168,12 @@
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
                           and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
-                  <li>
-                      <a href="${pageContext.request.contextPath}/inventory/import/history"
-                         class="<%= (uri.contains("import-history")) ? "active" : "" %>">
-                          <span>Import History</span>
-                      </a>
-                  </li>
+                <li>
+                    <a href="${pageContext.request.contextPath}/inventory/import/history"
+                       class="<%= (uri.contains("inventory/import/history")) ? "active" : "" %>">
+                        <span>Import History</span>
+                    </a>
+                </li>
             </c:if>
 
             <%--  out of stock--%>

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.sql.SQLException;
 import java.util.*;
 
 public class OrderService {
@@ -360,5 +361,9 @@ public class OrderService {
             throw new IllegalArgumentException("Order not found");
         }
         return orders;
+    }
+
+    public boolean updateStatusOrder(String orderCode, String status) {
+        return orderDAO.updateStatus(orderCode, status);
     }
 }

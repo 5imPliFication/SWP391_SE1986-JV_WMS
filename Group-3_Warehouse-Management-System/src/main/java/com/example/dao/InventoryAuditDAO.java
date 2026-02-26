@@ -3,7 +3,7 @@ package com.example.dao;
 import com.example.config.DBConfig;
 import com.example.enums.InventoryAuditStatus;
 import com.example.model.*;
-import com.example.util.UserConstant;
+import com.example.util.AppConstants;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -50,8 +50,8 @@ public class InventoryAuditDAO {
                 ps.setString(index++, status);
             }
 
-            ps.setInt(index++, UserConstant.PAGE_SIZE);
-            ps.setInt(index++, (pageNo - 1) * UserConstant.PAGE_SIZE);
+            ps.setInt(index++, AppConstants.PAGE_SIZE);
+            ps.setInt(index++, (pageNo - 1) * AppConstants.PAGE_SIZE);
 
             ResultSet rs = ps.executeQuery();
 
