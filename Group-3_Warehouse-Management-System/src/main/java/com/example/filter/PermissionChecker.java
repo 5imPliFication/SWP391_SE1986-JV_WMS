@@ -28,6 +28,11 @@ public class PermissionChecker {
         urlPermissionMap.put("/products/update", "UPDATE_PRODUCT");
         urlPermissionMap.put("/products/items/update", "UPDATE_PRODUCT_ITEM");
 
+        // --- QUẢN LÝ KIỂM KÊ ---
+        urlPermissionMap.put("/inventory-audits", "READ_AUDIT");
+        urlPermissionMap.put("/inventory-audits/add", "CREATE_AUDIT");
+        urlPermissionMap.put("/inventory-audits/perform", "PERFORM_AUDIT");
+
     }
 
     public static String getRequiredPermission(String url) {

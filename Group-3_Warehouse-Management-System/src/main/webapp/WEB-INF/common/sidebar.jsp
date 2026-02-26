@@ -199,7 +199,7 @@
             <c:if test="${sessionScope.user != null
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
-                          and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
+                          and fn:contains(sessionScope.userPermissions, 'READ_AUDIT')}">
                 <li>
                     <a href="${pageContext.request.contextPath}/inventory-audits"
                        class="<%= (uri.contains("inventory-audits")) ? "active" : "" %>">

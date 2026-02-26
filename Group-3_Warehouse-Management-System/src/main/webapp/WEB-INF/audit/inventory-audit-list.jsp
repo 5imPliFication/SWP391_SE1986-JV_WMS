@@ -37,9 +37,16 @@
     <h2>Inventory Audit List</h2>
 
     <%--create new audit--%>
-    <a href="${pageContext.request.contextPath}/inventory-audits/add">
-        <button class="btn btn-primary mb-3">Create new audit</button>
-    </a>
+    <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'CREATE_AUDIT')}">
+        <a href="${pageContext.request.contextPath}/inventory-audits/add">
+            <button class="btn btn-primary mb-3">Create new audit</button>
+        </a>
+    </c:if>
+
+
     <br>
     <br>
     <%--form submit for search and sort--%>
@@ -99,26 +106,39 @@
                 <td>
                     <c:if test="${i.status == 'PENDING'}">
                         <div class="d-flex justify-content-around">
-                            <form action="${pageContext.request.contextPath}/inventory-audits" method="post">
-                                <input type="hidden" name="inventoryAuditId" value="${i.id}">
-                                <input type="hidden" name="pageNo" value="${pageNo}">
-                                <input type="hidden" name="auditCode" value="${param.auditCode}">
-                                <input type="hidden" name="status" value="${param.status}">
-                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline"
-                                        style="text-decoration: none; color: red;">
-                                    CANCEL
-                                </button>
-                            </form>
-                            <form action="${pageContext.request.contextPath}/inventory-audits/perform" method="get">
-                                <input type="hidden" name="inventoryAuditId" value="${i.id}">
-                                <input type="hidden" name="pageNo" value="${pageNo}">
-                                <input type="hidden" name="auditCode" value="${param.auditCode}">
-                                <input type="hidden" name="status" value="${param.status}">
-                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline"
-                                        style="text-decoration: none; color: blue;">
-                                    PERFORM
-                                </button>
-                            </form>
+
+                            <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'CANCEL_AUDIT')}">
+                                <form action="${pageContext.request.contextPath}/inventory-audits" method="post">
+                                    <input type="hidden" name="inventoryAuditId" value="${i.id}">
+                                    <input type="hidden" name="pageNo" value="${pageNo}">
+                                    <input type="hidden" name="auditCode" value="${param.auditCode}">
+                                    <input type="hidden" name="status" value="${param.status}">
+                                    <button type="submit" class="btn btn-link p-0 m-0 align-baseline"
+                                            style="text-decoration: none; color: red;">
+                                        CANCEL
+                                    </button>
+                                </form>
+                            </c:if>
+
+                            <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'PERFORM_AUDIT')}">
+                                <form action="${pageContext.request.contextPath}/inventory-audits/perform" method="get">
+                                    <input type="hidden" name="inventoryAuditId" value="${i.id}">
+                                    <input type="hidden" name="pageNo" value="${pageNo}">
+                                    <input type="hidden" name="auditCode" value="${param.auditCode}">
+                                    <input type="hidden" name="status" value="${param.status}">
+                                    <button type="submit" class="btn btn-link p-0 m-0 align-baseline"
+                                            style="text-decoration: none; color: blue;">
+                                        PERFORM
+                                    </button>
+                                </form>
+                            </c:if>
+
                         </div>
                     </c:if>
                 </td>
