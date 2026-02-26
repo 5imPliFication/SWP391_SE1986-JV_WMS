@@ -2,9 +2,9 @@ package com.example.dao;
 
 import com.example.config.DBConfig;
 import com.example.model.*;
-import com.example.util.UserConstant;
+import com.example.util.AppConstants;
 import com.example.dto.ProductDTO;
-import java.math.BigDecimal;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -72,8 +72,8 @@ public class ProductDAO {
                 ps.setBoolean(index++, isActive);
             }
 
-            ps.setInt(index++, UserConstant.PAGE_SIZE);
-            ps.setInt(index++, (pageNo - 1) * UserConstant.PAGE_SIZE);
+            ps.setInt(index++, AppConstants.PAGE_SIZE);
+            ps.setInt(index++, (pageNo - 1) * AppConstants.PAGE_SIZE);
 
             ResultSet rs = ps.executeQuery();
 
@@ -299,9 +299,9 @@ public class ProductDAO {
                 ps.setBoolean(index++, isActive);
             }
             // set value for pagination of SQL
-            ps.setInt(index++, UserConstant.PAGE_SIZE);
+            ps.setInt(index++, AppConstants.PAGE_SIZE);
 
-            int offset = (pageNo - 1) * UserConstant.PAGE_SIZE;
+            int offset = (pageNo - 1) * AppConstants.PAGE_SIZE;
             ps.setInt(index++, offset);
 
             ResultSet rs = ps.executeQuery();
@@ -423,17 +423,27 @@ public class ProductDAO {
         }
     }
 
-    public List<ProductDTO> getLowStockProducts() {
+    public List<ProductDTO> getLowStockProducts(String name, int offset) {
         List<ProductDTO> products = new ArrayList<>();
-        String sql = """
-                    SELECT p.id, p.name, p.total_quantity
-                    FROM products p
-                    WHERE p.total_quantity <= 20 AND p.is_active = 1
-                    ORDER BY p.total_quantity ASC
-                """;
+        StringBuilder sql = new StringBuilder("select * from products where total_quantity < 10 ");
 
+        if(name != null && !name.trim().isEmpty()) {
+            sql.append(" and name like ? ");
+        }
+
+        // pagination
+        sql.append(" ORDER BY total_quantity asc LIMIT ? OFFSET ?");
+
+        int index = 1;
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            // set value
+            if(name != null && !name.trim().isEmpty()) {
+                ps.setString(index++, "%" + name + "%");
+            }
+
+            ps.setInt(index++, AppConstants.PAGE_SIZE);
+            ps.setInt(index, offset);
 
             ResultSet rs = ps.executeQuery();
 
@@ -448,5 +458,29 @@ public class ProductDAO {
             throw new RuntimeException(e);
         }
         return products;
+    }
+
+    public int countTotalProducts(String name) {
+        StringBuilder sql = new StringBuilder("select count(*) from products where total_quantity < 10 ");
+
+        if(name != null && !name.trim().isEmpty()) {
+            sql.append(" and name like ? ");
+        }
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            // set value
+            if(name != null && !name.trim().isEmpty()) {
+                ps.setString(1, "%" + name + "%");
+            }
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
     }
 }

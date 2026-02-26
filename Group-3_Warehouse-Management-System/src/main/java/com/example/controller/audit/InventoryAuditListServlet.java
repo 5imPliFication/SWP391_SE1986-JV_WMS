@@ -1,14 +1,8 @@
 package com.example.controller.audit;
 
-import com.example.model.Brand;
-import com.example.model.Category;
 import com.example.model.InventoryAudit;
-import com.example.model.Product;
-import com.example.service.BrandService;
-import com.example.service.CategoryService;
 import com.example.service.InventoryAuditService;
-import com.example.service.ProductService;
-import com.example.util.UserConstant;
+import com.example.util.AppConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -38,7 +32,7 @@ public class InventoryAuditListServlet extends HttpServlet {
         // Get total record
         int totalInventoryAudits = inventoryAuditService.getTotalInventoryAudits(auditCode, status);
         // Count total pages
-        int totalPages = (int) Math.ceil((double) totalInventoryAudits / UserConstant.PAGE_SIZE);
+        int totalPages = (int) Math.ceil((double) totalInventoryAudits / AppConstants.PAGE_SIZE);
 
         if (request.getParameter("pageNo") != null && !request.getParameter("pageNo").isEmpty()) {
             pageNo = Integer.parseInt(request.getParameter("pageNo"));
