@@ -15,6 +15,17 @@
 
 <main class="main-content">
     <h2 class="mb-4 text-danger">Out Of Stock Alert</h2>
+
+    <div class="d-flex align-items-center mb-3">
+        <%-- search product by name --%>
+        <form class="form-inline" action="${pageContext.request.contextPath}" method="get">
+            <input type="text" name="name" class="form-control mr-2"
+                   placeholder="Search name product" value="${param.name}">
+            <button type="submit" class="btn btn-primary mr-2" name="action" value="search">
+                Search
+            </button>
+        </form>
+    </div>
     <div class="container mt-4">
         <table class="table table-bordered table-hover">
             <thead class="table-dark">

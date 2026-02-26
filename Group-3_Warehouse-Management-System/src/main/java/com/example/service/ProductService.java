@@ -82,7 +82,7 @@ public class ProductService {
         return productDAO.updateItem(productItem);
     }
 
-    public List<ProductDTO> getOutOfStockAlertProducts() {
-        return productDAO.getLowStockProducts();
+    public List<ProductDTO> getOutOfStockAlertProducts(String name) {
+        return productDAO.getLowStockProducts(name);
     }
 }

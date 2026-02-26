@@ -423,11 +423,20 @@ public class ProductDAO {
         }
     }
 
-    public List<ProductDTO> getLowStockProducts() {
+    public List<ProductDTO> getLowStockProducts(String name) {
         List<ProductDTO> products = new ArrayList<>();
-        String sql = "select * from products where total_quantity < 10 order by total_quantity asc";
+        StringBuilder sql = new StringBuilder("select * from products where total_quantity < 10 ");
+
+        if(name != null && !name.trim().isEmpty()) {
+            sql.append(" and name like ? ");
+        }
+
+        sql.append(" order by total_quantity asc");
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            if(name != null && !name.trim().isEmpty()) {
+                ps.setString(1, "%" + name + "%");
+            }
 
             ResultSet rs = ps.executeQuery();
 

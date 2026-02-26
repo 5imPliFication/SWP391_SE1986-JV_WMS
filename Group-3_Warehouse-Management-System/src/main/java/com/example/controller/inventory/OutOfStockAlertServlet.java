@@ -20,9 +20,25 @@ public class OutOfStockAlertServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        List<ProductDTO> productList = productService.getOutOfStockAlertProducts();
-        request.setAttribute("products", productList);
+        // get action
+        String action = request.getParameter("action");
+
+        if (action == null) {
+            action = "search";
+        }
+
+        if("search".equals(action)) {
+            handleSearch(request);
+        }
 
         request.getRequestDispatcher("/WEB-INF/inventory/out-of-stock-alert.jsp").forward(request, response);
+    }
+
+    private void handleSearch(HttpServletRequest request) {
+        String name = request.getParameter("name");
+        List<ProductDTO> productList = productService.getOutOfStockAlertProducts(name);
+
+        request.setAttribute("name", name);
+        request.setAttribute("products", productList);
     }
 }
