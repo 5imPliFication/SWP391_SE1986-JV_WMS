@@ -117,7 +117,7 @@
             <c:if test="${sessionScope.user != null
                           and sessionScope.user.role != null
                           and sessionScope.user.role.active
-                          and fn:contains(sessionScope.userPermissions, 'READ_PRODUCT')}">
+                          and fn:contains(sessionScope.userPermissions, 'READ_USER')}">
                   <li>
                       <a href="${pageContext.request.contextPath}/products"
                          class="<%= (uri.contains("products")) ? "active" : "" %>">
