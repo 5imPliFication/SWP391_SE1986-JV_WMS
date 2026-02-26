@@ -33,7 +33,7 @@ public class InventoryAuditDAO {
             sql.append(" AND i.audit_code LIKE ? ");
         }
         if (status != null && !status.trim().isEmpty()) {
-            sql.append(" AND b.name = ? ");
+            sql.append(" AND i.status = ? ");
         }
 
         sql.append(" ORDER BY i.created_at DESC ");
