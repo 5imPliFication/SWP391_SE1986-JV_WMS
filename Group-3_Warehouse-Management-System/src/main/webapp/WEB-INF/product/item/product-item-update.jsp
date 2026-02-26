@@ -57,7 +57,7 @@
                             <input type="number"
                                    name="productItemCurrentPrice"
                                    class="form-control"
-                                   value="${productItem.currentPrice}"
+                                   value="<fmt:formatNumber value='${productItem.currentPrice}' type='number' groupingUsed='true' /> đ"
                                    placeholder="Input current price"
                                    required>
                         </div>
