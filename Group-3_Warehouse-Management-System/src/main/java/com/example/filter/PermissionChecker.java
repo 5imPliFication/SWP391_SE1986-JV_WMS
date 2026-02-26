@@ -18,6 +18,21 @@ public class PermissionChecker {
         urlPermissionMap.put("/create-role", "CREATE_ROLE");
         urlPermissionMap.put("/edit-role", "UPDATE_ROLE");
         urlPermissionMap.put("/role-delete", "UPDATE_ROLE");
+
+        // --- QUẢN LÝ PASSWORD RESET REQUEST ---
+        urlPermissionMap.put("/admin/password-reset", "READ_PASSWORD_RESET_REQUEST");
+
+        /// --- QUẢN LÝ SẢN PHẨM ---
+        urlPermissionMap.put("/products", "READ_PRODUCT");
+        urlPermissionMap.put("/products/add", "CREATE_PRODUCT");
+        urlPermissionMap.put("/products/update", "UPDATE_PRODUCT");
+        urlPermissionMap.put("/products/items/update", "UPDATE_PRODUCT_ITEM");
+
+        // --- QUẢN LÝ KIỂM KÊ ---
+        urlPermissionMap.put("/inventory-audits", "READ_AUDIT");
+        urlPermissionMap.put("/inventory-audits/add", "CREATE_AUDIT");
+        urlPermissionMap.put("/inventory-audits/perform", "PERFORM_AUDIT");
+
     }
 
     public static String getRequiredPermission(String url) {
