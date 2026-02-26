@@ -21,7 +21,7 @@ public class OutOfStockAlertServlet extends HttpServlet {
             throws ServletException, IOException {
 
         List<ProductDTO> productList = productService.getOutOfStockAlertProducts();
-        request.setAttribute("productList", productList);
+        request.setAttribute("products", productList);
 
         request.getRequestDispatcher("/WEB-INF/inventory/out-of-stock-alert.jsp").forward(request, response);
     }

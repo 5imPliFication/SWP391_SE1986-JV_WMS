@@ -29,24 +29,21 @@
 
             <tbody>
             <c:choose>
-                <c:when test="${not empty productList}">
-                    <c:forEach var="product" items="${productList}" varStatus="loop">
+                <c:when test="${not empty products}">
+                    <c:forEach items="${products}" var="product" varStatus="loop">
                         <tr>
                             <td>${loop.index + 1}</td>
                             <td>${product.name}</td>
-                            <td>${product.stock}</td>
+                            <td>${product.totalQuantity}</td>
 
                             <td>
                                 <c:choose>
-                                    <c:when test="${product.stock == 0}">
+                                    <c:when test="${product.totalQuantity == 0}">
                                         <span class="badge bg-danger">Out of Stock</span>
                                     </c:when>
-                                    <c:when test="${product.stock <= 5}">
+                                    <c:when test="${product.totalQuantity <= 10}">
                                         <span class="badge bg-warning text-dark">Low Stock</span>
                                     </c:when>
-                                    <c:otherwise>
-                                        <span class="badge bg-success">In Stock</span>
-                                    </c:otherwise>
                                 </c:choose>
                             </td>
 

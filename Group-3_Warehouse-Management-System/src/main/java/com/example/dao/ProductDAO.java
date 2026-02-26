@@ -425,13 +425,7 @@ public class ProductDAO {
 
     public List<ProductDTO> getLowStockProducts() {
         List<ProductDTO> products = new ArrayList<>();
-        String sql = """
-                    SELECT p.id, p.name, p.total_quantity
-                    FROM products p
-                    WHERE p.total_quantity <= 20 AND p.is_active = 1
-                    ORDER BY p.total_quantity ASC
-                """;
-
+        String sql = "select * from products where total_quantity < 10 order by total_quantity asc";
         try (Connection conn = DBConfig.getDataSource().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
