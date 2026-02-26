@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,6 +30,14 @@ public class ExportProductItemServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            String message = (String) session.getAttribute("message");
+            if (message != null) {
+                request.setAttribute("message", message);
+                session.removeAttribute("message");
+            }
+        }
         if (action == null) {
             action = "search";
         }

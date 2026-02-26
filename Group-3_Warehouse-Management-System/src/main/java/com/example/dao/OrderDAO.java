@@ -625,4 +625,26 @@ public class OrderDAO {
             throw new RuntimeException("Failed to remove coupon from order", e);
         }
     }
+
+    public boolean updateStatus(String orderCode, String status) {
+
+        StringBuilder sql = new StringBuilder("update orders set status = ? where order_code = ?");
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            if (status != null && !status.trim().isEmpty()) {
+                ps.setString(1, status);
+            }
+
+            if(orderCode != null && !orderCode.trim().isEmpty()) {
+                ps.setString(2, orderCode);
+            }
+
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update order status", e);
+        }
+    }
 }

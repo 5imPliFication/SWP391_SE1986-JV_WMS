@@ -43,25 +43,24 @@
                        class="form-control form-control-sm">
             </div>
 
-                <%-- filter by status --%>
-                <div class="col-auto">
-                    <label>
-                        <select name="status" class="form-select">
-                            <%-- default --%>
-                            <option value="" ${empty status ? 'selected' : ''}>
-                                All Status
-                            </option>
+            <%-- filter by status --%>
+            <div class="col-auto">
+                <label>
+                    <select name="status" class="form-control">
+                        <option value="" ${empty status ? 'selected' : ''}>
+                            All Status
+                        </option>
 
-                            <option value="SUBMITTED" ${status == 'SUBMITTED' ? 'selected' : ''}>
-                                SUBMITTED
-                            </option>
+                        <option value="SUBMITTED" ${status == 'SUBMITTED' ? 'selected' : ''}>
+                            SUBMITTED
+                        </option>
 
-                            <option value="PROCESSING" ${status == 'PROCESSING' ? 'selected' : ''}>
-                                PROCESSING
-                            </option>
-                        </select>
-                    </label>
-                </div>
+                        <option value="PROCESSING" ${status == 'PROCESSING' ? 'selected' : ''}>
+                            PROCESSING
+                        </option>
+                    </select>
+                </label>
+            </div>
 
             <%--    button search--%>
             <button type="submit"
@@ -110,11 +109,33 @@
                                 ${order.customerName}
                         </td>
                         <td class="text-center align-middle">
-                            <button class="btn btn-sm
-                                ${order.status == 'SUMITTED' ? 'btn-warning' :
-                                order.status == 'PROCESSING' ? 'btn-success' : 'btn-secondary'}">
-                                    ${order.status}
-                            </button>
+                            <c:choose>
+                                <%-- submiteed -> processing --%>
+                                <c:when test="${order.status == 'SUBMITTED'}">
+                                    <form action="${pageContext.request.contextPath}/inventory/update-status"
+                                          method="post" style="display:inline;">
+                                        <input type="hidden" name="orderCode" value="${order.code}"/>
+                                        <input type="hidden" name="newStatus" value="PROCESSING"/>
+                                        <button type="submit" class="btn btn-sm btn-warning">
+                                                ${order.status}
+                                        </button>
+                                    </form>
+                                </c:when>
+
+                                <%-- processing -> completed --%>
+                                <c:when test="${order.status == 'PROCESSING'}">
+                                    <form action="${pageContext.request.contextPath}/inventory/update-status"
+                                          method="post" style="display:inline;">
+
+                                        <input type="hidden" name="orderCode" value="${order.code}"/>
+                                        <input type="hidden" name="newStatus" value="COMPLETED"/>
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                                ${order.status}
+                                        </button>
+                                    </form>
+                                </c:when>
+
+                            </c:choose>
                         </td>
                         <td class="text-center align-middle">
                             <a href="${pageContext.request.contextPath}/inventory/export?action=detail&id=${order.id}"
