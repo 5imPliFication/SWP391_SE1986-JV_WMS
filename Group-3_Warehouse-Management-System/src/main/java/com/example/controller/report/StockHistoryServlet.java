@@ -2,6 +2,7 @@ package com.example.controller.report;
 
 import com.example.dao.StockMovementDAO;
 import com.example.model.MovementType;
+import com.example.model.ReferenceType;
 import com.example.model.StockMovement;
 
 import jakarta.servlet.ServletException;
@@ -26,6 +27,8 @@ public class StockHistoryServlet extends HttpServlet {
         String from = request.getParameter("fromDate");
         String to = request.getParameter("toDate");
         String typeParam = request.getParameter("type");
+        String refTypeParam = request.getParameter("referenceType");
+        String pageParam = request.getParameter("page");
 
         LocalDate fromDate = (from != null && !from.isEmpty())
                 ? LocalDate.parse(from) : null;
@@ -37,12 +40,37 @@ public class StockHistoryServlet extends HttpServlet {
                 ? MovementType.valueOf(typeParam)
                 : null;
 
+        ReferenceType referenceType = (refTypeParam != null && !refTypeParam.isEmpty())
+                ? ReferenceType.valueOf(refTypeParam)
+                : null;
+
+        int page = 1;
+        if (pageParam != null && !pageParam.isEmpty()) {
+            try {
+                page = Integer.parseInt(pageParam);
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+
+        int limit = 50;
+        int offset = (page - 1) * limit;
+
+        int totalCount = dao.getTotalCount(fromDate, toDate, type, referenceType);
+        int totalPages = (int) Math.ceil((double) totalCount / limit);
+
         List<StockMovement> list =
-                dao.getStockHistory(fromDate, toDate, type);
+                dao.getStockHistory(fromDate, toDate, type, referenceType, limit, offset);
 
         request.setAttribute("list", list);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("fromDate", from);
+        request.setAttribute("toDate", to);
+        request.setAttribute("type", typeParam);
+        request.setAttribute("referenceType", refTypeParam);
 
-        request.getRequestDispatcher("/WEB-INF/views/stock-history.jsp")
+        request.getRequestDispatcher("/WEB-INF/manager/stock-history.jsp")
                 .forward(request, response);
     }
 }

@@ -13,7 +13,10 @@ public class StockMovementDAO {
     public List<StockMovement> getStockHistory(
             LocalDate fromDate,
             LocalDate toDate,
-            MovementType type) {
+            MovementType type,
+            ReferenceType referenceType,
+            int limit,
+            int offset) {
 
         List<StockMovement> list = new ArrayList<>();
 
@@ -32,7 +35,11 @@ public class StockMovementDAO {
         if (type != null)
             sql.append(" AND type = ?");
 
+        if (referenceType != null)
+            sql.append(" AND reference_type = ?");
+
         sql.append(" ORDER BY created_at DESC");
+        sql.append(" LIMIT ? OFFSET ?");
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -47,6 +54,12 @@ public class StockMovementDAO {
 
             if (type != null)
                 ps.setString(index++, type.name());
+
+            if (referenceType != null)
+                ps.setString(index++, referenceType.name());
+
+            ps.setInt(index++, limit);
+            ps.setInt(index++, offset);
 
             ResultSet rs = ps.executeQuery();
 
@@ -69,5 +82,51 @@ public class StockMovementDAO {
         }
 
         return list;
+    }
+
+    public int getTotalCount(LocalDate fromDate, LocalDate toDate, MovementType type, ReferenceType referenceType) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT COUNT(*)
+                FROM stock_movements
+                WHERE 1=1
+                """);
+
+        if (fromDate != null)
+            sql.append(" AND DATE(created_at) >= ?");
+
+        if (toDate != null)
+            sql.append(" AND DATE(created_at) <= ?");
+
+        if (type != null)
+            sql.append(" AND type = ?");
+
+        if (referenceType != null)
+            sql.append(" AND reference_type = ?");
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int index = 1;
+
+            if (fromDate != null)
+                ps.setDate(index++, Date.valueOf(fromDate));
+
+            if (toDate != null)
+                ps.setDate(index++, Date.valueOf(toDate));
+
+            if (type != null)
+                ps.setString(index++, type.name());
+
+            if (referenceType != null)
+                ps.setString(index++, referenceType.name());
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error counting stock history", e);
+        }
+        return 0;
     }
 }
