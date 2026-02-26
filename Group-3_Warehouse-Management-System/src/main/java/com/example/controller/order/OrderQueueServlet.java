@@ -39,14 +39,45 @@ public class OrderQueueServlet extends HttpServlet {
         }
 
         try {
-            // Get all orders for warehouse (not just user's orders)
-            List<Order> orders = orderService.getAllOrders();
+            // Get page number (default to 1)
+            int pageNo = 1;
+            String pageParam = req.getParameter("pageNo");
+            if (pageParam != null && !pageParam.isEmpty()) {
+                try {
+                    pageNo = Integer.parseInt(pageParam);
+                } catch (NumberFormatException e) {
+                    pageNo = 1;
+                }
+            }
+
+            // Items per page
+            int pageSize = 10;
+
+            // Get filters
+            String status = req.getParameter("status");
+            String searchCode = req.getParameter("searchCode");
+
+            // Get total count
+            OrderService orderService = new OrderService();
+            int totalOrders = orderService.countOrders(status, searchCode);
+
+            // Calculate total pages
+            int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
+
+            // Get paginated data
+            int offset = (pageNo - 1) * pageSize;
+            List<Order> orders = orderService.getOrders(status, searchCode, offset, pageSize);
+
+            // Set attributes
+            req.setAttribute("orders", orders);
+            req.setAttribute("pageNo", pageNo);
+            req.setAttribute("totalPages", totalPages);
+            req.setAttribute("totalOrders", totalOrders);
 
             // Get statistics
             Map<String, Integer> stats = orderService.getOrderStatistics();
 
             // Set attributes
-            req.setAttribute("orders", orders);
             req.setAttribute("submittedCount", stats.getOrDefault("SUBMITTED", 0));
             req.setAttribute("processingCount", stats.getOrDefault("PROCESSING", 0));
             req.setAttribute("completedCount", stats.getOrDefault("COMPLETED", 0));

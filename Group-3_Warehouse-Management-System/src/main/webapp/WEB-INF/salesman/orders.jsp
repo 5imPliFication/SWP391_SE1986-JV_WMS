@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: Admin
-  Date: 1/28/2026
-  Time: 11:54 PM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
@@ -47,68 +40,80 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <c:forEach items="${orders}" var="o">
-                        <tr>
-                            <td class="px-4 fw-semibold text-primary">${o.orderCode}</td>
-                            <td class="px-4">${o.customerName}</td>
-                            <td class="px-4">
-                                <c:choose>
-                                    <c:when test="${o.status == 'SUBMITTED'}">
-                                            <span class="badge bg-warning text-dark">
-                                                <i class="bi bi-clock-history me-1"></i>${o.status}
-                                            </span>
-                                    </c:when>
-                                    <c:when test="${o.status == 'PROCESSING'}">
-                                            <span class="badge bg-info text-white">
-                                                <i class="bi bi-arrow-repeat me-1"></i>${o.status}
-                                            </span>
-                                    </c:when>
-                                    <c:when test="${o.status == 'COMPLETED'}">
-                                            <span class="badge bg-success text-white">
-                                                <i class="bi bi-check-circle me-1"></i>${o.status}
-                                            </span>
-                                    </c:when>
-                                    <c:when test="${o.status == 'CANCELLED'}">
-                                            <span class="badge bg-danger text-white">
-                                                <i class="bi bi-x-circle me-1 text-white"></i>${o.status}
-                                            </span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <c:if test="${o.status eq 'DRAFT'}">
-                                            <span class="badge bg-secondary text-white">${o.status}</span>
-                                        </c:if>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                            <td class="px-4 text-muted">
-                                <i class="bi bi-calendar3 me-1"></i>${o.createdAt}
-                            </td>
-                            <td class="px-4 text-center">
-                                <a href="${pageContext.request.contextPath}/salesman/order/detail?id=${o.id}"
-                                   class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-eye me-1"></i>View
-                                </a>
-                            </td>
-                        </tr>
-                    </c:forEach>
-
-                    <!-- Empty State -->
-                    <c:if test="${empty orders}">
-                        <tr>
-                            <td colspan="5" class="text-center py-5">
-                                <div class="text-muted">
-                                    <i class="bi bi-inbox display-1 d-block mb-3"></i>
-                                    <h5>No Orders Found</h5>
-                                    <p class="mb-0">Start by creating your first order</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </c:if>
+                    <!-- ✓ Order rows ONLY in tbody -->
+                    <c:choose>
+                        <c:when test="${not empty orders}">
+                            <c:forEach items="${orders}" var="o">
+                                <tr>
+                                    <td class="px-4 fw-semibold text-primary">${o.orderCode}</td>
+                                    <td class="px-4">${o.customerName}</td>
+                                    <td class="px-4">
+                                        <c:choose>
+                                            <c:when test="${o.status == 'SUBMITTED'}">
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="bi bi-clock-history me-1"></i>${o.status}
+                                                </span>
+                                            </c:when>
+                                            <c:when test="${o.status == 'PROCESSING'}">
+                                                <span class="badge bg-info text-white">
+                                                    <i class="bi bi-arrow-repeat me-1"></i>${o.status}
+                                                </span>
+                                            </c:when>
+                                            <c:when test="${o.status == 'COMPLETED'}">
+                                                <span class="badge bg-success text-white">
+                                                    <i class="bi bi-check-circle me-1"></i>${o.status}
+                                                </span>
+                                            </c:when>
+                                            <c:when test="${o.status == 'CANCELLED'}">
+                                                <span class="badge bg-danger text-white">
+                                                    <i class="bi bi-x-circle me-1 text-white"></i>${o.status}
+                                                </span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:if test="${o.status eq 'DRAFT'}">
+                                                    <span class="badge bg-secondary text-white">${o.status}</span>
+                                                </c:if>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td class="px-4 text-muted">
+                                        <i class="bi bi-calendar3 me-1"></i>${o.createdAt}
+                                    </td>
+                                    <td class="px-4 text-center">
+                                        <a href="${pageContext.request.contextPath}/salesman/order/detail?id=${o.id}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye me-1"></i>View
+                                        </a>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <!-- ✓ Empty state ONLY in tbody -->
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-inbox display-1 d-block mb-3"></i>
+                                        <h5>No Orders Found</h5>
+                                        <p class="mb-0">Start by creating your first order</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:otherwise>
+                    </c:choose>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <c:set var="queryParams" value="status=${param.status}&searchCode=${param.searchCode}"/>
+    <jsp:include page="/WEB-INF/common/pagination.jsp">
+        <jsp:param name="pageNo" value="${pageNo}"/>
+        <jsp:param name="totalPages" value="${totalPages}"/>
+        <jsp:param name="baseUrl" value="${pageContext.request.contextPath}/salesman/orders"/>
+        <jsp:param name="queryParams" value="${queryParams}"/>
+    </jsp:include>
 </main>
 
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>

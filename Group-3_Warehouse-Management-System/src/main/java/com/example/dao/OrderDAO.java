@@ -647,4 +647,192 @@ public class OrderDAO {
             throw new RuntimeException("Failed to update order status", e);
         }
     }
+
+    //for pagination
+    public int countOrders(String status, String searchCode) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders WHERE 1=1");
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND status = ?");
+        }
+
+        if (searchCode != null && !searchCode.isEmpty()) {
+            sql.append(" AND order_code LIKE ?");
+        }
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+
+            if (searchCode != null && !searchCode.isEmpty()) {
+                ps.setString(paramIndex++, "%" + searchCode + "%");
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+            return 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to count orders", e);
+        }
+    }
+
+    public List<Order> getOrders(String status, String searchCode, int offset, int limit) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM orders WHERE 1=1"
+        );
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND status = ?");
+        }
+
+        if (searchCode != null && !searchCode.isEmpty()) {
+            sql.append(" AND order_code LIKE ?");
+        }
+
+        sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
+
+        List<Order> orders = new ArrayList<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+
+            if (searchCode != null && !searchCode.isEmpty()) {
+                ps.setString(paramIndex++, "%" + searchCode + "%");
+            }
+
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex++, offset);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                orders.add(mapOrder(rs));
+            }
+
+            return orders;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get orders", e);
+        }
+    }
+
+    public int countOrdersBySalesman(Long salesmanId, String status, String searchCode) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) FROM orders WHERE created_by = ?"
+        );
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND status = ?");
+        }
+
+        if (searchCode != null && !searchCode.isEmpty()) {
+            sql.append(" AND order_code LIKE ?");
+        }
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            ps.setLong(paramIndex++, salesmanId);
+
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+
+            if (searchCode != null && !searchCode.isEmpty()) {
+                ps.setString(paramIndex++, "%" + searchCode + "%");
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+            return 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to count orders for salesman", e);
+        }
+    }
+
+    public List<Order> getOrdersBySalesman(Long salesmanId, String status, String searchCode,
+                                           int offset, int limit) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT o.*, u.fullname " +
+                        "FROM orders o " +
+                        "LEFT JOIN users u ON o.created_by = u.id " +
+                        "WHERE o.created_by = ?"
+        );
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND o.status = ?");
+        }
+
+        if (searchCode != null && !searchCode.isEmpty()) {
+            sql.append(" AND o.order_code LIKE ?");
+        }
+
+        sql.append(" ORDER BY o.order_date DESC LIMIT ? OFFSET ?");
+
+        List<Order> orders = new ArrayList<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            ps.setLong(paramIndex++, salesmanId);
+
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+
+            if (searchCode != null && !searchCode.isEmpty()) {
+                ps.setString(paramIndex++, "%" + searchCode + "%");
+            }
+
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex++, offset);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Order order = new Order();
+                order.setId(rs.getLong("id"));
+                order.setOrderCode(rs.getString("order_code"));
+                order.setCustomerName(rs.getString("customer_name"));
+                order.setCustomerPhone(rs.getString("customer_phone"));
+                order.setStatus(rs.getString("status"));
+                order.setNote(rs.getString("note"));
+                order.setCreatedAt(rs.getTimestamp("order_date"));
+
+                // Set creator info
+                User creator = new User();
+                creator.setId(rs.getLong("created_by"));
+                creator.setFullName(rs.getString("fullname"));
+                order.setCreatedBy(creator);
+
+                orders.add(order);
+            }
+
+            return orders;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get orders for salesman", e);
+        }
+    }
 }

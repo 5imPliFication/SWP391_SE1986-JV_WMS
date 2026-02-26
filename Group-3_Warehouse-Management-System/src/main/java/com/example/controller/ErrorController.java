@@ -47,6 +47,6 @@ public class ErrorController extends HttpServlet {
         req.setAttribute("requestUri", requestUri);
 
         // Forward to error page
-        req.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/views/error/error.jsp").forward(req, resp);
     }
 }
