@@ -8,8 +8,11 @@ import com.example.model.Brand;
 import com.example.model.Category;
 import com.example.model.Product;
 import com.example.model.ProductItem;
+import com.example.util.AppConstants;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProductService {
     private ProductDAO productDAO = new ProductDAO();
@@ -82,7 +85,24 @@ public class ProductService {
         return productDAO.updateItem(productItem);
     }
 
-    public List<ProductDTO> getOutOfStockAlertProducts(String name) {
-        return productDAO.getLowStockProducts(name);
+    public Map<String, Object> getOutOfStockAlertProducts(String name, int pageNo) {
+
+        Map<String, Object> results = new HashMap<>();
+
+        int offset = (pageNo - 1) * AppConstants.PAGE_SIZE;
+        List<ProductDTO> products = productDAO.getLowStockProducts(name, offset);
+
+        // handle pagination
+        int totalProducts = getTotalProducts(name);
+        int totalPages = (int) Math.ceil((double) totalProducts / AppConstants.PAGE_SIZE);
+
+        // set value for result
+        results.put("products", products);
+        results.put("totalPages", totalPages);
+        return results;
+    }
+
+    private int getTotalProducts(String name) {
+        return productDAO.countTotalProducts(name);
     }
 }
