@@ -37,9 +37,14 @@
     <h2>Product List</h2>
 
     <%--create new Product--%>
-    <a href="${pageContext.request.contextPath}/products/add">
-        <button class="btn btn-primary mb-3">Add new product</button>
-    </a>
+    <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'CREATE_PRODUCT')}">
+        <a href="${pageContext.request.contextPath}/products/add">
+            <button class="btn btn-primary mb-3">Add new product</button>
+        </a>
+    </c:if>
     <br>
     <br>
     <%--form submit for search and sort--%>
@@ -132,7 +137,12 @@
                 <td>${p.createdAt}</td>
                 <td>${p.updatedAt}</td>
                 <td>
-                    <a href="${pageContext.request.contextPath}/products/update?productId=${p.id}&pageNo=${pageNo}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&isActive=${param.isActive}">EDIT</a>
+                    <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'UPDATE_PRODUCT')}">
+                        <a href="${pageContext.request.contextPath}/products/update?productId=${p.id}&pageNo=${pageNo}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&isActive=${param.isActive}">EDIT</a>
+                    </c:if>
                 </td>
 
             </tr>

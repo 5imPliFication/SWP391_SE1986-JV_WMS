@@ -21,6 +21,13 @@ public class PermissionChecker {
 
         // --- QUẢN LÝ PASSWORD RESET REQUEST ---
         urlPermissionMap.put("/admin/password-reset", "READ_PASSWORD_RESET_REQUEST");
+
+        /// --- QUẢN LÝ SẢN PHẨM ---
+        urlPermissionMap.put("/products", "READ_PRODUCT");
+        urlPermissionMap.put("/products/add", "CREATE_PRODUCT");
+        urlPermissionMap.put("/products/update", "UPDATE_PRODUCT");
+        urlPermissionMap.put("/products/items/update", "UPDATE_PRODUCT_ITEM");
+
     }
 
     public static String getRequiredPermission(String url) {

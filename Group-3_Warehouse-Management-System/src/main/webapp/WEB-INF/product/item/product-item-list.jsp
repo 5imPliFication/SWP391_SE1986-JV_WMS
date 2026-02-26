@@ -105,9 +105,15 @@
                 <td>${pi.updatedAt}</td>
                 <td>${(pi.isActive == true) ? 'Available' : 'Unavailable'}</td>
                 <td>
-                    <a href="${pageContext.request.contextPath}/products/items/update?productItemId=${pi.id}&pageNo=${pageNo}&searchSerial=${param.searchSerial}&isActive=${param.isActive}">
-                        EDIT
-                    </a>
+                    <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'UPDATE_PRODUCT_ITEM')}">
+                        <a href="${pageContext.request.contextPath}/products/items/update?productItemId=${pi.id}&pageNo=${pageNo}&searchSerial=${param.searchSerial}&isActive=${param.isActive}">
+                            EDIT
+                        </a>
+                    </c:if>
+
                 </td>
 
             </tr>
