@@ -15,6 +15,9 @@
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
 <main class="main-content">
+
+    <h2 class="mb-4">Import Products</h2>
+
     <div class="d-flex align-items-center mb-3">
         <%-- search product by name --%>
         <form class="form-inline" action="${pageContext.request.contextPath}" method="get">
