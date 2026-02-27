@@ -39,12 +39,12 @@
                 <div class="mb-3">
                     <label class="form-label fw-bold d-block">Status</label>
                     <div class="btn-group w-100" role="group">
-                        <input type="radio" class="btn-check" name="status" id="active" value="true" ${category.active
+                        <input type="radio" class="btn-check" name="status" id="active" value="true" ${category.isActive == 1
                             ? 'checked' : '' }>
                         <label class="btn btn-outline-success" for="active"><i class="fas fa-check"></i> Active</label>
 
                         <input type="radio" class="btn-check" name="status" id="inactive" value="false"
-                            ${!category.active ? 'checked' : '' }>
+                            ${category.isActive != 1 ? 'checked' : '' }>
                         <label class="btn btn-outline-danger" for="inactive"><i class="fas fa-times"></i>
                             Inactive</label>
                     </div>
