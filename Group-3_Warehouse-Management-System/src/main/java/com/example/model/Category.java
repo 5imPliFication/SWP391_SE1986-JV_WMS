@@ -13,7 +13,7 @@ public class Category {
     private Long id;
     private String name;
     private String description;
-    private Boolean isActive;
+    private int isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

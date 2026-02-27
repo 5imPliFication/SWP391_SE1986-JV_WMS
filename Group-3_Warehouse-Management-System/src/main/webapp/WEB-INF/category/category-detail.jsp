@@ -37,7 +37,7 @@
                         <label class="fw-bold text-secondary">Status:</label>
                         <div class="ms-2 d-inline-block">
                             <c:choose>
-                                <c:when test="${category.active}">
+                                <c:when test="${category.isActive == 1}">
                                     <span class="badge bg-success fs-6"><i class="fas fa-check-circle"></i>
                                         Active</span>
                                 </c:when>

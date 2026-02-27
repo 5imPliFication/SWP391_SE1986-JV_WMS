@@ -1,6 +1,8 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
+import com.example.enums.MovementType;
+import com.example.enums.ReferenceType;
 import com.example.model.*;
 
 import java.sql.*;

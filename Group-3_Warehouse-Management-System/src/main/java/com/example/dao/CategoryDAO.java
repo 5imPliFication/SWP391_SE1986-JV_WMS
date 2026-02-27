@@ -26,7 +26,7 @@ public class CategoryDAO {
         String sql = """
                 SELECT *
                 FROM categories
-                WHERE is_active = true
+                WHERE is_active = 1
                 """;
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -51,7 +51,7 @@ public class CategoryDAO {
 
             ps.setString(1, category.getName());
             ps.setString(2, category.getDescription());
-            ps.setBoolean(3, category.getIsActive());
+            ps.setInt(3, category.getIsActive());
             ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -66,7 +66,7 @@ public class CategoryDAO {
 
             ps.setString(1, category.getName());
             ps.setString(2, category.getDescription());
-            ps.setBoolean(3, category.getIsActive());
+            ps.setInt(3, category.getIsActive());
             ps.setLong(4, category.getId());
             ps.executeUpdate();
 
@@ -89,7 +89,7 @@ public class CategoryDAO {
                 category.setId(rs.getLong("id"));
                 category.setName(rs.getString("name"));
 
-                // ✅ SAFE timestamp
+
                 category.setCreatedAt(getLocalDateTime(rs, "created_at"));
                 category.setUpdatedAt(getLocalDateTime(rs, "updated_at"));
 
@@ -115,7 +115,7 @@ public class CategoryDAO {
                     category.setId(rs.getLong("id"));
                     category.setName(rs.getString("name"));
                     category.setDescription(rs.getString("description"));
-                    category.setIsActive(rs.getBoolean("is_active"));
+                    category.setIsActive(rs.getInt("is_active"));
                     return category;
                 }
             }
@@ -137,7 +137,7 @@ public class CategoryDAO {
                 category.setId(rs.getLong("id"));
                 category.setName(rs.getString("name"));
                 category.setDescription(rs.getString("description"));
-                category.setIsActive(rs.getBoolean("is_active"));
+                category.setIsActive(rs.getInt("is_active"));
                 categories.add(category);
             }
 

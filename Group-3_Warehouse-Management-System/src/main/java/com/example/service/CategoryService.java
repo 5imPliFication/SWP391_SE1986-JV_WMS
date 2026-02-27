@@ -17,7 +17,7 @@ public class CategoryService {
         Category category = new Category();
         category.setName(name);
         category.setDescription(description);
-        category.setIsActive(isActive);
+        category.setIsActive(isActive ? 1 : 0);
 
         categoryDAO.createCategory(category);
     }

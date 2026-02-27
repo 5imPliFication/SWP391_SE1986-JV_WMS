@@ -1,10 +1,11 @@
 package com.example.controller.report;
 
 import com.example.dao.StockMovementDAO;
-import com.example.model.MovementType;
-import com.example.model.ReferenceType;
+import com.example.enums.MovementType;
+import com.example.enums.ReferenceType;
 import com.example.model.StockMovement;
 
+import com.example.util.AppConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -53,9 +54,11 @@ public class StockHistoryServlet extends HttpServlet {
             }
         }
 
-        int limit = 50;
+        int limit = AppConstants.PAGE_SIZE;
         int offset = (page - 1) * limit;
-
+        if (limit <= 0) {
+            throw new IllegalArgumentException("limit must be > 0");
+        }
         int totalCount = dao.getTotalCount(fromDate, toDate, type, referenceType);
         int totalPages = (int) Math.ceil((double) totalCount / limit);
 

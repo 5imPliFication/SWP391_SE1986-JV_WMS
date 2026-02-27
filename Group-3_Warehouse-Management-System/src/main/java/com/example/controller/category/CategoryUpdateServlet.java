@@ -55,7 +55,7 @@ public class CategoryUpdateServlet extends HttpServlet {
 
         try {
             Long id = Long.parseLong(idStr);
-            boolean isActive = Boolean.parseBoolean(statusStr);
+            int isActive = Boolean.parseBoolean(statusStr) ? 1 : 0;
 
             Category category = new Category();
             category.setId(id);
