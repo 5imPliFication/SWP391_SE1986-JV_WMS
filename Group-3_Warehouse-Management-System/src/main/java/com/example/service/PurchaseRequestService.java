@@ -64,19 +64,6 @@ public class PurchaseRequestService {
             if (item.getProductId() != null) {
                 continue;
             }
-
-            // Trường hợp sản phẩm chưa tồn tại (proposal)
-            if (item.getProductName() == null || item.getProductName().isBlank()) {
-                throw new IllegalArgumentException("New product must have product name");
-            }
-
-            if (item.getBrandName() == null || item.getBrandName().isBlank()) {
-                throw new IllegalArgumentException("New product must have brand name");
-            }
-
-            if (item.getCategoryName() == null || item.getCategoryName().isBlank()) {
-                throw new IllegalArgumentException("New product must have category name");
-            }
         }
         try {
             return p.createPurchaseRequest(

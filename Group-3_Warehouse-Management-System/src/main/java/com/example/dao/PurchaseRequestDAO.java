@@ -478,8 +478,8 @@ public class PurchaseRequestDAO {
 
         String insertSql = """
             INSERT INTO purchase_request_items
-            (purchase_request_id, product_id, product_name, brand_name, category_name, quantity)
-            VALUES (?, ?, ?, ?, ?, ?)
+            (purchase_request_id, product_id, quantity)
+            VALUES (?, ?, ?)
         """;
 
         try (Connection conn = DBConfig.getDataSource().getConnection()) {
@@ -493,20 +493,8 @@ public class PurchaseRequestDAO {
 
                 for (PurchaseRequestItem i : items) {
                     ps.setLong(1, requestId);
-
-                    if (i.getProductId() != null) {
-                        ps.setLong(2, i.getProductId());
-                        ps.setNull(3, java.sql.Types.VARCHAR);
-                        ps.setNull(4, java.sql.Types.VARCHAR);
-                        ps.setNull(5, java.sql.Types.VARCHAR);
-                    } else {
-                        ps.setNull(2, java.sql.Types.BIGINT);
-                        ps.setString(3, i.getProductName());
-                        ps.setString(4, i.getBrandName());
-                        ps.setString(5, i.getCategoryName());
-                    }
-
-                    ps.setLong(6, i.getQuantity());
+                    ps.setLong(2, i.getProductId());
+                    ps.setLong(3, i.getQuantity());
                     ps.addBatch();
                 }
 

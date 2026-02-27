@@ -15,7 +15,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -48,8 +50,6 @@ public class PurchaseRequestUpdate extends HttpServlet {
         pr = new PurchaseRequestService();
     }
 
-
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -66,35 +66,33 @@ public class PurchaseRequestUpdate extends HttpServlet {
         String note = req.getParameter("note");
 
         String[] productIds = req.getParameterValues("productId[]");
-        String[] productNames = req.getParameterValues("productName[]");
-        String[] brandNames = req.getParameterValues("brandId[]");
-        String[] categoryNames = req.getParameterValues("categoryId[]");
         String[] quantities = req.getParameterValues("quantity[]");
 
-        List<PurchaseRequestItem> items = new ArrayList<>();
+        // 1. Sử dụng Map để gộp các sản phẩm trùng ID
+        Map<Long, Long> aggregatedItems = new LinkedHashMap<>(); 
 
-        for (int i = 0; i < quantities.length; i++) {
+        if (productIds != null && quantities != null) {
+            for (int i = 0; i < productIds.length; i++) {
+                Long pId = Long.valueOf(productIds[i]);
+                Long qty = Long.valueOf(quantities[i]);
 
-            PurchaseRequestItem item = new PurchaseRequestItem();
-
-            // 👉 Có chọn product có sẵn
-            if (productIds[i] != null && !productIds[i].isBlank()) {
-                item.setProductId(Long.valueOf(productIds[i]));
-            } // 👉 New product
-            else {
-                item.setProductName(productNames[i]);
-                item.setBrandName(brandNames[i]);
-                item.setCategoryName(categoryNames[i]);
+                // Nếu đã có ID này rồi thì cộng thêm số lượng, nếu chưa thì tạo mới (mặc định 0L)
+                aggregatedItems.put(pId, aggregatedItems.getOrDefault(pId, 0L) + qty);
             }
+        }
 
-            item.setQuantity(Long.valueOf(quantities[i]));
+        // 2. Chuyển từ Map ngược lại List để truyền vào hàm update
+        List<PurchaseRequestItem> items = new ArrayList<>();
+        for (Map.Entry<Long, Long> entry : aggregatedItems.entrySet()) {
+            PurchaseRequestItem item = new PurchaseRequestItem();
+            item.setProductId(entry.getKey());
+            item.setQuantity(entry.getValue());
             items.add(item);
         }
 
         pr.updatePurchaseRequest(requestId, note, items, user);
 
-        resp.sendRedirect(req.getContextPath()
-                + "/purchase-request/list");
+        resp.sendRedirect(req.getContextPath() + "/purchase-request/list");
     }
 
 }
