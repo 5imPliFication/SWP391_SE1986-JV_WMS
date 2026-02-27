@@ -4,6 +4,8 @@ import com.example.dao.*;
 import com.example.model.*;
 import lombok.RequiredArgsConstructor;
 
+import com.example.dto.OrderDTO;
+import com.example.dto.OrderItemDTO;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -13,18 +15,19 @@ import java.util.*;
 public class OrderService {
     private final OrderDAO orderDAO;
     private final OrderItemDAO orderItemDAO;
-    private final ProductItemDAO productItemDAO;  // ✓ ADDED
+    private final ProductItemDAO productItemDAO; // ✓ ADDED
     private final CouponDAO couponDAO;
     private final UserDAO userDAO;
+    private final ProductDAO productDAO;
 
     public OrderService() {
         orderDAO = new OrderDAO();
         orderItemDAO = new OrderItemDAO();
-        productItemDAO = new ProductItemDAO();  // ✓ ADDED
+        productItemDAO = new ProductItemDAO(); // ✓ ADDED
         couponDAO = new CouponDAO();
         userDAO = new UserDAO();
+        productDAO = new ProductDAO();
     }
-
 
     public Map<String, Integer> getOrderStatistics() {
         return orderDAO.getStatistics();
@@ -64,7 +67,8 @@ public class OrderService {
 
     public Order getOrderDetail(Long orderId, Long userId, String role) {
         Order order = orderDAO.findById(orderId);
-        if (order == null) return null;
+        if (order == null)
+            return null;
 
         if ("Salesman".equals(role) && !Objects.equals(order.getCreatedBy().getId(), userId))
             throw new SecurityException("Access denied");
@@ -156,7 +160,8 @@ public class OrderService {
         } else if ("Warehouse".equalsIgnoreCase(userRole)) {
             // Warehouse can cancel SUBMITTED or PROCESSING orders
             if (!"SUBMITTED".equals(order.getStatus()) && !"PROCESSING".equals(order.getStatus())) {
-                throw new IllegalStateException("Can only cancel SUBMITTED or PROCESSING orders. This order is " + order.getStatus());
+                throw new IllegalStateException(
+                        "Can only cancel SUBMITTED or PROCESSING orders. This order is " + order.getStatus());
             }
             // Note is required for warehouse cancellations
             if (note == null || note.trim().isEmpty()) {
@@ -315,8 +320,7 @@ public class OrderService {
                 orderTotal.compareTo(coupon.getMinOrderAmount()) < 0) {
             throw new IllegalArgumentException(
                     String.format("Order total must be at least %s VND to use this coupon",
-                            coupon.getMinOrderAmount().toPlainString())
-            );
+                            coupon.getMinOrderAmount().toPlainString()));
         }
 
         orderDAO.applyCoupon(orderId, couponId);
@@ -379,8 +383,27 @@ public class OrderService {
         return orders;
     }
 
-    public boolean updateStatusOrder(String orderCode, String status) {
-        return orderDAO.updateStatus(orderCode, status);
+    public boolean updateStatusOrder(OrderDTO orderDTO) {
+        boolean updated = orderDAO.updateStatus(orderDTO.getCode(), orderDTO.getStatus());
+
+        // check if completed order -> reduce total product and inactive product item
+        if (updated && "COMPLETED".equalsIgnoreCase(orderDTO.getStatus())) {
+
+            System.out.println("order completed");
+            // find order id by order code
+            Long orderId = orderDAO.findOrderIdByCode(orderDTO.getCode());
+
+            System.out.println("order id " + orderId);
+            if (orderId != null) {
+                // get list order items
+                List<OrderItemDTO> items = orderItemDAO.findOrderItemsByOrderId(orderId);
+                for (OrderItemDTO item : items) {
+                    System.out.println(item);
+                    productDAO.deductStock(item.getProductId(), item.getQuantity());
+                }
+            }
+        }
+        return updated;
     }
 
     public int countOrders(String status, String searchCode) {
