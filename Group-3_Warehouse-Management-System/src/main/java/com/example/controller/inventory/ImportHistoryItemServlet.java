@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @WebServlet("/inventory/import/history")
@@ -36,7 +37,8 @@ public class ImportHistoryItemServlet extends HttpServlet {
 
     }
 
-    private void handleDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void handleDetail(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
         // get id need detail
         Long id = Long.parseLong(request.getParameter("id"));
@@ -68,14 +70,15 @@ public class ImportHistoryItemServlet extends HttpServlet {
         String receiptCode = request.getParameter("receiptCode");
 
         // get date
-        String fromDate = request.getParameter("fromDate");
-        String toDate = request.getParameter("toDate");
+        String fromDateStr = request.getParameter("fromDate");
+        String toDateStr = request.getParameter("toDate");
 
         // get data through service
-        List<ImportHistoryDTO> importHistories = goodsHistoryService.getImportHistory(receiptCode, fromDate, toDate, pageNo);
+        List<ImportHistoryDTO> importHistories = goodsHistoryService.getImportHistory(receiptCode, fromDateStr, toDateStr,
+                pageNo);
 
         // count total records
-        int totalRecords = goodsHistoryService.countImportHistory(receiptCode, fromDate, toDate);
+        int totalRecords = goodsHistoryService.countImportHistory(receiptCode, fromDateStr, toDateStr);
 
         // calc total pages
         int totalPages = (int) Math.ceil((double) totalRecords / AppConstants.PAGE_SIZE);
@@ -85,8 +88,8 @@ public class ImportHistoryItemServlet extends HttpServlet {
         request.setAttribute("importHistories", importHistories);
         request.setAttribute("pageNo", pageNo);
         request.setAttribute("totalPages", totalPages);
-        request.setAttribute("fromDate", fromDate);
-        request.setAttribute("toDate", toDate);
+        request.setAttribute("fromDate", fromDateStr);
+        request.setAttribute("toDate", toDateStr);
 
         // forward to jsp
         request.getRequestDispatcher("/WEB-INF/inventory/import-history.jsp").forward(request, response);
