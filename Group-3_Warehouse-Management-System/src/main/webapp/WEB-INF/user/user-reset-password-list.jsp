@@ -102,7 +102,11 @@
                         <input type="hidden" name="status" value="${param.status}">
                         <input type="hidden" name="pageNo" value="${param.pageNo}">
 
-                        <c:if test="${p.status == 'PENDING'}">
+                        <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'UPDATE_PASSWORD_RESET_REQUEST')
+                          and p.status == 'PENDING'}">
                             <button type="submit" name="action" value="Approve" class="btn btn-sm btn-success">
                                 Approve
                             </button>

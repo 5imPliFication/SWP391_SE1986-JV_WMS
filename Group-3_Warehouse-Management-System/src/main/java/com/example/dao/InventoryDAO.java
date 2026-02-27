@@ -1,9 +1,10 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
-import com.example.dto.ExportOrderDTO;
-import com.example.model.Product;
-import com.example.model.ProductItem;
+import com.example.dto.OrderDTO;
+import com.example.dto.ProductDTO;
+import com.example.dto.ProductItemDTO;
+import com.example.util.AppConstants;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -13,10 +14,10 @@ import java.util.List;
 public class InventoryDAO {
 
     // get list product by name
-    public List<Product> findProductByName(String searchName) {
-        List<Product> listProducts = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("select id, `name`, description from products as p " +
-                " where 1 = 1 ");
+    public List<ProductDTO> findProductByName(String searchName) {
+        List<ProductDTO> listProducts = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("select id, name, description, total_quantity from products as p "
+                + " where 1 = 1 ");
 
         // if param has value of searchName
         if (searchName != null && !searchName.trim().isEmpty()) {
@@ -25,8 +26,7 @@ public class InventoryDAO {
 
         int index = 1;
         // access data
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // if searchName has value -> set value to query
             if (searchName != null && !searchName.trim().isEmpty()) {
@@ -38,7 +38,8 @@ public class InventoryDAO {
                 long id = rs.getLong("id");
                 String name = rs.getString("name");
                 String description = rs.getString("description");
-                listProducts.add(new Product(id, name, description));
+                long totalQuantity = rs.getLong("total_quantity");
+                listProducts.add(new ProductDTO(id, name, description, totalQuantity));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -47,23 +48,21 @@ public class InventoryDAO {
     }
 
     // save list products item to db
-    public boolean saveProductItems(List<ProductItem> productItems) {
+    public boolean saveProductItems(List<ProductItemDTO> productItemDTOs) {
         String sql = "INSERT INTO product_items(serial, imported_price, current_price, is_active, imported_at, updated_at, product_id) "
-                +
-                "VALUES (?, ?, ?, ?, NOW(), NOW(), ?)";
+                + "VALUES (?, ?, ?, ?, NOW(), NOW(), ?)";
 
         // access data
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             // iterate each item
-            for (ProductItem item : productItems) {
+            for (ProductItemDTO item : productItemDTOs) {
 
                 // set data
                 int index = 1;
                 ps.setString(index++, item.getSerial());
-                ps.setDouble(index++, item.getImportedPrice());
-                ps.setDouble(index++, item.getImportedPrice());
+                ps.setDouble(index++, item.getImportPrice());
+                ps.setDouble(index++, item.getImportPrice());
                 ps.setBoolean(index++, true);
                 ps.setLong(index++, item.getProductId());
                 ps.addBatch();
@@ -76,8 +75,8 @@ public class InventoryDAO {
     }
 
     public boolean isExistSerial(String serial) {
-        StringBuilder sql = new StringBuilder("select serial from product_items as pt " +
-                "where 1 = 1 ");
+        StringBuilder sql = new StringBuilder("select serial from product_items as pt "
+                + "where 1 = 1 ");
 
         // if param has value of searchName
         if (serial != null && !serial.trim().isEmpty()) {
@@ -85,8 +84,7 @@ public class InventoryDAO {
         }
 
         // access data
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // if searchName has value -> set value to query
             if (serial != null) {
@@ -101,38 +99,61 @@ public class InventoryDAO {
         }
     }
 
-    public List<ExportOrderDTO> searchExportOrders(LocalDate fromDate, LocalDate toDate, int offset, int limit) {
+    public List<OrderDTO> searchExportOrders(String name, LocalDate fromDate, LocalDate toDate, String status, int offset) {
         StringBuilder sql = new StringBuilder("""
-                    SELECT o.id, o.order_code, o.order_date, u.fullname as salesman_name, o.customer_name, o.status
-                    FROM orders o
-                    JOIN users u ON o.created_by = u.id
-                    WHERE 1=1
+                    select o.id, o.order_code, o.order_date, u.fullname as salesman_name, o.customer_name, o.status
+                    from orders o
+                    join users u ON o.created_by = u.id
+                    where 1=1
                 """);
 
+        // name
+        if (name != null && !name.trim().isEmpty()) {
+            sql.append(" and o.customer_name like ? ");
+        }
+
         // handle date
-        if (fromDate != null)
-            sql.append(" AND CAST(o.order_date AS DATE) >= ?");
-        if (toDate != null)
-            sql.append(" AND CAST(o.order_date AS DATE) <= ?");
+        if (fromDate != null) {
+            sql.append(" and CAST(o.order_date AS DATE) >= ?");
+        }
+        if (toDate != null) {
+            sql.append(" and CAST(o.order_date AS DATE) <= ?");
+        }
+
+        // status
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" and o.status like ? ");
+        } else {
+            sql.append(" and o.status not in ('DRAFT', 'COMPLETED', 'CANCELLED') ");
+        }
 
         // pagination
         sql.append(" ORDER BY o.order_date DESC LIMIT ? OFFSET ?");
 
-        List<ExportOrderDTO> list = new ArrayList<>();
-        try (Connection con = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        List<OrderDTO> list = new ArrayList<>();
+        try (Connection con = DBConfig.getDataSource().getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             int index = 1;
-            if (fromDate != null)
+            if (name != null && !name.trim().isEmpty()) {
+                ps.setString(index++, "%" + name + "%");
+            }
+
+            if (fromDate != null) {
                 ps.setDate(index++, Date.valueOf(fromDate));
-            if (toDate != null)
+            }
+            if (toDate != null) {
                 ps.setDate(index++, Date.valueOf(toDate));
-            ps.setInt(index++, limit);
+            }
+
+            if (status != null && !status.trim().isEmpty()) {
+                ps.setString(index++, "%" + status + "%");
+            }
+            ps.setInt(index++, AppConstants.PAGE_SIZE);
             ps.setInt(index, offset);
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                ExportOrderDTO dto = new ExportOrderDTO();
+                OrderDTO dto = new OrderDTO();
                 dto.setId(rs.getLong("id"));
                 dto.setCode(rs.getString("order_code"));
                 dto.setExportDate(rs.getTimestamp("order_date"));
@@ -148,25 +169,48 @@ public class InventoryDAO {
     }
 
     // count total export product order
-    public int countExportOrders(LocalDate fromDate, LocalDate toDate) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders o WHERE 1=1");
-        if (fromDate != null)
-            sql.append(" AND CAST(o.order_date AS DATE) >= ?");
-        if (toDate != null)
-            sql.append(" AND CAST(o.order_date AS DATE) <= ?");
+    public int countExportOrders(String name, LocalDate fromDate, LocalDate toDate, String status) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders o WHERE 1=1 and o.status not in ('DRAFT', 'COMPLETED', 'CANCELLED') ");
+        if (name != null && !name.trim().isEmpty()) {
+            sql.append(" and o.customer_name like ? ");
+        }
 
-        try (Connection con = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        if (fromDate != null) {
+            sql.append(" and cast(o.order_date AS DATE) >= ?");
+        }
+        if (toDate != null) {
+            sql.append(" and cast(o.order_date AS DATE) <= ?");
+        }
+
+        // status
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" and o.status like ? ");
+        } else {
+            sql.append(" and o.status not in ('DRAFT', 'COMPLETED', 'CANCELLED') ");
+        }
+
+        try (Connection con = DBConfig.getDataSource().getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             int index = 1;
-            if (fromDate != null)
+            if (name != null && !name.trim().isEmpty()) {
+                ps.setString(index++, "%" + name + "%");
+            }
+
+            if (fromDate != null) {
                 ps.setDate(index++, Date.valueOf(fromDate));
-            if (toDate != null)
+            }
+            if (toDate != null) {
                 ps.setDate(index++, Date.valueOf(toDate));
+            }
+
+            if (status != null && !status.trim().isEmpty()) {
+                ps.setString(index++, "%" + status + "%");
+            }
 
             ResultSet rs = ps.executeQuery();
-            if (rs.next())
+            if (rs.next()) {
                 return rs.getInt(1);
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Count fail", e);
         }

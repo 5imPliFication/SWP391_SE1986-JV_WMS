@@ -4,7 +4,7 @@ import com.example.model.Role;
 import com.example.model.User;
 import com.example.service.RoleService;
 import com.example.service.UserService;
-import com.example.util.UserConstant;
+import com.example.util.AppConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -58,7 +58,7 @@ public class UserListServlet extends HttpServlet {
         int totalUsers = userService.getTotalUsers(searchName, roleId);
 
         // get total pages
-        int totalPages = (int)Math.ceil((double) totalUsers/ UserConstant.PAGE_SIZE);
+        int totalPages = (int)Math.ceil((double) totalUsers/ AppConstants.PAGE_SIZE);
 
         if (request.getParameter("pageNo") != null) {
             pageNo = Integer.parseInt(request.getParameter("pageNo"));

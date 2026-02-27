@@ -65,12 +65,6 @@
                                                 </c:forEach>
                                             </select>
                                         </td>
-
-
-
-
-
-
                                         <td>
                                             <input type="number"
                                                    name="quantity[]"

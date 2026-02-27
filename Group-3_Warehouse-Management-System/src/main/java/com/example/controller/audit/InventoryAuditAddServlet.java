@@ -1,9 +1,8 @@
 package com.example.controller.audit;
 
-import com.example.dto.ImportProductItemDTO;
 import com.example.model.*;
 import com.example.service.*;
-import com.example.util.UserConstant;
+import com.example.util.AppConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -50,7 +49,7 @@ public class InventoryAuditAddServlet extends HttpServlet {
         // Get total record
         int totalProducts = productService.getTotalProducts(searchName, brandName, categoryName, isActive);
         // Count total pages
-        int totalPages = (int) Math.ceil((double) totalProducts / UserConstant.PAGE_SIZE);
+        int totalPages = (int) Math.ceil((double) totalProducts / AppConstants.PAGE_SIZE);
 
         if (request.getParameter("pageNo") != null && !request.getParameter("pageNo").isEmpty()) {
             pageNo = Integer.parseInt(request.getParameter("pageNo"));

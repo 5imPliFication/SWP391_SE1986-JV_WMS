@@ -29,7 +29,7 @@
             </button>
         </div>
     </c:if>
-    
+
     <c:if test="${not empty param.error}">
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-circle mr-2"></i>${param.error}
@@ -125,13 +125,25 @@
                     <tbody>
                     <c:set var="total" value="0"/>
                     <c:forEach items="${items}" var="i" varStatus="status">
-                        <c:set var="subtotal" value="${i.product.price * i.quantity}"/>
+                        <c:set var="subtotal" value="${i.priceAtPurchase * i.quantity}"/>
                         <c:set var="total" value="${total + subtotal}"/>
                         <tr>
                             <td class="px-4 align-middle">${status.index + 1}</td>
-                            <td class="px-4 align-middle font-weight-bold">${i.product.name}</td>
+                            <td class="px-4 align-middle font-weight-bold">
+                                    ${i.product.name}
+                            </td>
                             <td class="px-4 align-middle">
-                                <fmt:formatNumber value="${i.product.price}" type="number" groupingUsed="true"/> VND
+                                <!-- ✓ FIXED: Show priceAtPurchase (price when ordered) -->
+                                <fmt:formatNumber value="${i.priceAtPurchase}" type="number" groupingUsed="true"/> VND
+
+                                <!-- ✓ ADDED: Show if price has changed since order -->
+                                <c:if test="${i.priceAtPurchase != i.productItem.currentPrice}">
+                                    <br><small class="text-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Current: <fmt:formatNumber value="${i.productItem.currentPrice}" type="number"
+                                                               groupingUsed="true"/> VND
+                                </small>
+                                </c:if>
                             </td>
                             <td class="px-4 align-middle text-center">
                                 <span class="badge badge-info badge-pill">${i.quantity}</span>
@@ -145,7 +157,7 @@
                                           method="post"
                                           style="display:inline;"
                                           onsubmit="return confirm('Remove this item from order?');">
-                                        <input type="hidden" name="productId" value="${i.product.id}"/>
+                                        <input type="hidden" name="productItemId" value="${i.productItem.id}"/>
                                         <input type="hidden" name="orderId" value="${order.id}"/>
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
                                             <i class="fas fa-trash"></i>
@@ -169,6 +181,7 @@
                         </tr>
                     </c:if>
                     </tbody>
+
                 </table>
             </div>
         </div>
@@ -198,10 +211,13 @@
                                                 <i class="fas fa-check-circle mr-1"></i>
                                                 <c:choose>
                                                     <c:when test="${order.coupon.discountType == 'PERCENTAGE'}">
-                                                        <fmt:formatNumber value="${order.coupon.discountValue}" pattern="#"/>% OFF Applied
+                                                        <fmt:formatNumber value="${order.coupon.discountValue}"
+                                                                          pattern="#"/>% OFF Applied
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <fmt:formatNumber value="${order.coupon.discountValue}" type="number" groupingUsed="true"/> VND OFF Applied
+                                                        <fmt:formatNumber value="${order.coupon.discountValue}"
+                                                                          type="number"
+                                                                          groupingUsed="true"/> VND OFF Applied
                                                     </c:otherwise>
                                                 </c:choose>
                                             </h6>
@@ -229,7 +245,8 @@
                                         <label class="font-weight-bold text-muted">
                                             <i class="fas fa-tag mr-1"></i>Discount Coupon
                                         </label>
-                                        <form action="${pageContext.request.contextPath}/salesman/order/apply-coupon" method="post">
+                                        <form action="${pageContext.request.contextPath}/salesman/order/apply-coupon"
+                                              method="post">
                                             <input type="hidden" name="orderId" value="${order.id}"/>
                                             <div class="input-group">
                                                 <input type="text"
@@ -247,7 +264,8 @@
                                                 </div>
                                             </div>
                                             <small class="form-text text-muted">
-                                                <i class="fas fa-info-circle mr-1"></i>Enter a valid coupon code to receive a discount
+                                                <i class="fas fa-info-circle mr-1"></i>Enter a valid coupon code to
+                                                receive a discount
                                             </small>
                                         </form>
                                     </div>
@@ -265,7 +283,7 @@
                                         <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> VND
                                     </span>
                                 </div>
-                                
+
                                 <!-- Show discount if coupon applied -->
                                 <c:choose>
                                     <c:when test="${not empty order.coupon}">
@@ -274,18 +292,21 @@
                                                 <i class="fas fa-tag mr-1"></i>Discount:
                                             </span>
                                             <span class="discount-highlight">
-                                                -<fmt:formatNumber value="${order.discountAmount}" type="number" groupingUsed="true"/> VND
+                                                -<fmt:formatNumber value="${order.discountAmount}" type="number"
+                                                                   groupingUsed="true"/> VND
                                             </span>
                                         </div>
                                         <hr>
                                         <div class="d-flex justify-content-between">
                                             <span class="h5 mb-0">Total:</span>
                                             <span class="h4 mb-0 text-success font-weight-bold">
-                                                <fmt:formatNumber value="${order.finalTotal}" type="number" groupingUsed="true"/> VND
+                                                <fmt:formatNumber value="${order.finalTotal}" type="number"
+                                                                  groupingUsed="true"/> VND
                                             </span>
                                         </div>
                                         <small class="text-muted d-block mt-2">
-                                            <i class="fas fa-save mr-1"></i>You saved <fmt:formatNumber value="${order.discountAmount}" type="number" groupingUsed="true"/> VND!
+                                            <i class="fas fa-save mr-1"></i>You saved <fmt:formatNumber
+                                                value="${order.discountAmount}" type="number" groupingUsed="true"/> VND!
                                         </small>
                                     </c:when>
                                     <c:otherwise>
@@ -322,13 +343,13 @@
 
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <label for="productId" class="font-weight-bold">
+                            <label for="productItemId" class="font-weight-bold">
                                 <i class="fas fa-laptop mr-1"></i>Product ID
                             </label>
                             <input type="number"
                                    class="form-control form-control-lg"
-                                   id="productId"
-                                   name="productId"
+                                   id="productItemId"
+                                   name="productItemId"
                                    placeholder="Enter product ID"
                                    required/>
                             <small class="form-text text-muted">Enter the product ID from inventory</small>
@@ -445,12 +466,12 @@
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
 <script>
     // Auto-uppercase coupon input
-    document.querySelector('.coupon-input-uppercase')?.addEventListener('input', function(e) {
+    document.querySelector('.coupon-input-uppercase')?.addEventListener('input', function (e) {
         this.value = this.value.toUpperCase();
     });
-    
+
     // Auto-dismiss alerts after 5 seconds
-    setTimeout(function() {
+    setTimeout(function () {
         const alerts = document.querySelectorAll('.alert-dismissible');
         alerts.forEach(alert => {
             const bsAlert = new bootstrap.Alert(alert);

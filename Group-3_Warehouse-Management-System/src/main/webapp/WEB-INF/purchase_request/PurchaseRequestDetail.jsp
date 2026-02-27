@@ -48,12 +48,17 @@
             </div>
 
             <!-- EDIT BUTTON -->
-            <c:if test="${!isManager && isPending}">
-                <button class="btn btn-warning mb-3"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editModal">
-                    ✏️ Edit Purchase Request
-                </button>
+            <c:if test="${sessionScope.user != null
+                          and sessionScope.user.role != null
+                          and sessionScope.user.role.active
+                          and fn:contains(sessionScope.userPermissions, 'UPDATE_PURCHASE_REQUEST')}">
+                <c:if test="${!isManager && isPending}">
+                    <button class="btn btn-warning mb-3"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editModal">
+                        ✏️ Edit Purchase Request
+                    </button>
+                </c:if>
             </c:if>
 
             <!-- ITEMS TABLE -->
@@ -88,40 +93,43 @@
 
             <!-- ACTIONS -->
             <div class="mt-3 d-flex gap-2">
+                <c:if test="${sessionScope.user != null
+                              and sessionScope.user.role != null
+                              and sessionScope.user.role.active
+                              and fn:contains(sessionScope.userPermissions, 'UPDATE_PURCHASE_REQUEST')}">
+                    <c:if test="${!isManager && isPending}">
+                        <form method="post"
+                              action="${pageContext.request.contextPath}/purchase-request/detail"
+                              onsubmit="return confirm('Cancel this purchase request?')">
+                            <input type="hidden" name="id" value="${prList.id}">
+                            <input type="hidden" name="action" value="cancel">
+                            <button class="btn btn-danger">❌ Cancel</button>
+                        </form>
+                    </c:if>
+                    <c:if test="${isWarehouse}">
+                        <form method="post"
+                              action="${pageContext.request.contextPath}/purchase-request/detail"
+                              onsubmit="return confirm('Complete this purchase request?')">
+                            <input type="hidden" name="id" value="${prList.id}">
+                            <input type="hidden" name="action" value="complete">
+                            <button class="btn btn-warning">Complete</button>
+                        </form>
+                    </c:if>
 
-                <c:if test="${!isManager && isPending}">
-                    <form method="post"
-                          action="${pageContext.request.contextPath}/purchase-request/detail"
-                          onsubmit="return confirm('Cancel this purchase request?')">
-                        <input type="hidden" name="id" value="${prList.id}">
-                        <input type="hidden" name="action" value="cancel">
-                        <button class="btn btn-danger">❌ Cancel</button>
-                    </form>
+                    <c:if test="${isManager && isPending}">
+                        <form method="post" action="${pageContext.request.contextPath}/purchase-request/detail">
+                            <input type="hidden" name="id" value="${prList.id}">
+                            <input type="hidden" name="action" value="approve">
+                            <button class="btn btn-success">Approve</button>
+                        </form>
+
+                        <form method="post" action="${pageContext.request.contextPath}/purchase-request/detail">
+                            <input type="hidden" name="id" value="${prList.id}">
+                            <input type="hidden" name="action" value="reject">
+                            <button class="btn btn-danger">Reject</button>
+                        </form>
+                    </c:if>
                 </c:if>
-                <c:if test="${isWarehouse}">
-                    <form method="post"
-                          action="${pageContext.request.contextPath}/purchase-request/detail"
-                          onsubmit="return confirm('Complete this purchase request?')">
-                        <input type="hidden" name="id" value="${prList.id}">
-                        <input type="hidden" name="action" value="complete">
-                        <button class="btn btn-warning">Complete</button>
-                    </form>
-                </c:if>
-
-                <c:if test="${isManager && isPending}">
-                    <form method="post" action="${pageContext.request.contextPath}/purchase-request/detail">
-                        <input type="hidden" name="id" value="${prList.id}">
-                        <input type="hidden" name="action" value="approve">
-                        <button class="btn btn-success">Approve</button>
-                    </form>
-
-                    <form method="post" action="${pageContext.request.contextPath}/purchase-request/detail">
-                        <input type="hidden" name="id" value="${prList.id}">
-                        <input type="hidden" name="action" value="reject">
-                        <button class="btn btn-danger">Reject</button>
-                    </form>
-                </c:if>
-
                 <a href="${pageContext.request.contextPath}/purchase-request/list"
                    class="btn btn-secondary ms-auto">
                     ← Back

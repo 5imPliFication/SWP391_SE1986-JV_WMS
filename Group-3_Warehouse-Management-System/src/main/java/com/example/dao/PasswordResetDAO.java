@@ -3,7 +3,7 @@ package com.example.dao;
 import com.example.config.DBConfig;
 import com.example.model.PasswordReset;
 import com.example.model.User;
-import com.example.util.UserConstant;
+import com.example.util.AppConstants;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -44,9 +44,9 @@ public class PasswordResetDAO {
                 ps.setString(index++, requestStatus.toUpperCase());
             }
             // set value for pagination of SQL
-            ps.setInt(index++, UserConstant.PAGE_SIZE);
+            ps.setInt(index++, AppConstants.PAGE_SIZE);
 
-            int offset = (pageNo - 1)* UserConstant.PAGE_SIZE;
+            int offset = (pageNo - 1)* AppConstants.PAGE_SIZE;
             ps.setInt(index++, offset);
 
             ResultSet rs = ps.executeQuery();

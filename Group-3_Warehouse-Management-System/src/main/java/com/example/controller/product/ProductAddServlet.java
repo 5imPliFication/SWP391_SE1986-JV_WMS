@@ -2,11 +2,9 @@ package com.example.controller.product;
 
 import com.example.model.Brand;
 import com.example.model.Category;
-import com.example.model.Product;
 import com.example.service.BrandService;
 import com.example.service.CategoryService;
 import com.example.service.ProductService;
-import com.example.util.UserConstant;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

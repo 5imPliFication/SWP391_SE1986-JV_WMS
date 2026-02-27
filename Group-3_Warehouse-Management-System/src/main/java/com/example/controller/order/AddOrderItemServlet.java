@@ -32,11 +32,11 @@ public class AddOrderItemServlet extends HttpServlet {
 
         try {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
-            Long productId = Long.parseLong(req.getParameter("productId"));
+            Long productItemId = Long.parseLong(req.getParameter("productItemId"));
             int quantity = Integer.parseInt(req.getParameter("quantity"));
 
             // Check if item already exists and update quantity instead
-            orderService.addOrUpdateOrderItem(orderId, productId, quantity);
+            orderService.addOrUpdateOrderItem(orderId, productItemId, quantity);
 
             resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId);
 

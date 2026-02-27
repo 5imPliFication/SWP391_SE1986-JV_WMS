@@ -14,7 +14,7 @@
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
 <main class="main-content">
-    <h3 class="mb-4">Import History</h3>
+    <h2 class="mb-4">Import History</h2>
 
     <%-- filter --%>
     <div class="d-flex justify-content-between align-items-end mb-3">

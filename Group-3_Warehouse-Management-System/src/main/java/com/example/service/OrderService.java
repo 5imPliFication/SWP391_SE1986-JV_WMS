@@ -7,26 +7,24 @@ import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.sql.SQLException;
 import java.util.*;
 
 public class OrderService {
     private final OrderDAO orderDAO;
     private final OrderItemDAO orderItemDAO;
-    private final ProductDAO productDAO;
+    private final ProductItemDAO productItemDAO;  // ✓ ADDED
     private final CouponDAO couponDAO;
     private final UserDAO userDAO;
 
     public OrderService() {
         orderDAO = new OrderDAO();
         orderItemDAO = new OrderItemDAO();
-        productDAO = new ProductDAO();
+        productItemDAO = new ProductItemDAO();  // ✓ ADDED
         couponDAO = new CouponDAO();
         userDAO = new UserDAO();
     }
 
-    public List<Order> getAllOrders() {
-        return orderDAO.findAll();
-    }
 
     public Map<String, Integer> getOrderStatistics() {
         return orderDAO.getStatistics();
@@ -47,8 +45,7 @@ public class OrderService {
         return orderDAO.create(order);
     }
 
-    public void removeItem(Long orderId, Long productId) {
-
+    public void removeItem(Long orderId, Long productItemId) {
         Order order = orderDAO.findById(orderId);
         if (order == null)
             throw new IllegalArgumentException("Order not found");
@@ -56,13 +53,12 @@ public class OrderService {
         if (!"DRAFT".equals(order.getStatus()))
             throw new IllegalStateException("Order is not editable");
 
-        OrderItem orderItem = orderItemDAO.findByOrderAndProduct(orderId, productId);
+        OrderItem orderItem = orderItemDAO.findByOrderAndProductItem(orderId, productItemId);
         if (orderItem == null)
             throw new IllegalArgumentException("Item not found");
 
-        orderItemDAO.deleteByOrderAndProduct(orderId, productId);
+        orderItemDAO.deleteByOrderAndProductItem(orderId, productItemId);
     }
-
 
     /* ================= SHARED ================= */
 
@@ -142,10 +138,6 @@ public class OrderService {
             throw new IllegalArgumentException("Order not found with ID: " + orderId);
         }
 
-        // Authorization check
-        // Salesman can only cancel their own DRAFT orders
-        // Warehouse can cancel SUBMITTED or PROCESSING orders
-
         User user = userDAO.findUserById(userId);
         if (user == null) {
             throw new IllegalArgumentException("User not found");
@@ -182,28 +174,47 @@ public class OrderService {
         }
     }
 
-    public void addOrUpdateOrderItem(Long orderId, Long productId, int quantity) {
+    /**
+     * Add or update order item
+     * ✓ FIXED: Now uses ProductItemDAO and stores price_at_purchase
+     */
+    public void addOrUpdateOrderItem(Long orderId, Long productItemId, int quantity) {
+        // Validate order
+        Order order = orderDAO.findById(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found");
+        }
+
+        if (!"DRAFT".equals(order.getStatus())) {
+            throw new IllegalStateException("Can only add items to draft orders");
+        }
+
+        ProductItem productItem = productItemDAO.findById(productItemId);
+        if (productItem == null) {
+            throw new IllegalArgumentException("Product item not found");
+        }
+
         // Check if item already exists
-        OrderItem existing = orderItemDAO.findByOrderAndProduct(orderId, productId);
+        OrderItem existing = orderItemDAO.findByOrderAndProductItem(orderId, productItemId);
 
         if (existing != null) {
             // Update quantity
-            existing.setQuantity(existing.getQuantity() + quantity);
-            orderItemDAO.updateQuantity(existing.getId(), existing.getQuantity());
+            int newQuantity = existing.getQuantity() + quantity;
+
+            orderItemDAO.updateQuantity(existing.getId(), newQuantity);
         } else {
-            // Add new item
             OrderItem orderItem = new OrderItem();
-            Order order = orderDAO.findById(orderId);
-            Product product = productDAO.findById(productId);
             orderItem.setOrder(order);
-            orderItem.setProduct(product);
+            orderItem.setProductItem(productItem);
             orderItem.setQuantity(quantity);
+
             orderItemDAO.addItem(orderItem);
         }
     }
 
     /**
      * Calculate total amount for an order
+     * ✓ FIXED: Now uses price_at_purchase from order_items
      */
     public BigDecimal calculateOrderTotal(Long orderId) {
         List<OrderItem> items = orderItemDAO.findByOrderId(orderId);
@@ -216,15 +227,14 @@ public class OrderService {
         BigDecimal total = BigDecimal.ZERO;
 
         for (OrderItem item : items) {
-            if (item.getProduct() == null) {
-                throw new RuntimeException("Product not loaded for item ID: " + item.getId());
+            // ✓ FIXED: Use price_at_purchase instead of product.price
+            if (item.getPriceAtPurchase() == null) {
+                throw new RuntimeException("Price not set for item ID: " + item.getId());
             }
 
-//            BigDecimal itemTotal = item.getProduct().getPrice()
-//                    .multiply(new BigDecimal(item.getQuantity()));
+            BigDecimal itemTotal = item.getPriceAtPurchase()
+                    .multiply(new BigDecimal(item.getQuantity()));
 
-            // Tạm thời để 0 vì Ko có price trong product, sau này sẽ sửa lại
-            BigDecimal itemTotal = BigDecimal.ZERO;
             total = total.add(itemTotal);
         }
 
@@ -265,13 +275,15 @@ public class OrderService {
      * Calculate discount amount based on coupon
      */
     public BigDecimal calculateDiscount(Coupon coupon, BigDecimal orderTotal) {
-        if (coupon.getDiscountType().equals("PERCENTAGE")) {
+        if ("PERCENTAGE".equals(coupon.getDiscountType())) {
             // Percentage discount
-            BigDecimal percentage = coupon.getDiscountValue().divide(new BigDecimal("100"));
+            BigDecimal percentage = coupon.getDiscountValue()
+                    .divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
             return orderTotal.multiply(percentage).setScale(2, RoundingMode.HALF_UP);
         } else {
-            // Fixed amount discount
-            return coupon.getDiscountValue();
+            // Fixed amount discount (but not more than order total)
+            BigDecimal discount = coupon.getDiscountValue();
+            return discount.min(orderTotal);
         }
     }
 
@@ -289,7 +301,7 @@ public class OrderService {
         }
 
         Coupon coupon = couponDAO.findById(couponId);
-        if (coupon==null) {
+        if (coupon == null) {
             throw new IllegalArgumentException("Coupon not found");
         }
 
@@ -326,6 +338,10 @@ public class OrderService {
         orderDAO.removeCoupon(orderId);
     }
 
+    /**
+     * Submit order
+     * ✓ FIXED: Proper equality check and null safety
+     */
     public void submitOrder(Long orderId, Long userId) {
         Order order = orderDAO.findById(orderId);
 
@@ -333,7 +349,8 @@ public class OrderService {
             throw new IllegalArgumentException("Order not found");
         }
 
-        if (!order.getCreatedBy().equals(userId)) {
+        // ✓ FIXED: Compare Long with Long, not User with Long
+        if (!order.getCreatedBy().getId().equals(userId)) {
             throw new SecurityException("You can only submit your own orders");
         }
 
@@ -346,19 +363,39 @@ public class OrderService {
             throw new IllegalStateException("Cannot submit empty order");
         }
 
-        // Increment coupon usage if coupon was applied
-        if (order.getCoupon().getId() != null) {
+        // ✓ FIXED: Check if coupon exists before accessing
+        if (order.getCoupon() != null && order.getCoupon().getId() != null) {
             couponDAO.incrementUsageCount(order.getCoupon().getId());
         }
 
         orderDAO.updateStatus(orderId, "SUBMITTED", userId, null);
     }
 
-    public List<Order> getOrdersBySalesman(Long salesmanId){
+    public List<Order> getOrdersBySalesman(Long salesmanId) {
         List<Order> orders = orderDAO.findBySalesman(salesmanId);
         if (orders.isEmpty()) {
-            throw new IllegalArgumentException("Order not found");
+            throw new IllegalArgumentException("No orders found for salesman");
         }
         return orders;
+    }
+
+    public boolean updateStatusOrder(String orderCode, String status) {
+        return orderDAO.updateStatus(orderCode, status);
+    }
+
+    public int countOrders(String status, String searchCode) {
+        return orderDAO.countOrders(status, searchCode);
+    }
+
+    public List<Order> getOrders(String status, String searchCode, int offset, int pageSize) {
+        return orderDAO.getOrders(status, searchCode, offset, pageSize);
+    }
+
+    public int countOrdersBySalesman(Long salesmanId, String status, String searchCode) {
+        return orderDAO.countOrdersBySalesman(salesmanId, status, searchCode);
+    }
+
+    public List<Order> getOrdersBySalesman(Long salesmanId, String status, String searchCode, int offset, int limit) {
+        return orderDAO.getOrdersBySalesman(salesmanId, status, searchCode, offset, limit);
     }
 }

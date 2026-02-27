@@ -2,7 +2,7 @@ package com.example.controller.inventory;
 
 import com.example.dto.ImportHistoryDTO;
 import com.example.service.GoodsHistoryService;
-import com.example.util.UserConstant;
+import com.example.util.AppConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -42,7 +42,7 @@ public class ImportHistoryItemServlet extends HttpServlet {
         int totalRecords = goodsHistoryService.countImportHistory(fromDate, toDate);
 
         // calc total pages
-        int totalPages = (int) Math.ceil((double) totalRecords / UserConstant.PAGE_SIZE);
+        int totalPages = (int) Math.ceil((double) totalRecords / AppConstants.PAGE_SIZE);
 
         // set data
         request.setAttribute("importHistories", importHistories);

@@ -2,7 +2,7 @@ package com.example.dao;
 
 import com.example.config.DBConfig;
 import com.example.dto.ImportHistoryDTO;
-import com.example.util.UserConstant;
+import com.example.util.AppConstants;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -45,8 +45,8 @@ public class GoodsHistoryDAO {
                 ps.setString(paramIndex++, toDate + " 23:59:59");
             }
 
-            ps.setInt(paramIndex++, UserConstant.PAGE_SIZE);
-            ps.setInt(paramIndex, (pageNo - 1) * UserConstant.PAGE_SIZE);
+            ps.setInt(paramIndex++, AppConstants.PAGE_SIZE);
+            ps.setInt(paramIndex, (pageNo - 1) * AppConstants.PAGE_SIZE);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
