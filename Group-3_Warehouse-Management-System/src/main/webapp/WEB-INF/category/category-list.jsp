@@ -79,6 +79,9 @@
                                     </c:if>
                                 </tbody>
                             </table>
+
+                            <a href="${pageContext.request.contextPath}/products">Back to product list</a>
+
                         </div>
                     </div>
                 </div>

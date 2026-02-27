@@ -161,6 +161,9 @@
                                         </c:forEach>
                                     </tbody>
                                 </table>
+
+                                <a href="${pageContext.request.contextPath}/products">Back to product list</a>
+
                                 <c:if test="${totalPages > 1}">
                                     <nav class="mt-3">
                                         <ul class="pagination justify-content-center">
