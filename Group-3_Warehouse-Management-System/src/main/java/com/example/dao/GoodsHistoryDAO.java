@@ -2,6 +2,7 @@ package com.example.dao;
 
 import com.example.config.DBConfig;
 import com.example.dto.ImportHistoryDTO;
+import com.example.dto.ImportHistoryDetailDTO;
 import com.example.util.AppConstants;
 
 import java.sql.*;
@@ -118,5 +119,61 @@ public class GoodsHistoryDAO {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public ImportHistoryDTO getImportHistoryById(Long id) {
+        String sql = """
+                    select gr.id, pr.request_code as receiptCode, gr.received_at, u.fullname as warehouseName,
+                           gr.total_actual_quantity as totalQuantity, gr.note
+                    from goods_receipts gr
+                    join purchase_requests pr on gr.purchase_request_id = pr.id
+                    join users u ON gr.warehouse_staff_id = u.id
+                    where gr.id = ?
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    ImportHistoryDTO dto = new ImportHistoryDTO();
+                    dto.setId(rs.getLong("id"));
+                    dto.setReceiptCode(rs.getString("receiptCode"));
+                    dto.setReceivedAt(rs.getTimestamp("received_at"));
+                    dto.setWarehouseName(rs.getString("warehouseName"));
+                    dto.setTotalQuantity(rs.getLong("totalQuantity"));
+                    dto.setNote(rs.getString("note"));
+                    return dto;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<ImportHistoryDetailDTO> getImportHistoryItems(Long receiptId) {
+        List<ImportHistoryDetailDTO> items = new ArrayList<>();
+        String sql = """
+                    select p.name as productName, gri.expected_quantity, gri.actual_quantity
+                    from goods_receipt_items gri
+                    join products p on gri.product_id = p.id
+                    where gri.goods_receipt_id = ?
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, receiptId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ImportHistoryDetailDTO dto = new ImportHistoryDetailDTO();
+                    dto.setProductName(rs.getString("productName"));
+                    dto.setExpectedQuantity(rs.getLong("expected_quantity"));
+                    dto.setActualQuantity(rs.getLong("actual_quantity"));
+                    items.add(dto);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return items;
     }
 }
