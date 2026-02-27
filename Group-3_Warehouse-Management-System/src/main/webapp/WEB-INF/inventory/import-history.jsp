@@ -16,34 +16,32 @@
 <main class="main-content">
     <h2 class="mb-4">Import History</h2>
 
-    <%-- filter --%>
-    <div class="d-flex justify-content-between align-items-end mb-3">
-        <form action="${pageContext.request.contextPath}/inventory/import/history" method="get"
-              class="form-row align-items-end">
-            <div class="form-group mr-2">
-                <label class="small mb-1">From date</label>
+    <div class="d-flex align-items-center mb-3">
+        <form class="form-inline" action="${pageContext.request.contextPath}/inventory/import/history"
+              method="get">
+            <%--search name customer--%>
+            <input type="text" name="receiptCode" class="form-control mr-5"
+                   placeholder="Search name customer" value="${receiptCode}">
+
+            <%-- from date--%>
+            <span class="mr-2">From Date</span>
+            <div class="form-group mr-5">
                 <input type="date" name="fromDate" value="${param.fromDate}"
                        class="form-control form-control-sm">
             </div>
 
+            <%-- to date--%>
+            <span class="mr-2">To Date</span>
             <div class="form-group mr-2">
-                <label class="small mb-1">To date</label>
                 <input type="date" name="toDate" value="${param.toDate}"
                        class="form-control form-control-sm">
             </div>
 
-            <div class="form-group mb-0">
-                <button type="submit" class="btn btn-primary btn-sm">Search</button>
-            </div>
+            <%-- button search--%>
+            <button type="submit" class="btn btn-primary mr-2" name="action" value="search">
+                Search
+            </button>
         </form>
-
-        <%-- export history by excel --%>
-        <div>
-            <a href="${pageContext.request.contextPath}/inventory/import/history?action=excel&fromDate=${param.fromDate}&toDate=${param.toDate}"
-               class="btn btn-success btn-sm">
-                Export Excel
-            </a>
-        </div>
     </div>
 
     <%-- message --%>
@@ -81,7 +79,7 @@
                                     ${history.receivedAt}
                             </td>
                             <td class="align-middle">
-                                    ${history.staffName}
+                                    ${history.warehouseName}
                             </td>
                             <td class="text-center align-middle">
                                     ${history.totalQuantity}
@@ -117,7 +115,7 @@
                     <%-- previous page--%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${pageNo - 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                       href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${pageNo - 1}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
                         Previous
                     </a>
                 </li>
@@ -131,7 +129,7 @@
                         <c:when test="${i == 1}">
                             <li class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                                   href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
                                         ${i}
                                 </a>
                             </li>
@@ -140,7 +138,7 @@
                         <c:when test="${i == totalPages}">
                             <li class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                                   href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
                                         ${i}
                                 </a>
                             </li>
@@ -150,7 +148,7 @@
                             <li
                                     class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                                   href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
                                         ${i}
                                 </a>
                             </li>
@@ -167,7 +165,7 @@
                     <%--next page--%>
                 <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${pageNo + 1}&fromDate=${param.fromDate}&toDate=${param.toDate}">
+                       href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${pageNo + 1}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
                         Next
                     </a>
                 </li>

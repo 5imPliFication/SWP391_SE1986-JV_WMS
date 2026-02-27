@@ -186,7 +186,7 @@
             <li>
                 <a href="${pageContext.request.contextPath}/inventory/export/history"
                    class="${currentUri == pageContext.request.contextPath.concat('/inventory/import/history') ? 'active' : ''}">
-                    <span>Import History</span>
+                    <span>Export History</span>
                 </a>
             </li>
         </c:if>
