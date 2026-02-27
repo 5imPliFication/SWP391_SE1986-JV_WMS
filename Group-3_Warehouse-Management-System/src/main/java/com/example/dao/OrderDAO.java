@@ -1,6 +1,7 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
+import com.example.dto.OrderDTO;
 import com.example.model.Coupon;
 import com.example.model.Order;
 import com.example.model.User;
@@ -101,7 +102,6 @@ public class OrderDAO {
         return order;
     }
 
-
     public int create(Order order) {
         String sql = """
                     INSERT INTO orders (order_code, customer_name, customer_phone, note, status, created_by)
@@ -146,38 +146,37 @@ public class OrderDAO {
         }
     }
 
-
     public Order findById(Long orderId) {
-         String sql = """
-                     SELECT
-                         o.id            AS order_id,
-                         o.order_code,
-                         o.customer_name,
-                         o.customer_phone,
-                         o.note,
-                         o.status,
-                         o.total_price as total,
-                         o.order_date,
-                         o.processed_at,
-                         o.discount_amount,
-                         o.final_total,
-                 
-                         cu.id           AS created_user_id,
-                         cu.fullname     AS created_user_name,
-                 
-                         pu.id           AS processed_user_id,
-                         pu.fullname     AS processed_user_name,
-                 
-                         c.id            AS coupon_id,
-                         c.code          AS coupon_code,
-                         c.discount_type,
-                         c.discount_value
-                     FROM orders o
-                     JOIN users cu ON o.created_by = cu.id
-                     LEFT JOIN users pu ON o.processed_by = pu.id
-                     LEFT JOIN coupons c ON o.coupon_id = c.id
-                     WHERE o.id = ?
-                 """;
+        String sql = """
+                    SELECT
+                        o.id            AS order_id,
+                        o.order_code,
+                        o.customer_name,
+                        o.customer_phone,
+                        o.note,
+                        o.status,
+                        o.total_price as total,
+                        o.order_date,
+                        o.processed_at,
+                        o.discount_amount,
+                        o.final_total,
+                
+                        cu.id           AS created_user_id,
+                        cu.fullname     AS created_user_name,
+                
+                        pu.id           AS processed_user_id,
+                        pu.fullname     AS processed_user_name,
+                
+                        c.id            AS coupon_id,
+                        c.code          AS coupon_code,
+                        c.discount_type,
+                        c.discount_value
+                    FROM orders o
+                    JOIN users cu ON o.created_by = cu.id
+                    LEFT JOIN users pu ON o.processed_by = pu.id
+                    LEFT JOIN coupons c ON o.coupon_id = c.id
+                    WHERE o.id = ?
+                """;
 
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -247,7 +246,6 @@ public class OrderDAO {
         }
     }
 
-
     public List<Order> findAll() {
         String sql = "SELECT\n" +
                 "    o.id            AS order_id,\n" +
@@ -292,30 +290,30 @@ public class OrderDAO {
 
     public List<Order> findBySalesman(Long salesmanId) {
         String sql = """
-        SELECT
-            o.id AS order_id,
-            o.order_code,
-            o.customer_name,
-            o.customer_phone,
-            o.note,
-            o.status,
-            o.total_price as total,
-            o.order_date,
-            o.processed_at,
-
-            u.id AS created_user_id,
-            u.fullname AS created_user_name,
-
-            c.id AS coupon_id,
-            c.code AS coupon_code,
-            c.discount_type,
-            c.discount_value
-        FROM orders o
-        JOIN users u ON o.created_by = u.id
-        LEFT JOIN coupons c ON o.coupon_id = c.id
-        WHERE o.created_by = ?
-        ORDER BY o.order_date DESC
-    """;
+                    SELECT
+                        o.id AS order_id,
+                        o.order_code,
+                        o.customer_name,
+                        o.customer_phone,
+                        o.note,
+                        o.status,
+                        o.total_price as total,
+                        o.order_date,
+                        o.processed_at,
+                
+                        u.id AS created_user_id,
+                        u.fullname AS created_user_name,
+                
+                        c.id AS coupon_id,
+                        c.code AS coupon_code,
+                        c.discount_type,
+                        c.discount_value
+                    FROM orders o
+                    JOIN users u ON o.created_by = u.id
+                    LEFT JOIN coupons c ON o.coupon_id = c.id
+                    WHERE o.created_by = ?
+                    ORDER BY o.order_date DESC
+                """;
 
         List<Order> list = new ArrayList<>();
 
@@ -336,30 +334,30 @@ public class OrderDAO {
 
     public List<Order> findByStatus(String status) {
         String sql = """
-        SELECT
-            o.id AS order_id,
-            o.order_code,
-            o.customer_name,
-            o.customer_phone,
-            o.note,
-            o.status,
-            o.total_price as total,
-            o.order_date,
-            o.processed_at,
-
-            u.id AS created_user_id,
-            u.fullname AS created_user_name,
-
-            c.id AS coupon_id,
-            c.code AS coupon_code,
-            c.discount_type,
-            c.discount_value
-        FROM orders o
-        JOIN users u ON o.created_by = u.id
-        LEFT JOIN coupons c ON o.coupon_id = c.id
-        WHERE o.status = ?
-        ORDER BY o.order_date ASC
-    """;
+                    SELECT
+                        o.id AS order_id,
+                        o.order_code,
+                        o.customer_name,
+                        o.customer_phone,
+                        o.note,
+                        o.status,
+                        o.total_price as total,
+                        o.order_date,
+                        o.processed_at,
+                
+                        u.id AS created_user_id,
+                        u.fullname AS created_user_name,
+                
+                        c.id AS coupon_id,
+                        c.code AS coupon_code,
+                        c.discount_type,
+                        c.discount_value
+                    FROM orders o
+                    JOIN users u ON o.created_by = u.id
+                    LEFT JOIN coupons c ON o.coupon_id = c.id
+                    WHERE o.status = ?
+                    ORDER BY o.order_date ASC
+                """;
 
         List<Order> list = new ArrayList<>();
 
@@ -384,13 +382,13 @@ public class OrderDAO {
                                 String note) {
 
         String sql = """
-        UPDATE orders
-        SET status = ?,
-            processed_by = ?,
-            processed_at = ?,
-            note = ?
-        WHERE id = ?
-    """;
+                    UPDATE orders
+                    SET status = ?,
+                        processed_by = ?,
+                        processed_at = ?,
+                        note = ?
+                    WHERE id = ?
+                """;
 
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -637,7 +635,7 @@ public class OrderDAO {
                 ps.setString(1, status);
             }
 
-            if(orderCode != null && !orderCode.trim().isEmpty()) {
+            if (orderCode != null && !orderCode.trim().isEmpty()) {
                 ps.setString(2, orderCode);
             }
 
@@ -648,7 +646,7 @@ public class OrderDAO {
         }
     }
 
-    //for pagination
+    // for pagination
     public int countOrders(String status, String searchCode) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders WHERE 1=1");
 
@@ -687,8 +685,7 @@ public class OrderDAO {
 
     public List<Order> getOrders(String status, String searchCode, int offset, int limit) {
         StringBuilder sql = new StringBuilder(
-                "SELECT * FROM orders WHERE 1=1"
-        );
+                "SELECT * FROM orders WHERE 1=1");
 
         if (status != null && !status.isEmpty()) {
             sql.append(" AND status = ?");
@@ -733,8 +730,7 @@ public class OrderDAO {
 
     public int countOrdersBySalesman(Long salesmanId, String status, String searchCode) {
         StringBuilder sql = new StringBuilder(
-                "SELECT COUNT(*) FROM orders WHERE created_by = ?"
-        );
+                "SELECT COUNT(*) FROM orders WHERE created_by = ?");
 
         if (status != null && !status.isEmpty()) {
             sql.append(" AND status = ?");
@@ -776,8 +772,7 @@ public class OrderDAO {
                 "SELECT o.*, u.fullname " +
                         "FROM orders o " +
                         "LEFT JOIN users u ON o.created_by = u.id " +
-                        "WHERE o.created_by = ?"
-        );
+                        "WHERE o.created_by = ?");
 
         if (status != null && !status.isEmpty()) {
             sql.append(" AND o.status = ?");
@@ -834,5 +829,26 @@ public class OrderDAO {
         } catch (SQLException e) {
             throw new RuntimeException("Failed to get orders for salesman", e);
         }
+    }
+
+    public Long findOrderIdByCode(String code) {
+        StringBuilder sql = new StringBuilder("SELECT id FROM orders WHERE 1 = 1 ");
+
+        if (code != null && !code.isEmpty()) {
+            sql.append(" AND order_code LIKE ?");
+        }
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            ps.setString(1, "%" + code + "%");
+            ResultSet resultSet =  ps.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getLong(1);
+            }
+
+        } catch (SQLException e) {
+        }
+        return null;
     }
 }
