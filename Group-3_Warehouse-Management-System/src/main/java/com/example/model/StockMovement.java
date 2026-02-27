@@ -1,4 +1,8 @@
 package com.example.model;
+
+
+import com.example.enums.MovementType;
+import com.example.enums.ReferenceType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
