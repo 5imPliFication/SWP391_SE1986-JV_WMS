@@ -20,6 +20,25 @@ public class ImportHistoryItemServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        String action = request.getParameter("action");
+
+        if (action == null) {
+            action = "search";
+        }
+
+        if ("search".equals(action)) {
+            handleSearch(request, response);
+        } else if ("detail".equals(action)) {
+            handleDetail(request, response);
+        }
+
+    }
+
+    private void handleDetail(HttpServletRequest request, HttpServletResponse response) {
+    }
+
+    private void handleSearch(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // get pageNo
         String pageNoStr = request.getParameter("pageNo");
         int pageNo = 1;
@@ -31,23 +50,29 @@ public class ImportHistoryItemServlet extends HttpServlet {
             }
         }
 
+        // get code
+        String receiptCode = request.getParameter("receiptCode");
+
         // get date
         String fromDate = request.getParameter("fromDate");
         String toDate = request.getParameter("toDate");
 
         // get data through service
-        List<ImportHistoryDTO> importHistories = goodsHistoryService.getImportHistory(fromDate, toDate, pageNo);
+        List<ImportHistoryDTO> importHistories = goodsHistoryService.getImportHistory(receiptCode, fromDate, toDate, pageNo);
 
         // count total records
-        int totalRecords = goodsHistoryService.countImportHistory(fromDate, toDate);
+        int totalRecords = goodsHistoryService.countImportHistory(receiptCode, fromDate, toDate);
 
         // calc total pages
         int totalPages = (int) Math.ceil((double) totalRecords / AppConstants.PAGE_SIZE);
 
         // set data
+        request.setAttribute("receiptCode", receiptCode);
         request.setAttribute("importHistories", importHistories);
         request.setAttribute("pageNo", pageNo);
         request.setAttribute("totalPages", totalPages);
+        request.setAttribute("fromDate", fromDate);
+        request.setAttribute("toDate", toDate);
 
         // forward to jsp
         request.getRequestDispatcher("/WEB-INF/inventory/import-history.jsp").forward(request, response);

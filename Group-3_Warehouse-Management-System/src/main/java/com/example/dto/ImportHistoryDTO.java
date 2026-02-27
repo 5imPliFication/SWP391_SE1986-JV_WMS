@@ -13,7 +13,7 @@ public class ImportHistoryDTO {
     private Long id;
     private String receiptCode;
     private Timestamp receivedAt;
-    private String staffName;
+    private String warehouseName;
     private Long totalQuantity;
     private String note;
 }
