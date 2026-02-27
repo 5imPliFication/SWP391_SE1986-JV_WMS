@@ -27,6 +27,15 @@ public class PermissionChecker {
         urlPermissionMap.put("/products/add", "CREATE_PRODUCT");
         urlPermissionMap.put("/products/update", "UPDATE_PRODUCT");
         urlPermissionMap.put("/products/items/update", "UPDATE_PRODUCT_ITEM");
+        urlPermissionMap.put("/products/items", "READ_PRODUCT");
+
+        urlPermissionMap.put("/brands", "READ_PRODUCT");
+        urlPermissionMap.put("/change-status", "UPDATE_PRODUCT");
+        urlPermissionMap.put("/brand-update", "UPDATE_PRODUCT");
+
+        urlPermissionMap.put("/categories", "READ_PRODUCT");
+        urlPermissionMap.put("/create-category", "CREATE_PRODUCT");
+        urlPermissionMap.put("/update-category", "UPDATE_PRODUCT");
 
         // --- QUẢN LÝ KIỂM KÊ ---
         urlPermissionMap.put("/inventory-audits", "READ_AUDIT");
