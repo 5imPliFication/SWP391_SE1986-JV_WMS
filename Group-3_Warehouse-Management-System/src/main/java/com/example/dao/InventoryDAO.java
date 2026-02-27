@@ -16,8 +16,8 @@ public class InventoryDAO {
     // get list product by name
     public List<ProductDTO> findProductByName(String searchName) {
         List<ProductDTO> listProducts = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("select id, name, description, total_quantity from products as p " +
-                " where 1 = 1 ");
+        StringBuilder sql = new StringBuilder("select id, name, description, total_quantity from products as p "
+                + " where 1 = 1 ");
 
         // if param has value of searchName
         if (searchName != null && !searchName.trim().isEmpty()) {
@@ -26,8 +26,7 @@ public class InventoryDAO {
 
         int index = 1;
         // access data
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // if searchName has value -> set value to query
             if (searchName != null && !searchName.trim().isEmpty()) {
@@ -51,12 +50,10 @@ public class InventoryDAO {
     // save list products item to db
     public boolean saveProductItems(List<ProductItemDTO> productItemDTOs) {
         String sql = "INSERT INTO product_items(serial, imported_price, current_price, is_active, imported_at, updated_at, product_id) "
-                +
-                "VALUES (?, ?, ?, ?, NOW(), NOW(), ?)";
+                + "VALUES (?, ?, ?, ?, NOW(), NOW(), ?)";
 
         // access data
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             // iterate each item
             for (ProductItemDTO item : productItemDTOs) {
@@ -78,8 +75,8 @@ public class InventoryDAO {
     }
 
     public boolean isExistSerial(String serial) {
-        StringBuilder sql = new StringBuilder("select serial from product_items as pt " +
-                "where 1 = 1 ");
+        StringBuilder sql = new StringBuilder("select serial from product_items as pt "
+                + "where 1 = 1 ");
 
         // if param has value of searchName
         if (serial != null && !serial.trim().isEmpty()) {
@@ -87,8 +84,7 @@ public class InventoryDAO {
         }
 
         // access data
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // if searchName has value -> set value to query
             if (serial != null) {
@@ -117,15 +113,15 @@ public class InventoryDAO {
         }
 
         // handle date
-        if (fromDate != null){
+        if (fromDate != null) {
             sql.append(" and CAST(o.order_date AS DATE) >= ?");
         }
-        if (toDate != null){
+        if (toDate != null) {
             sql.append(" and CAST(o.order_date AS DATE) <= ?");
         }
 
         // status
-        if(status != null && !status.trim().isEmpty()) {
+        if (status != null && !status.trim().isEmpty()) {
             sql.append(" and o.status like ? ");
         } else {
             sql.append(" and o.status not in ('DRAFT', 'COMPLETED', 'CANCELLED') ");
@@ -135,22 +131,21 @@ public class InventoryDAO {
         sql.append(" ORDER BY o.order_date DESC LIMIT ? OFFSET ?");
 
         List<OrderDTO> list = new ArrayList<>();
-        try (Connection con = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBConfig.getDataSource().getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             int index = 1;
             if (name != null && !name.trim().isEmpty()) {
                 ps.setString(index++, "%" + name + "%");
             }
 
-            if (fromDate != null){
+            if (fromDate != null) {
                 ps.setDate(index++, Date.valueOf(fromDate));
             }
-            if (toDate != null){
+            if (toDate != null) {
                 ps.setDate(index++, Date.valueOf(toDate));
             }
 
-            if(status != null && !status.trim().isEmpty()) {
+            if (status != null && !status.trim().isEmpty()) {
                 ps.setString(index++, "%" + status + "%");
             }
             ps.setInt(index++, AppConstants.PAGE_SIZE);
@@ -174,7 +169,7 @@ public class InventoryDAO {
     }
 
     // count total export product order
-    public int countExportOrders(String name, LocalDate fromDate, LocalDate toDate, String  status) {
+    public int countExportOrders(String name, LocalDate fromDate, LocalDate toDate, String status) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders o WHERE 1=1 and o.status not in ('DRAFT', 'COMPLETED', 'CANCELLED') ");
         if (name != null && !name.trim().isEmpty()) {
             sql.append(" and o.customer_name like ? ");
@@ -188,34 +183,34 @@ public class InventoryDAO {
         }
 
         // status
-        if(status != null && !status.trim().isEmpty()) {
+        if (status != null && !status.trim().isEmpty()) {
             sql.append(" and o.status like ? ");
         } else {
             sql.append(" and o.status not in ('DRAFT', 'COMPLETED', 'CANCELLED') ");
         }
 
-        try (Connection con = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBConfig.getDataSource().getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             int index = 1;
-            if(name != null && !name.trim().isEmpty()) {
+            if (name != null && !name.trim().isEmpty()) {
                 ps.setString(index++, "%" + name + "%");
             }
 
-            if (fromDate != null){
+            if (fromDate != null) {
                 ps.setDate(index++, Date.valueOf(fromDate));
             }
-            if (toDate != null){
+            if (toDate != null) {
                 ps.setDate(index++, Date.valueOf(toDate));
             }
 
-            if(status != null && !status.trim().isEmpty()) {
+            if (status != null && !status.trim().isEmpty()) {
                 ps.setString(index++, "%" + status + "%");
             }
 
             ResultSet rs = ps.executeQuery();
-            if (rs.next())
+            if (rs.next()) {
                 return rs.getInt(1);
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Count fail", e);
         }

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ProductService {
+
     private ProductDAO productDAO = new ProductDAO();
     private CategoryDAO categoryDAO = new CategoryDAO();
     private BrandDAO brandDAO = new BrandDAO();

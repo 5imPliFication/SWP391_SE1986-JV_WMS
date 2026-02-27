@@ -54,8 +54,7 @@ public class ProductDAO {
         sql.append(" ORDER BY p.created_at DESC ");
         sql.append(" LIMIT ? OFFSET ? ");
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
 
@@ -133,8 +132,7 @@ public class ProductDAO {
             sql.append(" AND p.is_active = ? ");
         }
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
 
@@ -165,8 +163,7 @@ public class ProductDAO {
                 INSERT INTO products (name, description, img_url, brand_id, category_id, is_active, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())
                 """;
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, product.getName());
             ps.setString(2, product.getDescription());
@@ -193,8 +190,7 @@ public class ProductDAO {
                 JOIN categories c on p.category_id = c.id
                 WHERE p.id = ?;
                 """;
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             Product product = null;
 
             ps.setLong(1, productId);
@@ -241,8 +237,7 @@ public class ProductDAO {
                 WHERE id = ?
                 """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, product.getName());
             ps.setString(2, product.getDescription());
@@ -286,8 +281,7 @@ public class ProductDAO {
         // handle pagination
         sql.append(" limit ? offset ? ");
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
             ps.setLong(index++, productId);
@@ -343,8 +337,7 @@ public class ProductDAO {
             sql.append(" AND pi.is_active = ? ");
         }
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
             ps.setLong(index++, productId);
@@ -371,8 +364,7 @@ public class ProductDAO {
                 FROM product_items pi
                 WHERE pi.id = ?;
                 """;
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ProductItem productItem = null;
 
             ps.setLong(1, productItemId);
@@ -408,8 +400,7 @@ public class ProductDAO {
                 WHERE id = ?
                 """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setDouble(1, productItem.getCurrentPrice());
             ps.setBoolean(2, productItem.getIsActive());
@@ -427,7 +418,7 @@ public class ProductDAO {
         List<ProductDTO> products = new ArrayList<>();
         StringBuilder sql = new StringBuilder("select * from products where total_quantity < 10 ");
 
-        if(name != null && !name.trim().isEmpty()) {
+        if (name != null && !name.trim().isEmpty()) {
             sql.append(" and name like ? ");
         }
 
@@ -435,10 +426,9 @@ public class ProductDAO {
         sql.append(" ORDER BY total_quantity asc LIMIT ? OFFSET ?");
 
         int index = 1;
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             // set value
-            if(name != null && !name.trim().isEmpty()) {
+            if (name != null && !name.trim().isEmpty()) {
                 ps.setString(index++, "%" + name + "%");
             }
 
@@ -463,15 +453,14 @@ public class ProductDAO {
     public int countTotalProducts(String name) {
         StringBuilder sql = new StringBuilder("select count(*) from products where total_quantity < 10 ");
 
-        if(name != null && !name.trim().isEmpty()) {
+        if (name != null && !name.trim().isEmpty()) {
             sql.append(" and name like ? ");
         }
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // set value
-            if(name != null && !name.trim().isEmpty()) {
+            if (name != null && !name.trim().isEmpty()) {
                 ps.setString(1, "%" + name + "%");
             }
             ResultSet rs = ps.executeQuery();
