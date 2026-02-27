@@ -7,12 +7,13 @@
             <title>Category List</title>
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/home.css">
         </head>
 
         <body class="d-flex bg-light">
             <jsp:include page="/WEB-INF/common/sidebar.jsp" />
 
-            <div class="container-fluid p-4">
+            <div class="main-content container-fluid p-4">
                 <div class="card shadow-sm">
                     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                         <h4 class="mb-0 text-primary">Category Management</h4>
@@ -48,7 +49,7 @@
                                             <td>${category.description}</td>
                                             <td>
                                                 <c:choose>
-                                                    <c:when test="${category.active}">
+                                                    <c:when test="${category.isActive == 1}">
                                                         <span class="badge bg-success">Active</span>
                                                     </c:when>
                                                     <c:otherwise>
