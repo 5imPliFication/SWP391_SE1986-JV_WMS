@@ -116,7 +116,7 @@
                         </form>
 
                         <c:if test="${prList.status eq 'APPROVED'}">
-                            <a href="${pageContext.request.contextPath}/inventory/import?prId=${prList.id}&prCode=${prList.requestCode}"
+                            <a href="${pageContext.request.contextPath}/inventory/import?purchaseId=${prList.id}&purchaseCode=${prList.requestCode}&action=import"
                                class="btn btn-primary">
                                 Import Product
                             </a>

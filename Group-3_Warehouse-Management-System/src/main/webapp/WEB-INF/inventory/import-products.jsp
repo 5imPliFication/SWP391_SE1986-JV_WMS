@@ -51,11 +51,11 @@
             Save
         </button>
 
-        <c:if test="${not empty prCode}">
+        <c:if test="${not empty purchaseCode}">
             <div class="ml-auto d-flex align-items-center">
                 <label class="mb-0 mr-2 font-weight-bold">Purchase Request:</label>
                 <input type="text" class="form-control form-control-sm"
-                       value="${prCode}" readonly
+                       value="${purchaseCode}" readonly
                        style="width: 150px; background-color: #e9ecef;">
             </div>
         </c:if>
