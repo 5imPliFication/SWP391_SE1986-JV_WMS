@@ -17,11 +17,16 @@ public class GoodsHistoryDAO {
 
         // sql
         StringBuilder sql = new StringBuilder("""
-                    select gr.id, pr.request_code as receiptCode, gr.received_at, u.fullname as warehouseName,
-                           gr.total_actual_quantity as totalQuantity, gr.note
+                    select gr.id,
+                           pr.request_code as receiptCode,
+                           gr.received_at,
+                           u.fullname as warehouseName,
+                           coalesce(sum(gri.actual_quantity), 0) as totalQuantity,
+                           gr.note
                     from goods_receipts gr
-                     join purchase_requests pr on gr.purchase_request_id = pr.id
-                     join users u ON gr.warehouse_staff_id = u.id
+                    join purchase_requests pr on gr.purchase_request_id = pr.id
+                    join users u ON gr.warehouse_id = u.id
+                    left join goods_receipt_items gri on gri.goods_receipt_id = gr.id
                     where 1=1
                 """);
 
@@ -38,6 +43,7 @@ public class GoodsHistoryDAO {
         }
 
         // pagination
+        sql.append(" group by gr.id, pr.request_code, gr.received_at, u.fullname, gr.note ");
         sql.append(" order by gr.received_at desc limit ? offset ?");
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
@@ -124,12 +130,18 @@ public class GoodsHistoryDAO {
 
     public ImportHistoryDTO getImportHistoryById(Long id) {
         String sql = """
-                    select gr.id, pr.request_code as receiptCode, gr.received_at, u.fullname as warehouseName,
-                           gr.total_actual_quantity as totalQuantity, gr.note
+                    select gr.id,
+                           pr.request_code as receiptCode,
+                           gr.received_at,
+                           u.fullname as warehouseName,
+                           coalesce(sum(gri.actual_quantity), 0) as totalQuantity,
+                           gr.note
                     from goods_receipts gr
                     join purchase_requests pr on gr.purchase_request_id = pr.id
-                    join users u ON gr.warehouse_staff_id = u.id
+                    join users u ON gr.warehouse_id = u.id
+                    left join goods_receipt_items gri on gri.goods_receipt_id = gr.id
                     where gr.id = ?
+                    group by gr.id, pr.request_code, gr.received_at, u.fullname, gr.note
                 """;
         try (Connection conn = DBConfig.getDataSource().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -155,9 +167,15 @@ public class GoodsHistoryDAO {
     public List<ImportHistoryDetailDTO> getImportHistoryItems(Long receiptId) {
         List<ImportHistoryDetailDTO> items = new ArrayList<>();
         String sql = """
-                    select p.name as productName, gri.expected_quantity, gri.actual_quantity
+                    select p.name as productName,
+                           pri.quantity as expected_quantity,
+                           gri.actual_quantity
                     from goods_receipt_items gri
+                    join goods_receipts gr on gri.goods_receipt_id = gr.id
                     join products p on gri.product_id = p.id
+                    left join purchase_request_items pri
+                      on pri.purchase_request_id = gr.purchase_request_id
+                     and pri.product_id = gri.product_id
                     where gri.goods_receipt_id = ?
                 """;
         try (Connection conn = DBConfig.getDataSource().getConnection();

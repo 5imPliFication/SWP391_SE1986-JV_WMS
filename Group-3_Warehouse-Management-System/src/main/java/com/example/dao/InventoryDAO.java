@@ -9,7 +9,9 @@ import com.example.util.AppConstants;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InventoryDAO {
 
@@ -26,7 +28,8 @@ public class InventoryDAO {
 
         int index = 1;
         // access data
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // if searchName has value -> set value to query
             if (searchName != null && !searchName.trim().isEmpty()) {
@@ -47,30 +50,112 @@ public class InventoryDAO {
         return listProducts;
     }
 
-    // save list products item to db
-    public boolean saveProductItems(List<ProductItemDTO> productItemDTOs) {
-        String sql = "INSERT INTO product_items(serial, imported_price, current_price, is_active, imported_at, updated_at, product_id) "
-                + "VALUES (?, ?, ?, ?, NOW(), NOW(), ?)";
+    public boolean saveProductItems(Long purchaseRequestId, Long warehouseUserId, String note,
+                                    List<ProductItemDTO> productItemDTOs) {
 
-        // access data
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        // count quantity import product for each product
+        Map<Long, Long> quantityByProduct = countQuantityImportByProductId(productItemDTOs);
 
-            // iterate each item
-            for (ProductItemDTO item : productItemDTOs) {
+        try {
+            // save product item: increase total quantity in table products and save each product items
+            // to table product items
+            insertProductItems(productItemDTOs);
 
-                // set data
-                int index = 1;
-                ps.setString(index++, item.getSerial());
-                ps.setDouble(index++, item.getImportPrice());
-                ps.setDouble(index++, item.getImportPrice());
-                ps.setBoolean(index++, true);
-                ps.setLong(index++, item.getProductId());
+            // update status of purchase request -> completed
+            completePurchaseRequest(purchaseRequestId);
+
+            // save purchase request to table good receipts
+            Long receiptId = insertGoodsReceipt(purchaseRequestId, warehouseUserId, note);
+
+            // save purchase request item to table goods receipt items
+            insertGoodsReceiptItems(receiptId, quantityByProduct);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private Map<Long, Long> countQuantityImportByProductId(List<ProductItemDTO> productItemDTOs) {
+        Map<Long, Long> quantityProduct = new HashMap<>();
+        for (ProductItemDTO dto : productItemDTOs) {
+            //get id of product
+            Long productId = dto.getProductId();
+            //get current quantity
+            Long currentQuantity = quantityProduct.get(productId);
+            // if not exist -> new quantity = 1
+            if (currentQuantity == null) {
+                quantityProduct.put(productId, 1L);
+            } else {
+                // exist -> quantity + 1
+                quantityProduct.put(productId, currentQuantity + 1);
+            }
+        }
+        return quantityProduct;
+    }
+
+    private Long insertGoodsReceipt(Long purchaseRequestId, Long warehouseUserId, String note)
+            throws SQLException {
+        String insertReceiptSql = "INSERT INTO goods_receipts(purchase_request_id, warehouse_id, received_at, note) VALUES (?, ?, NOW(), ?)";
+        Long receiptId = null;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(insertReceiptSql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setLong(1, purchaseRequestId);
+            ps.setLong(2, warehouseUserId);
+            if (note == null || note.isBlank()) {
+                ps.setNull(3, Types.VARCHAR);
+            } else {
+                ps.setString(3, note);
+            }
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    receiptId = rs.getLong(1);
+                }
+            }
+        }
+        return receiptId;
+    }
+
+    private void insertGoodsReceiptItems(Long receiptId, Map<Long, Long> qtyByProduct)
+            throws SQLException {
+        String insertReceiptItemSql = "INSERT INTO goods_receipt_items(goods_receipt_id, product_id, actual_quantity) VALUES (?, ?, ?)";
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(insertReceiptItemSql)) {
+            for (Map.Entry<Long, Long> entry : qtyByProduct.entrySet()) {
+                int idx = 1;
+                ps.setLong(idx++, receiptId);
+                ps.setLong(idx++, entry.getKey());
+                ps.setLong(idx, entry.getValue());
                 ps.addBatch();
             }
             ps.executeBatch();
-            return true;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        }
+    }
+
+    private void insertProductItems(List<ProductItemDTO> productItemDTOs) throws SQLException {
+        String insertProductItemSql = "INSERT INTO product_items(serial, imported_price, current_price, is_active, imported_at, updated_at, product_id) VALUES (?, ?, ?, ?, NOW(), NOW(), ?)";
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(insertProductItemSql)) {
+            for (ProductItemDTO item : productItemDTOs) {
+                int idx = 1;
+                ps.setString(idx++, item.getSerial());
+                ps.setDouble(idx++, item.getImportPrice());
+                ps.setDouble(idx++, item.getImportPrice());
+                ps.setBoolean(idx++, true);
+                ps.setLong(idx, item.getProductId());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }
+    }
+
+    private void completePurchaseRequest(Long purchaseRequestId) throws SQLException {
+        String completePrSql = "UPDATE purchase_requests SET status = 'COMPLETED', updated_at = NOW() WHERE id = ?";
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(completePrSql)) {
+            ps.setLong(1, purchaseRequestId);
+            ps.executeUpdate();
         }
     }
 
