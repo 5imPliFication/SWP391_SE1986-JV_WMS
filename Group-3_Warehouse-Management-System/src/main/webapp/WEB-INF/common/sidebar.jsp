@@ -139,19 +139,6 @@
             </li>
         </c:if>
 
-        <%--import product--%>
-        <c:if test="${sessionScope.user != null
-                    and sessionScope.user.role != null
-                    and sessionScope.user.role.active
-                    and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
-            <li>
-                <a href="${pageContext.request.contextPath}/inventory/import"
-                   class="${currentUri == pageContext.request.contextPath.concat('/inventory/import') ? 'active' : ''}">
-                    <span>Import Product</span>
-                </a>
-            </li>
-        </c:if>
-
         <%-- import history--%>
         <c:if test="${sessionScope.user != null
                     and sessionScope.user.role != null
