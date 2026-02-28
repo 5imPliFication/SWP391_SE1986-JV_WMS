@@ -1,14 +1,19 @@
 package com.example.controller.inventory;
 
 import com.example.dto.ProductItemDTO;
-import com.example.dto.ProductDTO;
+import com.example.dto.PurchaseRequestDTO;
 import com.example.model.PurchaseRequestItem;
+import com.example.model.User;
 import com.example.service.InventoryService;
 import com.example.service.PurchaseRequestService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,9 +41,7 @@ public class ImportProductItemServlet extends HttpServlet {
         // get session
         HttpSession session = request.getSession();
 
-        if ("search".equals(action)) {
-            handleSearch(session, request);
-        } else if ("delete".equals(action)) {
+        if ("delete".equals(action)) {
             handleDelete(session, request, response);
             return;
         } else if ("import".equals(action)) {
@@ -88,29 +91,33 @@ public class ImportProductItemServlet extends HttpServlet {
 
     private void handleImport(HttpSession session, HttpServletRequest request) {
 
-        // get data from purchase request detail
-        String purchaseCode = request.getParameter("purchaseCode");
+        // get purchaseId from purchase request detail
         Long purchaseId = Long.parseLong(request.getParameter("purchaseId"));
 
-        if (purchaseCode != null && !purchaseCode.isEmpty()) {
-            request.setAttribute("purchaseCode", purchaseCode);
-            request.setAttribute("purchaseId", purchaseId);
-        }
+        // get purchase request
+        PurchaseRequestDTO purchaseRequestDTO = purchaseRequestService.findPurchaseById(purchaseId);
 
-        List<PurchaseRequestItem> prItems = purchaseRequestService.getItems(purchaseId);
+        // set data for jsp
+        request.setAttribute("purchaseId", purchaseId);
+        request.setAttribute("purchaseCode", purchaseRequestDTO.getPurchaseCode());
+        request.setAttribute("purchaseNote", purchaseRequestDTO.getNote());
+
+        // get list purchase request items
+        List<PurchaseRequestItem> purchaseRequestItems = purchaseRequestService.getItems(purchaseId);
 
         List<ProductItemDTO> importItems = new ArrayList<>();
-        for (PurchaseRequestItem prItem : prItems) {
-            for (int i = 0; i < prItem.getQuantity(); i++) {
+        for (PurchaseRequestItem purchaseRequestItem : purchaseRequestItems) {
+            for (int i = 0; i < purchaseRequestItem.getQuantity(); i++) {
                 ProductItemDTO dto = new ProductItemDTO();
-                dto.setProductId(prItem.getProductId());
-                dto.setProductName(prItem.getProductName());
+                dto.setProductId(purchaseRequestItem.getProductId());
+                dto.setProductName(purchaseRequestItem.getProductName());
                 dto.setSerial("");
                 dto.setImportPrice(0.0);
                 importItems.add(dto);
             }
-            session.setAttribute("importItems", importItems);
         }
+        // save list items to session for pagination and delete
+        session.setAttribute("importItems", importItems);
     }
 
     // delete 1 product items from list import product items
@@ -127,30 +134,12 @@ public class ImportProductItemServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 
-    // search products by name
-    private void handleSearch(HttpSession session, HttpServletRequest request) {
-        String name = request.getParameter("name");
-
-        // set search name product for session
-        session.setAttribute("name", name);
-
-        // call service to get list products
-        List<ProductDTO> products = inventoryService.searchProducts(name);
-        if (products == null || products.isEmpty()) {
-            request.setAttribute("error", "Product not found. Please add new product");
-        } else {
-            session.setAttribute("products", products);
-        }
-    }
-
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         // get action
         String action = request.getParameter("action");
-        if ("add".equals(action)) {
-            handleAdd(session, request, response);
-        } else if ("save".equals(action)) {
+        if ("save".equals(action)) {
             handleSave(session, request, response);
         } else if ("file".equals(action)) {
             handleFile(session, request, response);
@@ -171,19 +160,27 @@ public class ImportProductItemServlet extends HttpServlet {
 
     private void handleSave(HttpSession session, HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+
+        // get purchaseId in form save
+        Long purchaseId = Long.parseLong(request.getParameter("purchaseId"));
+
+        // get note
+        String note = request.getParameter("note");
+
+        // get warehouse login
+        User user = (User) session.getAttribute("user");
+
         // get value
         String[] productIds = request.getParameterValues("productId");
         String[] serials = request.getParameterValues("serial");
         String[] prices = request.getParameterValues("price");
 
-        Long purchaseId = Long.parseLong(request.getParameter("purchaseId"));
-        // call service to handle save
-        String resultSave = inventoryService.saveProductItems(productIds, serials, prices);
+        // call service to handle import
+        String resultSave = inventoryService.importProductItems(purchaseId, user.getId(), note, productIds, serials, prices);
         // message
         if (resultSave == null) {
             session.setAttribute("message", "Product item saved successfully");
             session.setAttribute("messageType", "success");
-            purchaseRequestService.complete(purchaseId);
         } else {
             session.setAttribute("message", resultSave);
             session.setAttribute("messageType", "danger");
@@ -191,40 +188,8 @@ public class ImportProductItemServlet extends HttpServlet {
 
         // delete session after save success
         session.removeAttribute("importItems");
-        response.sendRedirect(request.getContextPath() + "/inventory/import");
-    }
-
-    private void handleAdd(HttpSession session, HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
-
-        // get session
-        List<ProductDTO> products = (List<ProductDTO>) session.getAttribute("products");
-        if (products != null) {
-            products = inventoryService.searchProducts((String) session.getAttribute("name"));
-            session.setAttribute("products", products);
-        }
-
-        // if session haven't value -> init
-        if (importItems == null) {
-            importItems = new ArrayList<>();
-        }
-
-        // get information from list product after search
-        Long productId = Long.parseLong(request.getParameter("productId"));
-        String productName = request.getParameter("productName");
-
-        // init import product item dto
-        ProductItemDTO importProductItemDTO = new ProductItemDTO();
-        importProductItemDTO.setProductId(productId);
-        importProductItemDTO.setProductName(productName);
-        importProductItemDTO.setSerial("");
-        importProductItemDTO.setImportPrice(0.0);
-
-        importItems.add(importProductItemDTO);
-
-        // save in session
-        session.setAttribute("importItems", importItems);
+        session.removeAttribute("message");
+        session.removeAttribute("messageType");
         response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 }

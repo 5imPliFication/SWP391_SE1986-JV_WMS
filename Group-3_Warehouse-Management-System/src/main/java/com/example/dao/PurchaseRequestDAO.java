@@ -5,6 +5,7 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
+import com.example.dto.PurchaseRequestDTO;
 import com.example.model.Brand;
 import com.example.model.Category;
 import com.example.model.Product;
@@ -535,5 +536,30 @@ public class PurchaseRequestDAO {
         } catch (Exception e) {
             throw new RuntimeException("Update purchase request failed", e);
         }
+    }
+
+    public PurchaseRequestDTO findPurchaseById(Long purchaseId) {
+        StringBuilder sql = new StringBuilder("select * from purchase_requests where 1 = 1 ");
+
+        if (purchaseId != null) {
+            sql.append(" and id = ?");
+        }
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            if (purchaseId != null) {
+                ps.setLong(1, purchaseId);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                PurchaseRequestDTO purchaseRequestDTO = new PurchaseRequestDTO();
+                purchaseRequestDTO.setPurchaseId(rs.getLong("id"));
+                purchaseRequestDTO.setPurchaseCode(rs.getString("request_code"));
+                purchaseRequestDTO.setNote(rs.getString("note"));
+                return purchaseRequestDTO;
+            }
+        } catch (Exception e) {
+        }
+        return null;
     }
 }

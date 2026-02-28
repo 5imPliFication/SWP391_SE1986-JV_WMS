@@ -25,44 +25,66 @@ public class InventoryService {
     // init productDAO
     private final InventoryDAO inventoryDAO = new InventoryDAO();
 
-    // search product by name
-    public List<ProductDTO> searchProducts(String searchName) {
-        return inventoryDAO.findProductByName(searchName);
-    }
+    public String importProductItems(Long purchaseRequestId, Long warehouseUserId, String note,
+                                     String[] productIds, String[] serials, String[] prices) {
 
-    // save list product items
-    public String saveProductItems(String[] productIds, String[] serials, String[] prices) {
-
-        // init list product item dto to store value
-        List<ProductItemDTO> productItemDTOs = new ArrayList<>();
-        try {
-            // loop
-            for (int i = 0; i < serials.length; i++) {
-                // get serial and price
-                String serial = serials[i];
-                double price = Double.parseDouble(prices[i]);
-
-                // validator
-                String messageValidator = ImportProductItemValidator.validateImportProductItem(serial, price);
-                if (messageValidator != null) {
-                    return messageValidator;
-                }
-
-                // check is exist serial
-                if (inventoryDAO.isExistSerial(serial)) {
-                    return "Serial " + serial + " already exists";
-                }
-
-                Long productId = Long.parseLong(productIds[i]);
-                productItemDTOs.add(new ProductItemDTO(productId, serial, price));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (productIds == null || serials == null || prices == null) {
+            return "Invalid import data";
         }
-        return inventoryDAO.saveProductItems(productItemDTOs) ? null : "Save successfully";
+
+        List<ProductItemDTO> importProductItemDTOs = getImportProductItemDTOs(productIds, serials, prices);
+
+        String validationMessage = validateProductItems(importProductItemDTOs);
+        if (validationMessage != null) {
+            return validationMessage;
+        }
+
+        return inventoryDAO.saveProductItems(purchaseRequestId, warehouseUserId, note, importProductItemDTOs)
+                ? null
+                : "Import failed";
     }
 
-    // save list products items by Excel
+    // get list product items import from table import 
+    private List<ProductItemDTO> getImportProductItemDTOs(String[] productIds, String[] serials, String[] prices) {
+
+        // init list to store
+        List<ProductItemDTO> items = new ArrayList<>();
+        for (int i = 0; i < serials.length; i++) {
+            String serial = serials[i];
+            double price = Double.parseDouble(prices[i]);
+            Long productId = Long.parseLong(productIds[i]);
+
+            ProductItemDTO dto = new ProductItemDTO();
+            dto.setProductId(productId);
+            dto.setSerial(serial);
+            dto.setImportPrice(price);
+
+            items.add(dto);
+        }
+        return items;
+    }
+
+    // check valid data from list product items import
+    private String validateProductItems(List<ProductItemDTO> productItemDTOs) {
+        for (ProductItemDTO item : productItemDTOs) {
+            String serial = item.getSerial();
+            double price = item.getImportPrice();
+
+            // validator
+            String messageValidator = ImportProductItemValidator.validateImportProductItem(serial, price);
+            if (messageValidator != null) {
+                return messageValidator;
+            }
+
+            // check is exist serial
+            if (inventoryDAO.isExistSerial(serial)) {
+                return "Serial " + serial + " already exists";
+            }
+        }
+        return null;
+    }
+
+    // get list products items by Excel
     public List<ProductItemDTO> readProductItemsFromExcel(Part filePart) {
         List<ProductItemDTO> importItems = new ArrayList<>();
         // if not have file upload -> return
