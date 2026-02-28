@@ -114,6 +114,13 @@
                             <input type="hidden" name="action" value="complete">
                             <button class="btn btn-warning">Complete</button>
                         </form>
+
+                        <c:if test="${prList.status eq 'APPROVED'}">
+                            <a href="${pageContext.request.contextPath}/inventory/import?prId=${prList.id}&prCode=${prList.requestCode}"
+                               class="btn btn-primary">
+                                Import Product
+                            </a>
+                        </c:if>
                     </c:if>
 
                     <c:if test="${isManager && isPending}">

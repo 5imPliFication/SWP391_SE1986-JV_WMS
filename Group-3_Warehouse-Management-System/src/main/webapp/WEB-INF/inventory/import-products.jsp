@@ -50,6 +50,15 @@
                 name="action" value="save">
             Save
         </button>
+
+        <c:if test="${not empty prCode}">
+            <div class="ml-auto d-flex align-items-center">
+                <label class="mb-0 mr-2 font-weight-bold">Purchase Request:</label>
+                <input type="text" class="form-control form-control-sm"
+                       value="${prCode}" readonly
+                       style="width: 150px; background-color: #e9ecef;">
+            </div>
+        </c:if>
     </div>
 
 
@@ -80,8 +89,9 @@
                     <td>${product.description}</td>
                         <%--add product to import product item--%>
                     <td>
-                        <form action="${pageContext.request.contextPath}/inventory/import"
-                              method="post">
+                        <form
+                                action="${pageContext.request.contextPath}/inventory/import"
+                                method="post">
                                 <%--set name to forward--%>
                             <input type="hidden" name="productId"
                                    value="${product.id}">
@@ -106,7 +116,8 @@
             <%--set value for product_items in scope from paged request attribute--%>
             <c:set var="productItem" value="${importItems}"/>
             <div class="table-responsive">
-                <%-- if productItem not empty -> display list product item need import --%>
+                <%-- if productItem not empty -> display list product item need
+                    import --%>
                 <c:if test="${not empty productItem}">
                 <table class="table table-bordered table-hover table-sm">
                     <thead class="thead-dark text-center">
@@ -119,56 +130,69 @@
                         <th style="width: 90px;">Delete</th>
                     </tr>
                     </thead>
-                        <tbody>
-                            <%--loop productItem--%>
-                        <c:forEach items="${productItem}" var="item" varStatus="status">
-                            <tr>
-                                    <%--STT--%>
-                                <td class="text-center align-middle">
-                                        ${status.index + 1}
-                                </td>
+                    <tbody>
+                        <%--loop productItem--%>
+                    <c:forEach items="${productItem}" var="item"
+                               varStatus="status">
+                        <tr>
+                                <%--STT--%>
+                            <td
+                                    class="text-center align-middle">
+                                    ${status.index + 1}
+                            </td>
 
-                                    <%--name product (item)--%>
-                                <td class="align-middle">
-                                    <input type="hidden"
-                                           name="productId"
-                                           value="${item.productId}">
-                                        ${item.productName}
-                                </td>
-                                    <%--serial--%>
-                                <td>
-                                    <input type="text" name="serial"
-                                           class="form-control form-control-sm"
-                                           value="${item.serial}"
-                                           required>
-                                </td>
-                                    <%--unit--%>
-                                <td
-                                        class="text-center align-middle">
-                                    1 Item
-                                </td>
-                                    <%--price--%>
-                                    <%--groupingUsed: prevent "," between numbers--%>
-                                <td>
-                                    <input type="number"
-                                           name="price"
-                                           class="form-control form-control-sm text-right"
-                                           value="<fmt:formatNumber value='${item.importPrice}' groupingUsed='false' />"
-                                           oninput="calcTotal()"
-                                           required>
-                                </td>
-                                    <%--delete product item--%>
-                                <td
-                                        class="text-center align-middle">
-                                        <%--index of row in importItems--%>
-                                    <a href="${pageContext.request.contextPath}/inventory/import?action=delete&index=${(pageNo - 1) * 10 + status.index}"
-                                       class="btn btn-danger btn-sm">
-                                        Delete
-                                    </a>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                        </tbody>
+                                <%--name product (item)--%>
+                            <td class="align-middle">
+                                <input type="hidden"
+                                       name="productId"
+                                       value="${item.productId}">
+                                    ${item.productName}
+                            </td>
+                                <%--serial--%>
+                            <td>
+                                <input type="text"
+                                       name="serial"
+                                       class="form-control form-control-sm"
+                                       value="${item.serial}"
+                                       required>
+                            </td>
+                                <%--unit--%>
+                            <td
+                                    class="text-center align-middle">
+                                1 Item
+                            </td>
+                                <%--price--%>
+                                <%--groupingUsed:
+                                    prevent ","
+                                    between
+                                    numbers--%>
+                            <td>
+                                <input
+                                        type="number"
+                                        name="price"
+                                        class="form-control form-control-sm text-right"
+                                        value="<fmt:formatNumber value='${item.importPrice}' groupingUsed='false' />"
+                                        oninput="calcTotal()"
+                                        required>
+                            </td>
+                                <%--delete
+                                    product
+                                    item--%>
+                            <td
+                                    class="text-center align-middle">
+                                    <%--index
+                                        of
+                                        row
+                                        in
+                                        importItems--%>
+                                <a href="${pageContext.request.contextPath}/inventory/import?action=delete&index=${(pageNo - 1) * 10 + status.index}"
+                                   class="btn btn-danger btn-sm">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
                     </c:if>
                 </table>
             </div>
@@ -217,7 +241,8 @@
                     <c:choose>
                         <%-- alway display first page --%>
                         <c:when test="${i == 1}">
-                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                            <li
+                                    class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
                                    href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}&searchName=${param.searchName}">
                                         ${i}
@@ -226,7 +251,8 @@
                         </c:when>
                         <%-- alway display last page --%>
                         <c:when test="${i == totalPages}">
-                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                            <li
+                                    class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
                                    href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}&searchName=${param.searchName}">
                                         ${i}
@@ -234,8 +260,10 @@
                             </li>
                         </c:when>
                         <%-- display between page--%>
-                        <c:when test="${i >= left && i <= right}">
-                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                        <c:when
+                                test="${i >= left && i <= right}">
+                            <li
+                                    class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
                                    href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}&searchName=${param.searchName}">
                                         ${i}
@@ -243,16 +271,19 @@
                             </li>
                         </c:when>
                         <%-- display hidden page by ... --%>
-                        <c:when test="${i == left - 1 || i == right + 1}">
+                        <c:when
+                                test="${i == left - 1 || i == right + 1}">
                             <li class="page-item disabled">
-                                <span class="page-link">...</span>
+                                                                                            <span
+                                                                                                    class="page-link">...</span>
                             </li>
                         </c:when>
                     </c:choose>
                 </c:forEach>
 
                     <%--next page--%>
-                <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
+                <li
+                        class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
                        href="${pageContext.request.contextPath}/inventory/import?pageNo=${pageNo + 1}&searchName=${param.searchName}">
                         Next

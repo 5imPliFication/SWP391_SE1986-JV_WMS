@@ -39,6 +39,12 @@ public class ImportProductItemServlet extends HttpServlet {
             return;
         }
 
+        // Handle Purchase Request Code if redirected from detail page
+        String prCode = request.getParameter("prCode");
+        if (prCode != null && !prCode.isEmpty()) {
+            request.setAttribute("prCode", prCode);
+        }
+
         // pagination for importItems
         List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
         if (importItems != null && !importItems.isEmpty()) {
@@ -81,7 +87,8 @@ public class ImportProductItemServlet extends HttpServlet {
     }
 
     // delete 1 product items from list import product items
-    private void handleDelete(HttpSession session, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleDelete(HttpSession session, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
 
         // get index need to delete
@@ -123,7 +130,8 @@ public class ImportProductItemServlet extends HttpServlet {
         }
     }
 
-    private void handleFile(HttpSession session, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    private void handleFile(HttpSession session, HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
         // get file excel import
         Part filePart = request.getPart("excelFile");
 
@@ -134,7 +142,8 @@ public class ImportProductItemServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 
-    private void handleSave(HttpSession session, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleSave(HttpSession session, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         // get value
         String[] productIds = request.getParameterValues("productId");
         String[] serials = request.getParameterValues("serial");
@@ -156,7 +165,8 @@ public class ImportProductItemServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 
-    private void handleAdd(HttpSession session, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void handleAdd(HttpSession session, HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
 
         // get session
