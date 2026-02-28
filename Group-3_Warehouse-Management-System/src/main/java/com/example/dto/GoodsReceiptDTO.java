@@ -1,0 +1,19 @@
+package com.example.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.sql.Timestamp;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class GoodsReceiptDTO {
+    private Long id;
+    private String receiptCode;
+    private Timestamp receivedAt;
+    private String warehouseName;
+    private Long totalQuantity;
+    private String note;
+}
