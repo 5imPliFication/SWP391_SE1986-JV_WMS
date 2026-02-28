@@ -94,6 +94,7 @@ public class ImportProductItemServlet extends HttpServlet {
 
         if (purchaseCode != null && !purchaseCode.isEmpty()) {
             request.setAttribute("purchaseCode", purchaseCode);
+            request.setAttribute("purchaseId", purchaseId);
         }
 
         List<PurchaseRequestItem> prItems = purchaseRequestService.getItems(purchaseId);
@@ -175,12 +176,14 @@ public class ImportProductItemServlet extends HttpServlet {
         String[] serials = request.getParameterValues("serial");
         String[] prices = request.getParameterValues("price");
 
+        Long purchaseId = Long.parseLong(request.getParameter("purchaseId"));
         // call service to handle save
         String resultSave = inventoryService.saveProductItems(productIds, serials, prices);
         // message
         if (resultSave == null) {
             session.setAttribute("message", "Product item saved successfully");
             session.setAttribute("messageType", "success");
+            purchaseRequestService.complete(purchaseId);
         } else {
             session.setAttribute("message", resultSave);
             session.setAttribute("messageType", "danger");
