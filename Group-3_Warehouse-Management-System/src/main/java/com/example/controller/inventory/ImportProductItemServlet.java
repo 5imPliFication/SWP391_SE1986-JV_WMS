@@ -157,13 +157,14 @@ public class ImportProductItemServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 
+    // save purchase request and others information relative
     private void handleSave(HttpSession session, HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
         // get purchaseId in form save
         Long purchaseId = Long.parseLong(request.getParameter("purchaseId"));
 
-        // get warehouse login
+        // get information warehouse handle import purchase
         User user = (User) session.getAttribute("user");
 
         // get value
@@ -184,8 +185,6 @@ public class ImportProductItemServlet extends HttpServlet {
 
         // delete session after save success
         session.removeAttribute("importItems");
-        session.removeAttribute("message");
-        session.removeAttribute("messageType");
         response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 }

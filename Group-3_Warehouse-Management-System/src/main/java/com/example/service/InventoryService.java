@@ -32,6 +32,7 @@ public class InventoryService {
             return "Invalid import data";
         }
 
+        // get information from list import product item
         List<ProductItemDTO> importProductItemDTOs = getImportProductItemDTOs(productIds, serials, prices);
 
         String validationMessage = validateProductItems(importProductItemDTOs);
@@ -49,6 +50,8 @@ public class InventoryService {
 
         // init list to store
         List<ProductItemDTO> items = new ArrayList<>();
+
+        // loop any row
         for (int i = 0; i < serials.length; i++) {
             String serial = serials[i];
             double price = Double.parseDouble(prices[i]);

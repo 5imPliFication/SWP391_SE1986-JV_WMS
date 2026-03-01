@@ -50,20 +50,20 @@ public class InventoryDAO {
         return listProducts;
     }
 
+    // save import product items and others information relative
     public boolean saveProductItems(Long purchaseRequestId, Long warehouseUserId, List<ProductItemDTO> productItemDTOs) {
 
         // count quantity import product for each product
         Map<Long, Long> quantityByProduct = countQuantityImportByProductId(productItemDTOs);
 
         try {
-            // save product item: increase total quantity in table products and save each product items
-            // to table product items
+            // save product item
             insertProductItems(productItemDTOs);
 
             // update status of purchase request -> completed
             completePurchaseRequest(purchaseRequestId);
 
-            // save purchase request to table good receipts
+            // save to table goods receipts
             Long receiptId = insertGoodsReceipt(purchaseRequestId, warehouseUserId);
 
             // save purchase request item to table goods receipt items
@@ -75,6 +75,7 @@ public class InventoryDAO {
         return false;
     }
 
+    // count quantity of product corresponding
     private Map<Long, Long> countQuantityImportByProductId(List<ProductItemDTO> productItemDTOs) {
         Map<Long, Long> quantityProduct = new HashMap<>();
         for (ProductItemDTO dto : productItemDTOs) {
@@ -95,12 +96,18 @@ public class InventoryDAO {
 
     private Long insertGoodsReceipt(Long purchaseRequestId, Long warehouseUserId)
             throws SQLException {
-        String insertReceiptSql = "INSERT INTO goods_receipts(purchase_request_id, warehouse_id, received_at) VALUES (?, ?, NOW())";
+        StringBuilder sql = new StringBuilder("insert into goods_receipts(purchase_request_id, warehouse_id, received_at) values (?, ?, NOW())");
         Long receiptId = null;
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(insertReceiptSql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setLong(1, purchaseRequestId);
-            ps.setLong(2, warehouseUserId);
+             PreparedStatement ps = conn.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+
+            // set value
+            if (warehouseUserId != null) {
+                ps.setLong(1, purchaseRequestId);
+            }
+            if (warehouseUserId != null) {
+                ps.setLong(2, warehouseUserId);
+            }
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
@@ -111,44 +118,53 @@ public class InventoryDAO {
         return receiptId;
     }
 
-    private void insertGoodsReceiptItems(Long receiptId, Map<Long, Long> qtyByProduct)
+    // save goods receipt item correspond receiptId
+    private void insertGoodsReceiptItems(Long receiptId, Map<Long, Long> quantityByProduct)
             throws SQLException {
-        String insertReceiptItemSql = "INSERT INTO goods_receipt_items(goods_receipt_id, product_id, actual_quantity) VALUES (?, ?, ?)";
+        String sql = "insert into goods_receipt_items(goods_receipt_id, product_id, actual_quantity) values (?, ?, ?)";
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(insertReceiptItemSql)) {
-            for (Map.Entry<Long, Long> entry : qtyByProduct.entrySet()) {
-                int idx = 1;
-                ps.setLong(idx++, receiptId);
-                ps.setLong(idx++, entry.getKey());
-                ps.setLong(idx, entry.getValue());
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            // for each any item
+            for (Map.Entry<Long, Long> entry : quantityByProduct.entrySet()) {
+                int index = 1;
+                ps.setLong(index++, receiptId);
+                ps.setLong(index++, entry.getKey());
+                ps.setLong(index, entry.getValue());
                 ps.addBatch();
             }
             ps.executeBatch();
         }
     }
 
+    // insert product item to table product_items
     private void insertProductItems(List<ProductItemDTO> productItemDTOs) throws SQLException {
-        String insertProductItemSql = "INSERT INTO product_items(serial, imported_price, current_price, is_active, imported_at, updated_at, product_id) VALUES (?, ?, ?, ?, NOW(), NOW(), ?)";
+        String sql = "insert into product_items(serial, imported_price, current_price, is_active, imported_at, updated_at, product_id) values (?, ?, ?, ?, NOW(), NOW(), ?)";
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(insertProductItemSql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            // for each productItems to get data
             for (ProductItemDTO item : productItemDTOs) {
-                int idx = 1;
-                ps.setString(idx++, item.getSerial());
-                ps.setDouble(idx++, item.getImportPrice());
-                ps.setDouble(idx++, item.getImportPrice());
-                ps.setBoolean(idx++, true);
-                ps.setLong(idx, item.getProductId());
+                int index = 1;
+                ps.setString(index++, item.getSerial());
+                ps.setDouble(index++, item.getImportPrice());
+                ps.setDouble(index++, item.getImportPrice());
+                ps.setBoolean(index++, true);
+                ps.setLong(index, item.getProductId());
                 ps.addBatch();
             }
             ps.executeBatch();
         }
     }
 
+    // update status purchase request from approve -> completed in table purchase_requests
     private void completePurchaseRequest(Long purchaseRequestId) throws SQLException {
-        String completePrSql = "UPDATE purchase_requests SET status = 'COMPLETED', updated_at = NOW() WHERE id = ?";
+        String sql = "update purchase_requests set status = 'COMPLETED', updated_at = NOW() where id = ?";
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(completePrSql)) {
-            ps.setLong(1, purchaseRequestId);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            // set value
+            if (purchaseRequestId != null) {
+                ps.setLong(1, purchaseRequestId);
+            }
             ps.executeUpdate();
         }
     }
