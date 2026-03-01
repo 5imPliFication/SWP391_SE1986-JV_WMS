@@ -50,8 +50,7 @@ public class InventoryDAO {
         return listProducts;
     }
 
-    public boolean saveProductItems(Long purchaseRequestId, Long warehouseUserId, String note,
-                                    List<ProductItemDTO> productItemDTOs) {
+    public boolean saveProductItems(Long purchaseRequestId, Long warehouseUserId, List<ProductItemDTO> productItemDTOs) {
 
         // count quantity import product for each product
         Map<Long, Long> quantityByProduct = countQuantityImportByProductId(productItemDTOs);
@@ -65,7 +64,7 @@ public class InventoryDAO {
             completePurchaseRequest(purchaseRequestId);
 
             // save purchase request to table good receipts
-            Long receiptId = insertGoodsReceipt(purchaseRequestId, warehouseUserId, note);
+            Long receiptId = insertGoodsReceipt(purchaseRequestId, warehouseUserId);
 
             // save purchase request item to table goods receipt items
             insertGoodsReceiptItems(receiptId, quantityByProduct);
@@ -94,19 +93,14 @@ public class InventoryDAO {
         return quantityProduct;
     }
 
-    private Long insertGoodsReceipt(Long purchaseRequestId, Long warehouseUserId, String note)
+    private Long insertGoodsReceipt(Long purchaseRequestId, Long warehouseUserId)
             throws SQLException {
-        String insertReceiptSql = "INSERT INTO goods_receipts(purchase_request_id, warehouse_id, received_at, note) VALUES (?, ?, NOW(), ?)";
+        String insertReceiptSql = "INSERT INTO goods_receipts(purchase_request_id, warehouse_id, received_at) VALUES (?, ?, NOW())";
         Long receiptId = null;
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(insertReceiptSql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, purchaseRequestId);
             ps.setLong(2, warehouseUserId);
-            if (note == null || note.isBlank()) {
-                ps.setNull(3, Types.VARCHAR);
-            } else {
-                ps.setString(3, note);
-            }
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {

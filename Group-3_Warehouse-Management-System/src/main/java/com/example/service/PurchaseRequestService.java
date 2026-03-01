@@ -176,7 +176,7 @@ public class PurchaseRequestService {
         p.updateItems(requestId, items);
     }
 
-    public PurchaseRequestDTO findPurchaseById(Long purchaseId) {
+    public PurchaseRequestDTO findPurchaseRequestById(Long purchaseId) {
         return p.findPurchaseById(purchaseId);
     }
 }
