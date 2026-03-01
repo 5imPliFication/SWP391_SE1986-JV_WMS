@@ -17,7 +17,7 @@ public class DBConfig {
         // JDBC URL
         config.setJdbcUrl(
                 "jdbc:mysql://localhost:3306/laptop_wms" +
-                        "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+                        "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh"
         );
 
         config.setUsername("root");
