@@ -65,45 +65,6 @@
         </div>
     </c:if>
 
-    <%--table list product when search by name--%>
-    <c:if test="${not empty products}">
-        <table class="table table-bordered table-hover">
-            <thead class="thead-dark">
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <c:forEach items="${products}" var="product">
-                <tr>
-                    <td>${product.id}</td>
-                    <td>${product.name}</td>
-                    <td>${product.description}</td>
-                        <%--add product to import product item--%>
-                    <td>
-                        <form
-                                action="${pageContext.request.contextPath}/inventory/import"
-                                method="post">
-                                <%--set name to forward--%>
-                            <input type="hidden" name="productId"
-                                   value="${product.id}">
-                            <input type="hidden" name="productName"
-                                   value="${product.name}">
-                            <button class="btn btn-success btn-sm" type="submit"
-                                    name="action" value="add">
-                                Import product
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            </c:forEach>
-            </tbody>
-        </table>
-    </c:if>
-
     <%--table import product items--%>
     <form id="productItemsForm" method="post"
           action="${pageContext.request.contextPath}/inventory/import">
@@ -132,55 +93,37 @@
                                varStatus="status">
                         <tr>
                                 <%--STT--%>
-                            <td
-                                    class="text-center align-middle">
+                            <td class="text-center align-middle">
                                     ${status.index + 1}
                             </td>
 
                                 <%--name product (item)--%>
                             <td class="align-middle">
-                                <input type="hidden"
-                                       name="productId"
-                                       value="${item.productId}">
+                                <input type="hidden" name="productId" value="${item.productId}">
                                     ${item.productName}
                             </td>
                                 <%--serial--%>
                             <td>
-                                <input type="text"
-                                       name="serial"
-                                       class="form-control form-control-sm"
+                                <input type="text" name="serial" class="form-control form-control-sm"
                                        value="${item.serial}"
                                        required>
                             </td>
                                 <%--unit--%>
-                            <td
-                                    class="text-center align-middle">
+                            <td class="text-center align-middle">
                                 1 Item
                             </td>
                                 <%--price--%>
-                                <%--groupingUsed:
-                                    prevent ","
-                                    between
-                                    numbers--%>
+                                <%--groupingUsed: prevent "," between numbers--%>
                             <td>
-                                <input
-                                        type="number"
-                                        name="price"
-                                        class="form-control form-control-sm text-right"
-                                        value="<fmt:formatNumber value='${item.importPrice}' groupingUsed='false' />"
-                                        oninput="calcTotal()"
-                                        required>
+                                <input type="number" name="price"
+                                       class="form-control form-control-sm text-right"
+                                       value="<fmt:formatNumber value='${item.importPrice}' groupingUsed='false' />"
+                                       oninput="calcTotal()"
+                                       required>
                             </td>
-                                <%--delete
-                                    product
-                                    item--%>
-                            <td
-                                    class="text-center align-middle">
-                                    <%--index
-                                        of
-                                        row
-                                        in
-                                        importItems--%>
+                                <%--delete product item--%>
+                            <td class="text-center align-middle">
+                                    <%--index of row in importItems--%>
                                 <a href="${pageContext.request.contextPath}/inventory/import?action=delete&index=${(pageNo - 1) * 10 + status.index}"
                                    class="btn btn-danger btn-sm">
                                     Delete
@@ -225,7 +168,7 @@
                     <%-- previous page--%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/import?pageNo=${pageNo - 1}&searchName=${param.searchName}">
+                       href="${pageContext.request.contextPath}/inventory/import?pageNo=${pageNo - 1}">
                         Previous
                     </a>
                 </li>
@@ -240,38 +183,33 @@
                             <li
                                     class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}&searchName=${param.searchName}">
+                                   href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}">
                                         ${i}
                                 </a>
                             </li>
                         </c:when>
                         <%-- alway display last page --%>
                         <c:when test="${i == totalPages}">
-                            <li
-                                    class="page-item ${i == pageNo ? 'active' : ''}">
+                            <li class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}&searchName=${param.searchName}">
+                                   href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}">
                                         ${i}
                                 </a>
                             </li>
                         </c:when>
                         <%-- display between page--%>
-                        <c:when
-                                test="${i >= left && i <= right}">
-                            <li
-                                    class="page-item ${i == pageNo ? 'active' : ''}">
+                        <c:when test="${i >= left && i <= right}">
+                            <li class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}&searchName=${param.searchName}">
+                                   href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}">
                                         ${i}
                                 </a>
                             </li>
                         </c:when>
                         <%-- display hidden page by ... --%>
-                        <c:when
-                                test="${i == left - 1 || i == right + 1}">
+                        <c:when test="${i == left - 1 || i == right + 1}">
                             <li class="page-item disabled">
-                                                                                            <span
-                                                                                                    class="page-link">...</span>
+                                <span class="page-link">...</span>
                             </li>
                         </c:when>
                     </c:choose>
@@ -281,7 +219,7 @@
                 <li
                         class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/import?pageNo=${pageNo + 1}&searchName=${param.searchName}">
+                       href="${pageContext.request.contextPath}/inventory/import?pageNo=${pageNo + 1}">
                         Next
                     </a>
                 </li>
