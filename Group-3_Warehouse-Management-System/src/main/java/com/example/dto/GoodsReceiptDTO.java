@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -12,8 +13,7 @@ import java.sql.Timestamp;
 public class GoodsReceiptDTO {
     private Long id;
     private String receiptCode;
-    private Timestamp receivedAt;
+    private LocalDateTime receivedAt;
     private String warehouseName;
-    private Long totalQuantity;
     private String note;
 }

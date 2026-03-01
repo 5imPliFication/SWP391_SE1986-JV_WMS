@@ -41,7 +41,7 @@
                             </p>
                         </div>
                         <div class="col-md-3">
-                            <p><strong>Staff:</strong> ${history.warehouseName}</p>
+                            <p><strong>Warehouse:</strong> ${history.warehouseName}</p>
                         </div>
                         <div class="col-md-3">
                             <p><strong>Total Quantity:</strong> ${history.totalQuantity}</p>
