@@ -1,8 +1,6 @@
 package com.example.controller;
 
 import com.example.model.User;
-import com.example.model.UserActivityLog;
-import com.example.service.ActivityLogService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,12 +9,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.List;
 
 @WebServlet(urlPatterns = "/home")
 public class HomeServlet extends HttpServlet {
-
-    private final ActivityLogService dashboardService = new ActivityLogService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -33,15 +28,19 @@ public class HomeServlet extends HttpServlet {
         String role = user.getRole().getName();
 
         if ("Admin".equals(role)) {
-            List<UserActivityLog> recentActivities =
-                    dashboardService.getRecentActivities(10);
-            dashboardService.loadAdminDashboard(req);
-            req.setAttribute("recentActivities", recentActivities);
-        } else if ("Staff".equals(user.getRole().getName())) {
-            dashboardService.loadStaffDashboard(req);
+            resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
+            return;
+        } else if ("Manager".equals(role)) {
+            resp.sendRedirect(req.getContextPath() + "/manager-dashboard");
+            return;
+        } else if ("Salesman".equals(role)) {
+            resp.sendRedirect(req.getContextPath() + "/salesman/dashboard");
+            return;
+        } else if ("Warehouse".equals(role)) {
+            resp.sendRedirect(req.getContextPath() + "/warehouse/dashboard");
+            return;
         }
 
-        req.getRequestDispatcher("/WEB-INF/home.jsp")
-                .forward(req, resp);
+        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
 }

@@ -30,7 +30,7 @@
             <!-- Dashboard luôn hiển thị -->
             <li>
                 <a href="${pageContext.request.contextPath}/home"
-                   class="<%= (uri.endsWith("home") || uri.contains("home")) ? "active" : "" %>">
+                   class="<%= (uri.endsWith("home") || uri.contains("home") || uri.contains("/dashboard")) ? "active" : "" %>">
                     <span>Dashboard</span>
                 </a>
             </li>

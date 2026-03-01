@@ -108,4 +108,18 @@ public class ProductService {
     private int getTotalProducts(String name) {
         return productDAO.countTotalProducts(name);
     }
+    // Count all products
+    public int countAllProducts() {
+        return productDAO.countAll();
+    }
+
+    // Count low stock products
+    public int countLowStockProducts(int threshold) {
+        return productDAO.countLowStock(threshold);
+    }
+
+    // Get low stock products
+    public List<Product> getLowStockProducts(int threshold) {
+        return productDAO.findLowStock(threshold);
+    }
 }

@@ -74,7 +74,7 @@
 
             <!-- ================= WAREHOUSE KEEPER DASHBOARD ================= -->
             <c:if test="${sessionScope.user.role.name == 'Warehouse'}">
-                <jsp:include page="/WEB-INF/views/home/salesman-dashboard.jsp"/>
+                <jsp:include page="/WEB-INF/views/home/warehouse-dashboard.jsp"/>
             </c:if>
         </main>
     </body>

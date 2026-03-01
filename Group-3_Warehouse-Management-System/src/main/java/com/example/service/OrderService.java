@@ -5,6 +5,7 @@ import com.example.model.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Timestamp;
 import java.util.*;
 
 public class OrderService {
@@ -473,5 +474,44 @@ public class OrderService {
 
     public List<Order> getOrdersBySalesman(Long salesmanId, String status, String searchCode, String sortBy, String sortDir, int offset, int limit) {
         return orderDAO.getOrdersBySalesman(salesmanId, status, searchCode, sortBy, sortDir, offset, limit);
+    }
+    // Count orders by date range
+    public int countOrdersByDateRange(Timestamp startDate, Timestamp endDate) {
+        return orderDAO.countByDateRange(startDate, endDate);
+    }
+
+    // Count orders by salesman and date
+    public int countOrdersBySalesmanAndDate(Long salesmanId, Timestamp startDate, Timestamp endDate) {
+        return orderDAO.countBySalesmanAndDateRange(salesmanId, startDate, endDate);
+    }
+
+    // Count orders by salesman and status
+    public int countOrdersBySalesmanAndStatus(Long salesmanId, String status) {
+        return orderDAO.countBySalesmanAndStatus(salesmanId, status);
+    }
+
+    // Get orders by salesman and date
+    public List<Order> getOrdersBySalesmanAndDate(Long salesmanId, Timestamp startDate, Timestamp endDate) {
+        return orderDAO.findBySalesmanAndDateRange(salesmanId, startDate, endDate);
+    }
+
+    // Get recent orders by salesman
+    public List<Order> getRecentOrdersBySalesman(Long salesmanId, Timestamp since, int limit) {
+        return orderDAO.findRecentBySalesman(salesmanId, since, limit);
+    }
+
+    // Get recent orders (all)
+    public List<Order> getRecentOrders(int limit) {
+        return orderDAO.findRecentOrders(limit);
+    }
+
+    // Count orders by status and date
+    public int countOrdersByStatusAndDate(String status, Timestamp startDate, Timestamp endDate) {
+        return orderDAO.countByStatusAndDateRange(status, startDate, endDate);
+    }
+
+    // Get orders by status
+    public List<Order> getOrdersByStatus(String status) {
+        return orderDAO.findByStatus(status);
     }
 }
