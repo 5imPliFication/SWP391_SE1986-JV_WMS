@@ -1,6 +1,7 @@
 package com.example.controller.inventory;
 
 import com.example.dao.OrderDAO;
+import com.example.dto.OrderDTO;
 import com.example.service.OrderService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -23,17 +24,23 @@ public class UpdateStatusServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
         HttpSession session = request.getSession();
         // get data
         String orderCode = request.getParameter("orderCode");
         String newStatus = request.getParameter("newStatus");
 
-        // call service
-        boolean statusUpdateOrder = orderService.updateStatusOrder(orderCode, newStatus);
+        // send to DTO
+        OrderDTO orderDTO = new OrderDTO();
+        orderDTO.setCode(orderCode);
+        orderDTO.setStatus(newStatus);
 
-        if(statusUpdateOrder){
+        // call service
+        boolean statusUpdateOrder = orderService.updateStatusOrder(orderDTO);
+
+        if (statusUpdateOrder) {
             session.setAttribute("message", "Order Updated Successfully");
             session.setAttribute("messageType", "success");
         } else {

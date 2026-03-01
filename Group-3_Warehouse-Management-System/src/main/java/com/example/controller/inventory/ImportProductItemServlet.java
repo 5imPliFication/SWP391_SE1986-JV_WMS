@@ -1,12 +1,20 @@
 package com.example.controller.inventory;
 
 import com.example.dto.ProductItemDTO;
-import com.example.dto.ProductDTO;
+import com.example.dto.PurchaseRequestDTO;
+import com.example.model.PurchaseRequestItem;
+import com.example.model.User;
 import com.example.service.InventoryService;
+import com.example.service.PurchaseRequestService;
+import com.example.util.AppConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,10 +25,12 @@ import java.util.List;
 public class ImportProductItemServlet extends HttpServlet {
 
     private InventoryService inventoryService;
+    private PurchaseRequestService purchaseRequestService;
 
     @Override
     public void init() throws ServletException {
         inventoryService = new InventoryService();
+        purchaseRequestService = new PurchaseRequestService();
     }
 
     @Override
@@ -32,37 +42,31 @@ public class ImportProductItemServlet extends HttpServlet {
         // get session
         HttpSession session = request.getSession();
 
-        if ("search".equals(action)) {
-            handleSearch(session, request);
-        } else if ("delete".equals(action)) {
+        if ("delete".equals(action)) {
             handleDelete(session, request, response);
             return;
+        } else if ("import".equals(action)) {
+            handleImport(session, request);
         }
 
         // pagination for importItems
         List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
         if (importItems != null && !importItems.isEmpty()) {
-            int pageSize = 10;
+            int pageSize = AppConstants.PAGE_SIZE;
             int totalItems = importItems.size();
             int totalPages = (int) Math.ceil((double) totalItems / pageSize);
 
             // get pageNo
             String pageNoStr = request.getParameter("pageNo");
             // default value
-            int pageNo = 1;
+            int pageNo = AppConstants.DEFAULT_PAGE_NO;
             if (pageNoStr != null && !pageNoStr.isEmpty()) {
                 try {
                     pageNo = Integer.parseInt(pageNoStr);
                 } catch (NumberFormatException e) {
-                    pageNo = 1;
+                    pageNo = AppConstants.DEFAULT_PAGE_NO;
                 }
             }
-
-            // validate pageNo in range
-            if (pageNo < 1)
-                pageNo = 1;
-            if (pageNo > totalPages)
-                pageNo = totalPages;
 
             // index start cut in session importItems
             int start = (pageNo - 1) * pageSize;
@@ -80,8 +84,44 @@ public class ImportProductItemServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/inventory/import-products.jsp").forward(request, response);
     }
 
+    // handle import product
+    private void handleImport(HttpSession session, HttpServletRequest request) {
+
+        // get purchaseId from purchase request detail
+        Long purchaseId = Long.parseLong(request.getParameter("purchaseId"));
+
+        // get purchase request
+        PurchaseRequestDTO purchaseRequestDTO = purchaseRequestService.findPurchaseRequestById(purchaseId);
+
+        // set data for information of purchase request in jsp
+        request.setAttribute("purchaseId", purchaseId);
+        request.setAttribute("purchaseCode", purchaseRequestDTO.getPurchaseCode());
+        request.setAttribute("purchaseNote", purchaseRequestDTO.getNote());
+
+        // get purchase request items
+        List<PurchaseRequestItem> purchaseRequestItems = purchaseRequestService.getItems(purchaseId);
+
+        List<ProductItemDTO> importItems = new ArrayList<>();
+        // convert purchase request item -> product item
+        for (PurchaseRequestItem purchaseRequestItem : purchaseRequestItems) {
+            for (int i = 0; i < purchaseRequestItem.getQuantity(); i++) {
+                ProductItemDTO dto = new ProductItemDTO();
+                dto.setProductId(purchaseRequestItem.getProductId());
+                dto.setProductName(purchaseRequestItem.getProductName());
+                dto.setSerial("");
+                dto.setImportPrice(null);
+                // add product item to list importItems
+                importItems.add(dto);
+            }
+        }
+        // save list items to session for pagination and delete
+        session.setAttribute("importItems", importItems);
+    }
+
     // delete 1 product items from list import product items
-    private void handleDelete(HttpSession session, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleDelete(HttpSession session, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        // get list importItems from session
         List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
 
         // get index need to delete
@@ -93,37 +133,20 @@ public class ImportProductItemServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 
-    // search products by name
-    private void handleSearch(HttpSession session, HttpServletRequest request) {
-        String name = request.getParameter("name");
-
-        // set search name product for session
-        session.setAttribute("name", name);
-
-        // call service to get list products
-        List<ProductDTO> products = inventoryService.searchProducts(name);
-        if (products == null || products.isEmpty()) {
-            request.setAttribute("error", "Product not found. Please add new product");
-        } else {
-            session.setAttribute("products", products);
-        }
-    }
-
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         // get action
         String action = request.getParameter("action");
-        if ("add".equals(action)) {
-            handleAdd(session, request, response);
-        } else if ("save".equals(action)) {
+        if ("save".equals(action)) {
             handleSave(session, request, response);
         } else if ("file".equals(action)) {
             handleFile(session, request, response);
         }
     }
 
-    private void handleFile(HttpSession session, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    private void handleFile(HttpSession session, HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
         // get file excel import
         Part filePart = request.getPart("excelFile");
 
@@ -134,14 +157,23 @@ public class ImportProductItemServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 
-    private void handleSave(HttpSession session, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    // save purchase request and others information relative
+    private void handleSave(HttpSession session, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        // get purchaseId in form save
+        Long purchaseId = Long.parseLong(request.getParameter("purchaseId"));
+
+        // get information warehouse handle import purchase
+        User user = (User) session.getAttribute("user");
+
         // get value
         String[] productIds = request.getParameterValues("productId");
         String[] serials = request.getParameterValues("serial");
         String[] prices = request.getParameterValues("price");
 
-        // call service to handle save
-        String resultSave = inventoryService.saveProductItems(productIds, serials, prices);
+        // call service to handle import
+        String resultSave = inventoryService.importProductItems(purchaseId, user.getId(), productIds, serials, prices);
         // message
         if (resultSave == null) {
             session.setAttribute("message", "Product item saved successfully");
@@ -153,39 +185,6 @@ public class ImportProductItemServlet extends HttpServlet {
 
         // delete session after save success
         session.removeAttribute("importItems");
-        response.sendRedirect(request.getContextPath() + "/inventory/import");
-    }
-
-    private void handleAdd(HttpSession session, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
-
-        // get session
-        List<ProductDTO> products = (List<ProductDTO>) session.getAttribute("products");
-        if (products != null) {
-            products = inventoryService.searchProducts((String) session.getAttribute("name"));
-            session.setAttribute("products", products);
-        }
-
-        // if session haven't value -> init
-        if (importItems == null) {
-            importItems = new ArrayList<>();
-        }
-
-        // get information from list product after search
-        Long productId = Long.parseLong(request.getParameter("productId"));
-        String productName = request.getParameter("productName");
-
-        // init import product item dto
-        ProductItemDTO importProductItemDTO = new ProductItemDTO();
-        importProductItemDTO.setProductId(productId);
-        importProductItemDTO.setProductName(productName);
-        importProductItemDTO.setSerial("");
-        importProductItemDTO.setImportPrice(0.0);
-
-        importItems.add(importProductItemDTO);
-
-        // save in session
-        session.setAttribute("importItems", importItems);
         response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 }

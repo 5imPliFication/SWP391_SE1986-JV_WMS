@@ -1,6 +1,7 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
+import com.example.dto.OrderItemDTO;
 import com.example.model.Order;
 import com.example.model.OrderItem;
 import com.example.model.Product;
@@ -17,7 +18,8 @@ import java.util.List;
 public class OrderItemDAO {
 
     public void addItem(OrderItem item) {
-        String checkStockSql = "SELECT pi.current_price, p.total_quantity AS quantity FROM product_items pi JOIN products p " +
+        String checkStockSql = "SELECT pi.current_price, p.total_quantity AS quantity FROM product_items pi JOIN products p "
+                +
                 "ON pi.product_id=p.id" +
                 " WHERE pi.id = ?";
         String insertSql = "INSERT INTO order_items (order_id, product_item_id, quantity, price_at_purchase) " +
@@ -25,7 +27,7 @@ public class OrderItemDAO {
 
         try (Connection con = DBConfig.getDataSource().getConnection()) {
 
-            con.setAutoCommit(false);  // Start transaction
+            con.setAutoCommit(false); // Start transaction
 
             try {
                 // 1. Get product item price and check stock FIRST
@@ -33,7 +35,7 @@ public class OrderItemDAO {
                 Integer availableQuantity = null;
 
                 try (PreparedStatement ps = con.prepareStatement(checkStockSql)) {
-                    ps.setLong(1, item.getProductItem().getId());  // Use product_item_id
+                    ps.setLong(1, item.getProductItem().getId()); // Use product_item_id
                     ResultSet rs = ps.executeQuery();
 
                     if (rs.next()) {
@@ -52,9 +54,9 @@ public class OrderItemDAO {
                 // 3. Insert order item with price snapshot
                 try (PreparedStatement ps = con.prepareStatement(insertSql)) {
                     ps.setLong(1, item.getOrder().getId());
-                    ps.setLong(2, item.getProductItem().getId());  // product_item_id
+                    ps.setLong(2, item.getProductItem().getId()); // product_item_id
                     ps.setInt(3, item.getQuantity());
-                    ps.setBigDecimal(4, currentPrice);  // Store price_at_purchase
+                    ps.setBigDecimal(4, currentPrice); // Store price_at_purchase
                     ps.executeUpdate();
                 }
 
@@ -113,7 +115,7 @@ public class OrderItemDAO {
                     OrderItem item = new OrderItem();
                     item.setId(rs.getLong("id"));
                     item.setProductItem(productItem);
-                    item.setProduct(product);  // For convenience in JSP
+                    item.setProduct(product); // For convenience in JSP
                     item.setQuantity(rs.getInt("quantity"));
                     item.setPriceAtPurchase(rs.getBigDecimal("price_at_purchase"));
 
@@ -214,5 +216,27 @@ public class OrderItemDAO {
         } catch (SQLException e) {
             throw new RuntimeException("Failed to delete order items", e);
         }
+    }
+
+    public List<OrderItemDTO> findOrderItemsByOrderId(Long orderId) {
+        String sql = "SELECT pi.product_id, oi.quantity FROM order_items oi " +
+                "JOIN product_items pi ON oi.product_item_id = pi.id " +
+                "WHERE oi.order_id = ?";
+        List<OrderItemDTO> items = new ArrayList<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    items.add(new com.example.dto.OrderItemDTO(
+                            rs.getLong("product_id"),
+                            rs.getInt("quantity")));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to find order item DTOs", e);
+        }
+        return items;
     }
 }

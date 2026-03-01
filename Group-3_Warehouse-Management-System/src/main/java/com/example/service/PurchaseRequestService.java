@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.dao.PurchaseRequestDAO;
+import com.example.dto.PurchaseRequestDTO;
 import com.example.model.Brand;
 import com.example.model.Category;
 import com.example.model.Product;
@@ -160,5 +161,9 @@ public class PurchaseRequestService {
 
         // Update items
         p.updateItems(requestId, items);
+    }
+
+    public PurchaseRequestDTO findPurchaseRequestById(Long purchaseId) {
+        return p.findPurchaseById(purchaseId);
     }
 }

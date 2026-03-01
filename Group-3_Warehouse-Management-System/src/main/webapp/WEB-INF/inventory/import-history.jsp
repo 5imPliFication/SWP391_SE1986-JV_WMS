@@ -21,7 +21,7 @@
               method="get">
             <%--search name customer--%>
             <input type="text" name="receiptCode" class="form-control mr-5"
-                   placeholder="Search name customer" value="${receiptCode}">
+                   placeholder="Search receipt code" value="${param.receiptCode}">
 
             <%-- from date--%>
             <span class="mr-2">From Date</span>
@@ -59,36 +59,28 @@
         <table class="table table-bordered table-hover table-sm">
             <thead class="thead-dark text-center">
             <tr>
-                <th style="width: 150px;">Receipt Code</th>
-                <th style="width: 160px;">Received Date</th>
-                <th>Warehouse Staff</th>
-                <th style="width: 120px;">Total Qty</th>
-                <th>Note</th>
+                <th class="text-left">Receipt Code</th>
+                <th style="width: 200px;">Received Date</th>
+                <th style="width: 200px;">Warehouse Staff</th>
                 <th style="width: 100px;">Details</th>
             </tr>
             </thead>
             <tbody>
             <c:choose>
-                <c:when test="${not empty importHistories}">
-                    <c:forEach items="${importHistories}" var="history">
+                <c:when test="${not empty goodsReceipts}">
+                    <c:forEach items="${goodsReceipts}" var="goodsReceipt">
                         <tr>
-                            <td class="text-center align-middle font-weight-bold">
-                                    ${history.receiptCode}
+                            <td class="text-left align-middle font-weight-bold">
+                                    ${goodsReceipt.receiptCode}
                             </td>
                             <td class="text-center align-middle">
-                                    ${history.receivedAt}
+                                    ${goodsReceipt.receivedAt}
                             </td>
                             <td class="align-middle">
-                                    ${history.warehouseName}
+                                    ${goodsReceipt.warehouseName}
                             </td>
                             <td class="text-center align-middle">
-                                    ${history.totalQuantity}
-                            </td>
-                            <td class="align-middle">
-                                    ${history.note}
-                            </td>
-                            <td class="text-center align-middle">
-                                <a href="${pageContext.request.contextPath}/inventory/import/history?action=detail&id=${history.id}"
+                                <a href="${pageContext.request.contextPath}/inventory/import/history?action=detail&id=${goodsReceipt.id}"
                                    class="btn btn-info btn-sm">
                                     View
                                 </a>

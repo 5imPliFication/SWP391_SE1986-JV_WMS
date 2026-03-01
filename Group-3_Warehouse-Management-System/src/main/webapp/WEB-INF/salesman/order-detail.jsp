@@ -1,19 +1,137 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: Admin
-  Date: 1/28/2026
-  Time: 11:54 PM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<html>
+<%@ taglib prefix="currency" uri="http://example.com/functions/currency" %>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Detail</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/order-detail-salesman.css">
+    <style>
+        /* Quantity Controls */
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .quantity-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 14px;
+        }
+
+        .quantity-display {
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* Product Modal */
+        .product-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .product-card:hover {
+            border-color: #007bff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card.selected {
+            border-color: #28a745;
+            background-color: #f0f8f5;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .product-stock {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .stock-high {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .stock-medium {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .stock-low {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .search-box {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .modal-body {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .quantity-input-modal {
+            width: 80px;
+            text-align: center;
+        }
+
+        .coupon-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .coupon-applied-box {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .discount-highlight {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .coupon-input-uppercase {
+            text-transform: uppercase;
+        }
+    </style>
 </head>
 <body>
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
@@ -24,8 +142,8 @@
     <c:if test="${not empty param.success}">
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle mr-2"></i>${param.success}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
             </button>
         </div>
     </c:if>
@@ -33,8 +151,8 @@
     <c:if test="${not empty param.error}">
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-circle mr-2"></i>${param.error}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
             </button>
         </div>
     </c:if>
@@ -44,8 +162,7 @@
         <h2 class="font-weight-bold text-dark">
             <i class="fas fa-file-invoice mr-2"></i>Order Detail
         </h2>
-        <a href="${pageContext.request.contextPath}/salesman/orders"
-           class="btn btn-secondary">
+        <a href="${pageContext.request.contextPath}/salesman/orders" class="btn btn-secondary">
             <i class="fas fa-arrow-left mr-2"></i>Back to Orders
         </a>
     </div>
@@ -104,21 +221,26 @@
 
     <!-- Order Items Table -->
     <div class="card shadow-sm mb-4">
-        <div class="card-header bg-dark text-white">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="fas fa-box mr-2"></i>Order Items</h5>
+            <c:if test="${order.status == 'DRAFT'}">
+                <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#productModal">
+                    <i class="fas fa-plus-circle mr-1"></i>Add Products
+                </button>
+            </c:if>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover table-striped mb-0">
                     <thead class="thead-light">
                     <tr>
-                        <th class="py-3 px-4">#</th>
-                        <th class="py-3 px-4">Product Name</th>
-                        <th class="py-3 px-4">Unit Price</th>
-                        <th class="py-3 px-4 text-center">Quantity</th>
-                        <th class="py-3 px-4 text-right">Subtotal</th>
+                        <th class="py-3 px-4" width="5%">#</th>
+                        <th class="py-3 px-4" width="35%">Product Name</th>
+                        <th class="py-3 px-4" width="20%">Unit Price</th>
+                        <th class="py-3 px-4 text-center" width="20%">Quantity</th>
+                        <th class="py-3 px-4 text-right" width="15%">Subtotal</th>
                         <c:if test="${order.status == 'DRAFT'}">
-                            <th class="py-3 px-4 text-center">Action</th>
+                            <th class="py-3 px-4 text-center" width="5%">Action</th>
                         </c:if>
                     </tr>
                     </thead>
@@ -129,40 +251,49 @@
                         <c:set var="total" value="${total + subtotal}"/>
                         <tr>
                             <td class="px-4 align-middle">${status.index + 1}</td>
-                            <td class="px-4 align-middle font-weight-bold">
-                                    ${i.product.name}
+                            <td class="px-4 align-middle">
+                                <div class="font-weight-bold">${i.product.name}</div>
                             </td>
                             <td class="px-4 align-middle">
-                                <!-- ✓ FIXED: Show priceAtPurchase (price when ordered) -->
-                                <fmt:formatNumber value="${i.priceAtPurchase}" type="number" groupingUsed="true"/> VND
-
-                                <!-- ✓ ADDED: Show if price has changed since order -->
+                                ${currency:format(i.priceAtPurchase)} VND
                                 <c:if test="${i.priceAtPurchase != i.productItem.currentPrice}">
                                     <br><small class="text-warning">
                                     <i class="fas fa-exclamation-triangle"></i>
-                                    Current: <fmt:formatNumber value="${i.productItem.currentPrice}" type="number"
-                                                               groupingUsed="true"/> VND
+                                    Current: ${currency:format(i.productItem.currentPrice)} VND
                                 </small>
                                 </c:if>
                             </td>
-                            <td class="px-4 align-middle text-center">
-                                <span class="badge badge-info badge-pill">${i.quantity}</span>
+                            <td class="px-4 align-middle">
+                                <c:choose>
+                                    <c:when test="${order.status == 'DRAFT'}">
+                                        <!-- Quantity Controls -->
+                                        <div class="quantity-controls">
+                                            <button class="btn btn-sm btn-outline-danger quantity-btn"
+                                                    onclick="updateQuantity(${order.id}, ${i.id}, ${i.quantity - 1})"
+                                                ${i.quantity <= 1 ? 'disabled' : ''}>
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <span class="quantity-display">${i.quantity}</span>
+                                            <button class="btn btn-sm btn-outline-success quantity-btn"
+                                                    onclick="updateQuantity(${order.id}, ${i.id}, ${i.quantity + 1})">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="badge badge-info badge-pill px-3 py-2">${i.quantity}</span>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
                             <td class="px-4 align-middle text-right font-weight-bold text-primary">
-                                <fmt:formatNumber value="${subtotal}" type="number" groupingUsed="true"/> VND
+                                ${currency:format(subtotal)} VND
                             </td>
                             <c:if test="${order.status == 'DRAFT'}">
                                 <td class="px-4 align-middle text-center">
-                                    <form action="${pageContext.request.contextPath}/salesman/order/item/remove"
-                                          method="post"
-                                          style="display:inline;"
-                                          onsubmit="return confirm('Remove this item from order?');">
-                                        <input type="hidden" name="productItemId" value="${i.productItem.id}"/>
-                                        <input type="hidden" name="orderId" value="${order.id}"/>
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            onclick="removeItem(${order.id}, ${i.productItem.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </td>
                             </c:if>
                         </tr>
@@ -175,13 +306,16 @@
                                 <div class="text-muted">
                                     <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
                                     <h5>No Items in Order</h5>
-                                    <p class="mb-0">Add items to this order</p>
+                                    <c:if test="${order.status == 'DRAFT'}">
+                                        <button class="btn btn-primary mt-3" data-toggle="modal" data-target="#productModal">
+                                            <i class="fas fa-plus-circle mr-2"></i>Add Your First Product
+                                        </button>
+                                    </c:if>
                                 </div>
                             </td>
                         </tr>
                     </c:if>
                     </tbody>
-
                 </table>
             </div>
         </div>
@@ -195,10 +329,9 @@
                     <div class="col-md-8">
                         <h5 class="mb-3"><i class="fas fa-receipt mr-2"></i>Order Summary</h5>
 
-                        <!-- Coupon Section - INTEGRATED -->
+                        <!-- Coupon Section -->
                         <c:choose>
                             <c:when test="${not empty order.coupon}">
-                                <!-- Coupon Applied -->
                                 <div class="coupon-applied-box">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
@@ -211,13 +344,10 @@
                                                 <i class="fas fa-check-circle mr-1"></i>
                                                 <c:choose>
                                                     <c:when test="${order.coupon.discountType == 'PERCENTAGE'}">
-                                                        <fmt:formatNumber value="${order.coupon.discountValue}"
-                                                                          pattern="#"/>% OFF Applied
+                                                        <fmt:formatNumber value="${order.coupon.discountValue}" pattern="#"/>% OFF Applied
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <fmt:formatNumber value="${order.coupon.discountValue}"
-                                                                          type="number"
-                                                                          groupingUsed="true"/> VND OFF Applied
+                                                        ${currency:format(order.coupon.discountValue)} VND OFF Applied
                                                     </c:otherwise>
                                                 </c:choose>
                                             </h6>
@@ -226,9 +356,8 @@
                                             </small>
                                         </div>
                                         <c:if test="${order.status == 'DRAFT'}">
-                                            <form action="${pageContext.request.contextPath}/salesman/order/remove-coupon"
-                                                  method="post"
-                                                  onsubmit="return confirm('Remove this coupon from the order?');">
+                                            <form action="${pageContext.request.contextPath}/salesman/order/remove-coupon" method="post"
+                                                  onsubmit="return confirm('Remove this coupon?');">
                                                 <input type="hidden" name="orderId" value="${order.id}"/>
                                                 <button type="submit" class="btn btn-outline-danger btn-sm">
                                                     <i class="fas fa-times mr-1"></i>Remove
@@ -239,24 +368,16 @@
                                 </div>
                             </c:when>
                             <c:otherwise>
-                                <!-- Apply Coupon Form (Only for DRAFT orders) -->
                                 <c:if test="${order.status == 'DRAFT'}">
                                     <div class="form-group">
                                         <label class="font-weight-bold text-muted">
                                             <i class="fas fa-tag mr-1"></i>Discount Coupon
                                         </label>
-                                        <form action="${pageContext.request.contextPath}/salesman/order/apply-coupon"
-                                              method="post">
+                                        <form action="${pageContext.request.contextPath}/salesman/order/apply-coupon" method="post">
                                             <input type="hidden" name="orderId" value="${order.id}"/>
                                             <div class="input-group">
-                                                <input type="text"
-                                                       name="couponCode"
-                                                       class="form-control coupon-input-uppercase"
-                                                       placeholder="Enter coupon code"
-                                                       pattern="[A-Z0-9]+"
-                                                       title="Coupon codes contain only uppercase letters and numbers"
-                                                       maxlength="50"
-                                                       required>
+                                                <input type="text" name="couponCode" class="form-control coupon-input-uppercase"
+                                                       placeholder="Enter coupon code" pattern="[A-Z0-9]+" maxlength="50" required>
                                                 <div class="input-group-append">
                                                     <button class="btn btn-outline-primary" type="submit">
                                                         <i class="fas fa-check mr-1"></i>Apply
@@ -264,8 +385,7 @@
                                                 </div>
                                             </div>
                                             <small class="form-text text-muted">
-                                                <i class="fas fa-info-circle mr-1"></i>Enter a valid coupon code to
-                                                receive a discount
+                                                <i class="fas fa-info-circle mr-1"></i>Enter a valid coupon code
                                             </small>
                                         </form>
                                     </div>
@@ -280,33 +400,27 @@
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="text-muted">Subtotal:</span>
                                     <span class="font-weight-bold">
-                                        <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> VND
+                                        ${currency:format(total)} VND
                                     </span>
                                 </div>
 
-                                <!-- Show discount if coupon applied -->
                                 <c:choose>
                                     <c:when test="${not empty order.coupon}">
                                         <div class="d-flex justify-content-between mb-2">
-                                            <span class="text-muted">
-                                                <i class="fas fa-tag mr-1"></i>Discount:
-                                            </span>
+                                            <span class="text-muted"><i class="fas fa-tag mr-1"></i>Discount:</span>
                                             <span class="discount-highlight">
-                                                -<fmt:formatNumber value="${order.discountAmount}" type="number"
-                                                                   groupingUsed="true"/> VND
+                                                -${currency:format(order.discountAmount)} VND
                                             </span>
                                         </div>
                                         <hr>
                                         <div class="d-flex justify-content-between">
                                             <span class="h5 mb-0">Total:</span>
-                                            <span class="h4 mb-0 text-success font-weight-bold">
-                                                <fmt:formatNumber value="${order.finalTotal}" type="number"
-                                                                  groupingUsed="true"/> VND
+                                            <span class="h4 mb-0 text-primary font-weight-bold">
+                                                ${currency:format(order.finalTotal)} VND
                                             </span>
                                         </div>
-                                        <small class="text-muted d-block mt-2">
-                                            <i class="fas fa-save mr-1"></i>You saved <fmt:formatNumber
-                                                value="${order.discountAmount}" type="number" groupingUsed="true"/> VND!
+                                        <small class="text-muted d-block mt-2 font-italic">
+                                            <i class="fas fa-solid fa-sack-dollar mr-1"></i>You saved ${currency:format(order.discountAmount)} VND!
                                         </small>
                                     </c:when>
                                     <c:otherwise>
@@ -318,7 +432,7 @@
                                         <div class="d-flex justify-content-between">
                                             <span class="h5 mb-0">Total:</span>
                                             <span class="h4 mb-0 text-primary font-weight-bold">
-                                                <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> VND
+                                                ${currency:format(total)} VND
                                             </span>
                                         </div>
                                     </c:otherwise>
@@ -331,85 +445,26 @@
         </div>
     </c:if>
 
-    <!-- Add Item Form (Only for DRAFT) -->
+    <!-- Action Buttons (Only for DRAFT) -->
     <c:if test="${order.status == 'DRAFT'}">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0"><i class="fas fa-plus-circle mr-2"></i>Add Item to Order</h5>
-            </div>
-            <div class="card-body">
-                <form action="${pageContext.request.contextPath}/salesman/order/item/add" method="post">
-                    <input type="hidden" name="orderId" value="${order.id}"/>
-
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="productItemId" class="font-weight-bold">
-                                <i class="fas fa-laptop mr-1"></i>Product ID
-                            </label>
-                            <input type="number"
-                                   class="form-control form-control-lg"
-                                   id="productItemId"
-                                   name="productItemId"
-                                   placeholder="Enter product ID"
-                                   required/>
-                            <small class="form-text text-muted">Enter the product ID from inventory</small>
-                        </div>
-
-                        <div class="form-group col-md-6">
-                            <label for="quantity" class="font-weight-bold">
-                                <i class="fas fa-sort-numeric-up mr-1"></i>Quantity
-                            </label>
-                            <input type="number"
-                                   class="form-control form-control-lg"
-                                   id="quantity"
-                                   name="quantity"
-                                   placeholder="Enter quantity"
-                                   min="1"
-                                   required/>
-                            <small class="form-text text-muted">Number of units to order</small>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-success btn-lg btn-block">
-                        <i class="fas fa-plus-circle mr-2"></i>Add Item
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
         <div class="row mb-4">
             <div class="col-md-6">
-                <!-- Submit Order Form -->
                 <div class="card shadow-sm border-primary h-100">
                     <div class="card-body text-center py-4">
-                        <h5 class="mb-3">
-                            <i class="fas fa-paper-plane mr-2"></i>Submit Order
-                        </h5>
-
+                        <h5 class="mb-3"><i class="fas fa-paper-plane mr-2"></i>Submit Order</h5>
                         <c:choose>
                             <c:when test="${not empty items}">
-                                <p class="text-muted mb-4">
-                                    Ready to submit? You won't be able to modify afterwards.
-                                </p>
-
-                                <form action="${pageContext.request.contextPath}/salesman/order/submit"
-                                      method="post"
-                                      onsubmit="return confirm('Are you sure you want to submit this order?');">
-
+                                <p class="text-muted mb-4">Ready to submit? You won't be able to modify afterwards.</p>
+                                <form action="${pageContext.request.contextPath}/salesman/order/submit" method="post"
+                                      onsubmit="return confirm('Submit this order?');">
                                     <input type="hidden" name="orderId" value="${order.id}"/>
-
                                     <button type="submit" class="btn btn-primary btn-lg btn-block">
                                         <i class="fas fa-paper-plane mr-2"></i>Submit Order
                                     </button>
                                 </form>
                             </c:when>
-
                             <c:otherwise>
-                                <p class="text-danger mb-4">
-                                    You must add at least one item before submitting the order.
-                                </p>
-
+                                <p class="text-danger mb-4">Add at least one item first.</p>
                                 <button class="btn btn-secondary btn-lg btn-block" disabled>
                                     <i class="fas fa-paper-plane mr-2"></i>Submit Order
                                 </button>
@@ -420,18 +475,12 @@
             </div>
 
             <div class="col-md-6">
-                <!-- Cancel Order Form -->
                 <div class="card shadow-sm border-danger h-100">
                     <div class="card-body text-center py-4">
-                        <h5 class="mb-3">
-                            <i class="fas fa-times-circle mr-2"></i>Cancel Order
-                        </h5>
-                        <p class="text-muted mb-4">
-                            Discard this draft order? This action cannot be undone.
-                        </p>
-                        <form action="${pageContext.request.contextPath}/salesman/order/cancel"
-                              method="post"
-                              onsubmit="return confirm('Are you sure you want to CANCEL this order? This cannot be undone!');">
+                        <h5 class="mb-3"><i class="fas fa-times-circle mr-2"></i>Cancel Order</h5>
+                        <p class="text-muted mb-4">Discard this draft? This cannot be undone.</p>
+                        <form action="${pageContext.request.contextPath}/salesman/order/cancel" method="post"
+                              onsubmit="return confirm('Cancel this order? This cannot be undone!');">
                             <input type="hidden" name="orderId" value="${order.id}"/>
                             <button type="submit" class="btn btn-danger btn-lg btn-block">
                                 <i class="fas fa-times-circle mr-2"></i>Cancel Order
@@ -445,10 +494,8 @@
 
     <!-- Locked Order Notice -->
     <c:if test="${order.status != 'DRAFT'}">
-        <div class="alert alert-info shadow-sm" role="alert">
-            <h5 class="alert-heading">
-                <i class="fas fa-lock mr-2"></i>Order ${order.status}
-            </h5>
+        <div class="alert alert-info shadow-sm">
+            <h5 class="alert-heading"><i class="fas fa-lock mr-2"></i>Order ${order.status}</h5>
             <p class="mb-0">
                 <c:choose>
                     <c:when test="${order.status == 'CANCELLED'}">
@@ -463,21 +510,184 @@
     </c:if>
 </main>
 
+<!-- Product Selection Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-shopping-cart mr-2"></i>Select Products</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <!-- Search Box -->
+            <div class="search-box">
+                <input type="text" id="productSearch" class="form-control form-control-lg"
+                       placeholder="🔍 Search products by name...">
+            </div>
+
+            <div class="modal-body">
+                <div class="row" id="productList">
+                    <c:forEach items="${availableProducts}" var="p">
+                        <div class="col-md-4 mb-3 product-item"
+                             data-name="${p.name.toLowerCase()}"
+                             data-id="${p.id}">
+                            <div class="card product-card h-100">
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <c:choose>
+                                            <c:when test="${p.totalQuantity > 20}">
+                                                <span class="product-stock stock-high">
+                                                    <i class="fas fa-check-circle"></i> In Stock
+                                                </span>
+                                            </c:when>
+                                            <c:when test="${p.totalQuantity > 0}">
+                                                <span class="product-stock stock-medium">
+                                                    <i class="fas fa-exclamation-triangle"></i> Low Stock
+                                                </span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="product-stock stock-low">
+                                                    <i class="fas fa-times-circle"></i> Out of Stock
+                                                </span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+
+                                    <h6 class="font-weight-bold mb-2">${p.name}</h6>
+                                    <p class="text-muted small mb-2">${p.description}</p>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-muted small">Available:</span>
+                                        <strong>${p.totalQuantity} units</strong>
+                                    </div>
+
+                                    <c:if test="${p.totalQuantity > 0}">
+                                        <div class="input-group mb-2">
+                                            <input type="number"
+                                                   class="form-control quantity-input-modal"
+                                                   value="1"
+                                                   min="1"
+                                                   max="${p.totalQuantity}"
+                                                   id="qty-${p.id}">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-primary"
+                                                        onclick="addProductToOrder(${order.id}, ${p.id})">
+                                                    <i class="fas fa-plus"></i> Add
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${p.totalQuantity == 0}">
+                                        <button class="btn btn-secondary btn-block" disabled>
+                                            <i class="fas fa-ban mr-1"></i> Out of Stock
+                                        </button>
+                                    </c:if>
+                                </div>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </div>
+
+                <c:if test="${empty availableProducts}">
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-box-open fa-3x mb-3"></i>
+                        <h5>No Products Available</h5>
+                    </div>
+                </c:if>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
 <script>
     // Auto-uppercase coupon input
-    document.querySelector('.coupon-input-uppercase')?.addEventListener('input', function (e) {
+    $('.coupon-input-uppercase').on('input', function() {
         this.value = this.value.toUpperCase();
     });
 
-    // Auto-dismiss alerts after 5 seconds
-    setTimeout(function () {
-        const alerts = document.querySelectorAll('.alert-dismissible');
-        alerts.forEach(alert => {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        });
+    // Auto-dismiss alerts
+    setTimeout(function() {
+        $('.alert-dismissible').fadeOut('slow');
     }, 5000);
+
+    // Product search (front-end filtering)
+    $('#productSearch').on('keyup', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        $('.product-item').each(function() {
+            const productName = $(this).data('name');
+            if (productName.includes(searchTerm)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+
+    // Add product to order
+    function addProductToOrder(orderId, productId) {
+        const quantity = parseInt($('#qty-' + productId).val());
+
+        if (!quantity || quantity < 1) {
+            alert('Please enter a valid quantity');
+            return;
+        }
+
+        // Create form and submit
+        const form = $('<form>', {
+            method: 'POST',
+            action: '${pageContext.request.contextPath}/salesman/order/item/add'
+        });
+
+        form.append($('<input>', { type: 'hidden', name: 'orderId', value: orderId }));
+        form.append($('<input>', { type: 'hidden', name: 'productId', value: productId }));
+        form.append($('<input>', { type: 'hidden', name: 'quantity', value: quantity }));
+
+        $('body').append(form);
+        form.submit();
+    }
+
+    // Update quantity
+    function updateQuantity(orderId, itemId, newQuantity) {
+        if (newQuantity < 1) {
+            alert('Quantity must be at least 1');
+            return;
+        }
+
+        if (confirm('Update quantity to ' + newQuantity + '?')) {
+            const form = $('<form>', {
+                method: 'POST',
+                action: '${pageContext.request.contextPath}/salesman/order/item/update-quantity'
+            });
+
+            form.append($('<input>', { type: 'hidden', name: 'orderId', value: orderId }));
+            form.append($('<input>', { type: 'hidden', name: 'itemId', value: itemId }));
+            form.append($('<input>', { type: 'hidden', name: 'quantity', value: newQuantity }));
+
+            $('body').append(form);
+            form.submit();
+        }
+    }
+
+    // Remove item
+    function removeItem(orderId, productItemId) {
+        if (confirm('Remove this item from the order?')) {
+            const form = $('<form>', {
+                method: 'POST',
+                action: '${pageContext.request.contextPath}/salesman/order/item/remove'
+            });
+
+            form.append($('<input>', { type: 'hidden', name: 'orderId', value: orderId }));
+            form.append($('<input>', { type: 'hidden', name: 'productItemId', value: productItemId }));
+
+            $('body').append(form);
+            form.submit();
+        }
+    }
 </script>
 </body>
 </html>

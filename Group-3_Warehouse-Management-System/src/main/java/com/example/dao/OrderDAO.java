@@ -60,7 +60,7 @@ public class OrderDAO {
     private Order mapOrder(ResultSet rs) throws SQLException {
 
         Order order = new Order();
-        order.setId(rs.getLong("order_id"));
+        order.setId(rs.getLong("id"));
         order.setOrderCode(rs.getString("order_code"));
         order.setCustomerName(rs.getString("customer_name"));
         order.setCustomerPhone(rs.getString("customer_phone"));
@@ -71,8 +71,7 @@ public class OrderDAO {
 
         // ---- createdBy user ----
         User createdBy = new User();
-        createdBy.setId(rs.getLong("created_user_id"));
-        createdBy.setFullName(rs.getString("created_user_name"));
+        createdBy.setId(rs.getLong("created_by"));
         order.setCreatedBy(createdBy);
 
         // ---- createdAt ----
@@ -457,9 +456,9 @@ public class OrderDAO {
      * Apply coupon to order
      */
     public void applyCoupon(Long orderId, Long couponId) {
-        String selectOrderSql = "SELECT SUM(oi.quantity * p.price) as subtotal " +
+        String selectOrderSql = "SELECT SUM(oi.quantity * pi.current_price) as subtotal " +
                 "FROM order_items oi " +
-                "JOIN products p ON oi.product_id = p.id " +
+                "JOIN product_items pi ON oi.product_item_id = pi.id " +
                 "WHERE oi.order_id = ?";
 
         String selectCouponSql = "SELECT * FROM coupons WHERE id = ?";
@@ -556,9 +555,9 @@ public class OrderDAO {
      * Remove coupon from order
      */
     public void removeCoupon(Long orderId) {
-        String selectOrderSql = "SELECT SUM(oi.quantity * p.price) as subtotal, o.coupon_id " +
+        String selectOrderSql = "SELECT SUM(oi.quantity * pi.current_price) as subtotal, o.coupon_id " +
                 "FROM order_items oi " +
-                "JOIN products p ON oi.product_id = p.id " +
+                "JOIN product_items pi ON oi.product_item_id = pi.id " +
                 "JOIN orders o ON o.id = oi.order_id " +
                 "WHERE oi.order_id = ? " +
                 "GROUP BY o.coupon_id";
@@ -685,20 +684,46 @@ public class OrderDAO {
         }
     }
 
-    public List<Order> getOrders(String status, String searchCode, int offset, int limit) {
+    public List<Order> getOrders(String status, String searchCode, String sortBy, String sortDir, int offset, int limit) {
         StringBuilder sql = new StringBuilder(
-                "SELECT * FROM orders WHERE 1=1"
+                "SELECT * FROM orders o WHERE 1=1"
         );
 
         if (status != null && !status.isEmpty()) {
-            sql.append(" AND status = ?");
+            sql.append(" AND o.status = ?");
         }
 
         if (searchCode != null && !searchCode.isEmpty()) {
-            sql.append(" AND order_code LIKE ?");
+            sql.append(" AND o.order_code LIKE ?");
         }
 
-        sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
+        // Add sorting
+        String orderBy = "o.order_date";
+        if (sortBy != null && !sortBy.isEmpty()) {
+            switch (sortBy) {
+                case "orderCode":
+                    orderBy = "o.order_code";
+                    break;
+                case "customerName":
+                    orderBy = "o.customer_name";
+                    break;
+                case "status":
+                    orderBy = "o.status";
+                    break;
+                case "createdAt":
+                    orderBy = "o.order_date";
+                    break;
+                default:
+                    orderBy = "o.order_date";
+            }
+        }
+        
+        String direction = "DESC";
+        if (sortDir != null && sortDir.equalsIgnoreCase("asc")) {
+            direction = "ASC";
+        }
+        
+        sql.append(" ORDER BY ").append(orderBy).append(" ").append(direction).append(" LIMIT ? OFFSET ?");
 
         List<Order> orders = new ArrayList<>();
 
@@ -706,6 +731,7 @@ public class OrderDAO {
              PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             int paramIndex = 1;
+            Order order =  new Order();
 
             if (status != null && !status.isEmpty()) {
                 ps.setString(paramIndex++, status);
@@ -721,7 +747,12 @@ public class OrderDAO {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                orders.add(mapOrder(rs));
+                order.setId(rs.getLong("id"));
+                order.setOrderCode(rs.getString("order_code"));
+                order.setCustomerName(rs.getString("customer_name"));
+                order.setStatus(rs.getString("status"));
+                order.setCreatedAt(rs.getTimestamp("order_date"));
+                orders.add(order);
             }
 
             return orders;
@@ -771,7 +802,7 @@ public class OrderDAO {
     }
 
     public List<Order> getOrdersBySalesman(Long salesmanId, String status, String searchCode,
-                                           int offset, int limit) {
+                                           String sortBy, String sortDir, int offset, int limit) {
         StringBuilder sql = new StringBuilder(
                 "SELECT o.*, u.fullname " +
                         "FROM orders o " +
@@ -787,7 +818,33 @@ public class OrderDAO {
             sql.append(" AND o.order_code LIKE ?");
         }
 
-        sql.append(" ORDER BY o.order_date DESC LIMIT ? OFFSET ?");
+        // Add sorting
+        String orderBy = "o.order_date";
+        if (sortBy != null && !sortBy.isEmpty()) {
+            switch (sortBy) {
+                case "orderCode":
+                    orderBy = "o.order_code";
+                    break;
+                case "customerName":
+                    orderBy = "o.customer_name";
+                    break;
+                case "status":
+                    orderBy = "o.status";
+                    break;
+                case "createdAt":
+                    orderBy = "o.order_date";
+                    break;
+                default:
+                    orderBy = "o.order_date";
+            }
+        }
+        
+        String direction = "DESC";
+        if (sortDir != null && sortDir.equalsIgnoreCase("asc")) {
+            direction = "ASC";
+        }
+        
+        sql.append(" ORDER BY ").append(orderBy).append(" ").append(direction).append(" LIMIT ? OFFSET ?");
 
         List<Order> orders = new ArrayList<>();
 

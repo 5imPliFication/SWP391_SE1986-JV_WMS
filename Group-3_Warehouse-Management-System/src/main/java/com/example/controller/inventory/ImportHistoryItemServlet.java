@@ -1,7 +1,7 @@
 package com.example.controller.inventory;
 
-import com.example.dto.ImportHistoryDTO;
-import com.example.dto.ImportHistoryDetailDTO;
+import com.example.dto.GoodsReceiptDTO;
+import com.example.dto.GoodsReceiptItemDTO;
 import com.example.service.GoodsHistoryService;
 import com.example.util.AppConstants;
 import jakarta.servlet.ServletException;
@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.List;
 
 @WebServlet("/inventory/import/history")
@@ -25,7 +24,7 @@ public class ImportHistoryItemServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        if (action == null) {
+        if (action == null || action.trim().isEmpty()) {
             action = "search";
         }
 
@@ -43,12 +42,12 @@ public class ImportHistoryItemServlet extends HttpServlet {
         // get id need detail
         Long id = Long.parseLong(request.getParameter("id"));
 
-        // call service
-        ImportHistoryDTO history = goodsHistoryService.getImportHistoryById(id);
-        List<ImportHistoryDetailDTO> details = goodsHistoryService.getImportHistoryItems(id);
+        // call service using GoodsReceiptDTO for better domain alignment
+        GoodsReceiptDTO goodsReceipt = goodsHistoryService.getGoodsReceiptById(id);
+        List<GoodsReceiptItemDTO> receiptItems = goodsHistoryService.getGoodsReceiptItems(id);
 
-        request.setAttribute("history", history);
-        request.setAttribute("details", details);
+        request.setAttribute("history", goodsReceipt);
+        request.setAttribute("details", receiptItems);
         request.getRequestDispatcher("/WEB-INF/inventory/import-history-detail.jsp").forward(request, response);
 
     }
@@ -57,12 +56,12 @@ public class ImportHistoryItemServlet extends HttpServlet {
             throws ServletException, IOException {
         // get pageNo
         String pageNoStr = request.getParameter("pageNo");
-        int pageNo = 1;
+        int pageNo = AppConstants.DEFAULT_PAGE_NO;
         if (pageNoStr != null && !pageNoStr.isEmpty()) {
             try {
                 pageNo = Integer.parseInt(pageNoStr);
             } catch (NumberFormatException e) {
-                pageNo = 1;
+                pageNo = AppConstants.DEFAULT_PAGE_NO;
             }
         }
 
@@ -73,19 +72,19 @@ public class ImportHistoryItemServlet extends HttpServlet {
         String fromDateStr = request.getParameter("fromDate");
         String toDateStr = request.getParameter("toDate");
 
-        // get data through service
-        List<ImportHistoryDTO> importHistories = goodsHistoryService.getImportHistory(receiptCode, fromDateStr, toDateStr,
+        // call service
+        List<GoodsReceiptDTO> goodsReceipts = goodsHistoryService.getGoodsReceipts(receiptCode, fromDateStr, toDateStr,
                 pageNo);
 
         // count total records
-        int totalRecords = goodsHistoryService.countImportHistory(receiptCode, fromDateStr, toDateStr);
+        int totalRecords = goodsHistoryService.countGoodsReceipts(receiptCode, fromDateStr, toDateStr);
 
         // calc total pages
         int totalPages = (int) Math.ceil((double) totalRecords / AppConstants.PAGE_SIZE);
 
         // set data
         request.setAttribute("receiptCode", receiptCode);
-        request.setAttribute("importHistories", importHistories);
+        request.setAttribute("goodsReceipts", goodsReceipts);
         request.setAttribute("pageNo", pageNo);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("fromDate", fromDateStr);

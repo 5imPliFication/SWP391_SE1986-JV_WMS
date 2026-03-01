@@ -107,13 +107,13 @@
                         </form>
                     </c:if>
                     <c:if test="${isWarehouse}">
-                        <form method="post"
-                              action="${pageContext.request.contextPath}/purchase-request/detail"
-                              onsubmit="return confirm('Complete this purchase request?')">
-                            <input type="hidden" name="id" value="${prList.id}">
-                            <input type="hidden" name="action" value="complete">
-                            <button class="btn btn-warning">Complete</button>
-                        </form>
+                        <%--đặt tên prList nhưng có giá trị là purchaseDetail ?--%>
+                        <c:if test="${prList.status eq 'APPROVED'}">
+                            <a href="${pageContext.request.contextPath}/inventory/import?purchaseId=${prList.id}&action=import"
+                               class="btn btn-primary">
+                                Import Product
+                            </a>
+                        </c:if>
                     </c:if>
 
                     <c:if test="${isManager && isPending}">

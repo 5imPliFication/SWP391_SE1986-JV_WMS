@@ -58,19 +58,19 @@ public class ApplyCouponServlet extends HttpServlet {
                 return;
             }
 
-            // Validate coupon
-            Optional<Coupon> couponOpt = couponService.validateCoupon(couponCode, orderTotal);
+            // Validate coupon (with per-user check)
+            Optional<Coupon> couponOpt = couponService.validateCoupon(couponCode, orderTotal, user.getId());
 
             if (couponOpt.isEmpty()) {
-                String errorMsg = URLEncoder.encode("Invalid, expired, or inapplicable coupon code", StandardCharsets.UTF_8);
+                String errorMsg = URLEncoder.encode("Invalid, expired, inapplicable, or already used coupon code", StandardCharsets.UTF_8);
                 resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&error=" + errorMsg);
                 return;
             }
 
             Coupon coupon = couponOpt.get();
 
-            // Apply coupon to order
-            orderService.applyCouponToOrder(orderId, coupon.getId());
+            // Apply coupon to order (with user ID)
+            orderService.applyCouponToOrder(orderId, coupon.getId(), user.getId());
 
             String successMsg = URLEncoder.encode("Coupon applied successfully!", StandardCharsets.UTF_8);
             resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&success=" + successMsg);

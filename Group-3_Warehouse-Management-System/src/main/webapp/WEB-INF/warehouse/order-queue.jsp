@@ -11,6 +11,7 @@
 <head>
     <title>Order Queue</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
 <body>
@@ -112,10 +113,10 @@
                 <table class="table table-hover table-striped mb-0">
                     <thead class="thead-light">
                     <tr>
-                        <th class="py-3 px-4">Order Code</th>
-                        <th class="py-3 px-4">Customer</th>
-                        <th class="py-3 px-4">Status</th>
-                        <th class="py-3 px-4">Created At</th>
+                        <th class="py-3 px-4" data-sort="orderCode">Order Code</th>
+                        <th class="py-3 px-4" data-sort="customerName">Customer</th>
+                        <th class="py-3 px-4" data-sort="status">Status</th>
+                        <th class="py-3 px-4" data-sort="createdAt">Created At</th>
                         <th class="py-3 px-4 text-center">Actions</th>
                     </tr>
                     </thead>
@@ -189,8 +190,17 @@
             </div>
         </div>
     </div>
+
+    <c:set var="queryParams" value="status=${param.status}&searchCode=${param.searchCode}&sortBy=${sortBy}&sortDir=${sortDir}"/>
+    <jsp:include page="/WEB-INF/common/pagination.jsp">
+        <jsp:param name="pageNo" value="${pageNo}"/>
+        <jsp:param name="totalPages" value="${totalPages}"/>
+        <jsp:param name="baseUrl" value="${pageContext.request.contextPath}/warehouse/orders"/>
+        <jsp:param name="queryParams" value="${queryParams}"/>
+    </jsp:include>
 </main>
 
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
+<script src="${pageContext.request.contextPath}/static/js/table-sort.js"></script>
 </body>
 </html>
