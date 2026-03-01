@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 @WebServlet("/inventory/import/history")
-public class ImportHistoryItemServlet extends HttpServlet {
+public class ImportHistoryServlet extends HttpServlet {
 
     private final GoodsHistoryService goodsHistoryService = new GoodsHistoryService();
 
@@ -39,15 +39,20 @@ public class ImportHistoryItemServlet extends HttpServlet {
     private void handleDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // get id need detail
+        // get id of goods receipt need detail
         Long id = Long.parseLong(request.getParameter("id"));
 
-        // call service using GoodsReceiptDTO for better domain alignment
+        // call service
         GoodsReceiptDTO goodsReceipt = goodsHistoryService.getGoodsReceiptById(id);
-        List<GoodsReceiptItemDTO> receiptItems = goodsHistoryService.getGoodsReceiptItems(id);
 
-        request.setAttribute("history", goodsReceipt);
-        request.setAttribute("details", receiptItems);
+        System.out.println(goodsReceipt);
+        List<GoodsReceiptItemDTO> goodsReceiptItems = goodsHistoryService.getGoodsReceiptItems(id);
+
+        for (GoodsReceiptItemDTO goodsReceiptItem : goodsReceiptItems) {
+            System.out.println(goodsReceiptItem);
+        }
+        request.setAttribute("goodsReceipt", goodsReceipt);
+        request.setAttribute("goodsReceiptItems", goodsReceiptItems);
         request.getRequestDispatcher("/WEB-INF/inventory/import-history-detail.jsp").forward(request, response);
 
     }

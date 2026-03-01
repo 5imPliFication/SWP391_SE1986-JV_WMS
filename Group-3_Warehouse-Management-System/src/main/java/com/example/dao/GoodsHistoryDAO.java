@@ -44,7 +44,7 @@ public class GoodsHistoryDAO {
         sql.append(" order by gr.received_at desc limit ? offset ?");
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int paramIndex = 1;
 
@@ -97,7 +97,7 @@ public class GoodsHistoryDAO {
         }
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int paramIndex = 1;
 
@@ -124,30 +124,28 @@ public class GoodsHistoryDAO {
     }
 
     public GoodsReceiptDTO getGoodsReceiptById(Long id) {
-        String sql = """
-                    select gr.id,
-                           pr.request_code as receiptCode,
-                           gr.received_at,
-                           u.fullname as warehouseName,
-                           coalesce(sum(gri.actual_quantity), 0) as totalQuantity,
-                           gr.note
-                    from goods_receipts gr
-                    join purchase_requests pr on gr.purchase_request_id = pr.id
-                    join users u ON gr.warehouse_id = u.id
-                    left join goods_receipt_items gri on gri.goods_receipt_id = gr.id
-                    where gr.id = ?
-                    group by gr.id, pr.request_code, gr.received_at, u.fullname, gr.note
-                """;
+        StringBuilder sql = new StringBuilder("""
+                select gr.id, pr.request_code, gr.received_at, u.fullname, pr.note
+                from goods_receipts gr
+                join purchase_requests pr
+                on gr.purchase_request_id = pr.id
+                join users u
+                on u.id = gr.warehouse_id where gr.id = ?
+                """);
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, id);
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            // set value
+            if (id != null) {
+                ps.setLong(1, id);
+            }
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     GoodsReceiptDTO dto = new GoodsReceiptDTO();
                     dto.setId(rs.getLong("id"));
-                    dto.setReceiptCode(rs.getString("receiptCode"));
-//                    dto.setReceivedAt(rs.getTimestamp("received_at"));
-                    dto.setWarehouseName(rs.getString("warehouseName"));
+                    dto.setReceiptCode(rs.getString("request_code"));
+                    dto.setReceivedAt(rs.getObject("received_at", LocalDateTime.class));
+                    dto.setWarehouseName(rs.getString("fullname"));
                     dto.setNote(rs.getString("note"));
                     return dto;
                 }
@@ -158,34 +156,32 @@ public class GoodsHistoryDAO {
         return null;
     }
 
-    /**
-     * Get GoodsReceipt items by receipt ID for detail view
-     */
+    // get goods receipt item by good receiptId
     public List<GoodsReceiptItemDTO> getGoodsReceiptItems(Long receiptId) {
         List<GoodsReceiptItemDTO> items = new ArrayList<>();
         String sql = """
-                    select gri.product_id,
-                           p.name as productName,
-                           pri.quantity as expected_quantity,
-                           gri.actual_quantity
-                    from goods_receipt_items gri
-                    join goods_receipts gr on gri.goods_receipt_id = gr.id
-                    join products p on gri.product_id = p.id
-                    left join purchase_request_items pri
-                      on pri.purchase_request_id = gr.purchase_request_id
-                     and pri.product_id = gri.product_id
-                    where gri.goods_receipt_id = ?
+                select p.name, gri.actual_quantity, pri.quantity as 'expected_quantity' from goods_receipts gr
+                join goods_receipt_items gri
+                on gr.id = gri.goods_receipt_id
+                join products p
+                on gri.product_id = p.id
+                join purchase_request_items pri
+                on pri.purchase_request_id = gr.purchase_request_id\s
+                where gri.goods_receipt_id = ?
+                and pri.product_id = gri.product_id;
                 """;
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, receiptId);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            // set value
+            if (receiptId != null) {
+                ps.setLong(1, receiptId);
+            }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     GoodsReceiptItemDTO dto = new GoodsReceiptItemDTO();
-                    dto.setProductId(rs.getLong("product_id"));
-                    dto.setProductName(rs.getString("productName"));
-                    Long expectedQty = rs.getLong("expected_quantity");
-                    dto.setExpectedQuantity(rs.wasNull() ? null : expectedQty);
+                    dto.setProductName(rs.getString("name"));
+                    dto.setExpectedQuantity(rs.getLong("expected_quantity"));
                     dto.setActualQuantity(rs.getLong("actual_quantity"));
                     items.add(dto);
                 }
