@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.dao.*;
+import com.example.dto.OrderDTO;
 import com.example.model.*;
 
 import java.math.BigDecimal;
@@ -455,8 +456,8 @@ public class OrderService {
         return orders;
     }
 
-    public boolean updateStatusOrder(String orderCode, String status) {
-        return orderDAO.updateStatus(orderCode, status);
+    public boolean updateStatusOrder(OrderDTO orderDTO) {
+        return orderDAO.updateStatus(orderDTO.getCode(), orderDTO.getStatus());
     }
 
     public int countOrders(String status, String searchCode) {
