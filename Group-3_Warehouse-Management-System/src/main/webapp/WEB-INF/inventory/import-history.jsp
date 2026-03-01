@@ -21,7 +21,7 @@
               method="get">
             <%--search name customer--%>
             <input type="text" name="receiptCode" class="form-control mr-5"
-                   placeholder="Search name customer" value="${param.receiptCode}">
+                   placeholder="Search receipt code" value="${param.receiptCode}">
 
             <%-- from date--%>
             <span class="mr-2">From Date</span>
@@ -62,7 +62,6 @@
                 <th class="text-left">Receipt Code</th>
                 <th style="width: 200px;">Received Date</th>
                 <th style="width: 200px;">Warehouse Staff</th>
-                <th>Note</th>
                 <th style="width: 100px;">Details</th>
             </tr>
             </thead>
@@ -79,9 +78,6 @@
                             </td>
                             <td class="align-middle">
                                     ${goodsReceipt.warehouseName}
-                            </td>
-                            <td class="align-middle">
-                                    ${goodsReceipt.note}
                             </td>
                             <td class="text-center align-middle">
                                 <a href="${pageContext.request.contextPath}/inventory/import/history?action=detail&id=${goodsReceipt.id}"

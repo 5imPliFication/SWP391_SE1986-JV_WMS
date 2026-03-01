@@ -19,7 +19,7 @@ public class GoodsHistoryDAO {
 
         // sql
         StringBuilder sql = new StringBuilder("""
-                    select gr.id, pr.request_code as 'receipt_code', gr.received_at, u.fullname as 'warehouse_name', pr.note
+                    select gr.id, pr.request_code as 'receipt_code', gr.received_at, u.fullname as 'warehouse_name'
                     from goods_receipts gr
                     join purchase_requests pr
                     on gr.purchase_request_id = pr.id
@@ -69,7 +69,6 @@ public class GoodsHistoryDAO {
                     dto.setReceiptCode(rs.getString("receipt_code"));
                     dto.setReceivedAt(rs.getObject("received_at", LocalDateTime.class));
                     dto.setWarehouseName(rs.getString("warehouse_name"));
-                    dto.setNote(rs.getString("note"));
                     receiptList.add(dto);
                 }
             }
