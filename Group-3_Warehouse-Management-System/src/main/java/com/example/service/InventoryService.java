@@ -25,13 +25,14 @@ public class InventoryService {
     // init productDAO
     private final InventoryDAO inventoryDAO = new InventoryDAO();
 
-    public String importProductItems(Long purchaseRequestId, Long warehouseUserId, String note,
+    public String importProductItems(Long purchaseRequestId, Long warehouseUserId,
                                      String[] productIds, String[] serials, String[] prices) {
 
         if (productIds == null || serials == null || prices == null) {
             return "Invalid import data";
         }
 
+        // get information from list import product item
         List<ProductItemDTO> importProductItemDTOs = getImportProductItemDTOs(productIds, serials, prices);
 
         String validationMessage = validateProductItems(importProductItemDTOs);
@@ -39,7 +40,7 @@ public class InventoryService {
             return validationMessage;
         }
 
-        return inventoryDAO.saveProductItems(purchaseRequestId, warehouseUserId, note, importProductItemDTOs)
+        return inventoryDAO.saveProductItems(purchaseRequestId, warehouseUserId, importProductItemDTOs)
                 ? null
                 : "Import failed";
     }
@@ -49,6 +50,8 @@ public class InventoryService {
 
         // init list to store
         List<ProductItemDTO> items = new ArrayList<>();
+
+        // loop any row
         for (int i = 0; i < serials.length; i++) {
             String serial = serials[i];
             double price = Double.parseDouble(prices[i]);
