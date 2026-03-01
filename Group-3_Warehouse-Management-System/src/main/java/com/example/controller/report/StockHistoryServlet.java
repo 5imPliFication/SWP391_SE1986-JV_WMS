@@ -1,8 +1,8 @@
 package com.example.controller.report;
 
 import com.example.dao.StockMovementDAO;
-import com.example.model.MovementType;
-import com.example.model.ReferenceType;
+import com.example.enums.MovementType;
+import com.example.enums.ReferenceType;
 import com.example.model.StockMovement;
 
 import jakarta.servlet.ServletException;

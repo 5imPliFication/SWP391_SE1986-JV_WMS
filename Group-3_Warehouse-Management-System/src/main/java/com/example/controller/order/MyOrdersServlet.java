@@ -59,6 +59,18 @@ public class MyOrdersServlet extends HttpServlet {
             String status = req.getParameter("status");
             String searchCode = req.getParameter("searchCode");
 
+            // Get sorting parameters
+            String sortBy = req.getParameter("sortBy");
+            String sortDir = req.getParameter("sortDir");
+            
+            // Default sorting: newest first
+            if (sortBy == null || sortBy.isEmpty()) {
+                sortBy = "createdAt";
+            }
+            if (sortDir == null || sortDir.isEmpty()) {
+                sortDir = "desc";
+            }
+
             // 4. Get total count for this salesman
             int totalOrders = orderService.countOrdersBySalesman(user.getId(), status, searchCode);
 
@@ -70,7 +82,7 @@ public class MyOrdersServlet extends HttpServlet {
             int offset = (pageNo - 1) * pageSize;
 
             // 7. Get paginated orders for this salesman
-            List<Order> orders = orderService.getOrdersBySalesman(user.getId(), status, searchCode, offset, pageSize);
+            List<Order> orders = orderService.getOrdersBySalesman(user.getId(), status, searchCode, sortBy, sortDir, offset, pageSize);
 
             // ===== SET ATTRIBUTES =====
             req.setAttribute("orders", orders);
@@ -78,6 +90,8 @@ public class MyOrdersServlet extends HttpServlet {
             req.setAttribute("totalPages", totalPages);
             req.setAttribute("totalOrders", totalOrders);
             req.setAttribute("pageSize", pageSize);
+            req.setAttribute("sortBy", sortBy);
+            req.setAttribute("sortDir", sortDir);
 
             // Forward to JSP
             req.getRequestDispatcher("/WEB-INF/salesman/orders.jsp")

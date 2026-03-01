@@ -23,6 +23,9 @@ public class ProductService {
             int pageNo) {
         return productDAO.getAll(searchName, brandName, categoryName, isActive, pageNo);
     }
+    public List<Product> findAll() {
+        return productDAO.getAllProducts();
+    }
 
     public int getTotalProducts(String searchName, String brandName, String categoryName, Boolean isActive) {
         return productDAO.countProducts(searchName, brandName, categoryName, isActive);

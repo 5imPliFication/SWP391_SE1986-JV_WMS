@@ -1,12 +1,10 @@
 package com.example.controller.order;
 
-import com.example.model.Coupon;
-import com.example.model.Order;
-import com.example.model.OrderItem;
-import com.example.model.User;
+import com.example.model.*;
 import com.example.service.CouponService;
 import com.example.service.OrderItemService;
 import com.example.service.OrderService;
+import com.example.service.ProductService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -21,11 +19,13 @@ public class SalesmanOrderDetailServlet extends HttpServlet {
 
     private OrderService orderService;
     private OrderItemService orderItemService;
+    private ProductService productService;
 
     @Override
     public void init() {
         orderService = new OrderService();
         orderItemService = new OrderItemService();
+        productService = new ProductService();
     }
 
     @Override
@@ -48,6 +48,7 @@ public class SalesmanOrderDetailServlet extends HttpServlet {
 
             Order order = orderService.getOrderDetail(orderId, user.getId(), "Salesman");
             List<OrderItem> items = orderItemService.getItemsByOrder(orderId, user.getId(), "Salesman");
+            List<Product> availableProducts = productService.findAll();
 
             // If order has a coupon, load it
             if (order.getCoupon() != null) {
@@ -58,6 +59,7 @@ public class SalesmanOrderDetailServlet extends HttpServlet {
 
             req.setAttribute("order", order);
             req.setAttribute("items", items);
+            req.setAttribute("availableProducts", availableProducts);
 
             req.getRequestDispatcher("/WEB-INF/salesman/order-detail.jsp")
                     .forward(req, resp);

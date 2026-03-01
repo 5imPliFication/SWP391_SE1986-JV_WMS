@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order List - Laptop Warehouse</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
@@ -32,10 +33,10 @@
                 <table class="table table-hover table-striped align-middle mb-0">
                     <thead class="table-primary">
                     <tr>
-                        <th class="py-3 px-4">Order Code</th>
-                        <th class="py-3 px-4">Customer</th>
-                        <th class="py-3 px-4">Status</th>
-                        <th class="py-3 px-4">Created At</th>
+                        <th class="py-3 px-4" data-sort="orderCode">Order Code</th>
+                        <th class="py-3 px-4" data-sort="customerName">Customer</th>
+                        <th class="py-3 px-4" data-sort="status">Status</th>
+                        <th class="py-3 px-4" data-sort="createdAt">Created At</th>
                         <th class="py-3 px-4 text-center">Action</th>
                     </tr>
                     </thead>
@@ -107,7 +108,7 @@
         </div>
     </div>
 
-    <c:set var="queryParams" value="status=${param.status}&searchCode=${param.searchCode}"/>
+    <c:set var="queryParams" value="status=${param.status}&searchCode=${param.searchCode}&sortBy=${sortBy}&sortDir=${sortDir}"/>
     <jsp:include page="/WEB-INF/common/pagination.jsp">
         <jsp:param name="pageNo" value="${pageNo}"/>
         <jsp:param name="totalPages" value="${totalPages}"/>
@@ -117,5 +118,6 @@
 </main>
 
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
+<script src="${pageContext.request.contextPath}/static/js/table-sort.js"></script>
 </body>
 </html>

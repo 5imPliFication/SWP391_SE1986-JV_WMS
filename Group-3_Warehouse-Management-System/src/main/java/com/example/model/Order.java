@@ -28,5 +28,4 @@ public class Order {
     private BigDecimal discountAmount;
     private BigDecimal finalTotal;
 
-
 }

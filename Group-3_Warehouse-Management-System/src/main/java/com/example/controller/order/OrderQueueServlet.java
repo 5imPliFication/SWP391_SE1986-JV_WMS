@@ -57,6 +57,18 @@ public class OrderQueueServlet extends HttpServlet {
             String status = req.getParameter("status");
             String searchCode = req.getParameter("searchCode");
 
+            // Get sorting parameters
+            String sortBy = req.getParameter("sortBy");
+            String sortDir = req.getParameter("sortDir");
+            
+            // Default sorting: newest first
+            if (sortBy == null || sortBy.isEmpty()) {
+                sortBy = "createdAt";
+            }
+            if (sortDir == null || sortDir.isEmpty()) {
+                sortDir = "desc";
+            }
+
             // Get total count
             OrderService orderService = new OrderService();
             int totalOrders = orderService.countOrders(status, searchCode);
@@ -66,13 +78,15 @@ public class OrderQueueServlet extends HttpServlet {
 
             // Get paginated data
             int offset = (pageNo - 1) * pageSize;
-            List<Order> orders = orderService.getOrders(status, searchCode, offset, pageSize);
+            List<Order> orders = orderService.getOrders(status, searchCode, sortBy, sortDir, offset, pageSize);
 
             // Set attributes
             req.setAttribute("orders", orders);
             req.setAttribute("pageNo", pageNo);
             req.setAttribute("totalPages", totalPages);
             req.setAttribute("totalOrders", totalOrders);
+            req.setAttribute("sortBy", sortBy);
+            req.setAttribute("sortDir", sortDir);
 
             // Get statistics
             Map<String, Integer> stats = orderService.getOrderStatistics();

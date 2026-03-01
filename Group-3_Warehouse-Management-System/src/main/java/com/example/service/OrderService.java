@@ -2,29 +2,27 @@ package com.example.service;
 
 import com.example.dao.*;
 import com.example.model.*;
-import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.sql.SQLException;
 import java.util.*;
 
 public class OrderService {
     private final OrderDAO orderDAO;
     private final OrderItemDAO orderItemDAO;
-    private final ProductItemDAO productItemDAO;  // ✓ ADDED
+    private final ProductItemDAO productItemDAO;
+    private final ProductDAO productDAO;
     private final CouponDAO couponDAO;
     private final UserDAO userDAO;
 
     public OrderService() {
         orderDAO = new OrderDAO();
         orderItemDAO = new OrderItemDAO();
-        productItemDAO = new ProductItemDAO();  // ✓ ADDED
+        productItemDAO = new ProductItemDAO();
+        productDAO = new ProductDAO();
         couponDAO = new CouponDAO();
         userDAO = new UserDAO();
     }
-
 
     public Map<String, Integer> getOrderStatistics() {
         return orderDAO.getStatistics();
@@ -107,12 +105,47 @@ public class OrderService {
         return orderDAO.findByStatus("SUBMITTED");
     }
 
+    /**
+     * Start processing order and update inventory
+     * This is when stock quantity actually decreases
+     */
     public void startProcessing(Long orderId, Long warehouseKeeperId) {
         Order order = orderDAO.findById(orderId);
 
         if (!order.getStatus().equals("SUBMITTED"))
             throw new IllegalStateException("Order is not in queue");
 
+        // Get order items
+        List<OrderItem> items = orderItemDAO.findByOrderId(orderId);
+
+        // Reduce stock for each item
+        for (OrderItem item : items) {
+            ProductItem productItem = productItemDAO.findById(item.getProductItem().getId());
+            if (productItem == null) {
+                throw new IllegalStateException("Product item not found for order item ID: " + item.getId());
+            }
+
+            Long productId = productItem.getProductId();
+            int available = productItemDAO.countActiveByProductId(productId);
+
+            // Check if enough stock available
+            if (available < item.getQuantity()) {
+                Product product = productDAO.findById(productId);
+                String productName = product != null ? product.getName() : ("Product ID " + productId);
+                throw new IllegalStateException(
+                        "Insufficient stock for " + productName +
+                                ". Available: " + available +
+                                ", Required: " + item.getQuantity()
+                );
+            }
+
+            int deactivated = productItemDAO.deactivateAvailableItems(productId, item.getQuantity());
+            if (deactivated < item.getQuantity()) {
+                throw new IllegalStateException("Failed to reserve enough stock for product ID: " + productId);
+            }
+        }
+
+        // Update order status
         orderDAO.updateStatus(orderId, "PROCESSING", warehouseKeeperId, null);
     }
 
@@ -125,12 +158,11 @@ public class OrderService {
         orderDAO.updateStatus(orderId, "COMPLETED", warehouseKeeperId, null);
     }
 
-    // Salesman cancel (no note required)
+
     public void cancelOrder(Long orderId, Long userId) {
         cancelOrder(orderId, userId, null);
     }
 
-    // Warehouse cancel (with note)
     public void cancelOrder(Long orderId, Long userId, String note) {
         Order order = orderDAO.findById(orderId);
 
@@ -162,12 +194,28 @@ public class OrderService {
             if (note == null || note.trim().isEmpty()) {
                 throw new IllegalArgumentException("Cancellation reason is required");
             }
+
+            // If order is PROCESSING, restore inventory
+            if ("PROCESSING".equals(order.getStatus())) {
+                List<OrderItem> items = orderItemDAO.findByOrderId(orderId);
+                for (OrderItem item : items) {
+                    ProductItem productItem = productItemDAO.findById(item.getProductItem().getId());
+                    if (productItem == null) {
+                        continue;
+                    }
+                    int restored = productItemDAO.activateInactiveItems(productItem.getProductId(), item.getQuantity());
+                    if (restored < item.getQuantity()) {
+                        throw new IllegalStateException("Failed to restore stock for product ID: " + productItem.getProductId());
+                    }
+                }
+            }
         } else {
             throw new SecurityException("You don't have permission to cancel orders");
         }
 
         // Update status and note
         orderDAO.updateStatus(orderId, "CANCELLED", userId, note);
+        couponDAO.decrementUsageCount(orderId);
 
         if (note != null && !note.trim().isEmpty()) {
             orderDAO.updateNote(orderId, "CANCELLED: " + note);
@@ -175,59 +223,92 @@ public class OrderService {
     }
 
     /**
-     * Add or update order item
-     * ✓ FIXED: Now uses ProductItemDAO and stores price_at_purchase
+     * Add or update order item - CHANGED to use productId
+     * Returns error message instead of throwing exception
      */
-    public void addOrUpdateOrderItem(Long orderId, Long productItemId, int quantity) {
-        // Validate order
-        Order order = orderDAO.findById(orderId);
-        if (order == null) {
-            throw new IllegalArgumentException("Order not found");
-        }
+    public String addOrUpdateOrderItem(Long orderId, Long productId, int quantity) {
+        try {
+            // Validate order
+            Order order = orderDAO.findById(orderId);
+            if (order == null) {
+                return "Order not found";
+            }
 
-        if (!"DRAFT".equals(order.getStatus())) {
-            throw new IllegalStateException("Can only add items to draft orders");
-        }
+            if (!"DRAFT".equals(order.getStatus())) {
+                return "Can only add items to draft orders";
+            }
 
-        ProductItem productItem = productItemDAO.findById(productItemId);
-        if (productItem == null) {
-            throw new IllegalArgumentException("Product item not found");
-        }
+            // Get product
+            Product product = productDAO.findById(productId);
+            if (product == null) {
+                return "Product not found";
+            }
 
-        // Check if item already exists
-        OrderItem existing = orderItemDAO.findByOrderAndProductItem(orderId, productItemId);
+            // Get available product items for this product
+            List<ProductItem> productItems = productItemDAO.findByProductId(productId);
+            if (productItems == null || productItems.isEmpty()) {
+                return "No available items for this product";
+            }
 
-        if (existing != null) {
-            // Update quantity
-            int newQuantity = existing.getQuantity() + quantity;
+            // Check total available quantity
+            int totalAvailable = productItemDAO.countActiveByProductId(productId);
 
-            orderItemDAO.updateQuantity(existing.getId(), newQuantity);
-        } else {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(order);
-            orderItem.setProductItem(productItem);
-            orderItem.setQuantity(quantity);
+            if (totalAvailable < quantity) {
+                return "Insufficient stock. Available: " + totalAvailable + ", Requested: " + quantity;
+            }
 
-            orderItemDAO.addItem(orderItem);
+            ProductItem selectedItem = productItems.stream()
+                    .filter(item -> Boolean.TRUE.equals(item.getIsActive()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (selectedItem == null) {
+                return "No available items in stock";
+            }
+
+            // Check if this product item already exists in order
+            OrderItem existing = orderItemDAO.findByOrderAndProductItem(orderId, selectedItem.getId());
+
+            if (existing != null) {
+                // Update quantity
+                int newQuantity = existing.getQuantity() + quantity;
+
+                // Verify total quantity doesn't exceed available
+                if (newQuantity > totalAvailable) {
+                    return "Cannot add " + quantity + " more. Maximum available: " +
+                            (totalAvailable - existing.getQuantity());
+                }
+
+                orderItemDAO.updateQuantity(existing.getId(), newQuantity);
+            } else {
+                // Add new item
+                OrderItem orderItem = new OrderItem();
+                orderItem.setOrder(order);
+                orderItem.setProductItem(selectedItem);
+                orderItem.setProduct(product); // For convenience
+                orderItem.setQuantity(quantity);
+
+                orderItemDAO.addItem(orderItem);
+            }
+
+            return null; // Success - no error
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Failed to add item: " + e.getMessage();
         }
     }
 
-    /**
-     * Calculate total amount for an order
-     * ✓ FIXED: Now uses price_at_purchase from order_items
-     */
     public BigDecimal calculateOrderTotal(Long orderId) {
         List<OrderItem> items = orderItemDAO.findByOrderId(orderId);
 
         if (items == null || items.isEmpty()) {
-            System.out.println("Order Empty!!!");
             return BigDecimal.ZERO;
         }
 
         BigDecimal total = BigDecimal.ZERO;
 
         for (OrderItem item : items) {
-            // ✓ FIXED: Use price_at_purchase instead of product.price
             if (item.getPriceAtPurchase() == null) {
                 throw new RuntimeException("Price not set for item ID: " + item.getId());
             }
@@ -241,16 +322,10 @@ public class OrderService {
         return total.setScale(2, RoundingMode.HALF_UP);
     }
 
-    /**
-     * Calculate subtotal (before discount)
-     */
     public BigDecimal calculateSubtotal(Long orderId) {
         return calculateOrderTotal(orderId);
     }
 
-    /**
-     * Calculate discount amount
-     */
     public BigDecimal calculateDiscountAmount(Long orderId) {
         Order order = orderDAO.findById(orderId);
         if (order == null || order.getCoupon() == null) {
@@ -261,9 +336,6 @@ public class OrderService {
         return calculateDiscount(order.getCoupon(), subtotal);
     }
 
-    /**
-     * Calculate final total (after coupon discount)
-     */
     public BigDecimal calculateFinalTotal(Long orderId) {
         BigDecimal subtotal = calculateOrderTotal(orderId);
         BigDecimal discount = calculateDiscountAmount(orderId);
@@ -271,26 +343,18 @@ public class OrderService {
         return subtotal.subtract(discount).setScale(2, RoundingMode.HALF_UP);
     }
 
-    /**
-     * Calculate discount amount based on coupon
-     */
     public BigDecimal calculateDiscount(Coupon coupon, BigDecimal orderTotal) {
         if ("PERCENTAGE".equals(coupon.getDiscountType())) {
-            // Percentage discount
             BigDecimal percentage = coupon.getDiscountValue()
                     .divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
             return orderTotal.multiply(percentage).setScale(2, RoundingMode.HALF_UP);
         } else {
-            // Fixed amount discount (but not more than order total)
             BigDecimal discount = coupon.getDiscountValue();
             return discount.min(orderTotal);
         }
     }
 
-    /**
-     * Apply coupon to order
-     */
-    public void applyCouponToOrder(Long orderId, Long couponId) {
+    public void applyCouponToOrder(Long orderId, Long couponId, Long userId) {
         Order order = orderDAO.findById(orderId);
         if (order == null) {
             throw new IllegalArgumentException("Order not found");
@@ -309,6 +373,11 @@ public class OrderService {
             throw new IllegalStateException("Coupon is no longer valid");
         }
 
+        // Check if user has already used this coupon (per-user restriction)
+        if (couponDAO.hasUserUsedCoupon(userId, couponId)) {
+            throw new IllegalStateException("You have already used this coupon");
+        }
+
         BigDecimal orderTotal = calculateOrderTotal(orderId);
 
         if (coupon.getMinOrderAmount() != null &&
@@ -319,13 +388,20 @@ public class OrderService {
             );
         }
 
+        // Check if order already has a coupon and remove its usage tracking
+        if (order.getCoupon() != null) {
+            couponDAO.removeUserCouponUsage(userId, order.getCoupon().getId());
+            couponDAO.decrementUsageCount(order.getCoupon().getId());
+        }
+
+        // Apply new coupon
         orderDAO.applyCoupon(orderId, couponId);
+        
+        // Record this user using this coupon
+        couponDAO.recordUserCouponUsage(userId, couponId);
     }
 
-    /**
-     * Remove coupon from order
-     */
-    public void removeCouponFromOrder(Long orderId) {
+    public void removeCouponFromOrder(Long orderId, Long userId) {
         Order order = orderDAO.findById(orderId);
         if (order == null) {
             throw new IllegalArgumentException("Order not found");
@@ -335,13 +411,15 @@ public class OrderService {
             throw new IllegalStateException("Can only remove coupons from draft orders");
         }
 
+        // Only remove if order has a coupon
+        if (order.getCoupon() != null) {
+            // Remove user usage tracking
+            couponDAO.removeUserCouponUsage(userId, order.getCoupon().getId());
+        }
+
         orderDAO.removeCoupon(orderId);
     }
 
-    /**
-     * Submit order
-     * ✓ FIXED: Proper equality check and null safety
-     */
     public void submitOrder(Long orderId, Long userId) {
         Order order = orderDAO.findById(orderId);
 
@@ -349,7 +427,6 @@ public class OrderService {
             throw new IllegalArgumentException("Order not found");
         }
 
-        // ✓ FIXED: Compare Long with Long, not User with Long
         if (!order.getCreatedBy().getId().equals(userId)) {
             throw new SecurityException("You can only submit your own orders");
         }
@@ -363,7 +440,6 @@ public class OrderService {
             throw new IllegalStateException("Cannot submit empty order");
         }
 
-        // ✓ FIXED: Check if coupon exists before accessing
         if (order.getCoupon() != null && order.getCoupon().getId() != null) {
             couponDAO.incrementUsageCount(order.getCoupon().getId());
         }
@@ -387,15 +463,15 @@ public class OrderService {
         return orderDAO.countOrders(status, searchCode);
     }
 
-    public List<Order> getOrders(String status, String searchCode, int offset, int pageSize) {
-        return orderDAO.getOrders(status, searchCode, offset, pageSize);
+    public List<Order> getOrders(String status, String searchCode, String sortBy, String sortDir, int offset, int pageSize) {
+        return orderDAO.getOrders(status, searchCode, sortBy, sortDir, offset, pageSize);
     }
 
     public int countOrdersBySalesman(Long salesmanId, String status, String searchCode) {
         return orderDAO.countOrdersBySalesman(salesmanId, status, searchCode);
     }
 
-    public List<Order> getOrdersBySalesman(Long salesmanId, String status, String searchCode, int offset, int limit) {
-        return orderDAO.getOrdersBySalesman(salesmanId, status, searchCode, offset, limit);
+    public List<Order> getOrdersBySalesman(Long salesmanId, String status, String searchCode, String sortBy, String sortDir, int offset, int limit) {
+        return orderDAO.getOrdersBySalesman(salesmanId, status, searchCode, sortBy, sortDir, offset, limit);
     }
 }
