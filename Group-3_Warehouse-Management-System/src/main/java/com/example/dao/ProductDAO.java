@@ -23,7 +23,7 @@ public class ProductDAO {
     }
 
     public List<Product> getAll(String searchName, String brandName,
-            String categoryName, Boolean isActive, int pageNo) {
+                                String categoryName, Boolean isActive, int pageNo) {
 
         List<Product> products = new ArrayList<>();
 
@@ -55,7 +55,7 @@ public class ProductDAO {
         sql.append(" LIMIT ? OFFSET ? ");
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
 
@@ -110,7 +110,7 @@ public class ProductDAO {
     }
 
     public int countProducts(String searchName, String brandName,
-            String categoryName, Boolean isActive) {
+                             String categoryName, Boolean isActive) {
 
         StringBuilder sql = new StringBuilder("""
                     SELECT COUNT(*)
@@ -134,7 +134,7 @@ public class ProductDAO {
         }
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
 
@@ -166,7 +166,7 @@ public class ProductDAO {
                 VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())
                 """;
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, product.getName());
             ps.setString(2, product.getDescription());
@@ -194,7 +194,7 @@ public class ProductDAO {
                 WHERE p.id = ?;
                 """;
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             Product product = null;
 
             ps.setLong(1, productId);
@@ -242,7 +242,7 @@ public class ProductDAO {
                 """;
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, product.getName());
             ps.setString(2, product.getDescription());
@@ -287,7 +287,7 @@ public class ProductDAO {
         sql.append(" limit ? offset ? ");
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
             ps.setLong(index++, productId);
@@ -344,7 +344,7 @@ public class ProductDAO {
         }
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
             ps.setLong(index++, productId);
@@ -372,7 +372,7 @@ public class ProductDAO {
                 WHERE pi.id = ?;
                 """;
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ProductItem productItem = null;
 
             ps.setLong(1, productItemId);
@@ -409,7 +409,7 @@ public class ProductDAO {
                 """;
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setDouble(1, productItem.getCurrentPrice());
             ps.setBoolean(2, productItem.getIsActive());
@@ -436,7 +436,7 @@ public class ProductDAO {
 
         int index = 1;
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             // set value
             if (name != null && !name.trim().isEmpty()) {
                 ps.setString(index++, "%" + name + "%");
@@ -468,7 +468,7 @@ public class ProductDAO {
         }
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // set value
             if (name != null && !name.trim().isEmpty()) {
@@ -484,16 +484,47 @@ public class ProductDAO {
         return 0;
     }
 
-    public boolean deductStock(long productId, int quantity) {
-        String sql = "UPDATE products SET total_quantity = total_quantity - ? WHERE id = ? AND total_quantity >= ?";
+    public List<Product> getAllProducts() {
+        String sql = "select * from products";
+        List<Product> products = new ArrayList<>();
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, quantity);
-            ps.setLong(2, productId);
-            ps.setInt(3, quantity);
-            return ps.executeUpdate() > 0;
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Product product = new Product();
+                product.setId(rs.getLong("id"));
+                product.setName(rs.getString("name"));
+                product.setTotalQuantity(rs.getLong("total_quantity"));
+                product.setIsActive(rs.getBoolean("is_active"));
+                product.setImgUrl(rs.getString("img_url"));
+                Brand brand = new Brand();
+                brand.setId(rs.getLong("brand_id"));
+                product.setDescription(rs.getString("description"));
+                product.setBrand(brand);
+                products.add(product);
+            }
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to deduct stock for product ID: " + productId, e);
+            throw new RuntimeException(e);
         }
+        return products;
     }
+
+//    public void updateQuantity(Long productId, int newQuantity) {
+//        String sql = "UPDATE products SET quantity = ? WHERE id = ?";
+//
+//        try (Connection con = DBConfig.getDataSource().getConnection();
+//             PreparedStatement ps = con.prepareStatement(sql)) {
+//
+//            ps.setInt(1, newQuantity);
+//            ps.setLong(2, productId);
+//
+//            int affected = ps.executeUpdate();
+//            if (affected == 0) {
+//                throw new SQLException("Product item not found with ID: " + productId);
+//            }
+//
+//        } catch (SQLException e) {
+//            throw new RuntimeException("Failed to update product item quantity", e);
+//        }
+//    }
 }

@@ -17,7 +17,46 @@ public class CouponService {
     }
 
     /**
-     * Validate coupon for an order
+     * Validate coupon for an order (includes global and per-user checks)
+     */
+    public Optional<Coupon> validateCoupon(String code, BigDecimal orderTotal, Long userId) {
+        if (code == null || code.trim().isEmpty()) {
+            return Optional.empty();
+        }
+
+        if (orderTotal == null || orderTotal.compareTo(BigDecimal.ZERO) <= 0) {
+            return Optional.empty();
+        }
+
+        Optional<Coupon> couponOpt = couponDAO.findByCode(code.toUpperCase());
+
+        if (couponOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Coupon coupon = couponOpt.get();
+
+        // Check if coupon is valid (global limit, expiry, etc.)
+        if (!coupon.isValid()) {
+            return Optional.empty();
+        }
+
+        // Check if user has already used this coupon (per-user restriction)
+        if (couponDAO.hasUserUsedCoupon(userId, coupon.getId())) {
+            return Optional.empty();
+        }
+
+        // Check minimum order amount
+        if (coupon.getMinOrderAmount() != null &&
+                orderTotal.compareTo(coupon.getMinOrderAmount()) < 0) {
+            return Optional.empty();
+        }
+
+        return Optional.of(coupon);
+    }
+
+    /**
+     * Validate coupon for an order (without per-user check - backward compatible)
      */
     public Optional<Coupon> validateCoupon(String code, BigDecimal orderTotal) {
         if (code == null || code.trim().isEmpty()) {

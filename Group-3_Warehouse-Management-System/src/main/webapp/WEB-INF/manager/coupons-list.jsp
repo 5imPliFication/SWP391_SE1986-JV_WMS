@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="currency" uri="http://example.com/functions/currency" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -100,12 +101,12 @@
                                                     <fmt:formatNumber value="${coupon.discountValue}" pattern="#"/>%
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <fmt:formatNumber value="${coupon.discountValue}" pattern="#,##0"/>VND
+                                                    ${currency:format(coupon.discountValue)} VND
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
                                         <td class="px-4 align-middle">
-                                            <fmt:formatNumber value="${coupon.minOrderAmount}" pattern="#,##0"/>VND
+                                            ${currency:format(coupon.minOrderAmount)} VND
                                         </td>
                                         <td class="px-4 align-middle">
                                             <c:choose>

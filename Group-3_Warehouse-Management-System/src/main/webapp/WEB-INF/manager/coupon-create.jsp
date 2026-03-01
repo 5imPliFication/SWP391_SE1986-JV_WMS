@@ -95,7 +95,7 @@
                                             required
                                             onchange="updateDiscountLabel()">
                                         <option value="PERCENTAGE">Percentage (%)</option>
-                                        <option value="FIXED">Fixed Amount ($)</option>
+                                        <option value="FIXED">Fixed Amount (VND)</option>
                                     </select>
                                 </div>
 
@@ -127,7 +127,7 @@
                                 </label>
                                 <div class="input-group input-group-lg">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text">$</span>
+                                        <span class="input-group-text">VND</span>
                                     </div>
                                     <input type="number"
                                            class="form-control"
