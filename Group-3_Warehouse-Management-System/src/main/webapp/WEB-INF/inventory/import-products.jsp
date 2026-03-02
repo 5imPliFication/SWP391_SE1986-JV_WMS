@@ -57,13 +57,6 @@
         </div>
     </div>
 
-    <%--table list product search--%>
-    <%--error if not found any product--%>
-    <c:if test="${not empty error}">
-        <div class="alert alert-warning">
-                ${error}
-        </div>
-    </c:if>
 
     <%--table import product items--%>
     <form id="productItemsForm" method="post"
@@ -92,6 +85,7 @@
                     <c:forEach items="${productItem}" var="item"
                                varStatus="status">
                         <tr>
+                            <input type="hidden" name="productId" value="${item.productId}">
                                 <%--STT--%>
                             <td class="text-center align-middle">
                                     ${status.index + 1}
@@ -99,7 +93,6 @@
 
                                 <%--name product (item)--%>
                             <td class="align-middle">
-                                <input type="hidden" name="productId" value="${item.productId}">
                                     ${item.productName}
                             </td>
                                 <%--serial--%>
@@ -159,6 +152,10 @@
         <div class="alert alert-${messageType}">
                 ${message}
         </div>
+
+        <%-- delete value after display --%>
+        <c:remove var="message" scope="session"/>
+        <c:remove var="messageType" scope="session"/>
     </c:if>
 
     <%-- pagination --%>

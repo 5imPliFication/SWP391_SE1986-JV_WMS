@@ -16,10 +16,8 @@ import java.util.Map;
 public class InventoryDAO {
 
     // get list product by name
-    public List<ProductDTO> findProductByName(String searchName) {
-        List<ProductDTO> listProducts = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("select id, name, description, total_quantity from products as p "
-                + " where 1 = 1 ");
+    public Long findProductIdByName(String searchName) {
+        StringBuilder sql = new StringBuilder("select id from products as p where 1 = 1 ");
 
         // if param has value of searchName
         if (searchName != null && !searchName.trim().isEmpty()) {
@@ -37,17 +35,13 @@ public class InventoryDAO {
             }
 
             ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                long id = rs.getLong("id");
-                String name = rs.getString("name");
-                String description = rs.getString("description");
-                long totalQuantity = rs.getLong("total_quantity");
-                listProducts.add(new ProductDTO(id, name, description, totalQuantity));
+            if(rs.next()){
+                return rs.getLong(1);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return listProducts;
+        return null;
     }
 
     // save import product items and others information relative

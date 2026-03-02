@@ -94,9 +94,9 @@ public class ImportProductItemServlet extends HttpServlet {
         PurchaseRequestDTO purchaseRequestDTO = purchaseRequestService.findPurchaseRequestById(purchaseId);
 
         // set data for information of purchase request in jsp
-        request.setAttribute("purchaseId", purchaseId);
-        request.setAttribute("purchaseCode", purchaseRequestDTO.getPurchaseCode());
-        request.setAttribute("purchaseNote", purchaseRequestDTO.getNote());
+        session.setAttribute("purchaseId", purchaseId);
+        session.setAttribute("purchaseCode", purchaseRequestDTO.getPurchaseCode());
+        session.setAttribute("purchaseNote", purchaseRequestDTO.getNote());
 
         // get purchase request items
         List<PurchaseRequestItem> purchaseRequestItems = purchaseRequestService.getItems(purchaseId);

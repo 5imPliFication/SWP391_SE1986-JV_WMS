@@ -25,7 +25,7 @@
         </div>
 
         <%--header--%>
-        <c:if test="${not empty history}">
+        <c:if test="${not empty goodsReceipt}">
             <div class="card mb-4">
                 <div class="card-header bg-dark text-white">
                     <h5 class="mb-0">Receipt Information</h5>
@@ -33,23 +33,20 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3">
-                            <p><strong>Receipt Code:</strong> ${history.receiptCode}</p>
+                            <p><strong>Receipt Code:</strong> ${goodsReceipt.receiptCode}</p>
                         </div>
                         <div class="col-md-3">
                             <p><strong>Received At:</strong>
-                                <fmt:formatDate value="${history.receivedAt}" pattern="dd/MM/yyyy HH:mm:ss"/>
+                                    ${goodsReceipt.receivedAt}
                             </p>
                         </div>
                         <div class="col-md-3">
-                            <p><strong>Warehouse:</strong> ${history.warehouseName}</p>
-                        </div>
-                        <div class="col-md-3">
-                            <p><strong>Total Quantity:</strong> ${history.totalQuantity}</p>
+                            <p><strong>Warehouse:</strong> ${goodsReceipt.warehouseName}</p>
                         </div>
                     </div>
                     <div class="row mt-2">
                         <div class="col-12">
-                            <p><strong>Note:</strong> ${history.note}</p>
+                            <p><strong>Note:</strong> ${goodsReceipt.note}</p>
                         </div>
                     </div>
                 </div>
@@ -67,8 +64,8 @@
                     </thead>
                     <tbody>
                     <c:choose>
-                        <c:when test="${not empty details}">
-                            <c:forEach items="${details}" var="item">
+                        <c:when test="${not empty goodsReceiptItems}">
+                            <c:forEach items="${goodsReceiptItems}" var="item">
                                 <tr>
                                     <td>${item.productName}</td>
                                     <td class="text-center">${item.expectedQuantity}</td>
@@ -78,8 +75,8 @@
                         </c:when>
                         <c:otherwise>
                             <tr>
-                                <td colspan="3" class="text-center text-muted">No items found for
-                                    this receipt.
+                                <td colspan="3" class="text-center text-muted">
+                                    No items found for this receipt.
                                 </td>
                             </tr>
                         </c:otherwise>
@@ -89,7 +86,7 @@
             </div>
         </c:if>
 
-        <c:if test="${empty history}">
+        <c:if test="${empty goodsReceiptItems}">
             <div class="alert alert-warning">
                 Receipt not found.
             </div>

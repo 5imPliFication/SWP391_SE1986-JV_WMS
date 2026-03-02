@@ -125,15 +125,11 @@ public class InventoryService {
                     String productName = nameCell.getStringCellValue().trim();
 
                     // get product id by name
-                    List<ProductDTO> products = inventoryDAO.findProductByName(productName);
-                    if (products == null || products.isEmpty()) {
+                    Long productId = inventoryDAO.findProductIdByName(productName);
+                    if (productId == null) {
                         // if not exist product -> skip
                         continue;
                     }
-
-                    // get first product in list
-                    ProductDTO product = products.get(0);
-                    Long productId = product.getId();
 
                     // get serial
                     String serial = serialCell.getStringCellValue().trim();
