@@ -85,6 +85,7 @@
                     <c:forEach items="${productItem}" var="item"
                                varStatus="status">
                         <tr>
+                            <input type="hidden" name="productId" value="${item.productId}">
                                 <%--STT--%>
                             <td class="text-center align-middle">
                                     ${status.index + 1}
@@ -92,7 +93,6 @@
 
                                 <%--name product (item)--%>
                             <td class="align-middle">
-                                <input type="hidden" name="productId" value="${item.productId}">
                                     ${item.productName}
                             </td>
                                 <%--serial--%>
