@@ -57,13 +57,6 @@
         </div>
     </div>
 
-    <%--table list product search--%>
-    <%--error if not found any product--%>
-    <c:if test="${not empty error}">
-        <div class="alert alert-warning">
-                ${error}
-        </div>
-    </c:if>
 
     <%--table import product items--%>
     <form id="productItemsForm" method="post"
@@ -159,6 +152,10 @@
         <div class="alert alert-${messageType}">
                 ${message}
         </div>
+
+        <%-- delete value after display --%>
+        <c:remove var="message" scope="session"/>
+        <c:remove var="messageType" scope="session"/>
     </c:if>
 
     <%-- pagination --%>
