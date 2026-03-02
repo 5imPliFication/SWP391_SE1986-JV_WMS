@@ -16,7 +16,8 @@
         <c:set var="isWarehouse" value="${user.role.name eq 'Warehouse'}"/>
         <c:set var="isPending" value="${prList.status eq 'PENDING'}"/>
 
-        <main class="main-content container mt-4 w-auto" >
+        <main class="main-content" >
+            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <h3 class="mb-3">
                 Purchase Request Detail

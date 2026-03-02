@@ -18,16 +18,21 @@
                 return;
             }
 
-
+            String uri = request.getRequestURI();
+            boolean showWelcome = uri.endsWith("/home.jsp");
+            
             // Get first letter of name for avatar
             String initial = user.getFullName() != null && !user.getFullName().isEmpty()
                     ? user.getFullName().substring(0, 1).toUpperCase()
                     : user.getFullName().substring(0, 1).toUpperCase();
+
         %>
         <header class="header">
             <div class="header-left">
+                <% if (showWelcome) { %>
                 <h2>Welcome Back, <%= user.getFullName() != null ? user.getFullName() : user.getFullName() %>!</h2>
                 <p>Here's what's happening in your warehouse today</p>
+                <% } %>
             </div>
             <div class="user-info">
                 <a href="<%= request.getContextPath() %>/user/profile" class="user-info">

@@ -8,10 +8,11 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     </head>
 
-    <body class="d-flex justify-content-center mt-5 vh-100 bg-light">
+    <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp" />
 
-        <div class="container main-content">
+        <div class=" main-content">
+            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <h3 class="text-center mb-4 fw-semibold">Edit User Information</h3>
 

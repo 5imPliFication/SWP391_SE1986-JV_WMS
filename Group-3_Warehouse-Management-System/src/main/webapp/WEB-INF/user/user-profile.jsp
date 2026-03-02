@@ -81,6 +81,7 @@
                     <button type="submit">Update Profile</button>
                 </td>
             </tr>
+            
         </table>
     </form>
 
