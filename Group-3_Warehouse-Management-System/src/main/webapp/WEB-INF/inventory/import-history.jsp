@@ -4,168 +4,170 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Import History</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Import History</title>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
+    </head>
 
-<body class="mt-4">
-<jsp:include page="/WEB-INF/common/sidebar.jsp"/>
+    <body class="mt-4">
+        <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
-<main class="main-content">
-    <h2 class="mb-4">Import History</h2>
+        <main class="main-content">
+            <jsp:include page="/WEB-INF/common/header.jsp" />
 
-    <div class="d-flex align-items-center mb-3">
-        <form class="form-inline" action="${pageContext.request.contextPath}/inventory/import/history"
-              method="get">
-            <%--search name customer--%>
-            <input type="text" name="receiptCode" class="form-control mr-5"
-                   placeholder="Search receipt code" value="${param.receiptCode}">
+            <h2 class="mb-4">Import History</h2>
 
-            <%-- from date--%>
-            <span class="mr-2">From Date</span>
-            <div class="form-group mr-5">
-                <input type="date" name="fromDate" value="${param.fromDate}"
-                       class="form-control form-control-sm">
+            <div class="d-flex align-items-center mb-3">
+                <form class="form-inline" action="${pageContext.request.contextPath}/inventory/import/history"
+                      method="get">
+                    <%--search name customer--%>
+                    <input type="text" name="receiptCode" class="form-control mr-5"
+                           placeholder="Search receipt code" value="${param.receiptCode}">
+
+                    <%-- from date--%>
+                    <span class="mr-2">From Date</span>
+                    <div class="form-group mr-5">
+                        <input type="date" name="fromDate" value="${param.fromDate}"
+                               class="form-control form-control-sm">
+                    </div>
+
+                    <%-- to date--%>
+                    <span class="mr-2">To Date</span>
+                    <div class="form-group mr-2">
+                        <input type="date" name="toDate" value="${param.toDate}"
+                               class="form-control form-control-sm">
+                    </div>
+
+                    <%-- button search--%>
+                    <button type="submit" class="btn btn-primary mr-2" name="action" value="search">
+                        Search
+                    </button>
+                </form>
             </div>
 
-            <%-- to date--%>
-            <span class="mr-2">To Date</span>
-            <div class="form-group mr-2">
-                <input type="date" name="toDate" value="${param.toDate}"
-                       class="form-control form-control-sm">
-            </div>
+            <%-- message --%>
+            <c:if test="${not empty message}">
+                <div class="alert alert-${messageType} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </c:if>
 
-            <%-- button search--%>
-            <button type="submit" class="btn btn-primary mr-2" name="action" value="search">
-                Search
-            </button>
-        </form>
-    </div>
-
-    <%-- message --%>
-    <c:if test="${not empty message}">
-        <div class="alert alert-${messageType} alert-dismissible fade show" role="alert">
-                ${message}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    </c:if>
-
-    <%-- table --%>
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover table-sm">
-            <thead class="thead-dark text-center">
-            <tr>
-                <th class="text-left">Receipt Code</th>
-                <th style="width: 200px;">Received Date</th>
-                <th style="width: 200px;">Warehouse Staff</th>
-                <th style="width: 100px;">Details</th>
-            </tr>
-            </thead>
-            <tbody>
-            <c:choose>
-                <c:when test="${not empty goodsReceipts}">
-                    <c:forEach items="${goodsReceipts}" var="goodsReceipt">
+            <%-- table --%>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-sm">
+                    <thead class="thead-dark text-center">
                         <tr>
-                            <td class="text-left align-middle font-weight-bold">
-                                    ${goodsReceipt.receiptCode}
-                            </td>
-                            <td class="text-center align-middle">
-                                    ${goodsReceipt.receivedAt}
-                            </td>
-                            <td class="align-middle">
-                                    ${goodsReceipt.warehouseName}
-                            </td>
-                            <td class="text-center align-middle">
-                                <a href="${pageContext.request.contextPath}/inventory/import/history?action=detail&id=${goodsReceipt.id}"
-                                   class="btn btn-info btn-sm">
-                                    View
-                                </a>
-                            </td>
+                            <th class="text-left">Receipt Code</th>
+                            <th style="width: 200px;">Received Date</th>
+                            <th style="width: 200px;">Warehouse Staff</th>
+                            <th style="width: 100px;">Details</th>
                         </tr>
-                    </c:forEach>
-                </c:when>
-                <c:otherwise>
-                    <tr>
-                        <td colspan="6" class="text-center text-muted py-3">
-                            No import history found.
-                        </td>
-                    </tr>
-                </c:otherwise>
-            </c:choose>
-            </tbody>
-        </table>
-    </div>
+                    </thead>
+                    <tbody>
+                        <c:choose>
+                            <c:when test="${not empty goodsReceipts}">
+                                <c:forEach items="${goodsReceipts}" var="goodsReceipt">
+                                    <tr>
+                                        <td class="text-left align-middle font-weight-bold">
+                                            ${goodsReceipt.receiptCode}
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            ${goodsReceipt.receivedAt}
+                                        </td>
+                                        <td class="align-middle">
+                                            ${goodsReceipt.warehouseName}
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <a href="${pageContext.request.contextPath}/inventory/import/history?action=detail&id=${goodsReceipt.id}"
+                                               class="btn btn-info btn-sm">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </c:when>
+                            <c:otherwise>
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-3">
+                                        No import history found.
+                                    </td>
+                                </tr>
+                            </c:otherwise>
+                        </c:choose>
+                    </tbody>
+                </table>
+            </div>
 
-    <%-- pagination --%>
-    <c:if test="${totalPages > 1}">
-        <nav class="mt-3">
-            <ul class="pagination justify-content-center">
-                    <%-- previous page--%>
-                <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
-                    <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${pageNo - 1}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
-                        Previous
-                    </a>
-                </li>
+            <%-- pagination --%>
+            <c:if test="${totalPages > 1}">
+                <nav class="mt-3">
+                    <ul class="pagination justify-content-center">
+                        <%-- previous page--%>
+                        <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${pageNo - 1}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
+                                Previous
+                            </a>
+                        </li>
 
-                <c:set var="left" value="${pageNo - 2}"/>
-                <c:set var="right" value="${pageNo + 2}"/>
+                        <c:set var="left" value="${pageNo - 2}"/>
+                        <c:set var="right" value="${pageNo + 2}"/>
 
-                <c:forEach begin="1" end="${totalPages}" var="i">
-                    <c:choose>
-                        <%-- alway display first page --%>
-                        <c:when test="${i == 1}">
-                            <li class="page-item ${i == pageNo ? 'active' : ''}">
-                                <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
-                                        ${i}
-                                </a>
-                            </li>
-                        </c:when>
-                        <%-- alway display last page --%>
-                        <c:when test="${i == totalPages}">
-                            <li class="page-item ${i == pageNo ? 'active' : ''}">
-                                <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
-                                        ${i}
-                                </a>
-                            </li>
-                        </c:when>
-                        <%-- display between page--%>
-                        <c:when test="${i >= left && i <= right}">
-                            <li
-                                    class="page-item ${i == pageNo ? 'active' : ''}">
-                                <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
-                                        ${i}
-                                </a>
-                            </li>
-                        </c:when>
-                        <%-- display hidden page by ... --%>
-                        <c:when test="${i == left - 1 || i == right + 1}">
-                            <li class="page-item disabled">
-                                <span class="page-link">...</span>
-                            </li>
-                        </c:when>
-                    </c:choose>
-                </c:forEach>
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <c:choose>
+                                <%-- alway display first page --%>
+                                <c:when test="${i == 1}">
+                                    <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                        <a class="page-link"
+                                           href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
+                                            ${i}
+                                        </a>
+                                    </li>
+                                </c:when>
+                                <%-- alway display last page --%>
+                                <c:when test="${i == totalPages}">
+                                    <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                        <a class="page-link"
+                                           href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
+                                            ${i}
+                                        </a>
+                                    </li>
+                                </c:when>
+                                <%-- display between page--%>
+                                <c:when test="${i >= left && i <= right}">
+                                    <li
+                                        class="page-item ${i == pageNo ? 'active' : ''}">
+                                        <a class="page-link"
+                                           href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
+                                            ${i}
+                                        </a>
+                                    </li>
+                                </c:when>
+                                <%-- display hidden page by ... --%>
+                                <c:when test="${i == left - 1 || i == right + 1}">
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                </c:when>
+                            </c:choose>
+                        </c:forEach>
 
-                    <%--next page--%>
-                <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
-                    <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${pageNo + 1}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
-                        Next
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </c:if>
+                        <%--next page--%>
+                        <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
+                            <a class="page-link"
+                               href="${pageContext.request.contextPath}/inventory/import/history?pageNo=${pageNo + 1}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </c:if>
 
-</main>
-</body>
+        </main>
+    </body>
 
 </html>

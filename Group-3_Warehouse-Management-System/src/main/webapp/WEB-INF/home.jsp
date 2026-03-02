@@ -34,28 +34,9 @@
         <!-- Main Content -->
         <main class="main-content">
             <!-- Header -->
-            <header class="header">
-                <div class="header-left">
-                    <h2>Welcome Back, <%= user.getFullName() != null ? user.getFullName() : user.getFullName() %>!</h2>
-                    <p>Here's what's happening in your warehouse today</p>
-                </div>
-                <div class="user-info">
-                    <a  href="<%= request.getContextPath() %>/user/profile" class="user-info">
-                        <div class="user-avatar"><%= initial %>
-                        </div>
-                        <div class="user-details">
-                            <h4><%= user.getFullName() != null ? user.getFullName() : "Unknown User" %></h4>
-                            <p>
-                                <%= user.getRole() != null && user.getRole().getName() != null
-                                    ? user.getRole().getName().toUpperCase()
-                                    : "USER" %>
-                            </p>
+            <jsp:include page="/WEB-INF/common/header.jsp" />
 
-                        </div>
-                    </a>
-                    <a href="logout" class="btn-logout">Logout</a>
-                </div>
-            </header>
+           
 
             <!-- Recent Activity -->
             <c:if test="${sessionScope.user.role.name == 'Admin'}">

@@ -14,6 +14,7 @@
     <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
         <main class="main-content">
+            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <h2>Create Purchase Request</h2>
 
@@ -67,10 +68,15 @@
 
                     </table>
                 </div>
-
-                <button type="submit" class="btn btn-success mt-3">
-                    Create Purchase Request
-                </button>
+                <div class=" d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-success ">
+                        Create Purchase Request
+                    </button>
+                    <a href="${pageContext.request.contextPath}/purchase-request/list"
+                       class="btn btn-secondary ms-auto">
+                        ← Back
+                    </a>
+                </div>
 
             </form>
         </main>
