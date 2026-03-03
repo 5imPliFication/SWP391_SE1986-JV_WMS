@@ -250,7 +250,7 @@
             </div>
         </div>
     </div>
-    
+
 </main>
 
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
