@@ -509,22 +509,62 @@ public class ProductDAO {
         return products;
     }
 
-//    public void updateQuantity(Long productId, int newQuantity) {
-//        String sql = "UPDATE products SET quantity = ? WHERE id = ?";
-//
-//        try (Connection con = DBConfig.getDataSource().getConnection();
-//             PreparedStatement ps = con.prepareStatement(sql)) {
-//
-//            ps.setInt(1, newQuantity);
-//            ps.setLong(2, productId);
-//
-//            int affected = ps.executeUpdate();
-//            if (affected == 0) {
-//                throw new SQLException("Product item not found with ID: " + productId);
-//            }
-//
-//        } catch (SQLException e) {
-//            throw new RuntimeException("Failed to update product item quantity", e);
-//        }
-//    }
+    public int countAll() {
+        String sql = "SELECT COUNT(*) FROM products";
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
+    public int countLowStock(int threshold) {
+        String sql = "SELECT COUNT(*) FROM products WHERE total_quantity <= ?";
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, threshold);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
+    public List<Product> findLowStock(int threshold) {
+        String sql = "SELECT * FROM products WHERE total_quantity <= ? ORDER BY total_quantity ASC";
+        List<Product> products = new ArrayList<>();
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, threshold);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Product product = new Product();
+                    product.setId(rs.getLong("id"));
+                    product.setName(rs.getString("name"));
+                    product.setDescription(rs.getString("description"));
+                    product.setImgUrl(rs.getString("img_url"));
+                    product.setIsActive(rs.getBoolean("is_active"));
+                    product.setTotalQuantity(rs.getLong("total_quantity"));
+
+                    Brand brand = new Brand();
+                    brand.setId(rs.getLong("brand_id"));
+                    product.setBrand(brand);
+
+                    products.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return products;
+    }
 }
