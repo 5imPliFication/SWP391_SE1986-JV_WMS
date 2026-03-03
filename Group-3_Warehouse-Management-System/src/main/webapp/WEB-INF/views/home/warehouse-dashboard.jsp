@@ -250,57 +250,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Low Stock Alert -->
-    <c:if test="${not empty lowStockProducts}">
-        <div class="card shadow mb-4 border-danger">
-            <div class="card-header py-3 bg-danger text-white">
-                <h6 class="m-0 font-weight-bold">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>Low Stock Alert
-                </h6>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="thead-light">
-                        <tr>
-                            <th class="py-3 px-4">Product Name</th>
-                            <th class="py-3 px-4 text-center">Available Quantity</th>
-                            <th class="py-3 px-4 text-center">Status</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <c:forEach items="${lowStockProducts}" var="product">
-                            <tr>
-                                <td class="px-4 align-middle font-weight-bold">
-                                    ${product.name}
-                                </td>
-                                <td class="px-4 align-middle text-center">
-                                    <span class="badge badge-danger badge-pill px-3 py-2">
-                                        ${product.totalQuantity} units
-                                    </span>
-                                </td>
-                                <td class="px-4 align-middle text-center">
-                                    <c:choose>
-                                        <c:when test="${product.totalQuantity == 0}">
-                                            <span class="badge badge-danger">OUT OF STOCK</span>
-                                        </c:when>
-                                        <c:when test="${product.totalQuantity <= 5}">
-                                            <span class="badge badge-danger">CRITICAL</span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span class="badge badge-warning">LOW</span>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </c:if>
+    
 </main>
 
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
