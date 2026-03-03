@@ -170,18 +170,20 @@
                 <%-- Stat Cards Row --%>
                   <div class="row">
                     <%-- Import Card --%>
-                      <div class="col-md-4 mb-3">
-                        <div class="stat-card">
-                          <div class="stat-icon import-icon">
-                            <i class="fas fa-arrow-circle-down"></i>
-                          </div>
-                          <div class="stat-label">Total Imports</div>
-                          <div class="stat-value">
-                            <fmt:formatNumber value="${report.totalImport}" pattern="#,##0" />
-                          </div>
-                        </div>
-                      </div>
+                      <a class="col-md-4 mb-3" href="${pageContext.request.contextPath}/inventory/import/history">
 
+
+                          <div class="stat-card">
+                            <div class="stat-icon import-icon">
+                              <i class="fas fa-arrow-circle-down"></i>
+                            </div>
+                            <div class="stat-label">Total Imports</div>
+                            <div class="stat-value">
+                            <fmt:formatNumber value="${report.totalImport}" pattern="#,##0" />
+                            </div>
+                          </div>
+
+                      </a>
                       <%-- Export Card --%>
                         <div class="col-md-4 mb-3">
                           <div class="stat-card">
@@ -196,7 +198,8 @@
                         </div>
 
                         <%-- In Stock Card --%>
-                          <div class="col-md-4 mb-3">
+                      <a class="col-md-4 mb-3" href="${pageContext.request.contextPath}/stock-history">
+
                             <div class="stat-card">
                               <div class="stat-icon stock-icon">
                                 <i class="fas fa-warehouse"></i>
@@ -206,7 +209,7 @@
                                 <fmt:formatNumber value="${report.totalInStock}" pattern="#,##0" />
                               </div>
                             </div>
-                          </div>
+                      </a>
                   </div>
           </div>
 
