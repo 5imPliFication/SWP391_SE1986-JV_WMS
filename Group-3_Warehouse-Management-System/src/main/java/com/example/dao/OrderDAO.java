@@ -29,7 +29,7 @@ public class OrderDAO {
         coupon.setUsageLimit(rs.getObject("usage_limit") != null ? rs.getInt("usage_limit") : null);
         coupon.setUsedCount(rs.getInt("used_count"));
         coupon.setIsActive(rs.getBoolean("is_active"));
-        coupon.setCreatedAt(rs.getTimestamp("created_at"));
+        coupon.setCreatedAt(rs.getTimestamp("order_date"));
         return coupon;
     }
 
@@ -68,11 +68,6 @@ public class OrderDAO {
 
         // ---- status (enum-safe) ----
         order.setStatus(rs.getString("status"));
-
-        // ---- createdBy user ----
-        User createdBy = new User();
-        createdBy.setId(rs.getLong("created_by"));
-        order.setCreatedBy(createdBy);
 
         // ---- createdAt ----
         Timestamp createdAt = rs.getTimestamp("order_date");
@@ -149,7 +144,7 @@ public class OrderDAO {
     public Order findById(Long orderId) {
          String sql = """
                      SELECT
-                         o.id            AS order_id,
+                         o.id,
                          o.order_code,
                          o.customer_name,
                          o.customer_phone,
@@ -190,7 +185,7 @@ public class OrderDAO {
                 }
 
                 Order order = new Order();
-                order.setId(rs.getLong("order_id"));
+                order.setId(rs.getLong("id"));
                 order.setOrderCode(rs.getString("order_code"));
                 order.setCustomerName(rs.getString("customer_name"));
                 order.setCustomerPhone(rs.getString("customer_phone"));
@@ -249,7 +244,7 @@ public class OrderDAO {
 
     public List<Order> findAll() {
         String sql = "SELECT\n" +
-                "    o.id            AS order_id,\n" +
+                "    o.id,\n" +
                 "    o.order_code,\n" +
                 "    o.customer_name,\n" +
                 "    o.customer_phone,\n" +
@@ -292,7 +287,7 @@ public class OrderDAO {
     public List<Order> findBySalesman(Long salesmanId) {
         String sql = """
         SELECT
-            o.id AS order_id,
+            o.id,
             o.order_code,
             o.customer_name,
             o.customer_phone,
@@ -336,7 +331,7 @@ public class OrderDAO {
     public List<Order> findByStatus(String status) {
         String sql = """
         SELECT
-            o.id AS order_id,
+            o.id,
             o.order_code,
             o.customer_name,
             o.customer_phone,
@@ -891,5 +886,136 @@ public class OrderDAO {
         } catch (SQLException e) {
             throw new RuntimeException("Failed to get orders for salesman", e);
         }
+    }
+    public int countByDateRange(Timestamp startDate, Timestamp endDate) {
+        String sql = "SELECT COUNT(*) FROM orders WHERE order_date BETWEEN ? AND ?";
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setTimestamp(1, startDate);
+            ps.setTimestamp(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to count orders by date range", e);
+        }
+        return 0;
+    }
+
+    public int countBySalesmanAndDateRange(Long salesmanId, Timestamp startDate, Timestamp endDate) {
+        String sql = "SELECT COUNT(*) FROM orders WHERE created_by = ? AND order_date BETWEEN ? AND ?";
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, salesmanId);
+            ps.setTimestamp(2, startDate);
+            ps.setTimestamp(3, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to count salesman orders by date range", e);
+        }
+        return 0;
+    }
+
+    public int countBySalesmanAndStatus(Long salesmanId, String status) {
+        String sql = "SELECT COUNT(*) FROM orders WHERE created_by = ? AND status = ?";
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, salesmanId);
+            ps.setString(2, status);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to count salesman orders by status", e);
+        }
+        return 0;
+    }
+
+    public List<Order> findBySalesmanAndDateRange(Long salesmanId, Timestamp startDate, Timestamp endDate) {
+        String sql = "SELECT * FROM orders WHERE created_by = ? AND order_date BETWEEN ? AND ? ORDER BY order_date DESC";
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, salesmanId);
+            ps.setTimestamp(2, startDate);
+            ps.setTimestamp(3, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapOrder(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to find salesman orders by date range", e);
+        }
+        return orders;
+    }
+
+    public List<Order> findRecentBySalesman(Long salesmanId, Timestamp since, int limit) {
+        String sql = "SELECT * FROM orders WHERE created_by = ? AND order_date >= ? ORDER BY order_date DESC LIMIT ?";
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, salesmanId);
+            ps.setTimestamp(2, since);
+            ps.setInt(3, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapOrder(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to find recent salesman orders", e);
+        }
+        return orders;
+    }
+
+    public List<Order> findRecentOrders(int limit) {
+        String sql = "SELECT o.*, u.fullname FROM orders o " +
+                "LEFT JOIN users u ON o.created_by = u.id " +
+                "ORDER BY o.order_date DESC LIMIT ?";
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Order order = mapOrder(rs);
+                    User creator = new User();
+                    creator.setId(rs.getLong("created_by"));
+                    creator.setFullName(rs.getString("fullname"));
+                    order.setCreatedBy(creator);
+                    orders.add(order);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to find recent orders", e);
+        }
+        return orders;
+    }
+
+    public int countByStatusAndDateRange(String status, Timestamp startDate, Timestamp endDate) {
+        String sql = "SELECT COUNT(*) FROM orders WHERE status = ? AND order_date BETWEEN ? AND ?";
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setTimestamp(2, startDate);
+            ps.setTimestamp(3, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to count orders by status and date range", e);
+        }
+        return 0;
     }
 }

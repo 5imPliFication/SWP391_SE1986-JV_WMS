@@ -41,24 +41,9 @@ public class ActivityLogService {
 
         req.setAttribute("adminCount", userDAO.countUsersByRole("Admin"));
         req.setAttribute("staffCount", userDAO.countUsersByRole("Staff"));
-        req.setAttribute("managerCount", userDAO.countUsersByRole("MANAGER"));
-        req.setAttribute("salesmanCount", userDAO.countUsersByRole("SALESMAN"));
-        req.setAttribute("storekeeperCount", userDAO.countUsersByRole("STOREKEEPER"));
-
-    }
-
-    //place holder
-    public void loadStaffDashboard(HttpServletRequest req) {
-
-        req.setAttribute("totalUsers", userDAO.countAllUsers());
-        req.setAttribute("activeUsers", userDAO.countActiveUsers());
-        req.setAttribute("inactiveUsers", userDAO.countInactiveUsers());
-
-        req.setAttribute("adminCount", userDAO.countUsersByRole("Admin"));
-        req.setAttribute("staffCount", userDAO.countUsersByRole("Staff"));
-        req.setAttribute("managerCount", userDAO.countUsersByRole("MANAGER"));
-        req.setAttribute("salesmanCount", userDAO.countUsersByRole("SALESMAN"));
-        req.setAttribute("storekeeperCount", userDAO.countUsersByRole("STOREKEEPER"));
+        req.setAttribute("managerCount", userDAO.countUsersByRole("Manager"));
+        req.setAttribute("salesmanCount", userDAO.countUsersByRole("Salesman"));
+        req.setAttribute("storekeeperCount", userDAO.countUsersByRole("Warehouse"));
 
     }
 }

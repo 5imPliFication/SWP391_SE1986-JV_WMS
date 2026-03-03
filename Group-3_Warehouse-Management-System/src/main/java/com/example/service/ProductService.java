@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ProductService {
-
     private ProductDAO productDAO = new ProductDAO();
     private CategoryDAO categoryDAO = new CategoryDAO();
     private BrandDAO brandDAO = new BrandDAO();
@@ -108,5 +107,19 @@ public class ProductService {
 
     private int getTotalProducts(String name) {
         return productDAO.countTotalProducts(name);
+    }
+    // Count all products
+    public int countAllProducts() {
+        return productDAO.countAll();
+    }
+
+    // Count low stock products
+    public int countLowStockProducts(int threshold) {
+        return productDAO.countLowStock(threshold);
+    }
+
+    // Get low stock products
+    public List<Product> getLowStockProducts(int threshold) {
+        return productDAO.findLowStock(threshold);
     }
 }
