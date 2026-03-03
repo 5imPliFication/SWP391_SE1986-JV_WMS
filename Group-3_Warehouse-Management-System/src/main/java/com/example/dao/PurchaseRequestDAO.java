@@ -113,12 +113,12 @@ public class PurchaseRequestDAO {
         List<Object> params = new ArrayList<>();
 
         /* ===== ROLE FILTER ===== */
-        if ("STAFF".equalsIgnoreCase(role)) {
+        if ("Salesman".equalsIgnoreCase(role)) {
             sql.append(" AND pr.created_by = ?");
             params.add(userId);
         }
 
-        if ("WAREHOUSE".equalsIgnoreCase(role)) {
+        if ("Warehouse".equalsIgnoreCase(role)) {
             sql.append(" AND pr.status IN ('APPROVED')");
         }
 
@@ -129,7 +129,7 @@ public class PurchaseRequestDAO {
         }
 
         /* ===== STATUS FILTER (KHÔNG ÁP DỤNG CHO WAREHOUSE) ===== */
-        if (!"WAREHOUSE".equalsIgnoreCase(role)
+        if (!"Warehouse".equalsIgnoreCase(role)
                 && status != null
                 && !status.isBlank()) {
 
@@ -192,12 +192,12 @@ public class PurchaseRequestDAO {
 
         List<Object> params = new ArrayList<>();
 
-        if ("STAFF".equalsIgnoreCase(role)) {
+        if ("Salesman".equalsIgnoreCase(role)) {
             sql.append(" AND pr.created_by = ?");
             params.add(userId);
         }
 
-        if ("WAREHOUSE".equalsIgnoreCase(role)) {
+        if ("Warehouse".equalsIgnoreCase(role)) {
             sql.append(" AND pr.status = ?");
             params.add("APPROVED");
         }

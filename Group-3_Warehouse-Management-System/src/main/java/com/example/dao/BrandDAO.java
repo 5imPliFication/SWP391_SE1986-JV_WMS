@@ -71,10 +71,11 @@ public class BrandDAO {
         return false;
     }
 
-    public boolean isBrandExist(String name) {
-        String sql = "SELECT 1 FROM brands WHERE name = ?";
+    public boolean isBrandExist(String name, Long id) {
+        String sql = "SELECT 1 FROM brands WHERE name = ? and id <> ?";
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
+            ps.setLong(2, id);
             ResultSet rs = ps.executeQuery();
             return rs.next();
         } catch (SQLException e) {

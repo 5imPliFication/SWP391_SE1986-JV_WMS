@@ -34,7 +34,7 @@ public class BrandService {
     }
 
     public boolean addBrand(Brand brand) {
-        if (b.isBrandExist(brand.getName())) {
+        if (b.isBrandExist(brand.getName(),brand.getId())) {
             return false;
         }
         b.addBrand(brand);
@@ -61,7 +61,7 @@ public class BrandService {
         try (Connection conn = DBConfig.getDataSource().getConnection()) {
 
             conn.setAutoCommit(false);
-            if (b.isBrandExist(brand.getName())) {
+            if (b.isBrandExist(brand.getName(),brand.getId())) {
                 return false;
             }
             b.updateBrand(conn, brand);
