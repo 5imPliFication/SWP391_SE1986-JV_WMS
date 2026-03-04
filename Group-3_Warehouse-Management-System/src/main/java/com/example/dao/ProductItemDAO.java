@@ -182,4 +182,60 @@ public class ProductItemDAO {
         }
     }
 
+    public int deactivateItemsByIds(List<Long> itemIds) {
+        if (itemIds == null || itemIds.isEmpty()) {
+            return 0;
+        }
+
+        String updateSql = "UPDATE product_items SET is_active = 0, updated_at = NOW() WHERE id = ? AND is_active = 1";
+
+        try (Connection con = DBConfig.getDataSource().getConnection()) {
+            con.setAutoCommit(false);
+            try (PreparedStatement ps = con.prepareStatement(updateSql)) {
+                int updated = 0;
+                for (Long itemId : itemIds) {
+                    ps.setLong(1, itemId);
+                    updated += ps.executeUpdate();
+                }
+                con.commit();
+                return updated;
+            } catch (SQLException e) {
+                con.rollback();
+                throw e;
+            } finally {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to deactivate product items by ids", e);
+        }
+    }
+
+    public int activateItemsByIds(List<Long> itemIds) {
+        if (itemIds == null || itemIds.isEmpty()) {
+            return 0;
+        }
+
+        String updateSql = "UPDATE product_items SET is_active = 1, updated_at = NOW() WHERE id = ? AND is_active = 0";
+
+        try (Connection con = DBConfig.getDataSource().getConnection()) {
+            con.setAutoCommit(false);
+            try (PreparedStatement ps = con.prepareStatement(updateSql)) {
+                int updated = 0;
+                for (Long itemId : itemIds) {
+                    ps.setLong(1, itemId);
+                    updated += ps.executeUpdate();
+                }
+                con.commit();
+                return updated;
+            } catch (SQLException e) {
+                con.rollback();
+                throw e;
+            } finally {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to activate product items by ids", e);
+        }
+    }
+
 }

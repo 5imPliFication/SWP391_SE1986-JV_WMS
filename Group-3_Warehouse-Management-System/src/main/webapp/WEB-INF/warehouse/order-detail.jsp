@@ -188,24 +188,25 @@
                             <tbody>
                             <c:set var="total" value="0"/>
                             <c:forEach items="${items}" var="item" varStatus="status">
-                                <%-- Use priceAtPurchase (from order_items.price_at_purchase) --%>
+                                <%-- Calculate subtotal using quantity from OrderItem and price at purchase --%>
                                 <c:set var="subtotal" value="${item.priceAtPurchase * item.quantity}"/>
                                 <c:set var="total" value="${total + subtotal}"/>
                                 <tr>
                                     <td class="px-4 align-middle text-muted">${status.index + 1}</td>
                                     <td class="px-4 align-middle">
-                                            <%-- Product name from products table --%>
+                                            <%-- Product name from Product entity --%>
                                         <div class="font-weight-bold">${item.product.name}</div>
-                                        <c:if test="${order.status == 'SUBMITTED'}">
-                                            <br><small class="text-info">
-                                            <i class="fas fa-warehouse mr-1"></i>
-                                            Available: ${item.productItem.quantity} units
+                                        <%-- Show inventory status based on order state --%>
+                                        <c:if test="${order.status == 'PROCESSING' || order.status == 'COMPLETED'}">
+                                            <br><small class="text-warning">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                            Stock Reduced (${item.quantity} units consumed)
                                         </small>
                                         </c:if>
                                     </td>
                                     <td class="px-4 align-middle text-right">
                                         ${currency:format(item.priceAtPurchase)} VND
-                                            <%-- Current price from product_items.price --%>
+                                            <%-- Current price from ProductItem.currentPrice --%>
                                         <c:if test="${item.priceAtPurchase != item.productItem.currentPrice}">
                                             <br><small class="text-warning">
                                             <i class="fas fa-info-circle"></i> Current:
@@ -214,7 +215,7 @@
                                         </c:if>
                                     </td>
                                     <td class="px-4 align-middle text-center">
-                                            <%-- Ordered quantity from order_items.quantity --%>
+                                            <%-- Order quantity from OrderItem.quantity --%>
                                         <span class="badge badge-primary badge-pill px-3 py-2">${item.quantity}</span>
                                     </td>
                                     <td class="px-4 align-middle text-right font-weight-bold text-primary">
@@ -316,25 +317,37 @@
             </div>
 
             <!-- Inventory Note (Important!) -->
-            <c:if test="${order.status == 'SUBMITTED'}">
+            <c:if test="${order.status == 'DRAFT' || order.status == 'SUBMITTED'}">
                 <div class="alert alert-warning mb-4" role="alert">
                     <h6 class="alert-heading">
-                        <i class="fas fa-info-circle mr-2"></i>Inventory Note
+                        <i class="fas fa-info-circle mr-2"></i>Inventory Status
                     </h6>
                     <small>
-                        <strong>Stock will be reduced when you start processing.</strong>
-                        <br>Product item quantities will be checked and decreased at that time.
+                        <strong>Warehouse inventory NOT yet consumed.</strong>
+                        <br>Product quantities will be automatically reduced when you move this order to "PROCESSING" status.
                     </small>
                 </div>
             </c:if>
 
             <c:if test="${order.status == 'PROCESSING'}">
-                <div class="alert alert-info mb-4" role="alert">
+                <div class="alert alert-success mb-4" role="alert">
                     <h6 class="alert-heading">
-                        <i class="fas fa-check-circle mr-2"></i>Inventory Updated
+                        <i class="fas fa-check-circle mr-2"></i>Inventory Consumed
                     </h6>
                     <small>
-                        Product item quantities have been reduced for this order.
+                        <i class="fas fa-check mr-1"></i>Warehouse inventory has been reduced by the order quantities.
+                        <br><i class="fas fa-undo mr-1"></i>If cancelled, inventory will be restored.
+                    </small>
+                </div>
+            </c:if>
+
+            <c:if test="${order.status == 'COMPLETED'}">
+                <div class="alert alert-info mb-4" role="alert">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-box mr-2"></i>Order Fulfilled
+                    </h6>
+                    <small>
+                        This order has been completed. Warehouse inventory quantity remains reduced.
                     </small>
                 </div>
             </c:if>

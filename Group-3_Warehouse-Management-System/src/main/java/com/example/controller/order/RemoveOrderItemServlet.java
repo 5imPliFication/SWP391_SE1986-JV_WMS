@@ -39,11 +39,11 @@ public class RemoveOrderItemServlet extends HttpServlet {
         try {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
 
-            // ✓ CORRECT: Get productItemId (not productId)
-            Long productItemId = Long.parseLong(req.getParameter("productItemId"));
+            // Now get orderItemId instead of productItemId
+            Long orderItemId = Long.parseLong(req.getParameter("orderItemId"));
 
             // Remove item
-            orderService.removeItem(orderId, productItemId);
+            orderService.removeItem(orderId, orderItemId);
 
             String successMsg = URLEncoder.encode("Item removed successfully", StandardCharsets.UTF_8);
             resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&success=" + successMsg);
