@@ -291,7 +291,7 @@
                             <c:if test="${order.status == 'DRAFT'}">
                                 <td class="px-4 align-middle text-center">
                                     <button class="btn btn-sm btn-outline-danger"
-                                            onclick="removeItem(${order.id}, ${i.productItem.id})">
+                                            onclick="removeItem(${order.id}, ${i.id})">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -674,7 +674,7 @@
     }
 
     // Remove item
-    function removeItem(orderId, productItemId) {
+    function removeItem(orderId, orderItemId) {
         if (confirm('Remove this item from the order?')) {
             const form = $('<form>', {
                 method: 'POST',
@@ -682,7 +682,7 @@
             });
 
             form.append($('<input>', { type: 'hidden', name: 'orderId', value: orderId }));
-            form.append($('<input>', { type: 'hidden', name: 'productItemId', value: productItemId }));
+            form.append($('<input>', { type: 'hidden', name: 'orderItemId', value: orderItemId }));
 
             $('body').append(form);
             form.submit();

@@ -29,7 +29,7 @@ public class OrderDAO {
         coupon.setUsageLimit(rs.getObject("usage_limit") != null ? rs.getInt("usage_limit") : null);
         coupon.setUsedCount(rs.getInt("used_count"));
         coupon.setIsActive(rs.getBoolean("is_active"));
-        coupon.setCreatedAt(rs.getTimestamp("order_date"));
+        coupon.setCreatedAt(rs.getTimestamp("created_at"));
         return coupon;
     }
 
@@ -451,10 +451,11 @@ public class OrderDAO {
      * Apply coupon to order
      */
     public void applyCoupon(Long orderId, Long couponId) {
-        String selectOrderSql = "SELECT SUM(oi.quantity * pi.current_price) as subtotal " +
-                "FROM order_items oi " +
-                "JOIN product_items pi ON oi.product_item_id = pi.id " +
-                "WHERE oi.order_id = ?";
+        String selectOrderSql = """
+                SELECT SUM(oi.quantity * oi.price_at_purchase) as subtotal
+                FROM order_items oi
+                WHERE oi.order_id = ?
+                """;
 
         String selectCouponSql = "SELECT * FROM coupons WHERE id = ?";
 
@@ -550,12 +551,13 @@ public class OrderDAO {
      * Remove coupon from order
      */
     public void removeCoupon(Long orderId) {
-        String selectOrderSql = "SELECT SUM(oi.quantity * pi.current_price) as subtotal, o.coupon_id " +
-                "FROM order_items oi " +
-                "JOIN product_items pi ON oi.product_item_id = pi.id " +
-                "JOIN orders o ON o.id = oi.order_id " +
-                "WHERE oi.order_id = ? " +
-                "GROUP BY o.coupon_id";
+        String selectOrderSql = """
+                SELECT SUM(oi.quantity * oi.price_at_purchase) as subtotal, o.coupon_id
+                FROM order_items oi
+                JOIN orders o ON o.id = oi.order_id
+                WHERE oi.order_id = ?
+                GROUP BY o.coupon_id
+                """;
 
         String updateOrderSql = "UPDATE orders SET coupon_id = NULL, discount_amount = 0, final_total = ? WHERE id = ?";
 
@@ -726,7 +728,6 @@ public class OrderDAO {
              PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             int paramIndex = 1;
-            Order order =  new Order();
 
             if (status != null && !status.isEmpty()) {
                 ps.setString(paramIndex++, status);
@@ -742,6 +743,7 @@ public class OrderDAO {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
+                Order order = new Order();
                 order.setId(rs.getLong("id"));
                 order.setOrderCode(rs.getString("order_code"));
                 order.setCustomerName(rs.getString("customer_name"));
