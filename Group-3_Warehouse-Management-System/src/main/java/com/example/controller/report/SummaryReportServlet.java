@@ -26,12 +26,7 @@ public class SummaryReportServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // Role check: Manager only
-        User user = (User) req.getSession().getAttribute("user");
-        if (user == null || !"Admin".equals(user.getRole().getName())) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
+
 
         // Parse optional date range filters
         String fromDateStr = req.getParameter("fromDate");
