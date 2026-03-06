@@ -357,9 +357,9 @@ public class OrderService {
             throw new IllegalStateException("Coupon is no longer valid");
         }
 
-        // Check if user has already used this coupon (per-user restriction)
-        if (couponDAO.hasUserUsedCoupon(userId, couponId)) {
-            throw new IllegalStateException("You have already used this coupon");
+        // Check if customer has already used this coupon (per-customer restriction)
+        if (couponDAO.hasCustomerUsedCoupon(order.getCustomerName(), couponId)) {
+            throw new IllegalStateException("This customer has already used this coupon");
         }
 
         BigDecimal orderTotal = calculateOrderTotal(orderId);
@@ -374,15 +374,15 @@ public class OrderService {
 
         // Check if order already has a coupon and remove its usage tracking
         if (order.getCoupon() != null) {
-            couponDAO.removeUserCouponUsage(userId, order.getCoupon().getId());
+            couponDAO.removeCustomerCouponUsage(order.getCustomerName(), order.getCoupon().getId());
             couponDAO.decrementUsageCount(order.getCoupon().getId());
         }
 
         // Apply new coupon
         orderDAO.applyCoupon(orderId, couponId);
         
-        // Record this user using this coupon
-        couponDAO.recordUserCouponUsage(userId, couponId);
+        // Record that this customer has used this coupon
+        couponDAO.recordCustomerCouponUsage(order.getCustomerName(), couponId);
     }
 
     public void removeCouponFromOrder(Long orderId, Long userId) {
@@ -397,8 +397,8 @@ public class OrderService {
 
         // Only remove if order has a coupon
         if (order.getCoupon() != null) {
-            // Remove user usage tracking
-            couponDAO.removeUserCouponUsage(userId, order.getCoupon().getId());
+            // Remove customer usage tracking
+            couponDAO.removeCustomerCouponUsage(order.getCustomerName(), order.getCoupon().getId());
         }
 
         orderDAO.removeCoupon(orderId);
