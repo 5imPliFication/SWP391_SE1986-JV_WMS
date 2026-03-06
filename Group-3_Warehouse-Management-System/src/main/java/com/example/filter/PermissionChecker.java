@@ -43,6 +43,10 @@ public class PermissionChecker {
         // --- QUẢN LÝ PURCHASE REQUEST ---
         urlPermissionMap.put("/purchase-request/list", "READ_PURCHASE_REQUEST");
         urlPermissionMap.put("/purchase-request/create", "CREATE_PURCHASE_REQUEST");
+
+        // --- QUẢN LÝ BÁO CÁO ---
+        urlPermissionMap.put("/summary_report", "READ_REPORT");
+
     }
 
     public static String getRequiredPermission(String url) {
