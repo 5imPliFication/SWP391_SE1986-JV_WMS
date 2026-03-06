@@ -45,7 +45,7 @@ public class OrderService {
         return orderDAO.create(order);
     }
 
-    public void removeItem(Long orderId, Long productItemId) {
+    public void removeItem(Long orderId, Long orderItemId) {
         Order order = orderDAO.findById(orderId);
         if (order == null)
             throw new IllegalArgumentException("Order not found");
@@ -53,11 +53,11 @@ public class OrderService {
         if (!"DRAFT".equals(order.getStatus()))
             throw new IllegalStateException("Order is not editable");
 
-        OrderItem orderItem = orderItemDAO.findByOrderAndProductItem(orderId, productItemId);
+        OrderItem orderItem = orderItemDAO.findByIdAndOrderId(orderId, orderItemId);
         if (orderItem == null)
             throw new IllegalArgumentException("Item not found");
 
-        orderItemDAO.deleteByOrderAndProductItem(orderId, productItemId);
+        orderItemDAO.deleteByOrderItemId(orderId, orderItemId);
     }
 
     /* ================= SHARED ================= */
@@ -120,30 +120,22 @@ public class OrderService {
         // Get order items
         List<OrderItem> items = orderItemDAO.findByOrderId(orderId);
 
-        // Reduce stock for each item
+        // Reduce stock for each linked product item
         for (OrderItem item : items) {
-            ProductItem productItem = productItemDAO.findById(item.getProductItem().getId());
-            if (productItem == null) {
-                throw new IllegalStateException("Product item not found for order item ID: " + item.getId());
+            List<ProductItem> linkedItems = item.getProductItems();
+            if (linkedItems == null || linkedItems.isEmpty()) {
+                throw new IllegalStateException("No linked product items found for order item ID: " + item.getId());
             }
 
-            Long productId = productItem.getProductId();
-            int available = productItemDAO.countActiveByProductId(productId);
-
-            // Check if enough stock available
-            if (available < item.getQuantity()) {
-                Product product = productDAO.findById(productId);
-                String productName = product != null ? product.getName() : ("Product ID " + productId);
-                throw new IllegalStateException(
-                        "Insufficient stock for " + productName +
-                                ". Available: " + available +
-                                ", Required: " + item.getQuantity()
-                );
+            if (linkedItems.size() < item.getQuantity()) {
+                throw new IllegalStateException("Linked item count does not match quantity for order item ID: " + item.getId());
             }
 
-            int deactivated = productItemDAO.deactivateAvailableItems(productId, item.getQuantity());
-            if (deactivated < item.getQuantity()) {
-                throw new IllegalStateException("Failed to reserve enough stock for product ID: " + productId);
+            List<Long> linkedIds = linkedItems.stream().map(ProductItem::getId).toList();
+            int deactivated = productItemDAO.deactivateItemsByIds(linkedIds);
+            if (deactivated < linkedIds.size()) {
+                String productName = item.getProduct() != null ? item.getProduct().getName() : ("order item " + item.getId());
+                throw new IllegalStateException("Insufficient active stock for " + productName);
             }
         }
 
@@ -197,17 +189,19 @@ public class OrderService {
                 throw new IllegalArgumentException("Cancellation reason is required");
             }
 
-            // If order is PROCESSING, restore inventory
+            // If order is PROCESSING, restore inventory by linked product item IDs
             if ("PROCESSING".equals(order.getStatus())) {
                 List<OrderItem> items = orderItemDAO.findByOrderId(orderId);
                 for (OrderItem item : items) {
-                    ProductItem productItem = productItemDAO.findById(item.getProductItem().getId());
-                    if (productItem == null) {
+                    List<ProductItem> linkedItems = item.getProductItems();
+                    if (linkedItems == null || linkedItems.isEmpty()) {
                         continue;
                     }
-                    int restored = productItemDAO.activateInactiveItems(productItem.getProductId(), item.getQuantity());
-                    if (restored < item.getQuantity()) {
-                        throw new IllegalStateException("Failed to restore stock for product ID: " + productItem.getProductId());
+
+                    List<Long> linkedIds = linkedItems.stream().map(ProductItem::getId).toList();
+                    int restored = productItemDAO.activateItemsByIds(linkedIds);
+                    if (restored < linkedIds.size()) {
+                        throw new IllegalStateException("Failed to restore stock for order item ID: " + item.getId());
                     }
                 }
             }
@@ -246,30 +240,19 @@ public class OrderService {
                 return "Product not found";
             }
 
-            // Get available product items for this product
-            List<ProductItem> productItems = productItemDAO.findByProductId(productId);
-            if (productItems == null || productItems.isEmpty()) {
-                return "No available items for this product";
-            }
-
-            // Check total available quantity
+            // Check total available quantity first
             int totalAvailable = productItemDAO.countActiveByProductId(productId);
 
             if (totalAvailable < quantity) {
                 return "Insufficient stock. Available: " + totalAvailable + ", Requested: " + quantity;
             }
 
-            ProductItem selectedItem = productItems.stream()
-                    .filter(item -> Boolean.TRUE.equals(item.getIsActive()))
+            // Check if this product already exists in order by checking all items
+            List<OrderItem> existingItems = orderItemDAO.findByOrderId(orderId);
+            OrderItem existing = existingItems.stream()
+                    .filter(item -> item.getProduct() != null && item.getProduct().getId().equals(productId))
                     .findFirst()
                     .orElse(null);
-
-            if (selectedItem == null) {
-                return "No available items in stock";
-            }
-
-            // Check if this product item already exists in order
-            OrderItem existing = orderItemDAO.findByOrderAndProductItem(orderId, selectedItem.getId());
 
             if (existing != null) {
                 // Update quantity
@@ -286,8 +269,7 @@ public class OrderService {
                 // Add new item
                 OrderItem orderItem = new OrderItem();
                 orderItem.setOrder(order);
-                orderItem.setProductItem(selectedItem);
-                orderItem.setProduct(product); // For convenience
+                orderItem.setProduct(product);
                 orderItem.setQuantity(quantity);
 
                 orderItemDAO.addItem(orderItem);
