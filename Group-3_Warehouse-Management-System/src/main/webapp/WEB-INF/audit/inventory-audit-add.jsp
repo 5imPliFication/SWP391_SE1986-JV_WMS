@@ -10,7 +10,7 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
     </head>
 
-    <body class="mt-4">
+    <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
         <main class="main-content">

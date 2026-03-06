@@ -11,7 +11,6 @@
     <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp" />
         <main class=" main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <div>
                 <h2 >Update Brand</h2>

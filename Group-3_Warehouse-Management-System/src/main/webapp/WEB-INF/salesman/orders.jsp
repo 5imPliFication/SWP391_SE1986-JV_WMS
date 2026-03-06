@@ -13,8 +13,6 @@
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
 <main class="main-content">
-    <jsp:include page="/WEB-INF/common/header.jsp"/>
-
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-dark">

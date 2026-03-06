@@ -17,7 +17,6 @@
         <c:set var="isPending" value="${prList.status eq 'PENDING'}"/>
 
         <main class="main-content" >
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <h3 class="mb-3">
                 Purchase Request Detail
@@ -70,7 +69,7 @@
                             <th>Product</th>
                             <th>Brand</th>
                             <th>Category</th>
-                            <th>Qty</th>
+                            <th>Quanity</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,7 +78,7 @@
                                 <td>${i.productName}</td>
                                 <td>${i.brandName}</td>
                                 <td>${i.categoryName}</td>
-                                <td class="text-center">${i.quantity}</td>
+                                <td class="text-center">${i.quantity} item</td>
                             </tr>
                         </c:forEach>
 

@@ -12,7 +12,6 @@
     <body >
         <jsp:include page="/WEB-INF/common/sidebar.jsp" />
         <main class="main-content ">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
             <div class="d-flex justify-content-center align-items-center">
                 <form action="update-category" method="post"
                       class="border border-secondary rounded shadow bg-white w-50 p-4">
