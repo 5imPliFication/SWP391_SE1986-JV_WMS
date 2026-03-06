@@ -14,7 +14,6 @@
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
 <main class="main-content">
-    <jsp:include page="/WEB-INF/common/header.jsp"/>
 
     <!-- Breadcrumb & Header -->
     <div class="mb-4">

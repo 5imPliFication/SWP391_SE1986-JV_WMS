@@ -12,7 +12,6 @@
         <jsp:include page="/WEB-INF/common/sidebar.jsp" />
 
         <main class="main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
             <div class="container-fluid py-4">
                 <h2 class="mb-4">Role & Permission Management</h2>
                 <c:if test="${param.msg == 'delete_success'}">

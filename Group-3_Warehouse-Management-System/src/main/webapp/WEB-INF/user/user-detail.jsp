@@ -12,7 +12,6 @@
         <jsp:include page="/WEB-INF/common/sidebar.jsp" />
 
         <div class=" main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <h3 class="text-center mb-4 fw-semibold">Edit User Information</h3>
 

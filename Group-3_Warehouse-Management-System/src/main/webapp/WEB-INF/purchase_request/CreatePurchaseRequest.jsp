@@ -14,7 +14,6 @@
     <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
         <main class="main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <h2>Create Purchase Request</h2>
 

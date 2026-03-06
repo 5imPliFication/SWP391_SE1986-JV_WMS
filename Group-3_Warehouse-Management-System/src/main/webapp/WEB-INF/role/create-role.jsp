@@ -12,7 +12,6 @@
     <body >
         <jsp:include page="/WEB-INF/common/sidebar.jsp" />
         <main class="main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
             <form action="create-role" method="post" class="border border-secondary rounded shadow bg-white w-50 p-4 main-content">
                 <h2 class="text-center mb-4 text-primary">Create New Role</h2>
 

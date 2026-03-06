@@ -136,7 +136,6 @@
 <body>
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 <main class="main-content">
-    <jsp:include page="/WEB-INF/common/header.jsp"/>
 
     <!-- Success/Error Messages -->
     <c:if test="${not empty param.success}">

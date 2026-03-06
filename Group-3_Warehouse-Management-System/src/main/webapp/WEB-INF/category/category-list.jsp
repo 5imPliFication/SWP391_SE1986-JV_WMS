@@ -15,7 +15,6 @@
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
         <div class="main-content ">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <div class="card shadow-sm">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">

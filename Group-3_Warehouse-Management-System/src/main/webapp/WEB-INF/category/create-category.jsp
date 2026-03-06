@@ -16,7 +16,6 @@
     <body >
         <jsp:include page="/WEB-INF/common/sidebar.jsp" />
         <main class="main-content ">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
             <div class="d-flex justify-content-center align-items-center">
 
                 <form action="create-category" method="post"

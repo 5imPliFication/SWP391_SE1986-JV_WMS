@@ -10,11 +10,10 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
     </head>
 
-    <body class="mt-4">
+    <body >
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
         <main class="main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <h2 class="mb-4 text-danger">Out Of Stock Alert</h2>
 

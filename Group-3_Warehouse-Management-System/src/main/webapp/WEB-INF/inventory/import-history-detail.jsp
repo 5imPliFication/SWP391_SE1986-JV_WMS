@@ -15,7 +15,6 @@
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
         <main class="main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <div class="container-fluid">
                 <div class="d-flex justify-content-between align-items-center mb-4">

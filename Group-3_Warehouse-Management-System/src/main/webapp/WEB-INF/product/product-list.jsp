@@ -34,7 +34,6 @@
     <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
         <div class="main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <h2>Product List</h2>
 
@@ -140,7 +139,7 @@
                                 <a href="${pageContext.request.contextPath}/products/items?productId=${p.id}">${p.name}</a>
                             </td>
                             <td>${p.description}</td>
-                            <td>${p.totalQuantity}</td>
+                            <td>${p.totalQuantity} item</td>
                             <td>${p.brand.name}</td>
                             <td>${p.category.name}</td>
                             <td>${(p.isActive == true) ? 'Active' : 'Inactive'}</td>
