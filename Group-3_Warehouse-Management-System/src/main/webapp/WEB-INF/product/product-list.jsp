@@ -113,16 +113,8 @@
                         <th>Name</th>
                         <th>Description</th>
                         <th>Total Quantity</th>
-                        <th>
-                            <a href="${pageContext.request.contextPath}/brands">
-                                Brand
-                            </a>
-                        </th>
-                        <th>
-                            <a href="${pageContext.request.contextPath}/categories">
-                                Category
-                            </a>
-                        </th>
+                        <th>Brand</th>
+                        <th>Category</th>
                         <th>Status</th>
                         <th>Created Time</th>
                         <th>Updated Time</th>
