@@ -28,7 +28,7 @@
 
     <body>
 
-        <header class="bg-white border-bottom">
+        <header class="bg-white shadow-lg">
 
             <div class="container-fluid d-flex justify-content-end p-2">
 
