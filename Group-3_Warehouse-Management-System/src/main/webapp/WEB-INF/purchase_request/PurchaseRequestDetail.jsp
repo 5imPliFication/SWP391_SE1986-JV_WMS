@@ -66,18 +66,18 @@
                 <table class="table table-bordered">
                     <thead class="table-primary text-center">
                         <tr>
-                            <th>Product</th>
                             <th>Brand</th>
                             <th>Category</th>
+                            <th>Product</th>
                             <th>Quanity</th>
                         </tr>
                     </thead>
                     <tbody>
                         <c:forEach items="${items}" var="i">
                             <tr>
-                                <td>${i.productName}</td>
                                 <td>${i.brandName}</td>
                                 <td>${i.categoryName}</td>
+                                <td>${i.productName}</td>
                                 <td class="text-center">${i.quantity} item</td>
                             </tr>
                         </c:forEach>

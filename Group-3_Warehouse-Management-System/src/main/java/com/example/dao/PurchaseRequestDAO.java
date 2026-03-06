@@ -240,7 +240,7 @@ public class PurchaseRequestDAO {
         List<Product> list = new ArrayList<>();
 
         String sql = """
-        SELECT id, name
+        SELECT id, name, brand_id, category_id
         FROM products
         WHERE is_active = true
         ORDER BY name
@@ -249,9 +249,19 @@ public class PurchaseRequestDAO {
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
+
                 Product p = new Product();
                 p.setId(rs.getLong("id"));
                 p.setName(rs.getString("name"));
+
+                Brand brand = new Brand();
+                brand.setId(rs.getLong("brand_id"));
+                p.setBrand(brand);
+
+                Category category = new Category();
+                category.setId(rs.getLong("category_id"));
+                p.setCategory(category);
+
                 list.add(p);
             }
 
@@ -532,8 +542,7 @@ public class PurchaseRequestDAO {
         if (purchaseId != null) {
             sql.append(" and id = ?");
         }
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             if (purchaseId != null) {
                 ps.setLong(1, purchaseId);
             }

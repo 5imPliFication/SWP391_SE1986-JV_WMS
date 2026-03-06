@@ -275,6 +275,12 @@
 
                     const linkPath = new URL(link.href).pathname;
 
+                    if (linkPath === "/home") {
+                        if (currentPath.includes("dashboard")) {
+                            link.classList.add("active");
+                        }
+                    }
+
                     if (currentPath.startsWith(linkPath) && linkPath.length > bestLength) {
                         bestMatch = link;
                         bestLength = linkPath.length;

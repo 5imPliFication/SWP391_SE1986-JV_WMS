@@ -2,6 +2,8 @@ package com.example.controller.purchase_request;
 
 import com.example.model.PurchaseRequestItem;
 import com.example.model.User;
+import com.example.service.BrandService;
+import com.example.service.CategoryService;
 import com.example.service.PurchaseRequestService;
 
 import jakarta.servlet.ServletException;
@@ -32,6 +34,8 @@ public class PurchaseRequest extends HttpServlet {
             throws ServletException, IOException {
 
         request.setAttribute("productName", p.getProductDropdown());
+        request.setAttribute("brands", p.getBrandsDropdown());
+        request.setAttribute("categories", p.getCategoryDropdown());
 
         request.getRequestDispatcher("/WEB-INF/purchase_request/CreatePurchaseRequest.jsp")
                 .forward(request, response);
