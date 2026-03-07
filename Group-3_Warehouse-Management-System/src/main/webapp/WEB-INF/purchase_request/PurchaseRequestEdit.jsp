@@ -63,95 +63,101 @@
                     <div class="table-responsive mt-2"
                          style="flex:1 1 auto; overflow-y:auto; min-height:0;">
 
-                        <table class="table table-bordered mb-0">
+                        <c:set var="tableHeader" scope="request">
+                            <tr>
+                                <th class="col-brand">Brand</th>
+                                <th class="col-category">Category</th>
+                                <th class="col-product">Product</th>
+                                <th class="col-qty">Quantity</th>
+                                <th class="col-action">Action</th>
+                            </tr>
+                        </c:set>
 
-                            <thead class="table-primary text-center sticky-top">
+
+                        <c:set var="tableBody" scope="request">
+
+                            <c:forEach items="${items}" var="i">
+
                                 <tr>
-                                    <th class="col-brand">Brand</th>
-                                    <th class="col-category">Category</th>
-                                    <th class="col-product">Product</th>
-                                    <th class="col-qty">Quanity</th>
-                                    <th class="col-action">Action</th>
+
+                                    <!-- BRAND -->
+                                    <td>
+                                        <select class="form-select brand-select"
+                                                onchange="filterModalProduct(this)">
+                                            <option value="">Select Brand</option>
+
+                                            <c:forEach var="b" items="${brandName}">
+                                                <option value="${b.id}"
+                                                        <c:if test="${b.name eq i.brandName}">selected</c:if>>
+                                                    ${b.name}
+                                                </option>
+                                            </c:forEach>
+                                        </select>
+                                    </td>
+
+
+                                    <!-- CATEGORY -->
+                                    <td>
+                                        <select class="form-select category-select"
+                                                onchange="filterModalProduct(this)">
+                                            <option value="">Select Category</option>
+
+                                            <c:forEach var="c" items="${CategoryName}">
+                                                <option value="${c.id}"
+                                                        <c:if test="${c.name eq i.categoryName}">selected</c:if>>
+                                                    ${c.name}
+                                                </option>
+                                            </c:forEach>
+                                        </select>
+                                    </td>
+
+
+                                    <!-- PRODUCT -->
+                                    <td>
+                                        <select name="productId[]"
+                                                class="form-select product-select"
+                                                onchange="onModalProductChange(this)">
+
+                                            <option value="">Select Product</option>
+
+                                            <c:forEach var="p" items="${productName}">
+                                                <option value="${p.id}"
+                                                        <c:if test="${p.id == i.productId}">selected</c:if>>
+                                                    ${p.name}
+                                                </option>
+                                            </c:forEach>
+
+                                        </select>
+                                    </td>
+
+
+                                    <!-- QUANTITY -->
+                                    <td>
+                                        <input type="number"
+                                               name="quantity[]"
+                                               class="form-control quantity-input"
+                                               min="1"
+                                               value="${i.quantity}">
+                                    </td>
+
+
+                                    <!-- ACTION -->
+                                    <td class="text-center">
+                                        <button type="button"
+                                                class="btn btn-outline-danger btn-sm"
+                                                onclick="removeModalRow(this)">
+                                            ❌
+                                        </button>
+                                    </td>
+
                                 </tr>
-                            </thead>
 
-                            <tbody id="modalItemsBody">
+                            </c:forEach>
 
-                                <c:forEach items="${items}" var="i">
-                                    <tr>
-
-                                        <!-- BRAND -->
-                                        <td>
-                                            <select class="form-select brand-select"
-                                                    onchange="filterModalProduct(this)">
-                                                <option value="">Select Brand</option>
-
-                                                <c:forEach var="b" items="${brandName}">
-                                                    <option value="${b.id}"
-                                                            <c:if test="${b.name eq i.brandName}">selected</c:if>>
-                                                        ${b.name}
-                                                    </option>
-                                                </c:forEach>
-                                            </select>
-                                        </td>
-
-                                        <!-- CATEGORY -->
-                                        <td>
-                                            <select class="form-select category-select"
-                                                    onchange="filterModalProduct(this)">
-                                                <option value="">Select Category</option>
-
-                                                <c:forEach var="c" items="${CategoryName}">
-                                                    <option value="${c.id}"
-                                                            <c:if test="${c.name eq i.categoryName}">selected</c:if>>
-                                                        ${c.name}
-                                                    </option>
-                                                </c:forEach>
-                                            </select>
-                                        </td>
+                        </c:set>
 
 
-                                        <!-- PRODUCT -->
-                                        <td>
-                                            <select name="productId[]"
-                                                    class="form-select product-select"
-                                                    onchange="onModalProductChange(this)">
-
-                                                <option value="">Select Product</option>
-
-                                                <c:forEach var="p" items="${productName}">
-                                                    <option value="${p.id}"
-                                                            <c:if test="${p.id == i.productId}">selected</c:if>>
-                                                        ${p.name}
-                                                    </option>
-                                                </c:forEach>
-
-                                            </select>
-                                        </td>
-
-                                        <!-- QTY -->
-                                        <td>
-                                            <input type="number"
-                                                   name="quantity[]"
-                                                   class="form-control quantity-input"
-                                                   min="1"
-                                                   value="${i.quantity}">
-                                        </td>
-
-                                        <td class="text-center">
-                                            <button type="button"
-                                                    class="btn btn-outline-danger btn-sm"
-                                                    onclick="removeModalRow(this)">
-                                                ❌
-                                            </button>
-                                        </td>
-
-                                    </tr>
-                                </c:forEach>
-
-                            </tbody>
-                        </table>
-
+                        <jsp:include page="/WEB-INF/common/table.jsp"/>
                     </div>
 
                 </div>

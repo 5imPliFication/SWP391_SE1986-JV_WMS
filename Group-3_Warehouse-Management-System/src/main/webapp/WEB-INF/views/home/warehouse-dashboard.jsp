@@ -149,52 +149,97 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th class="py-3 px-4">Order Code</th>
-                                    <th class="py-3 px-4">Customer</th>
-                                    <th class="py-3 px-4">Salesman</th>
-                                    <th class="py-3 px-4">Submitted</th>
-                                    <th class="py-3 px-4 text-center">Action</th>
+                        <!-- HEADER -->
+                        <c:set var="tableHeader" scope="request">
+                            <tr>
+                                <th class="py-3 px-4">Order Code</th>
+                                <th class="py-3 px-4">Customer</th>
+                                <th class="py-3 px-4">Salesman</th>
+                                <th class="py-3 px-4">Submitted</th>
+                                <th class="py-3 px-4 text-center">Action</th>
+                            </tr>
+                        </c:set>
+
+                        <!-- BODY -->
+                        <c:set var="tableBody" scope="request">
+
+                            <c:forEach items="${pendingOrders}" var="order">
+
+                                <tr class="table-warning">
+
+                                    <td class="px-4 align-middle font-weight-bold text-primary">
+                                        ${order.orderCode}
+                                    </td>
+
+                                    <td class="px-4 align-middle">
+
+                                        <div class="font-weight-bold">
+                                            ${order.customerName}
+                                        </div>
+
+                                        <small class="text-muted">
+                                            ${order.customerPhone}
+                                        </small>
+
+                                    </td>
+
+                                    <td class="px-4 align-middle">
+                                        ${order.createdBy != null ? order.createdBy.fullName : 'N/A'}
+                                    </td>
+
+                                    <td class="px-4 align-middle text-muted">
+
+                                        <i class="fas fa-calendar mr-1"></i>
+
+                                        <fmt:formatDate value="${order.createdAt}"
+                                                        pattern="dd MMM, HH:mm"/>
+
+                                    </td>
+
+                                    <td class="px-4 align-middle text-center">
+
+                                        <a href="${pageContext.request.contextPath}/warehouse/order/detail?id=${order.id}"
+                                           class="btn btn-sm btn-warning">
+
+                                            <i class="fas fa-play-circle mr-1"></i>
+                                            Process Now
+
+                                        </a>
+
+                                    </td>
+
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach items="${pendingOrders}" var="order">
-                                    <tr class="table-warning">
-                                        <td class="px-4 align-middle font-weight-bold text-primary">
-                                            ${order.orderCode}
-                                        </td>
-                                        <td class="px-4 align-middle">
-                                            <div class="font-weight-bold">${order.customerName}</div>
-                                            <small class="text-muted">${order.customerPhone}</small>
-                                        </td>
-                                        <td class="px-4 align-middle">
-                                            ${order.createdBy != null ? order.createdBy.fullName : 'N/A'}
-                                        </td>
-                                        <td class="px-4 align-middle text-muted">
-                                            <i class="fas fa-calendar mr-1"></i>
-                                            <fmt:formatDate value="${order.createdAt}" pattern="dd MMM, HH:mm"/>
-                                        </td>
-                                        <td class="px-4 align-middle text-center">
-                                            <a href="${pageContext.request.contextPath}/warehouse/order/detail?id=${order.id}" 
-                                               class="btn btn-sm btn-warning">
-                                                <i class="fas fa-play-circle mr-1"></i>Process Now
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                                <c:if test="${empty pendingOrders}">
-                                    <tr>
-                                        <td colspan="5" class="text-center py-5 text-muted">
-                                            <i class="fas fa-check-circle fa-3x text-success mb-3 d-block"></i>
-                                            <h5 class="text-success">All Caught Up!</h5>
-                                            <p class="mb-0">No pending orders at the moment</p>
-                                        </td>
-                                    </tr>
-                                </c:if>
-                            </tbody>
-                        </table>
+
+                            </c:forEach>
+
+
+                            <c:if test="${empty pendingOrders}">
+
+                                <tr>
+
+                                    <td colspan="5" class="text-center py-5 text-muted">
+
+                                        <i class="fas fa-check-circle fa-3x text-success mb-3 d-block"></i>
+
+                                        <h5 class="text-success">
+                                            All Caught Up!
+                                        </h5>
+
+                                        <p class="mb-0">
+                                            No pending orders at the moment
+                                        </p>
+
+                                    </td>
+
+                                </tr>
+
+                            </c:if>
+
+                        </c:set>
+
+                        <!-- COMMON TABLE -->
+                        <jsp:include page="/WEB-INF/common/table.jsp"/>
+
                     </div>
                 </div>
             </div>

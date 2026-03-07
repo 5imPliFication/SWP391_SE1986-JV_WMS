@@ -42,141 +42,131 @@
                         <input type="hidden" name="roleIds" value="${role.id}" />
                     </c:forEach>
 
-                    <div class="card mb-4 ">
-                        <!-- ROLE HEADER -->
-                        <div class="card-header">
+                    <!-- ROLE HEADER -->
 
-                            <div class="row mb-3 align-items-end w-100">
+                    <div class="mb-3 d-flex justify-content-between">
+                        <!-- ACTION -->
+                        <div class="d-flex">
+                            <div class="mr-3">
+                                <label class="form-label fw-semibold">Action (CRUD)</label>
+                                <select id="actionSelect" class="form-select">
+                                    <option value="">-- All --</option>
 
-                                <!-- ACTION -->
-                                <div class="col-md-2">
-                                    <label class="form-label fw-semibold">Action (CRUD)</label>
-                                    <select id="actionSelect" class="form-select">
-                                        <option value="">-- All --</option>
+                                    <c:set var="actionListRendered" value="" />
+                                    <c:forEach items="${allPermissions}" var="p">
+                                        <c:set var="parts" value="${fn:split(p.name, '_')}" />
+                                        <c:set var="action" value="${parts[0]}" />
 
-                                        <c:set var="actionListRendered" value="" />
-                                        <c:forEach items="${allPermissions}" var="p">
-                                            <c:set var="parts" value="${fn:split(p.name, '_')}" />
-                                            <c:set var="action" value="${parts[0]}" />
-
-                                            <c:if test="${not fn:contains(actionListRendered, action)}">
-                                                <option value="${action}">${action}</option>
-                                                <c:set var="actionListRendered" value="${actionListRendered}${action}," />
-                                            </c:if>
-                                        </c:forEach>
-                                    </select>
-                                </div>
-
-                                <!-- OBJECT -->
-                                <div class="col-md-2">
-                                    <label class="form-label fw-semibold">Object</label>
-                                    <select id="objectSelect" class="form-select">
-                                        <option value="">-- All --</option>
-
-                                        <c:set var="objectListRendered" value="" />
-                                        <c:forEach items="${allPermissions}" var="p">
-                                            <c:set var="parts" value="${fn:split(p.name, '_')}" />
-                                            <c:set var="object" value="${parts[1]}" />
-
-                                            <c:if test="${not fn:contains(objectListRendered, object)}">
-                                                <option value="${object}">${object}</option>
-                                                <c:set var="objectListRendered" value="${objectListRendered}${object}," />
-                                            </c:if>
-                                        </c:forEach>
-                                    </select>
-                                </div>
-
-                                <!-- BUTTON CUỐI CÙNG BÊN PHẢI -->
-                                <c:if test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
-
-                                    <div class="col-md-8 d-flex justify-content-end">
-                                        <button type="submit" class="btn btn-success mt-4">
-                                            <i class="fas fa-save"></i> Save changes
-                                        </button>
-                                    </div>
-                                </c:if>
-
+                                        <c:if test="${not fn:contains(actionListRendered, action)}">
+                                            <option value="${action}">${action}</option>
+                                            <c:set var="actionListRendered" value="${actionListRendered}${action}," />
+                                        </c:if>
+                                    </c:forEach>
+                                </select>
                             </div>
 
+                            <!-- OBJECT -->
+                            <div >
+                                <label class="form-label fw-semibold">Object</label>
+                                <select id="objectSelect" class="form-select">
+                                    <option value="">-- All --</option>
+
+                                    <c:set var="objectListRendered" value="" />
+                                    <c:forEach items="${allPermissions}" var="p">
+                                        <c:set var="parts" value="${fn:split(p.name, '_')}" />
+                                        <c:set var="object" value="${parts[1]}" />
+
+                                        <c:if test="${not fn:contains(objectListRendered, object)}">
+                                            <option value="${object}">${object}</option>
+                                            <c:set var="objectListRendered" value="${objectListRendered}${object}," />
+                                        </c:if>
+                                    </c:forEach>
+                                </select>
+                            </div>
                         </div>
+                        <!-- BUTTON CUỐI CÙNG BÊN PHẢI -->
+                        <c:if test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
+
+                            <div class=" d-flex justify-content-end">
+                                <button type="submit" class="btn btn-success mt-4">
+                                    <i class="fas fa-save"></i> Save changes
+                                </button>
+                            </div>
+                        </c:if>
+                    </div>
 
 
-                        <!-- PERMISSION TABLE -->
-                        <div class="card-body p-2">
-                            <div style="overflow-x: auto;">   <!-- Cho phép scroll ngang nếu nhiều role -->
 
-                                <table class="table table-bordered mb-0 permission-table">
+                    <!-- PERMISSION TABLE -->
+                    <div style="overflow-x: auto;">   <!-- Cho phép scroll ngang nếu nhiều role -->
 
-                                    <colgroup>
-                                        <!-- 3 cột cố định đầu -->
-                                        <col style="width: 220px;">   <!-- Permission -->
-                                        <col style="width: 300px;">   <!-- Description -->
+                        <table class="table table-bordered mb-0 permission-table">
 
-                                        <!-- Mỗi role 1 cột cố định -->
+                            <colgroup>
+                                <!-- 3 cột cố định đầu -->
+                                <col style="width: 220px;">   <!-- Permission -->
+                                <col style="width: 300px;">   <!-- Description -->
+
+                                <!-- Mỗi role 1 cột cố định -->
+                                <c:forEach items="${roleList}" var="role">
+                                    <col style="width: 120px;">
+                                </c:forEach>
+                            </colgroup>
+
+                            <thead class="table-primary text-center">
+                                <tr>
+                                    <th>Permission</th>
+                                    <th>Description</th>
                                         <c:forEach items="${roleList}" var="role">
-                                            <col style="width: 120px;">
+                                        <th>
+                                            <c:choose>
+                                                <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
+                                                    <a href="edit-role?id=${role.id}">
+                                                        ${role.name}
+                                                    </a>
+                                                </c:when>    
+                                                <c:otherwise>
+                                                    ${role.name}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </th>
+                                    </c:forEach>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <c:forEach items="${allPermissions}" var="p">
+                                    <tr data-permission-name="${p.name}">
+                                        <td class="fw-semibold">${p.name}</td>
+                                        <td>${p.description}</td>
+
+
+                                        <c:forEach items="${roleList}" var="role">
+                                            <td class="text-center ${(not role.active or !fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE'))
+                                                                     ? 'fw-bold text-dark bg-secondary bg-opacity-25'
+                                                                     : ''}"
+
+                                                ">
+
+                                                <input type="checkbox"
+                                                       class="form-check-input permission-checkbox
+                                                       <c:if test='${!role.active}'>opacity-50</c:if>"
+                                                       name="perm_${role.id}"
+                                                       value="${p.id}"
+                                                       ${(not role.active or !fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE'))
+                                                         ? 'disabled="disabled"'
+                                                         : ''}"                                                           
+                                                       <c:forEach items="${role.permissions}" var="rp">
+                                                           <c:if test="${rp.id == p.id}">checked</c:if>
+                                                       </c:forEach>
+                                                       />
+
+                                            </td>
                                         </c:forEach>
-                                    </colgroup>
-
-                                    <thead class="table-primary text-center">
-                                        <tr>
-                                            <th>Permission</th>
-                                            <th>Description</th>
-                                                <c:forEach items="${roleList}" var="role">
-                                                <th>
-                                                    <c:choose>
-                                                        <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
-                                                            <a href="edit-role?id=${role.id}">
-                                                                ${role.name}
-                                                            </a>
-                                                        </c:when>    
-                                                        <c:otherwise>
-                                                            ${role.name}
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </th>
-                                            </c:forEach>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        <c:forEach items="${allPermissions}" var="p">
-                                            <tr data-permission-name="${p.name}">
-                                                <td class="fw-semibold">${p.name}</td>
-                                                <td>${p.description}</td>
-
-
-                                                <c:forEach items="${roleList}" var="role">
-                                                    <td class="text-center ${(not role.active or !fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE'))
-                                                                             ? 'fw-bold text-dark bg-secondary bg-opacity-25'
-                                                                             : ''}"
-
-                                                        ">
-
-                                                        <input type="checkbox"
-                                                               class="form-check-input permission-checkbox
-                                                               <c:if test='${!role.active}'>opacity-50</c:if>"
-                                                               name="perm_${role.id}"
-                                                               value="${p.id}"
-                                                               ${(not role.active or !fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE'))
-                                                                 ? 'disabled="disabled"'
-                                                                 : ''}"                                                           
-                                                               <c:forEach items="${role.permissions}" var="rp">
-                                                                   <c:if test="${rp.id == p.id}">checked</c:if>
-                                                               </c:forEach>
-                                                               />
-
-                                                    </td>
-                                                </c:forEach>
-                                            </tr>
-                                        </c:forEach>
-                                    </tbody>
-
-                                </table>
-
-                            </div>
-
-                        </div>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
                 </form>
             </div>
         </div>

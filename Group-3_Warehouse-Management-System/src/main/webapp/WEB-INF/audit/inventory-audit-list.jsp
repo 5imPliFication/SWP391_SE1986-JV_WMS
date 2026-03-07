@@ -80,79 +80,117 @@
                     </button>
                 </div>
             </form>
-            <table>
-                <thead>
+            <!-- HEADER -->
+            <c:set var="tableHeader" scope="request">
+                <tr>
+                    <th>Audit Code</th>
+                    <th>Created By</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Updated At</th>
+                    <th>Action</th>
+                </tr>
+            </c:set>
+
+            <!-- BODY -->
+            <c:set var="tableBody" scope="request">
+
+                <c:forEach items="${inventoryAudits}" var="i">
                     <tr>
-                        <th>Audit Code</th>
-                        <th>Created By</th>
-                        <th>Status</th>
-                        <th>Created At</th>
-                        <th>Updated At</th>
-                        <th>Action</th>
+
+                        <td>
+                            <!-- Click -> Move to Inventory Audit Item List -->
+                            <a href="${pageContext.request.contextPath}/inventory-audits/detail?inventoryAuditId=${i.id}">
+                                ${i.auditCode}
+                            </a>
+                        </td>
+
+                        <td>${i.user.fullName}</td>
+
+                        <td>${i.status}</td>
+
+                        <td>${i.createdAt}</td>
+
+                        <td>${i.updatedAt}</td>
+
+                        <td>
+
+                            <c:if test="${i.status == 'PENDING'}">
+
+                                <div class="d-flex justify-content-around">
+
+                                    <c:if test="${sessionScope.user != null
+                                                  and sessionScope.user.role != null
+                                                  and sessionScope.user.role.active
+                                                  and fn:contains(sessionScope.userPermissions, 'CANCEL_AUDIT')}">
+
+                                          <form action="${pageContext.request.contextPath}/inventory-audits" method="post">
+
+                                              <input type="hidden" name="inventoryAuditId" value="${i.id}">
+                                              <input type="hidden" name="pageNo" value="${pageNo}">
+                                              <input type="hidden" name="auditCode" value="${param.auditCode}">
+                                              <input type="hidden" name="status" value="${param.status}">
+
+                                              <button type="submit"
+                                                      class="btn btn-link p-0 m-0 align-baseline"
+                                                      style="text-decoration:none;color:red;">
+
+                                                  CANCEL
+
+                                              </button>
+
+                                          </form>
+
+                                    </c:if>
+
+
+                                    <c:if test="${sessionScope.user != null
+                                                  and sessionScope.user.role != null
+                                                  and sessionScope.user.role.active
+                                                  and fn:contains(sessionScope.userPermissions, 'PERFORM_AUDIT')}">
+
+                                          <form action="${pageContext.request.contextPath}/inventory-audits/perform" method="get">
+
+                                              <input type="hidden" name="inventoryAuditId" value="${i.id}">
+                                              <input type="hidden" name="pageNo" value="${pageNo}">
+                                              <input type="hidden" name="auditCode" value="${param.auditCode}">
+                                              <input type="hidden" name="status" value="${param.status}">
+
+                                              <button type="submit"
+                                                      class="btn btn-link p-0 m-0 align-baseline"
+                                                      style="text-decoration:none;color:blue;">
+
+                                                  PERFORM
+
+                                              </button>
+
+                                          </form>
+
+                                    </c:if>
+
+                                </div>
+
+                            </c:if>
+
+                        </td>
+
                     </tr>
-                </thead>
+                </c:forEach>
 
-                <tbody>
-                    <c:forEach items="${inventoryAudits}" var="i">
-                        <tr>
-                            <td>
-                                <%--Click -> Move to Inventory Audit Item List--%>
-                                <a href="${pageContext.request.contextPath}/inventory-audits/detail?inventoryAuditId=${i.id}">${i.auditCode}</a>
-                            </td>
-                            <td>${i.user.fullName}</td>
-                            <td>${i.status}</td>
-                            <td>${i.createdAt}</td>
-                            <td>${i.updatedAt}</td>
 
-                            <td>
-                                <c:if test="${i.status == 'PENDING'}">
-                                    <div class="d-flex justify-content-around">
+                <c:if test="${empty inventoryAudits}">
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            No data
+                        </td>
+                    </tr>
+                </c:if>
 
-                                        <c:if test="${sessionScope.user != null
-                                                      and sessionScope.user.role != null
-                                                      and sessionScope.user.role.active
-                                                      and fn:contains(sessionScope.userPermissions, 'CANCEL_AUDIT')}">
-                                              <form action="${pageContext.request.contextPath}/inventory-audits" method="post">
-                                                  <input type="hidden" name="inventoryAuditId" value="${i.id}">
-                                                  <input type="hidden" name="pageNo" value="${pageNo}">
-                                                  <input type="hidden" name="auditCode" value="${param.auditCode}">
-                                                  <input type="hidden" name="status" value="${param.status}">
-                                                  <button type="submit" class="btn btn-link p-0 m-0 align-baseline"
-                                                          style="text-decoration: none; color: red;">
-                                                      CANCEL
-                                                  </button>
-                                              </form>
-                                        </c:if>
+            </c:set>
 
-                                        <c:if test="${sessionScope.user != null
-                                                      and sessionScope.user.role != null
-                                                      and sessionScope.user.role.active
-                                                      and fn:contains(sessionScope.userPermissions, 'PERFORM_AUDIT')}">
-                                              <form action="${pageContext.request.contextPath}/inventory-audits/perform" method="get">
-                                                  <input type="hidden" name="inventoryAuditId" value="${i.id}">
-                                                  <input type="hidden" name="pageNo" value="${pageNo}">
-                                                  <input type="hidden" name="auditCode" value="${param.auditCode}">
-                                                  <input type="hidden" name="status" value="${param.status}">
-                                                  <button type="submit" class="btn btn-link p-0 m-0 align-baseline"
-                                                          style="text-decoration: none; color: blue;">
-                                                      PERFORM
-                                                  </button>
-                                              </form>
-                                        </c:if>
+            <!-- COMMON TABLE -->
+            <jsp:include page="/WEB-INF/common/table.jsp"/>
 
-                                    </div>
-                                </c:if>
-                            </td>
-                        </tr>
-                    </c:forEach>
-
-                    <c:if test="${empty inventoryAudits}">
-                        <tr>
-                            <td colspan="6">No data</td>
-                        </tr>
-                    </c:if>
-                </tbody>
-            </table>
 
             <%-- pagination--%>
             <c:if test="${totalPages > 1}">

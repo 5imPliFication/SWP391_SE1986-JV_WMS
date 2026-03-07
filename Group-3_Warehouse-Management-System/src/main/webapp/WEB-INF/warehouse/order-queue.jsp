@@ -108,83 +108,132 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover table-striped mb-0">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th class="py-3 px-4" data-sort="orderCode">Order Code</th>
-                                    <th class="py-3 px-4" data-sort="customerName">Customer</th>
-                                    <th class="py-3 px-4" data-sort="status">Status</th>
-                                    <th class="py-3 px-4" data-sort="createdAt">Created At</th>
-                                    <th class="py-3 px-4 text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach items="${orders}" var="o">
-                                    <tr>
-                                        <td class="px-4 align-middle font-weight-bold text-primary">
-                                            ${o.orderCode}
-                                        </td>
-                                        <td class="px-4 align-middle">${o.customerName}</td>
-                                        <td class="px-4 align-middle">
-                                            <c:choose>
-                                                <c:when test="${o.status == 'DRAFT'}">
-                                                    <span class="badge badge-secondary">
-                                                        <i class="fas fa-edit mr-1"></i>${o.status}
-                                                    </span>
-                                                </c:when>
-                                                <c:when test="${o.status == 'SUBMITTED'}">
-                                                    <span class="badge badge-warning">
-                                                        <i class="fas fa-paper-plane mr-1"></i>${o.status}
-                                                    </span>
-                                                </c:when>
-                                                <c:when test="${o.status == 'PROCESSING'}">
-                                                    <span class="badge badge-info">
-                                                        <i class="fas fa-spinner mr-1"></i>${o.status}
-                                                    </span>
-                                                </c:when>
-                                                <c:when test="${o.status == 'COMPLETED'}">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-check-circle mr-1"></i>${o.status}
-                                                    </span>
-                                                </c:when>
-                                                <c:when test="${o.status == 'CANCELLED'}">
-                                                    <span class="badge badge-danger">
-                                                        <i class="fas fa-times-circle mr-1"></i>${o.status}
-                                                    </span>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span class="badge badge-secondary">${o.status}</span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td class="px-4 align-middle text-muted">
-                                            <i class="fas fa-calendar mr-1"></i>
-                                            ${o.createdAt}
-                                        </td>
-                                        <td class="px-4 align-middle text-center">
-                                            <!-- Only View button - Actions performed in detail page -->
-                                            <a href="${pageContext.request.contextPath}/warehouse/order/detail?id=${o.id}"
-                                               class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye mr-1"></i>View Details
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
+                        <!-- HEADER -->
+                        <c:set var="tableHeader" scope="request">
+                            <tr>
+                                <th class="py-3 px-4" data-sort="orderCode">Order Code</th>
+                                <th class="py-3 px-4" data-sort="customerName">Customer</th>
+                                <th class="py-3 px-4" data-sort="status">Status</th>
+                                <th class="py-3 px-4" data-sort="createdAt">Created At</th>
+                                <th class="py-3 px-4 text-center">Actions</th>
+                            </tr>
+                        </c:set>
 
-                                <!-- Empty State -->
-                                <c:if test="${empty orders}">
-                                    <tr>
-                                        <td colspan="5" class="text-center py-5">
-                                            <div class="text-muted">
-                                                <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
-                                                <h5>No Orders in Queue</h5>
-                                                <p class="mb-0">All orders have been processed</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </c:if>
-                            </tbody>
-                        </table>
+                        <!-- BODY -->
+                        <c:set var="tableBody" scope="request">
+
+                            <c:forEach items="${orders}" var="o">
+
+                                <tr>
+
+                                    <td class="px-4 align-middle font-weight-bold text-primary">
+                                        ${o.orderCode}
+                                    </td>
+
+                                    <td class="px-4 align-middle">
+                                        ${o.customerName}
+                                    </td>
+
+                                    <td class="px-4 align-middle">
+
+                                        <c:choose>
+
+                                            <c:when test="${o.status == 'DRAFT'}">
+                                                <span class="badge badge-secondary">
+                                                    <i class="fas fa-edit mr-1"></i>${o.status}
+                                                </span>
+                                            </c:when>
+
+                                            <c:when test="${o.status == 'SUBMITTED'}">
+                                                <span class="badge badge-warning">
+                                                    <i class="fas fa-paper-plane mr-1"></i>${o.status}
+                                                </span>
+                                            </c:when>
+
+                                            <c:when test="${o.status == 'PROCESSING'}">
+                                                <span class="badge badge-info">
+                                                    <i class="fas fa-spinner mr-1"></i>${o.status}
+                                                </span>
+                                            </c:when>
+
+                                            <c:when test="${o.status == 'COMPLETED'}">
+                                                <span class="badge badge-success">
+                                                    <i class="fas fa-check-circle mr-1"></i>${o.status}
+                                                </span>
+                                            </c:when>
+
+                                            <c:when test="${o.status == 'CANCELLED'}">
+                                                <span class="badge badge-danger">
+                                                    <i class="fas fa-times-circle mr-1"></i>${o.status}
+                                                </span>
+                                            </c:when>
+
+                                            <c:otherwise>
+                                                <span class="badge badge-secondary">
+                                                    ${o.status}
+                                                </span>
+                                            </c:otherwise>
+
+                                        </c:choose>
+
+                                    </td>
+
+                                    <td class="px-4 align-middle text-muted">
+
+                                        <i class="fas fa-calendar mr-1"></i>
+
+                                        ${o.createdAt}
+
+                                    </td>
+
+                                    <td class="px-4 align-middle text-center">
+
+                                        <!-- Only View button -->
+                                        <a href="${pageContext.request.contextPath}/warehouse/order/detail?id=${o.id}"
+                                           class="btn btn-sm btn-outline-primary">
+
+                                            <i class="fas fa-eye mr-1"></i>
+                                            View Details
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            </c:forEach>
+
+
+                            <!-- Empty State -->
+                            <c:if test="${empty orders}">
+
+                                <tr>
+
+                                    <td colspan="5" class="text-center py-5">
+
+                                        <div class="text-muted">
+
+                                            <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+
+                                            <h5>No Orders in Queue</h5>
+
+                                            <p class="mb-0">
+                                                All orders have been processed
+                                            </p>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            </c:if>
+
+                        </c:set>
+
+                        <!-- COMMON TABLE -->
+                        <jsp:include page="/WEB-INF/common/table.jsp"/>
+
                     </div>
                 </div>
             </div>
