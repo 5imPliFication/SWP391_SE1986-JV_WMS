@@ -7,29 +7,7 @@
         <title>Product List</title>
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <style>
-            table {
-                border-collapse: collapse;
-                width: 100%;
-            }
-
-            th, td {
-                padding: 8px;
-                border: 1px solid #ccc;
-                text-align: left;
-            }
-
-            th {
-                background-color: #f4f4f4;
-            }
-
-            .product-img {
-                width: 40px;
-                height: 40px;
-                object-fit: cover;
-                border-radius: 4px;
-            }
-        </style>
+        
     </head>
     <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
@@ -143,9 +121,9 @@
                         <td>${p.category.name}</td>
 
                         <td>
-                            <span class="badge ${(p.isActive) ? 'bg-success' : 'bg-secondary'}">
-                                ${(p.isActive) ? 'Active' : 'Inactive'}
-                            </span>
+                            <jsp:include page="/WEB-INF/common/statusBadge.jsp">
+                                <jsp:param name="active" value="${p.isActive}" />
+                            </jsp:include>
                         </td>
 
                         <td>${p.createdAt}</td>

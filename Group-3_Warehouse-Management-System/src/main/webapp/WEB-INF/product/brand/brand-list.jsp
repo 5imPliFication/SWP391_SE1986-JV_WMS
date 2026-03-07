@@ -125,52 +125,17 @@
 
                                 <!-- STATUS -->
                                 <td class="text-center">
-
-                                    <form action="${pageContext.request.contextPath}/change-status"
-                                          method="get"
-                                          class="d-inline">
-
-                                        <input type="hidden" name="brandId" value="${b.id}">
-                                        <input type="hidden" name="status" value="${b.active}">
-
-                                        <c:choose>
-
-                                            <c:when test="${b.active}">
-                                                <button type="submit"
-                                                        class="btn btn-sm btn-success">
-                                                    Active
-                                                </button>
-                                            </c:when>
-
-                                            <c:otherwise>
-                                                <button type="submit"
-                                                        class="btn btn-sm btn-secondary">
-                                                    Activate
-                                                </button>
-                                            </c:otherwise>
-
-                                        </c:choose>
-
-                                    </form>
-
+                                    <jsp:include page="/WEB-INF/common/statusBadge.jsp">
+                                        <jsp:param name="active" value="${b.active}" />
+                                    </jsp:include>
                                 </td>
 
                                 <!-- ACTION -->
                                 <td class="text-center">
-
-                                    <c:if test="${b.active}">
-                                        <a href="${pageContext.request.contextPath}/brand-update?brandId=${b.id}"
-                                           class="btn btn-sm btn-warning">
-                                            Edit
-                                        </a>
-                                    </c:if>
-
-                                    <c:if test="${!b.active}">
-                                        <span class="text-muted ms-2">
-                                            Disabled
-                                        </span>
-                                    </c:if>
-
+                                    <a href="${pageContext.request.contextPath}/brand-update?brandId=${b.id}"
+                                       class="btn btn-sm btn-warning">
+                                        Edit
+                                    </a>
                                 </td>
 
                             </tr>

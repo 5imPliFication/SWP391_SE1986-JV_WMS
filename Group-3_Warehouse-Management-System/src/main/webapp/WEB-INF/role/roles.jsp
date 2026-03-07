@@ -100,73 +100,83 @@
                     <!-- PERMISSION TABLE -->
                     <div style="overflow-x: auto;">   <!-- Cho phép scroll ngang nếu nhiều role -->
 
-                        <table class="table table-bordered mb-0 permission-table">
+                        <c:set var="tableHeader" scope="request">
+                            <tr>
+                                <th style="width: 200px">Permission</th>
+                                <th style="width: 200px">Description</th>
 
-                            <colgroup>
-                                <!-- 3 cột cố định đầu -->
-                                <col style="width: 220px;">   <!-- Permission -->
-                                <col style="width: 300px;">   <!-- Description -->
-
-                                <!-- Mỗi role 1 cột cố định -->
                                 <c:forEach items="${roleList}" var="role">
-                                    <col style="width: 120px;">
-                                </c:forEach>
-                            </colgroup>
+                                    <th style="width: 100px; ">
 
-                            <thead class="table-primary text-center">
-                                <tr>
-                                    <th>Permission</th>
-                                    <th>Description</th>
-                                        <c:forEach items="${roleList}" var="role">
-                                        <th>
-                                            <c:choose>
-                                                <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
-                                                    <a href="edit-role?id=${role.id}">
-                                                        ${role.name}
-                                                    </a>
-                                                </c:when>    
-                                                <c:otherwise>
+                                        <c:choose>
+
+                                            <c:when test="${fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE')}">
+                                                <a href="edit-role?id=${role.id}" style="color: #52E7FA; text-decoration: underline">
                                                     ${role.name}
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </th>
-                                    </c:forEach>
-                                </tr>
-                            </thead>
+                                                </a>
+                                            </c:when>
 
-                            <tbody>
-                                <c:forEach items="${allPermissions}" var="p">
-                                    <tr data-permission-name="${p.name}">
-                                        <td class="fw-semibold">${p.name}</td>
-                                        <td>${p.description}</td>
+                                            <c:otherwise>
+                                                ${role.name}
+                                            </c:otherwise>
 
+                                        </c:choose>
 
-                                        <c:forEach items="${roleList}" var="role">
-                                            <td class="text-center ${(not role.active or !fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE'))
-                                                                     ? 'fw-bold text-dark bg-secondary bg-opacity-25'
-                                                                     : ''}"
-
-                                                ">
-
-                                                <input type="checkbox"
-                                                       class="form-check-input permission-checkbox
-                                                       <c:if test='${!role.active}'>opacity-50</c:if>"
-                                                       name="perm_${role.id}"
-                                                       value="${p.id}"
-                                                       ${(not role.active or !fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE'))
-                                                         ? 'disabled="disabled"'
-                                                         : ''}"                                                           
-                                                       <c:forEach items="${role.permissions}" var="rp">
-                                                           <c:if test="${rp.id == p.id}">checked</c:if>
-                                                       </c:forEach>
-                                                       />
-
-                                            </td>
-                                        </c:forEach>
-                                    </tr>
+                                    </th>
                                 </c:forEach>
-                            </tbody>
-                        </table>
+
+                            </tr>
+
+                        </c:set>
+
+
+                        <c:set var="tableBody" scope="request">
+
+                            <c:forEach items="${allPermissions}" var="p">
+
+                                <tr data-permission-name="${p.name}">
+
+                                    <td class="fw-semibold">${p.name}</td>
+
+                                    <td>${p.description}</td>
+
+
+                                    <c:forEach items="${roleList}" var="role">
+
+                                        <td class=" text-center
+                                            ${(not role.active or !fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE'))
+                                              ? 'fw-bold text-dark bg-secondary bg-opacity-25'
+                                              : ''}">
+
+                                            <input type="checkbox"
+                                                   style="accent-color:#0d6efd;"
+                                                   class="
+                                                   <c:if test='${!role.active}'>opacity-50</c:if>"
+
+                                                       name="perm_${role.id}"
+                                                   value="${p.id}"
+
+                                                   ${(not role.active or !fn:contains(sessionScope.userPermissions, 'UPDATE_ROLE'))
+                                                     ? 'disabled="disabled"'
+                                                     : ''}
+
+                                                   <c:forEach items="${role.permissions}" var="rp">
+                                                       <c:if test="${rp.id == p.id}">checked</c:if>
+                                                   </c:forEach>
+                                                   />
+
+                                        </td>
+
+                                    </c:forEach>
+
+                                </tr>
+
+                            </c:forEach>
+
+                        </c:set>
+
+
+                        <jsp:include page="/WEB-INF/common/table.jsp"/>
                 </form>
             </div>
         </div>

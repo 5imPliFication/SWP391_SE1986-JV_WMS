@@ -13,7 +13,7 @@
         <style>
 
             .sidebar{
-                width:290px;
+                width:300px;
                 height:100vh;
                 position:fixed;
                 left:0;
@@ -30,7 +30,7 @@
             }
 
             .main-header{
-                margin-left:290px;
+                margin-left:300px;
             }
 
             .main-content{

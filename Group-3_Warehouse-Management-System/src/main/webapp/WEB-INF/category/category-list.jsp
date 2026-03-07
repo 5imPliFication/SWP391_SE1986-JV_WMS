@@ -59,21 +59,9 @@
                             <td>${category.description}</td>
 
                             <td>
-                                <c:choose>
-
-                                    <c:when test="${category.isActive == 1}">
-                                        <span class="badge bg-success">
-                                            Active
-                                        </span>
-                                    </c:when>
-
-                                    <c:otherwise>
-                                        <span class="badge bg-danger">
-                                            Inactive
-                                        </span>
-                                    </c:otherwise>
-
-                                </c:choose>
+                                <jsp:include page="/WEB-INF/common/statusBadge.jsp">
+                                    <jsp:param name="active" value="${category.isActive}" />
+                                </jsp:include>
                             </td>
 
                             <td>
