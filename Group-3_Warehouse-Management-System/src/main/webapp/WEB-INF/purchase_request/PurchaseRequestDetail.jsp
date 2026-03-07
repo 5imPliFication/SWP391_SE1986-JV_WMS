@@ -135,10 +135,11 @@
                     ← Back
                 </a>
             </div>
-
         </main>
+        <c:forEach var="b" items="${brandName}">${b.id}</c:forEach>
 
-        <!-- INCLUDE MODAL -->
+
+            <!-- INCLUDE MODAL -->
         <jsp:include page="/WEB-INF/purchase_request/PurchaseRequestEdit.jsp"/>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

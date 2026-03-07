@@ -272,45 +272,7 @@ public class PurchaseRequestDAO {
         return list;
     }
 
-    public List<Brand> getActiveBrands() {
-        List<Brand> list = new ArrayList<>();
-
-        String sql = "SELECT id, name FROM brands ORDER BY name";
-
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Brand b = new Brand();
-                b.setId(rs.getLong("id"));
-                b.setName(rs.getString("name"));
-                list.add(b);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return list;
-    }
-
-    public List<Category> getActiveCategories() {
-        List<Category> list = new ArrayList<>();
-
-        String sql = "SELECT id, name FROM categories ORDER BY name";
-
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Category c = new Category();
-                c.setId(rs.getLong("id"));
-                c.setName(rs.getString("name"));
-                list.add(c);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return list;
-    }
+  
 
     public PurchaseRequest findById(
             Long requestId,

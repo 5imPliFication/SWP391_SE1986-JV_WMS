@@ -98,26 +98,6 @@ public class BrandDAO {
         }
     }
 
-    public List<Brand> findActiveBrand() {
-        List<Brand> list = new ArrayList<>();
-        // Modified SQL to get both ID and Name, separated by colon
-        String sql = "SELECT * from brands where is_active = 1";
-
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Brand brand = new Brand();
-                brand.setId(rs.getLong("id"));
-                brand.setName(rs.getString("name"));
-                brand.setDescription(rs.getString("description"));
-                brand.setActive(rs.getBoolean("is_active"));
-                list.add(brand);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
 
     public Brand findBrandByID(Long id) {
         Brand brand = new Brand();

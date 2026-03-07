@@ -1,5 +1,7 @@
 package com.example.service;
 
+import com.example.dao.BrandDAO;
+import com.example.dao.CategoryDAO;
 import com.example.dao.PurchaseRequestDAO;
 import com.example.dto.PurchaseRequestDTO;
 import com.example.model.Brand;
@@ -15,9 +17,13 @@ import java.util.List;
 public class PurchaseRequestService {
 
     private final PurchaseRequestDAO p;
+    private final BrandDAO b;
+    private final CategoryDAO c;
 
     public PurchaseRequestService() {
         p = new PurchaseRequestDAO();
+        b = new BrandDAO();
+        c = new CategoryDAO();
     }
 
     public List<PurchaseRequest> getList(
@@ -82,11 +88,11 @@ public class PurchaseRequestService {
     }
 
     public List<Brand> getBrandsDropdown() {
-        return p.getActiveBrands();
+        return b.getAllActive();
     }
 
     public List<Category> getCategoryDropdown() {
-        return p.getActiveCategories();
+        return c.getAllActive();
     }
 
     public PurchaseRequest getDetail(Long requestId, User user) {

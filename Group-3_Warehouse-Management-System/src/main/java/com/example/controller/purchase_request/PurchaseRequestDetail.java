@@ -23,30 +23,30 @@ import com.example.model.PurchaseRequest;
  */
 @WebServlet(name = "PurchaseRequestDetail", urlPatterns = {"/purchase-request/detail"})
 public class PurchaseRequestDetail extends HttpServlet {
-    
+
     private PurchaseRequestService pr;
-    
+
     @Override
     public void init() {
         pr = new PurchaseRequestService();
     }
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         User user = (User) request.getSession().getAttribute("user");
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        
+
         String idRaw = request.getParameter("id");
         if (idRaw == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        
+
         Long id;
         try {
             id = Long.parseLong(idRaw);
@@ -54,39 +54,39 @@ public class PurchaseRequestDetail extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        
+
         PurchaseRequest prDetail = pr.getDetail(id, user);
         if (prDetail == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        
+
         List<PurchaseRequestItem> items = pr.getItems(id);
         request.setAttribute("prList", prDetail);
         request.setAttribute("items", items);
         request.setAttribute("user", user);
         request.setAttribute("productName", pr.getProductDropdown());
-        request.setAttribute("BrandName", pr.getBrandsDropdown());
+        request.setAttribute("brandName", pr.getBrandsDropdown());
         request.setAttribute("CategoryName", pr.getCategoryDropdown());
 
         request.getRequestDispatcher(
                 "/WEB-INF/purchase_request/PurchaseRequestDetail.jsp"
         ).forward(request, response);
     }
-    
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        
+
         User user = (User) req.getSession().getAttribute("user");
         if (user == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
-        
+
         Long id = Long.valueOf(req.getParameter("id"));
         String action = req.getParameter("action");
-        
+
         switch (action) {
             case "cancel" ->
                 pr.cancel(id);
@@ -97,7 +97,7 @@ public class PurchaseRequestDetail extends HttpServlet {
             case "complete" ->
                 pr.complete(id);
         }
-        
+
         resp.sendRedirect(req.getContextPath() + "/purchase-request/list");
     }
 }
