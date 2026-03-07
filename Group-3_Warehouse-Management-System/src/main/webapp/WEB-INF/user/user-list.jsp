@@ -15,22 +15,7 @@
         <title>User List</title>
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <style>
-            table {
-                border-collapse: collapse;
-                width: 100%;
-            }
 
-            th, td {
-                padding: 8px;
-                border: 1px solid #ccc;
-                text-align: left;
-            }
-
-            th {
-                background-color: #f4f4f4;
-            }
-        </style>
     </head>
     <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
