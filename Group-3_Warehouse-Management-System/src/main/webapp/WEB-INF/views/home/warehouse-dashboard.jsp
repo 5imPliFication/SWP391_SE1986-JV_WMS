@@ -198,6 +198,14 @@
                     </tbody>
                 </table>
             </div>
+            <c:if test="${hasMorePending}">
+                <div class="card-footer text-center py-3 bg-light">
+                    <a href="${pageContext.request.contextPath}/warehouse/orders?status=SUBMITTED" 
+                       class="btn btn-warning btn-sm">
+                        <i class="fas fa-list mr-2"></i>See More Orders...
+                    </a>
+                </div>
+            </c:if>
         </div>
     </div>
 
@@ -248,6 +256,14 @@
                     </tbody>
                 </table>
             </div>
+            <c:if test="${hasMoreProcessing}">
+                <div class="card-footer text-center py-3 bg-light">
+                    <a href="${pageContext.request.contextPath}/warehouse/orders?status=PROCESSING" 
+                       class="btn btn-info btn-sm">
+                        <i class="fas fa-list mr-2"></i>See More Orders...
+                    </a>
+                </div>
+            </c:if>
         </div>
     </div>
 

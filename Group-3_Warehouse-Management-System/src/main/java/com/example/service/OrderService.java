@@ -119,28 +119,50 @@ public class OrderService {
 
         // Get order items
         List<OrderItem> items = orderItemDAO.findByOrderId(orderId);
+        List<Long> deactivatedItemIds = new ArrayList<>();
 
-        // Reduce stock for each linked product item
-        for (OrderItem item : items) {
-            List<ProductItem> linkedItems = item.getProductItems();
-            if (linkedItems == null || linkedItems.isEmpty()) {
-                throw new IllegalStateException("No linked product items found for order item ID: " + item.getId());
+        try {
+            // Reduce stock for each linked product item
+            for (OrderItem item : items) {
+                List<ProductItem> linkedItems = item.getProductItems();
+                if (linkedItems == null || linkedItems.isEmpty()) {
+                    throw new IllegalStateException("No linked product items found for order item ID: " + item.getId());
+                }
+
+                if (linkedItems.size() < item.getQuantity()) {
+                    throw new IllegalStateException("Linked item count does not match quantity for order item ID: " + item.getId());
+                }
+
+                // Decrease exactly the ordered quantity, even if more linked items are present.
+                List<Long> linkedIds = linkedItems.stream()
+                        .limit(item.getQuantity())
+                        .map(ProductItem::getId)
+                        .toList();
+
+                int deactivated = productItemDAO.deactivateItemsByIds(linkedIds);
+                if (deactivated < linkedIds.size()) {
+                    String productName = item.getProduct() != null ? item.getProduct().getName() : ("order item " + item.getId());
+                    throw new IllegalStateException("Insufficient active stock for " + productName);
+                }
+
+                deactivatedItemIds.addAll(linkedIds);
             }
 
-            if (linkedItems.size() < item.getQuantity()) {
-                throw new IllegalStateException("Linked item count does not match quantity for order item ID: " + item.getId());
+            // Update order status
+            boolean updated = orderDAO.updateStatus(orderId, "PROCESSING", warehouseKeeperId, null);
+            if (!updated) {
+                throw new IllegalStateException("Failed to update order status to PROCESSING");
             }
-
-            List<Long> linkedIds = linkedItems.stream().map(ProductItem::getId).toList();
-            int deactivated = productItemDAO.deactivateItemsByIds(linkedIds);
-            if (deactivated < linkedIds.size()) {
-                String productName = item.getProduct() != null ? item.getProduct().getName() : ("order item " + item.getId());
-                throw new IllegalStateException("Insufficient active stock for " + productName);
+        } catch (RuntimeException e) {
+            if (!deactivatedItemIds.isEmpty()) {
+                try {
+                    productItemDAO.activateItemsByIds(deactivatedItemIds);
+                } catch (RuntimeException rollbackEx) {
+                    throw new IllegalStateException("Failed during processing and failed to rollback stock changes", rollbackEx);
+                }
             }
+            throw e;
         }
-
-        // Update order status
-        orderDAO.updateStatus(orderId, "PROCESSING", warehouseKeeperId, null);
     }
 
     public void completeProcessing(Long orderId, Long warehouseKeeperId) {
@@ -198,7 +220,11 @@ public class OrderService {
                         continue;
                     }
 
-                    List<Long> linkedIds = linkedItems.stream().map(ProductItem::getId).toList();
+                    // Restore exactly the ordered quantity that was deactivated when processing started.
+                    List<Long> linkedIds = linkedItems.stream()
+                            .limit(item.getQuantity())
+                            .map(ProductItem::getId)
+                            .toList();
                     int restored = productItemDAO.activateItemsByIds(linkedIds);
                     if (restored < linkedIds.size()) {
                         throw new IllegalStateException("Failed to restore stock for order item ID: " + item.getId());

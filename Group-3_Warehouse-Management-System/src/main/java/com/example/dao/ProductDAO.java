@@ -485,7 +485,19 @@ public class ProductDAO {
     }
 
     public List<Product> getAllProducts() {
-        String sql = "select * from products";
+        String sql = """
+                SELECT p.id,
+                       p.name,
+                       p.description,
+                       p.img_url,
+                       p.is_active,
+                       p.brand_id,
+                       COUNT(pi.id) AS active_item_count
+                FROM products p
+                JOIN product_items pi ON pi.product_id = p.id AND pi.is_active = 1
+                GROUP BY p.id, p.name, p.description, p.img_url, p.is_active, p.brand_id
+                ORDER BY p.name ASC
+                """;
         List<Product> products = new ArrayList<>();
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -494,7 +506,8 @@ public class ProductDAO {
                 Product product = new Product();
                 product.setId(rs.getLong("id"));
                 product.setName(rs.getString("name"));
-                product.setTotalQuantity(rs.getLong("total_quantity"));
+                // In order screens, availability is based on active product items only.
+                product.setTotalQuantity(rs.getLong("active_item_count"));
                 product.setIsActive(rs.getBoolean("is_active"));
                 product.setImgUrl(rs.getString("img_url"));
                 Brand brand = new Brand();
