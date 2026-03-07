@@ -38,32 +38,39 @@
             <h2>List Reset Password Request</h2>
             <br>
             <%--form submit for search and sort--%>
-            <form action="${pageContext.request.contextPath}/admin/password-reset" method="get"
-                  class="row g-2 align-items-center mb-3">
-                <%--search user by name--%>
+            <form action="${pageContext.request.contextPath}/admin/password-reset" 
+                  method="get"
+                  class="row g-2 align-items-end mb-3">
+
+                <%-- search user by name --%>
                 <div class="col-auto">
-                    <label>
-                        <input type="text" class="form-control" name="searchName" placeholder="Search by name"
-                               value="${param.searchName}">
-                    </label>
+                    <input type="text"
+                           class="form-control"
+                           name="searchName"
+                           placeholder="Search by name"
+                           value="${param.searchName}">
                 </div>
 
-                <%-- sort by type of status--%>
+                <%-- sort by status --%>
                 <div class="col-auto">
-                    <label>
-                        <select name="status" class="form-select">
-                            <option value="">Status</option>
-                            <option value="PENDING"  ${param.status == 'PENDING' ? 'selected' : ''}>
-                                PENDING
-                            </option>
-                            <option value="APPROVED"  ${param.status == 'APPROVED' ? 'selected' : ''}>
-                                APPROVED
-                            </option>
-                            <option value="REJECTED"  ${param.status == 'REJECTED' ? 'selected' : ''}>
-                                REJECTED
-                            </option>
-                        </select>
-                    </label>
+                    <select name="status" class="form-select">
+                        <option value="">Status</option>
+
+                        <option value="PENDING"
+                                ${param.status == 'PENDING' ? 'selected' : ''}>
+                            PENDING
+                        </option>
+
+                        <option value="APPROVED"
+                                ${param.status == 'APPROVED' ? 'selected' : ''}>
+                            APPROVED
+                        </option>
+
+                        <option value="REJECTED"
+                                ${param.status == 'REJECTED' ? 'selected' : ''}>
+                            REJECTED
+                        </option>
+                    </select>
                 </div>
 
                 <div class="col-auto">
@@ -71,9 +78,11 @@
                         Search
                     </button>
                 </div>
+
             </form>
-            <table>
-                <thead>
+
+            <table class="table table-bordered mb-0 permission-table">
+                <thead class="table-primary text-center">
                     <tr>
                         <th>Request ID</th>
                         <th>Full Name</th>

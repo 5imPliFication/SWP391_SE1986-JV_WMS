@@ -62,34 +62,33 @@
             </c:if>
 
             <!-- ITEMS TABLE -->
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead class="table-primary text-center">
-                        <tr>
-                            <th>Brand</th>
-                            <th>Category</th>
-                            <th>Product</th>
-                            <th>Quanity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach items="${items}" var="i">
-                            <tr>
-                                <td>${i.brandName}</td>
-                                <td>${i.categoryName}</td>
-                                <td>${i.productName}</td>
-                                <td class="text-center">${i.quantity} item</td>
-                            </tr>
-                        </c:forEach>
+            <c:set var="tableHeader" scope="request">
+                <tr>
+                    <th>Brand</th>
+                    <th>Category</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                </tr>
+            </c:set>
 
-                        <c:if test="${empty items}">
-                            <tr>
-                                <td colspan="4" class="text-center text-muted">No items</td>
-                            </tr>
-                        </c:if>
-                    </tbody>
-                </table>
-            </div>
+            <c:set var="tableBody" scope="request">
+                <c:forEach items="${items}" var="i">
+                    <tr>
+                        <td>${i.brandName}</td>
+                        <td>${i.categoryName}</td>
+                        <td>${i.productName}</td>
+                        <td class="text-center">${i.quantity} item</td>
+                    </tr>
+                </c:forEach>
+
+                <c:if test="${empty items}">
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">No items</td>
+                    </tr>
+                </c:if>
+            </c:set>
+            <jsp:include page="/WEB-INF/common/table.jsp"/>
+
 
             <!-- ACTIONS -->
             <div class="mt-3 d-flex gap-2">
@@ -136,7 +135,6 @@
                 </a>
             </div>
         </main>
-        <c:forEach var="b" items="${brandName}">${b.id}</c:forEach>
 
 
             <!-- INCLUDE MODAL -->

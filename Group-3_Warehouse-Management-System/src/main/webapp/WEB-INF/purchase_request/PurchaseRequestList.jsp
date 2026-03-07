@@ -88,77 +88,79 @@
 
                 <div style="overflow-x: auto;">   <!-- Cho phép scroll ngang nếu nhiều role -->
 
-                    <table class="table table-bordered mb-0">
-                        <thead class="table-primary text-center">
-                            <tr>
-                                <th>Request Code</th>
-                                <th>Status</th>
+                    <c:set var="tableHeader" scope="request">
+                        <tr>
+                            <th>Request Code</th>
+                            <th>Status</th>
+
+                            <c:if test="${showCreatedBy}">
+                                <th>Created By</th>
+                                </c:if>
+
+                            <th>Approved By</th>
+                            <th>Created At</th>
+                            <th>Action</th>
+                        </tr>
+                    </c:set>
+
+
+                    <c:set var="tableBody"  scope="request">
+
+                        <c:forEach items="${purchaseRequests}" var="pr">
+
+                            <tr class="${pr.status == 'CANCELLED' ? 'table-secondary text-muted' : ''}">
+
+                                <td>${pr.requestCode}</td>
+
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${pr.status == 'PENDING'}">
+                                            <span class="badge bg-warning text-dark">${pr.status}</span>
+                                        </c:when>
+
+                                        <c:when test="${pr.status == 'APPROVED'}">
+                                            <span class="badge bg-success">${pr.status}</span>
+                                        </c:when>
+
+                                        <c:when test="${pr.status == 'REJECTED'}">
+                                            <span class="badge bg-danger">${pr.status}</span>
+                                        </c:when>
+
+                                        <c:when test="${pr.status == 'CANCELLED'}">
+                                            <span class="badge bg-secondary">${pr.status}</span>
+                                        </c:when>
+
+                                        <c:when test="${pr.status == 'COMPLETED'}">
+                                            <span class="badge bg-primary">${pr.status}</span>
+                                        </c:when>
+
+                                        <c:otherwise>
+                                            <span class="badge bg-dark">${pr.status}</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
 
                                 <c:if test="${showCreatedBy}">
-                                    <th>Created By</th>
-                                    </c:if>
+                                    <td>${pr.createdByName}</td>
+                                </c:if>
 
-                                <th>Approved By</th>
-                                <th>Created At</th>
-                                <th>Action</th>
+                                <td>${pr.approvedByName}</td>
+                                <td>${pr.createdAt}</td>
+
+                                <td>
+                                    <a href="${pageContext.request.contextPath}/purchase-request/detail?id=${pr.id}">
+                                        Detail
+                                    </a>
+                                </td>
+
                             </tr>
-                        </thead>
 
-                        <tbody>
-                            <c:forEach items="${purchaseRequests}" var="pr">
-                                <tr class="${pr.status == 'CANCELLED' ? 'table-secondary text-muted' : ''}">
-                                    <td>${pr.requestCode}</td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${pr.status == 'PENDING'}">
-                                                <span class="badge bg-warning text-dark">${pr.status}</span>
-                                            </c:when>
+                        </c:forEach>
 
-                                            <c:when test="${pr.status == 'APPROVED'}">
-                                                <span class="badge bg-success">${pr.status}</span>
-                                            </c:when>
+                    </c:set>
 
-                                            <c:when test="${pr.status == 'REJECTED'}">
-                                                <span class="badge bg-danger">${pr.status}</span>
-                                            </c:when>
+                    <jsp:include page="/WEB-INF/common/table.jsp"/>
 
-                                            <c:when test="${pr.status == 'CANCELLED'}">
-                                                <span class="badge bg-secondary">${pr.status}</span>
-                                            </c:when>
-
-                                            <c:when test="${pr.status == 'COMPLETED'}">
-                                                <span class="badge bg-primary">${pr.status}</span>
-                                            </c:when>
-
-                                            <c:otherwise>
-                                                <span class="badge bg-dark">${pr.status}</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <c:if test="${showCreatedBy}">
-                                        <td>${pr.createdByName}</td>
-                                    </c:if>
-
-                                    <td>${pr.approvedByName}</td>
-                                    <td>${pr.createdAt}</td>
-                                    <td class="text-center">
-                                        <c:choose>
-                                            <c:when test="${pr.status == 'CANCELLED'}">
-                                                <span class="text-muted fst-italic">No action</span>
-                                            </c:when>
-
-                                            <c:otherwise>
-                                                <a href="${pageContext.request.contextPath}/purchase-request/detail?id=${pr.id}">
-                                                    Detail
-                                                </a>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-
-                    </table>
                     <c:if test="${totalPages > 1}">
                         <nav class="mt-3">
                             <ul class="pagination justify-content-center">

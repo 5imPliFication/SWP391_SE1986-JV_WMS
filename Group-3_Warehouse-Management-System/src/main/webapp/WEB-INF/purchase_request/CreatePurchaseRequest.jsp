@@ -73,18 +73,17 @@
 
                 <div class="table-responsive">
 
-                    <table class="table table-bordered">
+                    <c:set var="tableHeader" scope="request">
+                        <tr>
+                            <th class="col-brand">Brand</th>
+                            <th class="col-category">Category</th>
+                            <th class="col-product">Product</th>
+                            <th class="col-qty">Quantity</th>
+                            <th class="col-action">Action</th>
+                        </tr>
+                    </c:set>
 
-                        <thead class="table-primary text-center">
-                            <tr>
-                                <th class="col-brand">Brand</th>
-                                <th class="col-category">Category</th>
-                                <th class="col-product">Product</th>
-                                <th class="col-qty">Quanity</th>
-                                <th class="col-action">Action</th>
-                            </tr>
-                        </thead>
-
+                    <c:set var="tableBody" scope="request">
                         <tbody id="itemsBody">
 
                             <tr id="emptyRow">
@@ -94,8 +93,10 @@
                             </tr>
 
                         </tbody>
+                    </c:set>
 
-                    </table>
+                    <jsp:include page="/WEB-INF/common/table.jsp"/>
+
 
                 </div>
 
@@ -151,7 +152,7 @@
                 row.innerHTML = `
 
         <td>
-        <select class="form-control brand-select"
+        <select class="form-select brand-select"
                 onchange="filterProduct(this)">
         <option value="">Select Brand</option>
 
@@ -165,7 +166,7 @@
         </td>
 
         <td>
-        <select class="form-control category-select"
+        <select  class="form-select category-select"
                 onchange="filterProduct(this)">
         <option value="">Select Category</option>
 
@@ -180,7 +181,7 @@
 
         <td>
         <select name="productId[]"
-        class="form-control product-select"
+        class="form-select product-select"
         onchange="onProductChange(this)"
         disabled>
 

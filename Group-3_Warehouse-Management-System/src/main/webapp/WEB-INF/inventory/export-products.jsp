@@ -83,71 +83,106 @@
             <%--  table export order  --%>
             <c:if test="${not empty exportOrders}">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover table-sm">
-                        <thead class="thead-dark text-center">
+                    <!-- HEADER -->
+                    <c:set var="tableHeader" scope="request">
+                        <tr>
+                            <th style="width: 140px;">Order Code</th>
+                            <th style="width: 140px;">Date</th>
+                            <th>Salesman</th>
+                            <th>Customer</th>
+                            <th style="width: 120px;">Status</th>
+                            <th style="width: 100px;">Details</th>
+                        </tr>
+                    </c:set>
+
+                    <!-- BODY -->
+                    <c:set var="tableBody" scope="request">
+
+                        <c:forEach items="${exportOrders}" var="order">
+
                             <tr>
-                                <th style="width: 140px;">Order Code</th>
-                                <th style="width: 140px;">Date</th>
-                                <th>Salesman</th>
-                                <th>Customer</th>
-                                <th style="width: 120px;">Status</th>
-                                <th style="width: 100px;">Details</th>
+
+                                <td class="text-center align-middle">
+                                    ${order.code}
+                                </td>
+
+                                <td class="text-center align-middle">
+                                    ${order.exportDate}
+                                </td>
+
+                                <td class="align-middle">
+                                    ${order.salesmanName}
+                                </td>
+
+                                <td class="align-middle">
+                                    ${order.customerName}
+                                </td>
+
+                                <td class="text-center align-middle">
+
+                                    <c:choose>
+
+                                        <!-- SUBMITTED -> PROCESSING -->
+                                        <c:when test="${order.status == 'SUBMITTED'}">
+
+                                            <form action="${pageContext.request.contextPath}/inventory/update-status"
+                                                  method="post"
+                                                  style="display:inline;">
+
+                                                <input type="hidden" name="orderCode" value="${order.code}"/>
+                                                <input type="hidden" name="newStatus" value="PROCESSING"/>
+
+                                                <button type="submit" class="btn btn-sm btn-warning">
+                                                    ${order.status}
+                                                </button>
+
+                                            </form>
+
+                                        </c:when>
+
+
+                                        <!-- PROCESSING -> COMPLETED -->
+                                        <c:when test="${order.status == 'PROCESSING'}">
+
+                                            <form action="${pageContext.request.contextPath}/inventory/update-status"
+                                                  method="post"
+                                                  style="display:inline;">
+
+                                                <input type="hidden" name="orderCode" value="${order.code}"/>
+                                                <input type="hidden" name="newStatus" value="COMPLETED"/>
+
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    ${order.status}
+                                                </button>
+
+                                            </form>
+
+                                        </c:when>
+
+                                    </c:choose>
+
+                                </td>
+
+                                <td class="text-center align-middle">
+
+                                    <a href="${pageContext.request.contextPath}/inventory/export?action=detail&id=${order.id}"
+                                       class="btn btn-info btn-sm">
+
+                                        View
+
+                                    </a>
+
+                                </td>
+
                             </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach items="${exportOrders}" var="order">
-                                <tr>
-                                    <td class="text-center align-middle">
-                                        ${order.code}
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        ${order.exportDate}
-                                    </td>
-                                    <td class="align-middle">
-                                        ${order.salesmanName}
-                                    </td>
-                                    <td class="align-middle">
-                                        ${order.customerName}
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        <c:choose>
-                                            <%-- submiteed -> processing --%>
-                                            <c:when test="${order.status == 'SUBMITTED'}">
-                                                <form action="${pageContext.request.contextPath}/inventory/update-status"
-                                                      method="post" style="display:inline;">
-                                                    <input type="hidden" name="orderCode" value="${order.code}"/>
-                                                    <input type="hidden" name="newStatus" value="PROCESSING"/>
-                                                    <button type="submit" class="btn btn-sm btn-warning">
-                                                        ${order.status}
-                                                    </button>
-                                                </form>
-                                            </c:when>
 
-                                            <%-- processing -> completed --%>
-                                            <c:when test="${order.status == 'PROCESSING'}">
-                                                <form action="${pageContext.request.contextPath}/inventory/update-status"
-                                                      method="post" style="display:inline;">
+                        </c:forEach>
 
-                                                    <input type="hidden" name="orderCode" value="${order.code}"/>
-                                                    <input type="hidden" name="newStatus" value="COMPLETED"/>
-                                                    <button type="submit" class="btn btn-sm btn-success">
-                                                        ${order.status}
-                                                    </button>
-                                                </form>
-                                            </c:when>
+                    </c:set>
 
-                                        </c:choose>
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        <a href="${pageContext.request.contextPath}/inventory/export?action=detail&id=${order.id}"
-                                           class="btn btn-info btn-sm">
-                                            View
-                                        </a>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
+                    <!-- COMMON TABLE -->
+                    <jsp:include page="/WEB-INF/common/table.jsp"/>
+
                 </div>
             </c:if>
 

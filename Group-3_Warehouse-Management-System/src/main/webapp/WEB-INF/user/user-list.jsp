@@ -97,40 +97,46 @@
                 </div>
             </form>
 
-            <table>
-                <thead>
+            <!-- HEADER -->
+            <c:set var="tableHeader" scope="request">
+                <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Details</th>
+                </tr>
+            </c:set>
+
+            <!-- BODY -->
+            <c:set var="tableBody" scope="request">
+
+                <c:forEach items="${userList}" var="u">
                     <tr>
-                        <th>ID</th>
-                        <th>Full Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Details</th>
+                        <td>${u.id}</td>
+                        <td>${u.fullName}</td>
+                        <td>${u.email}</td>
+                        <td>${u.role.name}</td>
+                        <td>
+                            <a href="${pageContext.request.contextPath}/user?id=${u.id}"
+                               class="btn btn-info btn-sm">
+                                Detail
+                            </a>
+                        </td>
                     </tr>
-                </thead>
+                </c:forEach>
 
-                <tbody>
-                    <c:forEach items="${userList}" var="u">
-                        <tr>
-                            <td>${u.id}</td>
-                            <td>${u.fullName}</td>
-                            <td>${u.email}</td>
-                            <td>${u.role.name}</td>
-                            <td>
-                                <a href="${pageContext.request.contextPath}/user?id=${u.id}"
-                                   class="btn btn-info btn-sm">
-                                    Detail
-                                </a>
-                            </td>
-                        </tr>
-                    </c:forEach>
+                <c:if test="${empty userList}">
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No data</td>
+                    </tr>
+                </c:if>
 
-                    <c:if test="${empty userList}">
-                        <tr>
-                            <td colspan="7">No data</td>
-                        </tr>
-                    </c:if>
-                </tbody>
-            </table>
+            </c:set>
+
+            <!-- COMMON TABLE -->
+            <jsp:include page="/WEB-INF/common/table.jsp"/>
+
             <%-- pagination--%>
             <%--    when total page > 1 -> display--%>
             <c:if test="${totalPages > 1}">
