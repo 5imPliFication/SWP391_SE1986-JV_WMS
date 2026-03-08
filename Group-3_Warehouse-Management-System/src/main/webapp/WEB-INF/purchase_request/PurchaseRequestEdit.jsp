@@ -69,91 +69,96 @@
                                 <th class="col-category">Category</th>
                                 <th class="col-product">Product</th>
                                 <th class="col-qty">Quantity</th>
+                                <th class="col-qty">Unit</th>
                                 <th class="col-action">Action</th>
                             </tr>
                         </c:set>
 
 
                         <c:set var="tableBody" scope="request">
+                            <tbody id="modalItemsBody">
 
-                            <c:forEach items="${items}" var="i">
+                                <c:forEach items="${items}" var="i">
 
-                                <tr>
+                                    <tr>
 
-                                    <!-- BRAND -->
-                                    <td>
-                                        <select class="form-select brand-select"
-                                                onchange="filterModalProduct(this)">
-                                            <option value="">Select Brand</option>
+                                        <!-- BRAND -->
+                                        <td>
+                                            <select class="form-select brand-select"
+                                                    onchange="filterModalProduct(this)">
+                                                <option value="">Select Brand</option>
 
-                                            <c:forEach var="b" items="${brandName}">
-                                                <option value="${b.id}"
-                                                        <c:if test="${b.name eq i.brandName}">selected</c:if>>
-                                                    ${b.name}
-                                                </option>
-                                            </c:forEach>
-                                        </select>
-                                    </td>
-
-
-                                    <!-- CATEGORY -->
-                                    <td>
-                                        <select class="form-select category-select"
-                                                onchange="filterModalProduct(this)">
-                                            <option value="">Select Category</option>
-
-                                            <c:forEach var="c" items="${CategoryName}">
-                                                <option value="${c.id}"
-                                                        <c:if test="${c.name eq i.categoryName}">selected</c:if>>
-                                                    ${c.name}
-                                                </option>
-                                            </c:forEach>
-                                        </select>
-                                    </td>
+                                                <c:forEach var="b" items="${brandName}">
+                                                    <option value="${b.id}"
+                                                            <c:if test="${b.name eq i.brandName}">selected</c:if>>
+                                                        ${b.name}
+                                                    </option>
+                                                </c:forEach>
+                                            </select>
+                                        </td>
 
 
-                                    <!-- PRODUCT -->
-                                    <td>
-                                        <select name="productId[]"
-                                                class="form-select product-select"
-                                                onchange="onModalProductChange(this)">
+                                        <!-- CATEGORY -->
+                                        <td>
+                                            <select class="form-select category-select"
+                                                    onchange="filterModalProduct(this)">
+                                                <option value="">Select Category</option>
 
-                                            <option value="">Select Product</option>
-
-                                            <c:forEach var="p" items="${productName}">
-                                                <option value="${p.id}"
-                                                        <c:if test="${p.id == i.productId}">selected</c:if>>
-                                                    ${p.name}
-                                                </option>
-                                            </c:forEach>
-
-                                        </select>
-                                    </td>
+                                                <c:forEach var="c" items="${CategoryName}">
+                                                    <option value="${c.id}"
+                                                            <c:if test="${c.name eq i.categoryName}">selected</c:if>>
+                                                        ${c.name}
+                                                    </option>
+                                                </c:forEach>
+                                            </select>
+                                        </td>
 
 
-                                    <!-- QUANTITY -->
-                                    <td>
-                                        <input type="number"
-                                               name="quantity[]"
-                                               class="form-control quantity-input"
-                                               min="1"
-                                               value="${i.quantity}">
-                                    </td>
+                                        <!-- PRODUCT -->
+                                        <td>
+                                            <select name="productId[]"
+                                                    class="form-select product-select"
+                                                    onchange="onModalProductChange(this)">
+
+                                                <option value="">Select Product</option>
+
+                                                <c:forEach var="p" items="${productName}">
+                                                    <option value="${p.id}"
+                                                            <c:if test="${p.id == i.productId}">selected</c:if>>
+                                                        ${p.name}
+                                                    </option>
+                                                </c:forEach>
+
+                                            </select>
+                                        </td>
 
 
-                                    <!-- ACTION -->
-                                    <td class="text-center">
-                                        <button type="button"
-                                                class="btn btn-outline-danger btn-sm"
-                                                onclick="removeModalRow(this)">
-                                            ❌
-                                        </button>
-                                    </td>
+                                        <!-- QUANTITY -->
+                                        <td>
+                                            <input type="number"
+                                                   name="quantity[]"
+                                                   class="form-control quantity-input"
+                                                   min="1"
+                                                   value="${i.quantity}">
+                                        </td>   
 
-                                </tr>
+                                        <td class="unit-cell">
+                                            ${i.unit}
+                                        </td>
 
-                            </c:forEach>
+                                        <!-- ACTION -->
+                                        <td class="text-center">
+                                            <button type="button"
+                                                    class="btn btn-outline-danger btn-sm"
+                                                    onclick="removeModalRow(this)">
+                                                ❌
+                                            </button>
+                                        </td>
 
+                                    </tr>
+
+                                </c:forEach>
+                            </tbody>
                         </c:set>
 
 
@@ -190,20 +195,36 @@
     id: ${p.id},
             name: "${p.name}",
             brandId: ${p.brand.id},
-            categoryId: ${p.category.id}
+            categoryId: ${p.category.id},
+            unit:"${p.unit.symbol}"
     }<c:if test="${!s.last}">,</c:if>
     </c:forEach>
     ];
 </script>
 <script>
-    function filterModalProduct(selectEl) {
+    function filterModalProduct(selectEl, isInit = false) {
 
         const row = selectEl.closest("tr");
         const brandId = Number(row.querySelector(".brand-select").value);
         const categoryId = Number(row.querySelector(".category-select").value);
         const productSelect = row.querySelector(".product-select");
+
         const currentValue = productSelect.value;
+
         productSelect.innerHTML = '<option value="">Select Product</option>';
+
+        const qtyInput = row.querySelector(".quantity-input");
+        const unitCell = row.querySelector(".unit-cell");
+
+        if (!isInit) {
+            qtyInput.value = "";
+            qtyInput.disabled = true;
+
+            if (unitCell)
+                unitCell.textContent = "";
+        }
+
+
         if (!brandId || !categoryId) {
             productSelect.disabled = true;
             return;
@@ -256,18 +277,34 @@
 
         const row = select.closest("tr");
         const qtyInput = row.querySelector(".quantity-input");
+        const unitCell = row.querySelector(".unit-cell");
+
         if (select.value !== "") {
 
             qtyInput.disabled = false;
+            qtyInput.value = "";
             qtyInput.focus();
+
+            const product = allProducts.find(p => p.id == select.value);
+
+            if (product && unitCell) {
+                unitCell.textContent = product.unit;
+            }
+
         } else {
 
             qtyInput.disabled = true;
             qtyInput.value = "";
+
+            if (unitCell) {
+                unitCell.textContent = "";
+            }
+
         }
 
         refreshModalProductOptions();
     }
+
 
 
     /* ================= PREVENT DUPLICATE PRODUCT ================= */
@@ -344,7 +381,7 @@
    min="1"
    disabled>
 </td>
-
+<td class="unit-cell"></td>
 <td class="text-center">
 <button type="button"
     class="btn btn-outline-danger btn-sm"
@@ -373,7 +410,7 @@
             const categorySelect = row.querySelector(".category-select");
 
             if (brandSelect.value && categorySelect.value) {
-                filterModalProduct(brandSelect);
+                filterModalProduct(brandSelect, true);
             }
 
         });

@@ -68,6 +68,7 @@
                     <th>Category</th>
                     <th>Product</th>
                     <th>Quantity</th>
+                    <th>Unit</th>
                 </tr>
             </c:set>
 
@@ -77,7 +78,8 @@
                         <td>${i.brandName}</td>
                         <td>${i.categoryName}</td>
                         <td>${i.productName}</td>
-                        <td class="text-center">${i.quantity} item</td>
+                        <td >${i.quantity}</td>
+                        <td>${i.unit}</td>
                     </tr>
                 </c:forEach>
 

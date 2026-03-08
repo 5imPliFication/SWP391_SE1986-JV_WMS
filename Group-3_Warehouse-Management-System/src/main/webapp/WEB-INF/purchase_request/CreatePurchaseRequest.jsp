@@ -79,6 +79,7 @@
                             <th class="col-category">Category</th>
                             <th class="col-product">Product</th>
                             <th class="col-qty">Quantity</th>
+                            <th class="col-qty">Unit</th>
                             <th class="col-action">Action</th>
                         </tr>
                     </c:set>
@@ -96,8 +97,6 @@
                     </c:set>
 
                     <jsp:include page="/WEB-INF/common/table.jsp"/>
-
-
                 </div>
 
                 <div class="d-flex gap-2 mt-3">
@@ -125,11 +124,11 @@
             id: ${p.id},
                     name: "${p.name}",
                     brandId: ${p.brand.id},
-                    categoryId: ${p.category.id}
+                    categoryId: ${p.category.id},
+                    unit:"${p.unit.symbol}"
             }<c:if test="${!s.last}">,</c:if>
             </c:forEach>
             ];
-            console.log(allProducts);
         </script>
 
 
@@ -201,7 +200,9 @@
 
 
         </td>
-
+        <td>
+                    
+        </td>
         <td class="text-center">
         <button type="button"
                 onclick="removeRow(this)"
@@ -255,17 +256,24 @@
                         row.querySelector(".category-select").value
                         );
 
-                const productSelect =
-                        row.querySelector(".product-select");
+                const productSelect = row.querySelector(".product-select");
 
                 productSelect.innerHTML =
                         '<option value="">Select Product</option>';
+
+                const unitCell = row.children[4];
+                unitCell.textContent = "";
+
+                const qtyInput = row.querySelector(".quantity-input");
+                qtyInput.value = "";
+                qtyInput.disabled = true;
 
                 // disable nếu chưa chọn đủ
                 if (!brandId || !categoryId) {
                     productSelect.disabled = true;
                     return;
                 }
+
 
                 const filteredProducts =
                         allProducts.filter(p =>
@@ -324,17 +332,31 @@
 
                 const row = select.closest("tr");
                 const qtyInput = row.querySelector(".quantity-input");
+                const unitCell = row.children[4];
 
                 if (select.value !== "") {
+
                     qtyInput.disabled = false;
-                    qtyInput.focus();   // tự nhảy vào ô quantity
+                    qtyInput.value = "";
+                    qtyInput.focus();
+
+                    const product = allProducts.find(p => p.id == select.value);
+
+                    if (product) {
+                        unitCell.textContent = product.unit;
+                    }
+
                 } else {
+
                     qtyInput.disabled = true;
                     qtyInput.value = "";
+                    unitCell.textContent = "";
+
                 }
 
                 refreshProductOptions();
             }
+
 
 
 
