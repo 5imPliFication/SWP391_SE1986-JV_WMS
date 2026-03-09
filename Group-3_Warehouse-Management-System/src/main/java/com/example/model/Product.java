@@ -10,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 public class Product {
+
     private Long id;
     private String name;
     private String description;
@@ -19,6 +20,11 @@ public class Product {
     private Brand brand;
     private Category category;
     private Unit unit;
+    private Chip chip;
+    private Model model;
+    private Ram ram;
+    private Size size;
+    private Storage storage;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

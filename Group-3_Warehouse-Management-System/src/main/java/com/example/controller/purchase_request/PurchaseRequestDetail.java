@@ -16,6 +16,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import com.example.model.PurchaseRequest;
+import com.example.service.ChipService;
+import com.example.service.ModelService;
+import com.example.service.RamService;
+import com.example.service.SizeService;
+import com.example.service.StorageService;
 
 /**
  *
@@ -25,10 +30,20 @@ import com.example.model.PurchaseRequest;
 public class PurchaseRequestDetail extends HttpServlet {
 
     private PurchaseRequestService pr;
+    private ModelService m;
+    private ChipService c;
+    private RamService r;
+    private StorageService sto;
+    private SizeService s;
 
     @Override
     public void init() {
         pr = new PurchaseRequestService();
+        m = new ModelService();
+        c = new ChipService();
+        r = new RamService();
+        sto = new StorageService();
+        s = new SizeService();
     }
 
     @Override
@@ -66,8 +81,13 @@ public class PurchaseRequestDetail extends HttpServlet {
         request.setAttribute("items", items);
         request.setAttribute("user", user);
         request.setAttribute("productName", pr.getProductDropdown());
-        request.setAttribute("brandName", pr.getBrandsDropdown());
-        request.setAttribute("CategoryName", pr.getCategoryDropdown());
+        request.setAttribute("brands", pr.getBrandsDropdown());
+        request.setAttribute("categories", pr.getCategoryDropdown());
+        request.setAttribute("models", m.getAllActiveModels());
+        request.setAttribute("chips", c.getAllActiveChips());
+        request.setAttribute("rams", r.getAllActiveRams());
+        request.setAttribute("storages", sto.getAllActiveStorage());
+        request.setAttribute("sizes", s.getAllActiveSize());
 
         request.getRequestDispatcher(
                 "/WEB-INF/purchase_request/PurchaseRequestDetail.jsp"
