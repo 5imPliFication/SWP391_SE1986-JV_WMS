@@ -69,6 +69,8 @@
 
     <form id="productItemsForm" method="post" action="${pageContext.request.contextPath}/inventory/import">
         <input type="hidden" name="purchaseId" value="${sessionScope.purchaseId}">
+        <input type="hidden" name="action" id="formAction" value="save">
+        <input type="hidden" name="targetPageNo" id="targetPageNo" value="1">
 
         <div class="table-responsive">
             <table class="table table-bordered">
@@ -129,6 +131,8 @@
                             <%-- Row chi tiết --%>
                             <tr class="sub-item">
                                 <input type="hidden" name="productId" value="${item.productId}">
+                                <input type="hidden" name="rowIndex"
+                                       value="${(startIndex != null ? startIndex : 0) + status.index}">
                                 <td class="text-center align-middle">
                                     ${displayIndex}
                                     <c:set var="displayIndex" value="${displayIndex + 1}"/>
@@ -170,27 +174,28 @@
             <ul class="pagination justify-content-center">
                 <%-- previous page--%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
-                    <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/import?pageNo=${pageNo - 1}">
+                    <button type="button" class="page-link"
+                            onclick="changePage(${pageNo - 1})"
+                            ${pageNo == 1 ? 'disabled' : ''}>
                         Previous
-                    </a>
+                    </button>
                 </li>
 
                 <c:forEach begin="1" end="${totalPages}" var="i">
                     <li class="page-item ${i == pageNo ? 'active' : ''}">
-                        <a class="page-link"
-                           href="${pageContext.request.contextPath}/inventory/import?pageNo=${i}">
+                        <button type="button" class="page-link" onclick="changePage(${i})">
                             ${i}
-                        </a>
+                        </button>
                     </li>
                 </c:forEach>
 
                 <%--next page--%>
                 <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
-                    <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/import?pageNo=${pageNo + 1}">
+                    <button type="button" class="page-link"
+                            onclick="changePage(${pageNo + 1})"
+                            ${pageNo == totalPages ? 'disabled' : ''}>
                         Next
-                    </a>
+                    </button>
                 </li>
             </ul>
         </nav>
@@ -227,6 +232,15 @@
 
         // Format số thành chuỗi có dấu phẩy (vd: 25,000,000)
         document.getElementById("totalPayment").innerText = total.toLocaleString('en-US');
+    }
+
+    function changePage(pageNo) {
+        if (!pageNo || pageNo < 1) {
+            return;
+        }
+        document.getElementById('formAction').value = 'paging';
+        document.getElementById('targetPageNo').value = pageNo;
+        document.getElementById('productItemsForm').submit();
     }
 
     // Chạy tính tổng lần đầu khi load trang

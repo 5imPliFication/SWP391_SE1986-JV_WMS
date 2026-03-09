@@ -150,6 +150,8 @@ public class ImportProductItemServlet extends HttpServlet {
             handleSave(session, request, response);
         } else if ("file".equals(action)) {
             handleFile(session, request, response);
+        } else if ("paging".equals(action)) {
+            handlePaging(session, request, response);
         }
     }
 
@@ -194,5 +196,46 @@ public class ImportProductItemServlet extends HttpServlet {
         // delete session after save success
         session.removeAttribute("importItems");
         response.sendRedirect(request.getContextPath() + "/inventory/import");
+    }
+
+    // update importItems in session when changing page
+    private void handlePaging(HttpSession session, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
+        if (importItems == null || importItems.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            return;
+        }
+
+        String[] indexes = request.getParameterValues("rowIndex");
+        String[] serials = request.getParameterValues("serial");
+        String[] prices = request.getParameterValues("price");
+
+        if (indexes != null && serials != null && prices != null) {
+            for (int i = 0; i < indexes.length; i++) {
+                int idx = Integer.parseInt(indexes[i]);
+                if (idx >= 0 && idx < importItems.size()) {
+                    ProductItemDTO dto = importItems.get(idx);
+                    dto.setSerial(serials[i]);
+                    try {
+                        dto.setImportPrice(prices[i] != null && !prices[i].isEmpty()
+                                ? Double.parseDouble(prices[i])
+                                : null);
+                    } catch (NumberFormatException e) {
+                        dto.setImportPrice(null);
+                    }
+                }
+            }
+        }
+
+        session.setAttribute("importItems", importItems);
+
+        // redirect to target page
+        String pageNo = request.getParameter("targetPageNo");
+        if (pageNo == null || pageNo.isEmpty()) {
+            pageNo = "1";
+        }
+        response.sendRedirect(request.getContextPath() + "/inventory/import?pageNo=" + pageNo);
     }
 }
