@@ -7,34 +7,11 @@
         <title>Product List</title>
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <style>
-            table {
-                border-collapse: collapse;
-                width: 100%;
-            }
-
-            th, td {
-                padding: 8px;
-                border: 1px solid #ccc;
-                text-align: left;
-            }
-
-            th {
-                background-color: #f4f4f4;
-            }
-
-            .product-img {
-                width: 40px;
-                height: 40px;
-                object-fit: cover;
-                border-radius: 4px;
-            }
-        </style>
+        
     </head>
     <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
         <div class="main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <h2>Product List</h2>
 
@@ -51,54 +28,47 @@
             <br>
             <%--form submit for search and sort--%>
             <form action="${pageContext.request.contextPath}/products" method="get"
-                  class="row g-2 align-items-center mb-3">
+                  class="row g-2 align-items-end mb-3">
+
                 <%--search user by name--%>
                 <div class="col-auto">
-                    <label>
-                        <input type="text" class="form-control" name="searchName" placeholder="Search by name"
-                               value="${param.searchName}">
-                    </label>
+                    <input type="text" class="form-control" name="searchName" placeholder="Search by name"
+                           value="${param.searchName}">
                 </div>
 
                 <%--sort by brand name--%>
                 <div class="col-auto">
-                    <label>
-                        <select name="brandName" class="form-select">
-                            <option value="">All Brand</option>
-                            <c:forEach var="b" items="${brands}">
-                                <option value="${b.name}"
-                                        ${param.brandName == b.name ? 'selected' : ''}>
-                                    ${b.name}
-                                </option>
-                            </c:forEach>
-                        </select>
-                    </label>
+                    <select name="brandName" class="form-select">
+                        <option value="">All Brand</option>
+                        <c:forEach var="b" items="${brands}">
+                            <option value="${b.name}"
+                                    ${param.brandName == b.name ? 'selected' : ''}>
+                                ${b.name}
+                            </option>
+                        </c:forEach>
+                    </select>
                 </div>
 
                 <%--sort by category name--%>
                 <div class="col-auto">
-                    <label>
-                        <select name="categoryName" class="form-select">
-                            <option value="">All Category</option>
-                            <c:forEach var="c" items="${categories}">
-                                <option value="${c.name}"
-                                        ${param.categoryName == c.name ? 'selected' : ''}>
-                                    ${c.name}
-                                </option>
-                            </c:forEach>
-                        </select>
-                    </label>
+                    <select name="categoryName" class="form-select">
+                        <option value="">All Category</option>
+                        <c:forEach var="c" items="${categories}">
+                            <option value="${c.name}"
+                                    ${param.categoryName == c.name ? 'selected' : ''}>
+                                ${c.name}
+                            </option>
+                        </c:forEach>
+                    </select>
                 </div>
 
                 <%--sort by status--%>
                 <div class="col-auto">
-                    <label>
-                        <select name="isActive" class="form-select">
-                            <option value="">All Status</option>
-                            <option value="true"  ${param.isActive == 'true' ? 'selected' : ''}>Active</option>
-                            <option value="false" ${param.isActive == 'false' ? 'selected' : ''}>Inactive</option>
-                        </select>
-                    </label>
+                    <select name="isActive" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="true"  ${param.isActive == 'true' ? 'selected' : ''}>Active</option>
+                        <option value="false" ${param.isActive == 'false' ? 'selected' : ''}>Inactive</option>
+                    </select>
                 </div>
 
                 <div class="col-auto">
@@ -106,65 +76,90 @@
                         Search
                     </button>
                 </div>
+
             </form>
-            <table>
-                <thead>
+
+            <!-- HEADER -->
+            <c:set var="tableHeader" scope="request">
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Total Quantity</th>
+                    <th>Brand</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Created Time</th>
+                    <th>Updated Time</th>
+                    <th>Action</th>
+                </tr>
+            </c:set>
+
+            <!-- BODY -->
+            <c:set var="tableBody" scope="request">
+
+                <c:forEach items="${products}" var="p">
                     <tr>
-                        <th>Image</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Total Quantity</th>
-                        <th>
-                            <a href="${pageContext.request.contextPath}/brands">
-                                Brand
+
+                        <td>
+                            <img src="${p.imgUrl}" class="product-img" alt="${p.name}">
+                        </td>
+
+                        <td>
+                            <!-- Click -> Move to Product Item List -->
+                            <a href="${pageContext.request.contextPath}/products/items?productId=${p.id}">
+                                ${p.name}
                             </a>
-                        </th>
-                        <th>
-                            <a href="${pageContext.request.contextPath}/categories">
-                                Category
-                            </a>
-                        </th>
-                        <th>Status</th>
-                        <th>Created Time</th>
-                        <th>Updated Time</th>
-                        <th>Action</th>
+                        </td>
+
+                        <td>${p.description}</td>
+
+                        <td>${p.totalQuantity} item</td>
+
+                        <td>${p.brand.name}</td>
+
+                        <td>${p.category.name}</td>
+
+                        <td>
+                            <jsp:include page="/WEB-INF/common/statusBadge.jsp">
+                                <jsp:param name="active" value="${p.isActive}" />
+                            </jsp:include>
+                        </td>
+
+                        <td>${p.createdAt}</td>
+
+                        <td>${p.updatedAt}</td>
+
+                        <td>
+
+                            <c:if test="${sessionScope.user != null
+                                          and sessionScope.user.role != null
+                                          and sessionScope.user.role.active
+                                          and fn:contains(sessionScope.userPermissions, 'UPDATE_PRODUCT')}">
+
+                                  <a href="${pageContext.request.contextPath}/products/update?productId=${p.id}&pageNo=${pageNo}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&isActive=${param.isActive}"
+                                     class="btn btn-warning btn-sm">
+                                      Edit
+                                  </a>
+
+                            </c:if>
+
+                        </td>
+
                     </tr>
-                </thead>
+                </c:forEach>
 
-                <tbody>
-                    <c:forEach items="${products}" var="p">
-                        <tr>
-                            <td><img src="${p.imgUrl}" class="product-img" alt="${p.name}"></td>
-                            <td>
-                                <%--Click -> Move to Product Item List--%>
-                                <a href="${pageContext.request.contextPath}/products/items?productId=${p.id}">${p.name}</a>
-                            </td>
-                            <td>${p.description}</td>
-                            <td>${p.totalQuantity}</td>
-                            <td>${p.brand.name}</td>
-                            <td>${p.category.name}</td>
-                            <td>${(p.isActive == true) ? 'Active' : 'Inactive'}</td>
-                            <td>${p.createdAt}</td>
-                            <td>${p.updatedAt}</td>
-                            <td>
-                                <c:if test="${sessionScope.user != null
-                                              and sessionScope.user.role != null
-                                              and sessionScope.user.role.active
-                                              and fn:contains(sessionScope.userPermissions, 'UPDATE_PRODUCT')}">
-                                      <a href="${pageContext.request.contextPath}/products/update?productId=${p.id}&pageNo=${pageNo}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&isActive=${param.isActive}">EDIT</a>
-                                </c:if>
-                            </td>
+                <c:if test="${empty products}">
+                    <tr>
+                        <td colspan="10" class="text-center text-muted">No data</td>
+                    </tr>
+                </c:if>
 
-                        </tr>
-                    </c:forEach>
+            </c:set>
 
-                    <c:if test="${empty products}">
-                        <tr>
-                            <td colspan="8">No data</td>
-                        </tr>
-                    </c:if>
-                </tbody>
-            </table>
+            <!-- COMMON TABLE -->
+            <jsp:include page="/WEB-INF/common/table.jsp"/>
+
 
             <%-- pagination--%>
             <c:if test="${totalPages > 1}">

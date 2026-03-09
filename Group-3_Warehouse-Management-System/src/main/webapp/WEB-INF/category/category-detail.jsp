@@ -13,7 +13,6 @@
         <jsp:include page="/WEB-INF/common/sidebar.jsp" />
 
         <main class="main-content ">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
             <div class="d-flex justify-content-center align-items-center">
                 <div class="card shadow-lg p-4 " style="width: 500px;">
                     <div class="card-body">

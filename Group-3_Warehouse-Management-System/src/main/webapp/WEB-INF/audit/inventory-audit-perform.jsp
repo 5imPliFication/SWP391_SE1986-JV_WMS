@@ -34,8 +34,6 @@
     <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
         <div class="main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
-
             <h2>Inventory Audit Perform</h2>
 
             <%-- Audit Info--%>

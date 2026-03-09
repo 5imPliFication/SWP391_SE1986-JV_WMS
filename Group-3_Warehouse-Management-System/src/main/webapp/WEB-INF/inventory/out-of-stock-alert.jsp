@@ -10,11 +10,10 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
     </head>
 
-    <body class="mt-4">
+    <body >
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
         <main class="main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <h2 class="mb-4 text-danger">Out Of Stock Alert</h2>
 
@@ -29,57 +28,91 @@
                 </form>
             </div>
             <div class="mt-4">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>No</th>
-                            <th>Name</th>
-                            <th>Stock</th>
-                            <th>Status</th>
-                            <th>Details</th>
-                        </tr>
-                    </thead>
+                <!-- HEADER -->
+                <c:set var="tableHeader" scope="request">
+                    <tr>
+                        <th>No</th>
+                        <th>Name</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </c:set>
 
-                    <tbody>
-                        <c:choose>
-                            <c:when test="${not empty products}">
-                                <c:forEach items="${products}" var="product" varStatus="loop">
-                                    <tr>
-                                        <td>${loop.index + 1}</td>
-                                        <td>${product.name}</td>
-                                        <td>${product.totalQuantity}</td>
+                <!-- BODY -->
+                <c:set var="tableBody" scope="request">
 
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${product.totalQuantity == 0}">
-                                                    <span class="badge bg-danger">Out of Stock</span>
-                                                </c:when>
-                                                <c:when test="${product.totalQuantity <= 10}">
-                                                    <span class="badge bg-warning text-dark">Low Stock</span>
-                                                </c:when>
-                                            </c:choose>
-                                        </td>
+                    <c:choose>
 
-                                        <td>
-                                            <a href="${pageContext.request.contextPath}/products/items?productId=${product.id}"
-                                               class="btn btn-sm btn-primary">
-                                                View
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </c:when>
+                        <c:when test="${not empty products}">
 
-                            <c:otherwise>
+                            <c:forEach items="${products}" var="product" varStatus="loop">
+
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted">
-                                        No out-of-stock products found.
+
+                                    <td>${loop.index + 1}</td>
+
+                                    <td>${product.name}</td>
+
+                                    <td>${product.totalQuantity}</td>
+
+                                    <td>
+
+                                        <c:choose>
+
+                                            <c:when test="${product.totalQuantity == 0}">
+                                                <span class="badge bg-danger">
+                                                    Out of Stock
+                                                </span>
+                                            </c:when>
+
+                                            <c:when test="${product.totalQuantity <= 10}">
+                                                <span class="badge bg-warning text-dark">
+                                                    Low Stock
+                                                </span>
+                                            </c:when>
+
+                                        </c:choose>
+
                                     </td>
+
+                                    <td>
+
+                                        <a href="${pageContext.request.contextPath}/products/items?productId=${product.id}"
+                                           class="btn btn-sm btn-primary">
+
+                                            View
+
+                                        </a>
+
+                                    </td>
+
                                 </tr>
-                            </c:otherwise>
-                        </c:choose>
-                    </tbody>
-                </table>
+
+                            </c:forEach>
+
+                        </c:when>
+
+                        <c:otherwise>
+
+                            <tr>
+                                <td colspan="5"
+                                    class="text-center text-muted">
+
+                                    No out-of-stock products found.
+
+                                </td>
+                            </tr>
+
+                        </c:otherwise>
+
+                    </c:choose>
+
+                </c:set>
+
+                <!-- COMMON TABLE -->
+                <jsp:include page="/WEB-INF/common/table.jsp"/>
+
             </div>
 
             <%--   pagination --%>

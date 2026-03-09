@@ -19,7 +19,6 @@
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
         <div class=" main-content ">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
             <div class="row justify-content-center">
                 <div class="col-md-6">
 

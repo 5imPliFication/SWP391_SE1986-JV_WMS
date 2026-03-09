@@ -17,7 +17,6 @@
         <c:set var="isPending" value="${prList.status eq 'PENDING'}"/>
 
         <main class="main-content" >
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <h3 class="mb-3">
                 Purchase Request Detail
@@ -63,34 +62,33 @@
             </c:if>
 
             <!-- ITEMS TABLE -->
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead class="table-primary text-center">
-                        <tr>
-                            <th>Product</th>
-                            <th>Brand</th>
-                            <th>Category</th>
-                            <th>Qty</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach items="${items}" var="i">
-                            <tr>
-                                <td>${i.productName}</td>
-                                <td>${i.brandName}</td>
-                                <td>${i.categoryName}</td>
-                                <td class="text-center">${i.quantity}</td>
-                            </tr>
-                        </c:forEach>
+            <c:set var="tableHeader" scope="request">
+                <tr>
+                    <th>Brand</th>
+                    <th>Category</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                </tr>
+            </c:set>
 
-                        <c:if test="${empty items}">
-                            <tr>
-                                <td colspan="4" class="text-center text-muted">No items</td>
-                            </tr>
-                        </c:if>
-                    </tbody>
-                </table>
-            </div>
+            <c:set var="tableBody" scope="request">
+                <c:forEach items="${items}" var="i">
+                    <tr>
+                        <td>${i.brandName}</td>
+                        <td>${i.categoryName}</td>
+                        <td>${i.productName}</td>
+                        <td class="text-center">${i.quantity} item</td>
+                    </tr>
+                </c:forEach>
+
+                <c:if test="${empty items}">
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">No items</td>
+                    </tr>
+                </c:if>
+            </c:set>
+            <jsp:include page="/WEB-INF/common/table.jsp"/>
+
 
             <!-- ACTIONS -->
             <div class="mt-3 d-flex gap-2">
@@ -136,10 +134,10 @@
                     ← Back
                 </a>
             </div>
-
         </main>
 
-        <!-- INCLUDE MODAL -->
+
+            <!-- INCLUDE MODAL -->
         <jsp:include page="/WEB-INF/purchase_request/PurchaseRequestEdit.jsp"/>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

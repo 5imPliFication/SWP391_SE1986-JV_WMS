@@ -14,7 +14,6 @@
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
         <main class=" main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <div class="container-fluid py-4">
 
@@ -58,155 +57,138 @@
                 </c:if>
 
 
-                <div class="card mb-4 shadow-sm">
-                    <!-- ROLE HEADER -->
-                    <div class="card-header">
-                        <div class="card-header">
-
-                            <div class="row mb-3 align-items-end w-100">
-
-                                <!-- ACTION -->
-                                <div class="col-md-3">
-                                    <input
-                                        type="text"
-                                        id="searchName"
-                                        class="form-control"
-                                        placeholder="Search brand name..."
-                                        >
-                                </div>
-
-                                <!-- OBJECT -->
-                                <div class="col-md-2">
-                                    <select id="a" class="form-select">
-                                        <option value="">-- All --</option>
-                                        <option value="1">Active</option>
-                                        <option value="0">Deactive</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-7 d-flex justify-content-end">
-                                    <c:if test="${sessionScope.user != null
-                                                  and sessionScope.user.role != null
-                                                  and sessionScope.user.role.active
-                                                  and fn:contains(sessionScope.userPermissions, 'CREATE_PRODUCT')}">
-                                          <button class="btn btn-primary"
-                                                  data-bs-toggle="modal"
-                                                  data-bs-target="#addBrandModal">
-                                              Add new brand
-                                          </button>
-                                    </c:if>
-
-                                </div>
-
-                            </div>
-
+                <div class="d-flex mb-3 justify-content-between">
+                    <!-- ACTION -->
+                    <div class="d-flex">
+                        <div class="mr-3">
+                            <input
+                                type="text"
+                                id="searchName"
+                                class="form-control"
+                                placeholder="Search brand name..."
+                                >
                         </div>
 
-                        <!-- PERMISSION TABLE -->
-                        <div class="card-body p-2">
-                            <div style="overflow-x: auto;">   <!-- Cho phép scroll ngang nếu nhiều role -->
-
-                                <table class="table table-bordered mb-0">
-                                    <thead class="table-primary text-center">
-                                        <tr>
-                                            <th>Stt</th>
-                                            <th>Brand name</th>
-                                            <th>Description</th>
-                                            <th>Status</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        <c:forEach items="${brandList}" var="b" varStatus="s">
-                                            <tr class="${!b.active ? 'table-secondary text-muted' : ''}"
-                                                data-status="${b.active ? 1 : 0}"
-                                                data-name="${fn:toLowerCase(b.name)}">
-
-                                                <td>${s.index + 1}</td>
-                                                <td>${b.name}</td>
-                                                <td>${b.description}</td>
-
-                                                <!-- STATUS -->
-                                                <td class="text-center">
-                                                    <form action="${pageContext.request.contextPath}/change-status"
-                                                          method="get" class="d-inline">
-
-                                                        <input type="hidden" name="brandId" value="${b.id}">
-                                                        <input type="hidden" name="status" value="${b.active}">
-
-                                                        <c:choose>
-                                                            <c:when test="${b.active}">
-                                                                <button type="submit" class="btn btn-sm btn-success">
-                                                                    Active
-                                                                </button>
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <button type="submit" class="btn btn-sm btn-secondary">
-                                                                    Activate
-                                                                </button>
-                                                            </c:otherwise>
-                                                        </c:choose>
-
-                                                    </form>
-                                                </td>
-
-                                                <!-- ACTION -->
-                                                <td class="text-center">
-                                                    <!-- DELETE -->
-                                                    <c:if test="${b.active}">
-                                                        <a href="${pageContext.request.contextPath}/brand-update?brandId=${b.id}"
-                                                           class="btn btn-sm btn-warning">
-                                                            Edit
-                                                        </a>
-                                                    </c:if>
-                                                    <c:if test="${!b.active}">
-                                                        <span class="text-muted ms-2">Disabled</span>
-                                                    </c:if>
-
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                    </tbody>
-                                </table>
-
-                                <a href="${pageContext.request.contextPath}/products">Back to product list</a>
-
-                                <c:if test="${totalPages > 1}">
-                                    <nav class="mt-3">
-                                        <ul class="pagination justify-content-center">
-
-                                            <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
-                                                <a class="page-link"
-                                                   href="${pageContext.request.contextPath}/brands?pageNo=${pageNo - 1}">
-                                                    Previous
-                                                </a>
-                                            </li>
-
-                                            <c:forEach begin="1" end="${totalPages}" var="i">
-                                                <li class="page-item ${i == pageNo ? 'active' : ''}">
-                                                    <a class="page-link"
-                                                       href="${pageContext.request.contextPath}/brands?pageNo=${i}">
-                                                        ${i}
-                                                    </a>
-                                                </li>
-                                            </c:forEach>
-
-                                            <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
-                                                <a class="page-link"
-                                                   href="${pageContext.request.contextPath}/brands?pageNo=${pageNo + 1}">
-                                                    Next
-                                                </a>
-                                            </li>
-
-                                        </ul>
-                                    </nav>
-                                </c:if>
-
-                            </div>
+                        <!-- OBJECT -->
+                        <div >
+                            <select id="a" class="form-select">
+                                <option value="">-- All status--</option>
+                                <option value="1">Active</option>
+                                <option value="0">Deactive</option>
+                            </select>
                         </div>
                     </div>
+
+                    <div class=" d-flex justify-content-end">
+                        <c:if test="${sessionScope.user != null
+                                      and sessionScope.user.role != null
+                                      and sessionScope.user.role.active
+                                      and fn:contains(sessionScope.userPermissions, 'CREATE_PRODUCT')}">
+                              <button class="btn btn-primary"
+                                      data-bs-toggle="modal"
+                                      data-bs-target="#addBrandModal">
+                                  Add new brand
+                              </button>
+                        </c:if>
+
+                    </div>
                 </div>
+
+                <!-- PERMISSION TABLE -->
+                <div style="overflow-x: auto;">
+
+                    <!-- HEADER -->
+                    <c:set var="tableHeader" scope="request">
+                        <tr>
+                            <th>Stt</th>
+                            <th>Brand name</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </c:set>
+
+                    <!-- BODY -->
+                    <c:set var="tableBody" scope="request">
+
+                        <c:forEach items="${brandList}" var="b" varStatus="s">
+
+                            <tr class="${!b.active ? 'table-secondary text-muted' : ''}"
+                                data-status="${b.active ? 1 : 0}"
+                                data-name="${fn:toLowerCase(b.name)}">
+
+                                <td>${s.index + 1}</td>
+
+                                <td>${b.name}</td>
+
+                                <td>${b.description}</td>
+
+                                <!-- STATUS -->
+                                <td class="text-center">
+                                    <jsp:include page="/WEB-INF/common/statusBadge.jsp">
+                                        <jsp:param name="active" value="${b.active}" />
+                                    </jsp:include>
+                                </td>
+
+                                <!-- ACTION -->
+                                <td class="text-center">
+                                    <a href="${pageContext.request.contextPath}/brand-update?brandId=${b.id}"
+                                       class="btn btn-sm btn-warning">
+                                        Edit
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                        </c:forEach>
+
+                        <c:if test="${empty brandList}">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">
+                                    No data
+                                </td>
+                            </tr>
+                        </c:if>
+
+                    </c:set>
+
+                    <!-- COMMON TABLE -->
+                    <jsp:include page="/WEB-INF/common/table.jsp"/>
+
+                </div>
+
+                <c:if test="${totalPages > 1}">
+                    <nav class="mt-3">
+                        <ul class="pagination justify-content-center">
+
+                            <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/brands?pageNo=${pageNo - 1}">
+                                    Previous
+                                </a>
+                            </li>
+
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                    <a class="page-link"
+                                       href="${pageContext.request.contextPath}/brands?pageNo=${i}">
+                                        ${i}
+                                    </a>
+                                </li>
+                            </c:forEach>
+
+                            <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/brands?pageNo=${pageNo + 1}">
+                                    Next
+                                </a>
+                            </li>
+
+                        </ul>
+                    </nav>
+                </c:if>
+
+            </div>
 
         </main>
         <jsp:include page="add-brand.jsp"/>

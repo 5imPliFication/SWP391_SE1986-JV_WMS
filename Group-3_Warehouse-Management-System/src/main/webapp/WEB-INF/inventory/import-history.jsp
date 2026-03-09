@@ -10,11 +10,10 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
     </head>
 
-    <body class="mt-4">
+    <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 
         <main class="main-content">
-            <jsp:include page="/WEB-INF/common/header.jsp" />
 
             <h2 class="mb-4">Import History</h2>
 
@@ -58,49 +57,79 @@
 
             <%-- table --%>
             <div class="table-responsive">
-                <table class="table table-bordered table-hover table-sm">
-                    <thead class="thead-dark text-center">
-                        <tr>
-                            <th class="text-left">Receipt Code</th>
-                            <th style="width: 200px;">Received Date</th>
-                            <th style="width: 200px;">Warehouse Staff</th>
-                            <th style="width: 100px;">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:choose>
-                            <c:when test="${not empty goodsReceipts}">
-                                <c:forEach items="${goodsReceipts}" var="goodsReceipt">
-                                    <tr>
-                                        <td class="text-left align-middle font-weight-bold">
-                                            ${goodsReceipt.receiptCode}
-                                        </td>
-                                        <td class="text-center align-middle">
-                                            ${goodsReceipt.receivedAt}
-                                        </td>
-                                        <td class="align-middle">
-                                            ${goodsReceipt.warehouseName}
-                                        </td>
-                                        <td class="text-center align-middle">
-                                            <a href="${pageContext.request.contextPath}/inventory/import/history?action=detail&id=${goodsReceipt.id}"
-                                               class="btn btn-info btn-sm">
-                                                View
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </c:when>
-                            <c:otherwise>
+
+                <!-- HEADER -->
+                <c:set var="tableHeader" scope="request">
+                    <tr>
+                        <th class="text-left">Receipt Code</th>
+                        <th style="width: 200px;">Received Date</th>
+                        <th style="width: 200px;">Warehouse Staff</th>
+                        <th style="width: 100px;">Details</th>
+                    </tr>
+                </c:set>
+
+                <!-- BODY -->
+                <c:set var="tableBody" scope="request">
+
+                    <c:choose>
+
+                        <c:when test="${not empty goodsReceipts}">
+
+                            <c:forEach items="${goodsReceipts}" var="goodsReceipt">
+
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-3">
-                                        No import history found.
+
+                                    <td class="text-left align-middle fw-bold">
+                                        ${goodsReceipt.receiptCode}
                                     </td>
+
+                                    <td class="text-center align-middle">
+                                        ${goodsReceipt.receivedAt}
+                                    </td>
+
+                                    <td class="align-middle">
+                                        ${goodsReceipt.warehouseName}
+                                    </td>
+
+                                    <td class="text-center align-middle">
+
+                                        <a href="${pageContext.request.contextPath}/inventory/import/history?action=detail&id=${goodsReceipt.id}"
+                                           class="btn btn-info btn-sm">
+
+                                            View
+
+                                        </a>
+
+                                    </td>
+
                                 </tr>
-                            </c:otherwise>
-                        </c:choose>
-                    </tbody>
-                </table>
+
+                            </c:forEach>
+
+                        </c:when>
+
+                        <c:otherwise>
+
+                            <tr>
+                                <td colspan="4"
+                                    class="text-center text-muted py-3">
+
+                                    No import history found.
+
+                                </td>
+                            </tr>
+
+                        </c:otherwise>
+
+                    </c:choose>
+
+                </c:set>
+
+                <!-- COMMON TABLE -->
+                <jsp:include page="/WEB-INF/common/table.jsp"/>
+
             </div>
+
 
             <%-- pagination --%>
             <c:if test="${totalPages > 1}">

@@ -49,9 +49,7 @@ public class BrandService {
         b.changeStatus(id, status);
     }
 
-    public List<Brand> getActiveBrand() {
-        return b.findActiveBrand();
-    }
+ 
 
     public Brand getBrandByID(Long id) {
         return b.findBrandByID(id);
