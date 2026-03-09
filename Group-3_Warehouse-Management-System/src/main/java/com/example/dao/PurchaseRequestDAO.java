@@ -11,6 +11,7 @@ import com.example.model.Category;
 import com.example.model.Product;
 import com.example.model.PurchaseRequest;
 import com.example.model.PurchaseRequestItem;
+import com.example.model.Unit;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -240,10 +241,16 @@ public class PurchaseRequestDAO {
         List<Product> list = new ArrayList<>();
 
         String sql = """
-        SELECT id, name, brand_id, category_id
-        FROM products
-        WHERE is_active = true
-        ORDER BY name
+               SELECT 
+                    p.id,
+                    p.name,
+                    p.brand_id,
+                    p.category_id,
+                    u.symbol
+                FROM products p
+                LEFT JOIN units u ON p.unit_id = u.id
+                WHERE p.is_active = true
+                ORDER BY p.name
     """;
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -262,6 +269,10 @@ public class PurchaseRequestDAO {
                 category.setId(rs.getLong("category_id"));
                 p.setCategory(category);
 
+                Unit unit = new Unit();
+                unit.setSymbol(rs.getString("symbol"));
+                p.setUnit(unit);
+
                 list.add(p);
             }
 
@@ -271,8 +282,6 @@ public class PurchaseRequestDAO {
 
         return list;
     }
-
-  
 
     public PurchaseRequest findById(
             Long requestId,
@@ -337,17 +346,19 @@ public class PurchaseRequestDAO {
         List<PurchaseRequestItem> items = new ArrayList<>();
 
         String sql = """
-      SELECT
-            pri.product_id,
-            pri.quantity,
-            p.name AS product_name,
-            b.name AS brand_name,
-            c.name AS category_name
-        FROM purchase_request_items pri
-        JOIN products p ON pri.product_id = p.id
-        LEFT JOIN brands b ON p.brand_id = b.id
-        LEFT JOIN categories c ON p.category_id = c.id
-        WHERE pri.purchase_request_id = ?
+            SELECT
+                pri.product_id,
+                p.name AS product_name,
+                pri.quantity,
+                u.symbol AS unit,
+                b.name AS brand_name,
+                c.name AS category_name
+            FROM purchase_request_items pri
+            JOIN products p ON pri.product_id = p.id
+            LEFT JOIN units u ON p.unit_id = u.id
+            LEFT JOIN brands b ON p.brand_id = b.id
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE pri.purchase_request_id = ?;
     """;
 
         try (
@@ -368,6 +379,7 @@ public class PurchaseRequestDAO {
                 item.setBrandName(rs.getString("brand_name"));
                 item.setCategoryName(rs.getString("category_name"));
                 item.setQuantity(rs.getLong("quantity"));
+                item.setUnit(rs.getString("unit"));
 
                 items.add(item);
             }

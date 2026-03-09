@@ -18,6 +18,7 @@ public class Product {
     private Boolean isActive;
     private Brand brand;
     private Category category;
+    private Unit unit;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
