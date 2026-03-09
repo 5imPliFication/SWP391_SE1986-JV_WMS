@@ -253,6 +253,21 @@
 
                 </c:if>
 
+
+                <!-- Summary Report -->
+                <c:if test="${sessionScope.user != null
+                                and sessionScope.user.role != null
+                                and sessionScope.user.role.active
+                                and fn:contains(sessionScope.userPermissions, 'READ_REPORT')}">
+
+                    <li>
+                        <a href="${pageContext.request.contextPath}/summary_report">
+                            <span>Summary Report</span>
+                        </a>
+                    </li>
+
+                </c:if>
+
             </ul>
 
         </aside>

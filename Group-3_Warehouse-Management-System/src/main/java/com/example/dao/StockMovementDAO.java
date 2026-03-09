@@ -23,8 +23,9 @@ public class StockMovementDAO {
         List<StockMovement> list = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("""
-                SELECT id, product_id, quantity, type, reference_type, created_at
-                FROM stock_movements
+                SELECT sm.id,sm.product_id, p.name AS product_name, sm.quantity, sm.type, sm.reference_type, sm.created_at
+                FROM stock_movements sm
+                JOIN products p on p.id=sm.product_id
                 WHERE 1=1
                 """);
 
@@ -70,6 +71,7 @@ public class StockMovementDAO {
                 StockMovement movement = new StockMovement(
                         rs.getLong("id"),
                         rs.getLong("product_id"),
+                        rs.getString("product_name"),
                         rs.getLong("quantity"),
                         MovementType.valueOf(rs.getString("type")),
                         ReferenceType.valueOf(rs.getString("reference_type")),
