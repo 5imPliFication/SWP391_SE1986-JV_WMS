@@ -52,7 +52,7 @@ public class ImportProductItemServlet extends HttpServlet {
         // get full list from session
         List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
 
-        // pagination for display (keep full list in session)
+        // pagination for display 
         if (importItems != null && !importItems.isEmpty()) {
             int pageSize = AppConstants.PAGE_SIZE;
             int totalItems = importItems.size();
@@ -69,12 +69,6 @@ public class ImportProductItemServlet extends HttpServlet {
                 }
             }
 
-            // clamp pageNo to valid range
-            if (pageNo < 1) {
-                pageNo = 1;
-            } else if (pageNo > totalPages) {
-                pageNo = totalPages;
-            }
 
             int start = (pageNo - 1) * pageSize;
             int end = Math.min(start + pageSize, totalItems);
@@ -144,14 +138,16 @@ public class ImportProductItemServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
-        // get action
+
+        String pagingParam = request.getParameter("paging");
         String action = request.getParameter("action");
-        if ("save".equals(action)) {
+
+        if (pagingParam != null) {
+            handlePaging(session, request, response);
+        } else if ("save".equals(action)) {
             handleSave(session, request, response);
         } else if ("file".equals(action)) {
             handleFile(session, request, response);
-        } else if ("paging".equals(action)) {
-            handlePaging(session, request, response);
         }
     }
 
@@ -177,10 +173,43 @@ public class ImportProductItemServlet extends HttpServlet {
         // get information warehouse handle import purchase
         User user = (User) session.getAttribute("user");
 
-        // get value
-        String[] productIds = request.getParameterValues("productId");
-        String[] serials = request.getParameterValues("serial");
-        String[] prices = request.getParameterValues("price");
+        // get full list from session (all pages)
+        List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
+
+        if (importItems == null || importItems.isEmpty()) {
+            session.setAttribute("message", "No product items to save");
+            session.setAttribute("messageType", "danger");
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            return;
+        }
+
+        // update data in current page into session before save
+        String[] indexesStr = request.getParameterValues("rowIndex");
+        String[] serialsStr = request.getParameterValues("serial");
+        String[] pricesStr = request.getParameterValues("price");
+
+        if (indexesStr != null && serialsStr != null && pricesStr != null) {
+            for (int i = 0; i < indexesStr.length; i++) {
+                // index of row
+                int index = Integer.parseInt(indexesStr[i]);
+                if (index >= 0 && index < importItems.size()) {
+                    ProductItemDTO dto = importItems.get(index);
+                    dto.setSerial(serialsStr[i]);
+                    dto.setImportPrice(Double.parseDouble(pricesStr[i]));
+                }
+            }
+        }
+
+        String[] productIds = new String[importItems.size()];
+        String[] serials = new String[importItems.size()];
+        String[] prices = new String[importItems.size()];
+
+        for (int i = 0; i < importItems.size(); i++) {
+            ProductItemDTO dto = importItems.get(i);
+            productIds[i] = dto.getProductId() != null ? String.valueOf(dto.getProductId()) : null;
+            serials[i] = dto.getSerial();
+            prices[i] = dto.getImportPrice() != null ? String.valueOf(dto.getImportPrice()) : null;
+        }
 
         // call service to handle import
         String resultSave = inventoryService.importProductItems(purchaseId, user.getId(), productIds, serials, prices);
@@ -203,36 +232,28 @@ public class ImportProductItemServlet extends HttpServlet {
             throws IOException {
 
         List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
-        if (importItems == null || importItems.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/inventory/import");
-            return;
-        }
 
+        // index
         String[] indexes = request.getParameterValues("rowIndex");
         String[] serials = request.getParameterValues("serial");
         String[] prices = request.getParameterValues("price");
 
         if (indexes != null && serials != null && prices != null) {
             for (int i = 0; i < indexes.length; i++) {
-                int idx = Integer.parseInt(indexes[i]);
-                if (idx >= 0 && idx < importItems.size()) {
-                    ProductItemDTO dto = importItems.get(idx);
+                // index of row
+                int index = Integer.parseInt(indexes[i]);
+                if (index >= 0 && index < importItems.size()) {
+                    ProductItemDTO dto = importItems.get(index);
                     dto.setSerial(serials[i]);
-                    try {
-                        dto.setImportPrice(prices[i] != null && !prices[i].isEmpty()
-                                ? Double.parseDouble(prices[i])
-                                : null);
-                    } catch (NumberFormatException e) {
-                        dto.setImportPrice(null);
-                    }
+                    dto.setImportPrice(Double.parseDouble(prices[i]));
                 }
             }
         }
 
         session.setAttribute("importItems", importItems);
 
-        // redirect to target page
-        String pageNo = request.getParameter("targetPageNo");
+        // redirect to page click on pagination
+        String pageNo = request.getParameter("paging");
         if (pageNo == null || pageNo.isEmpty()) {
             pageNo = "1";
         }

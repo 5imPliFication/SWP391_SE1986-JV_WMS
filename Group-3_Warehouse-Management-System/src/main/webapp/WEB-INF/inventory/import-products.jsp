@@ -9,15 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Import Product</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
-    <style>
-        .main-content { padding: 20px; max-width: 1200px; margin: auto; }
-
-        .group-header { background-color: #d1ecf1 !important; font-weight: bold; }
-
-        .sub-item td:nth-child(2) { padding-left: 30px; color: #6c757d; }
-
-        .master-price-input { border: 2px solid #007bff; font-weight: bold; color: #007bff; }
-    </style>
 </head>
 
 <body>
@@ -28,7 +19,7 @@
     <%-- message --%>
     <c:if test="${not empty message}">
         <div class="alert alert-${messageType} alert-dismissible fade show" role="alert">
-            ${message}
+                ${message}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -61,16 +52,14 @@
                 </label>
             </form>
             <button type="submit" form="productItemsForm" class="btn btn-success ml-2" name="action" value="save"
-                    ${empty importItems ? 'disabled' : ''}>
-                Save Changes
+            ${empty importItems ? 'disabled' : ''}>
+                Save
             </button>
         </div>
     </div>
 
     <form id="productItemsForm" method="post" action="${pageContext.request.contextPath}/inventory/import">
         <input type="hidden" name="purchaseId" value="${sessionScope.purchaseId}">
-        <input type="hidden" name="action" id="formAction" value="save">
-        <input type="hidden" name="targetPageNo" id="targetPageNo" value="1">
 
         <div class="table-responsive">
             <table class="table table-bordered">
@@ -80,7 +69,8 @@
                     <th style="width: 250px;">Product Name</th>
                     <th>Serial / IMEI</th>
                     <th style="width: 100px;" class="text-center">Quantity</th>
-                    <th style="width: 160px;" class="text-right">Unit Price (VND)</th>
+                    <th style="width: 160px;" class="text-right">Price</th>
+                    <th style="width: 160px;" class="text-right">Unit</th>
                     <th style="width: 90px;" class="text-center">Action</th>
                 </tr>
                 </thead>
@@ -94,16 +84,17 @@
                         </tr>
                     </c:when>
                     <c:otherwise>
-                        <%-- Tạo header nhóm theo productId --%>
+                        <%-- create group header by productId --%>
                         <c:set var="currentProductId" value="-1"/>
                         <c:set var="displayIndex" value="${(startIndex != null ? startIndex : 0) + 1}"/>
 
                         <c:forEach items="${importItems}" var="item" varStatus="status">
-                            <%-- Khi gặp productId mới thì in header nhóm --%>
+                            <%-- if meet new productId, create group header --%>
                             <c:if test="${currentProductId != item.productId}">
+                                <%-- set current productId --%>
                                 <c:set var="currentProductId" value="${item.productId}"/>
 
-                                <%-- Đếm số item thuộc productId này để hiển thị Qty --%>
+                                <%-- count number of item belong to productId to display Qty --%>
                                 <c:set var="groupCount" value="0"/>
                                 <c:forEach items="${importItems}" var="tmp">
                                     <c:if test="${tmp.productId == item.productId}">
@@ -113,11 +104,11 @@
 
                                 <tr class="group-header">
                                     <td colspan="2" class="align-middle">
-                                        ${item.productName}
+                                            ${item.productName}
                                     </td>
                                     <td class="align-middle text-muted"><em></em></td>
                                     <td class="text-center align-middle">
-                                        ${groupCount} Item
+                                            ${groupCount} Item
                                     </td>
                                     <td>
                                         <input type="number"
@@ -128,23 +119,22 @@
                                 </tr>
                             </c:if>
 
-                            <%-- Row chi tiết --%>
+                            <%-- each row detail --%>
                             <tr class="sub-item">
                                 <input type="hidden" name="productId" value="${item.productId}">
                                 <input type="hidden" name="rowIndex"
                                        value="${(startIndex != null ? startIndex : 0) + status.index}">
                                 <td class="text-center align-middle">
-                                    ${displayIndex}
+                                        ${displayIndex}
                                     <c:set var="displayIndex" value="${displayIndex + 1}"/>
                                 </td>
                                 <td class="align-middle">
-                                    ${item.productName}
+                                        ${item.productName}
                                 </td>
                                 <td>
                                     <input type="text" name="serial"
                                            class="form-control form-control-sm"
-                                           value="${item.serial}"
-                                           required>
+                                           value="${item.serial}">
                                 </td>
                                 <td class="text-center align-middle">1</td>
                                 <td>
@@ -174,25 +164,74 @@
             <ul class="pagination justify-content-center">
                 <%-- previous page--%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
-                    <button type="button" class="page-link"
-                            onclick="changePage(${pageNo - 1})"
+                    <button type="submit"
+                            class="page-link"
+                            form="productItemsForm"
+                            name="paging"
+                            value="${pageNo - 1}"
                             ${pageNo == 1 ? 'disabled' : ''}>
                         Previous
                     </button>
                 </li>
 
+                <%-- window around current page, với first/last và ... giống user-list.jsp --%>
+                <c:set var="left" value="${pageNo - 2}"/>
+                <c:set var="right" value="${pageNo + 2}"/>
+
                 <c:forEach begin="1" end="${totalPages}" var="i">
-                    <li class="page-item ${i == pageNo ? 'active' : ''}">
-                        <button type="button" class="page-link" onclick="changePage(${i})">
-                            ${i}
-                        </button>
-                    </li>
+                    <c:choose>
+                        <%-- always show first page --%>
+                        <c:when test="${i == 1}">
+                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                <button type="submit"
+                                        class="page-link"
+                                        form="productItemsForm"
+                                        name="paging"
+                                        value="${i}">
+                                    ${i}
+                                </button>
+                            </li>
+                        </c:when>
+                        <%-- always show last page --%>
+                        <c:when test="${i == totalPages}">
+                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                <button type="submit"
+                                        class="page-link"
+                                        form="productItemsForm"
+                                        name="paging"
+                                        value="${i}">
+                                    ${i}
+                                </button>
+                            </li>
+                        </c:when>
+                        <%-- show pages around current page --%>
+                        <c:when test="${i >= left && i <= right}">
+                            <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                <button type="submit"
+                                        class="page-link"
+                                        form="productItemsForm"
+                                        name="paging"
+                                        value="${i}">
+                                    ${i}
+                                </button>
+                            </li>
+                        </c:when>
+                        <%-- show ... for hidden pages --%>
+                        <c:when test="${i == left - 1 || i == right + 1}">
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        </c:when>
+                    </c:choose>
                 </c:forEach>
 
                 <%--next page--%>
                 <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
-                    <button type="button" class="page-link"
-                            onclick="changePage(${pageNo + 1})"
+                    <button type="submit"
+                            class="page-link"
+                            form="productItemsForm"
+                            name="paging"
+                            value="${pageNo + 1}"
                             ${pageNo == totalPages ? 'disabled' : ''}>
                         Next
                     </button>
@@ -209,38 +248,27 @@
 </main>
 
 <script>
-    // Hàm cập nhật giá cho tất cả các item con khi sửa giá ở Header
-    function updateGroupPrice(productId, newPrice) {
-        // Lấy tất cả các input giá của item con thuộc productId đó
+    // autofill price for all item when change price at header
+    function updateGroupPrice(productId, price) {
+        // get all price input of item con belong to productId
         let detailInputs = document.querySelectorAll('.price-' + productId);
 
         detailInputs.forEach(input => {
-            input.value = newPrice; // Gán giá trị mới
+            input.value = price; // set price
         });
 
-        // Tính lại tổng tiền sau khi giá thay đổi
+        // recalculate total payment after price change
         calcTotal();
     }
 
-    // Hàm tính tổng tiền toàn bộ phiếu nhập
+    // function to calculate total payment of all import product
     function calcTotal() {
         let total = 0;
-        // Chỉ lấy các input thuộc class 'detail-price' (các máy con) để cộng, bỏ qua ô nhập Master
         document.querySelectorAll('.detail-price').forEach(input => {
             total += Number(input.value || 0);
         });
 
-        // Format số thành chuỗi có dấu phẩy (vd: 25,000,000)
         document.getElementById("totalPayment").innerText = total.toLocaleString('en-US');
-    }
-
-    function changePage(pageNo) {
-        if (!pageNo || pageNo < 1) {
-            return;
-        }
-        document.getElementById('formAction').value = 'paging';
-        document.getElementById('targetPageNo').value = pageNo;
-        document.getElementById('productItemsForm').submit();
     }
 
     // Chạy tính tổng lần đầu khi load trang
