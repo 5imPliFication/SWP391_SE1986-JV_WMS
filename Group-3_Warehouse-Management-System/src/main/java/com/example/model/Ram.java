@@ -16,6 +16,6 @@ public class Ram {
     private Long id;
 
     private String size;
-        private boolean isActive;
+    private boolean isActive;
 
 }

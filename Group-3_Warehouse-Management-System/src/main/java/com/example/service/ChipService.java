@@ -8,10 +8,6 @@ import com.example.dao.ChipDAO;
 import com.example.model.Chip;
 import java.util.List;
 
-/**
- *
- * @author PC
- */
 public class ChipService {
 
     private ChipDAO c = new ChipDAO();

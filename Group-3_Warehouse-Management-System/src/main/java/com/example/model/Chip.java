@@ -16,6 +16,6 @@ public class Chip {
     private Long id;
 
     private String name;
-        private boolean isActive;
+    private boolean isActive;
 
 }
