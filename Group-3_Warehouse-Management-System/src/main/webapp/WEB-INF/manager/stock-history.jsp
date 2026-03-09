@@ -164,6 +164,11 @@
                     <h2 class="font-weight-bold text-dark m-0">
                         <i class="fas fa-history mr-2"></i>Stock History
                     </h2>
+                    <a href="${pageContext.request.contextPath}/summary_report"
+                       class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Back to Summary Report
+                    </a>
                 </div>
 
                 <div class="filter-card">
@@ -226,7 +231,7 @@
                         <c:set var="tableHeader" scope="request">
                             <tr>
                                 <th>Movement ID</th>
-                                <th>Product ID</th>
+                                <th>Product </th>
                                 <th>Quantity</th>
                                 <th>Type</th>
                                 <th>Reference Type</th>
@@ -245,7 +250,7 @@
                                     </td>
 
                                     <td>
-                                        PID-${item.productId}
+                                            ${item.productName}
                                     </td>
 
                                     <td>
