@@ -49,8 +49,10 @@ public class ImportProductItemServlet extends HttpServlet {
             handleImport(session, request);
         }
 
-        // pagination for importItems
+        // get full list from session
         List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
+
+        // pagination for display (keep full list in session)
         if (importItems != null && !importItems.isEmpty()) {
             int pageSize = AppConstants.PAGE_SIZE;
             int totalItems = importItems.size();
@@ -58,7 +60,6 @@ public class ImportProductItemServlet extends HttpServlet {
 
             // get pageNo
             String pageNoStr = request.getParameter("pageNo");
-            // default value
             int pageNo = AppConstants.DEFAULT_PAGE_NO;
             if (pageNoStr != null && !pageNoStr.isEmpty()) {
                 try {
@@ -68,17 +69,24 @@ public class ImportProductItemServlet extends HttpServlet {
                 }
             }
 
-            // index start cut in session importItems
+            // clamp pageNo to valid range
+            if (pageNo < 1) {
+                pageNo = 1;
+            } else if (pageNo > totalPages) {
+                pageNo = totalPages;
+            }
+
             int start = (pageNo - 1) * pageSize;
-            // index end cut in session importItems
             int end = Math.min(start + pageSize, totalItems);
 
-            // cut
             List<ProductItemDTO> pageItems = importItems.subList(start, end);
 
             request.setAttribute("importItems", pageItems);
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("pageNo", pageNo);
+            request.setAttribute("startIndex", start);
+        } else {
+            request.setAttribute("importItems", importItems);
         }
 
         request.getRequestDispatcher("/WEB-INF/inventory/import-products.jsp").forward(request, response);
