@@ -29,10 +29,6 @@ public class InventoryService {
     public String importProductItems(Long purchaseRequestId, Long warehouseUserId,
                                      String[] productIds, String[] serials, String[] prices) {
 
-        if (productIds == null || serials == null || prices == null) {
-            return "Invalid import data";
-        }
-
         // get information from list import product item
         List<ProductItemDTO> importProductItemDTOs = getImportProductItemDTOs(productIds, serials, prices);
 
@@ -58,23 +54,8 @@ public class InventoryService {
             String priceStr = prices[i];
             String productIdStr = productIds[i];
 
-            // validate required fields 
-            if (serial == null || serial.trim().isEmpty()
-                    || priceStr == null || priceStr.trim().isEmpty()
-                    || productIdStr == null || productIdStr.trim().isEmpty()) {
-                // if fail -> skip
-                continue;
-            }
-
-            long price;
-            long productId;
-            try {
-                price = Long.parseLong(priceStr);
-                productId = Long.parseLong(productIdStr);
-            } catch (NumberFormatException ex) {
-                // if can not parse -> skip
-                continue;
-            }
+            long price = Long.parseLong(priceStr);
+            long productId = Long.parseLong(productIdStr);
 
             ProductItemDTO dto = new ProductItemDTO();
             dto.setProductId(productId);
@@ -84,27 +65,6 @@ public class InventoryService {
             items.add(dto);
         }
         return items;
-    }
-
-    /**
-     * Parse price from UI into Long (integer currency) to match DB BIGINT.
-     * Accepts strings like "1000000", "1,000,000", or "1000000.0".
-     */
-    private Long parsePriceToLong(String raw) {
-        if (raw == null) {
-            return null;
-        }
-        String s = raw.trim().replace(",", "");
-        if (s.isEmpty()) {
-            return null;
-        }
-        try {
-            // Handles "1000", "1000.0", etc. (round half up).
-            BigDecimal bd = new BigDecimal(s);
-            return bd.setScale(0, RoundingMode.HALF_UP).longValueExact();
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     // check valid data from list product items import
