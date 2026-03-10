@@ -247,7 +247,7 @@ public class ImportProductItemServlet extends HttpServlet {
                 if (index >= 0 && index < importItems.size()) {
                     ProductItemDTO dto = importItems.get(index);
                     dto.setSerial(serialsStr[i]);
-                    dto.setImportPrice(Double.parseDouble(pricesStr[i]));
+//                    dto.setImportPrice(Double.parseDouble(pricesStr[i]));
                 }
             }
         }
@@ -297,7 +297,7 @@ public class ImportProductItemServlet extends HttpServlet {
                 if (index >= 0 && index < importItems.size()) {
                     ProductItemDTO dto = importItems.get(index);
                     dto.setSerial(serials[i]);
-                    dto.setImportPrice(Double.parseDouble(prices[i]));
+//                    dto.setImportPrice(Double.parseDouble(prices[i]));
                 }
             }
         }
