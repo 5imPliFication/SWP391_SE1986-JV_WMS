@@ -42,11 +42,16 @@ public class ImportProductItemServlet extends HttpServlet {
         // get session
         HttpSession session = request.getSession();
 
-        if ("delete".equals(action)) {
-            handleDelete(session, request, response);
-            return;
-        } else if ("import".equals(action)) {
-            handleImport(session, request);
+        try {
+            if ("delete".equals(action)) {
+                handleDelete(session, request, response);
+                return;
+            } else if ("import".equals(action)) {
+                handleImport(session, request);
+            }
+        } catch (Exception e) {
+            session.setAttribute("message", "Cannot open import page: " + e.getMessage());
+            session.setAttribute("messageType", "danger");
         }
 
         // get full list from session
@@ -90,10 +95,23 @@ public class ImportProductItemServlet extends HttpServlet {
     private void handleImport(HttpSession session, HttpServletRequest request) {
 
         // get purchaseId from purchase request detail
-        Long purchaseId = Long.parseLong(request.getParameter("purchaseId"));
+        String purchaseIdRaw = request.getParameter("purchaseId");
+        if (purchaseIdRaw == null || purchaseIdRaw.isBlank()) {
+            throw new IllegalArgumentException("Missing purchaseId");
+        }
+
+        Long purchaseId;
+        try {
+            purchaseId = Long.parseLong(purchaseIdRaw);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid purchaseId: " + purchaseIdRaw);
+        }
 
         // get purchase request
         PurchaseRequestDTO purchaseRequestDTO = purchaseRequestService.findPurchaseRequestById(purchaseId);
+        if (purchaseRequestDTO == null) {
+            throw new IllegalStateException("Purchase request not found (id=" + purchaseId + ")");
+        }
 
         // set data for information of purchase request in jsp
         session.setAttribute("purchaseId", purchaseId);
@@ -102,10 +120,19 @@ public class ImportProductItemServlet extends HttpServlet {
 
         // get purchase request items
         List<PurchaseRequestItem> purchaseRequestItems = purchaseRequestService.getItems(purchaseId);
+        if (purchaseRequestItems == null || purchaseRequestItems.isEmpty()) {
+            throw new IllegalStateException("Purchase request has no items (id=" + purchaseId + ")");
+        }
 
         List<ProductItemDTO> importItems = new ArrayList<>();
         // convert purchase request item -> product item
         for (PurchaseRequestItem purchaseRequestItem : purchaseRequestItems) {
+            if (purchaseRequestItem.getQuantity() == null || purchaseRequestItem.getQuantity() <= 0) {
+                continue;
+            }
+            if (purchaseRequestItem.getProductId() == null) {
+                continue;
+            }
             for (int i = 0; i < purchaseRequestItem.getQuantity(); i++) {
                 ProductItemDTO dto = new ProductItemDTO();
                 dto.setProductId(purchaseRequestItem.getProductId());
@@ -115,6 +142,9 @@ public class ImportProductItemServlet extends HttpServlet {
                 // add product item to list importItems
                 importItems.add(dto);
             }
+        }
+        if (importItems.isEmpty()) {
+            throw new IllegalStateException("No importable items for purchase request (id=" + purchaseId + ")");
         }
         // save list items to session for pagination and delete
         session.setAttribute("importItems", importItems);
@@ -168,10 +198,32 @@ public class ImportProductItemServlet extends HttpServlet {
             throws IOException {
 
         // get purchaseId in form save
-        Long purchaseId = Long.parseLong(request.getParameter("purchaseId"));
+        String purchaseIdRaw = request.getParameter("purchaseId");
+        if (purchaseIdRaw == null || purchaseIdRaw.isBlank()) {
+            session.setAttribute("message", "Missing purchaseId");
+            session.setAttribute("messageType", "danger");
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            return;
+        }
+
+        Long purchaseId;
+        try {
+            purchaseId = Long.parseLong(purchaseIdRaw);
+        } catch (NumberFormatException e) {
+            session.setAttribute("message", "Invalid purchaseId: " + purchaseIdRaw);
+            session.setAttribute("messageType", "danger");
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            return;
+        }
 
         // get information warehouse handle import purchase
         User user = (User) session.getAttribute("user");
+        if (user == null) {
+            session.setAttribute("message", "Unauthorized");
+            session.setAttribute("messageType", "danger");
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            return;
+        }
 
         // get full list from session (all pages)
         List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");

@@ -9,14 +9,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class PurchaseRequestItem {
+@AllArgsConstructor
+public class Unit {
 
-    private Long productId; // nullable
-    private String productName;
-    private String brandName;
-    private String categoryName;
-    private Long quantity;
-    private String unit;
+    private Long id;
+    private String name;
+    private String symbol;
+    private String description;
 }

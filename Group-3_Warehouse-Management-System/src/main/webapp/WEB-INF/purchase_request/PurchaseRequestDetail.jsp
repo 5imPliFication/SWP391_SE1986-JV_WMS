@@ -64,20 +64,20 @@
             <!-- ITEMS TABLE -->
             <c:set var="tableHeader" scope="request">
                 <tr>
-                    <th>Brand</th>
-                    <th>Category</th>
+                    <th>#</th>
                     <th>Product</th>
                     <th>Quantity</th>
+                    <th>Unit</th>
                 </tr>
             </c:set>
 
             <c:set var="tableBody" scope="request">
-                <c:forEach items="${items}" var="i">
+                <c:forEach items="${items}" var="i" varStatus="st">
                     <tr>
-                        <td>${i.brandName}</td>
-                        <td>${i.categoryName}</td>
+                        <td>${st.index + 1}</td>
                         <td>${i.productName}</td>
-                        <td class="text-center">${i.quantity} item</td>
+                        <td >${i.quantity}</td>
+                        <td>${i.unit}</td>
                     </tr>
                 </c:forEach>
 
@@ -137,7 +137,7 @@
         </main>
 
 
-            <!-- INCLUDE MODAL -->
+        <!-- INCLUDE MODAL -->
         <jsp:include page="/WEB-INF/purchase_request/PurchaseRequestEdit.jsp"/>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
