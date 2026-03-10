@@ -11,4 +11,8 @@ public class RamService {
     public List<Ram> getAllActiveRams() {
         return ramDAO.getAllActive();
     }
+
+    public List<Ram> getAllRams() {
+        return ramDAO.getAll();
+    }
 }
