@@ -66,10 +66,10 @@ public class InventoryService {
                 continue;
             }
 
-            double price;
+            long price;
             long productId;
             try {
-                price = Double.parseDouble(priceStr);
+                price = Long.parseLong(priceStr);
                 productId = Long.parseLong(productIdStr);
             } catch (NumberFormatException ex) {
                 // if can not parse -> skip
