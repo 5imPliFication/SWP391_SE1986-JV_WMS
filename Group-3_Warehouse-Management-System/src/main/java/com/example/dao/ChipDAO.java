@@ -2,6 +2,7 @@ package com.example.dao;
 
 import com.example.config.DBConfig;
 import com.example.model.Chip;
+import com.example.model.Model;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -68,5 +69,31 @@ public class ChipDAO {
         }
 
         return list;
+    }
+
+    public Chip getById(long chipId) {
+        String sql = """
+            SELECT *
+            FROM chips c
+            WHERE c.id = ?
+            """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            Chip chip = null;
+            ps.setLong(1, chipId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                chip = new Chip();
+                chip.setId(rs.getLong("id"));
+                chip.setName(rs.getString("name"));
+            }
+
+            return chip;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

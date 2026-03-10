@@ -6,6 +6,8 @@ package com.example.service;
 
 import com.example.dao.ChipDAO;
 import com.example.model.Chip;
+import com.example.model.Model;
+
 import java.util.List;
 
 public class ChipService {
@@ -18,5 +20,9 @@ public class ChipService {
 
     public List<Chip> getAllChips() {
         return c.getAll();
+    }
+
+    public Chip getChipById(long chipId) {
+        return c.getById(chipId);
     }
 }

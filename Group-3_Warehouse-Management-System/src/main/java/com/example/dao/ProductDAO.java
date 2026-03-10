@@ -264,8 +264,8 @@ public class ProductDAO {
     // Create new product
     public boolean create(Product product) {
         String sql = """
-                INSERT INTO products (name, description, img_url, brand_id, category_id, is_active, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())
+                INSERT INTO products (name, description, img_url, brand_id, category_id, model_id, chip_id, ram_id, storage_id, size_id, unit_id ,is_active, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
                 """;
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -275,6 +275,12 @@ public class ProductDAO {
             ps.setString(3, product.getImgUrl());
             ps.setLong(4, product.getBrand().getId());
             ps.setLong(5, product.getCategory().getId());
+            ps.setLong(6, product.getModel().getId());
+            ps.setLong(7, product.getChip().getId());
+            ps.setLong(8, product.getRam().getId());
+            ps.setLong(9, product.getStorage().getId());
+            ps.setLong(10, product.getSize().getId());
+            ps.setLong(11, product.getUnit().getId());
 
             int affectedRows = ps.executeUpdate();
 
@@ -728,5 +734,24 @@ public class ProductDAO {
             throw new RuntimeException(e);
         }
         return products;
+    }
+
+    public boolean existedByName(String productName) {
+        String sql = """
+                SELECT *
+                FROM products p
+                WHERE p.name = ?;
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, productName);
+            ResultSet rs = ps.executeQuery();
+
+            return rs.next();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

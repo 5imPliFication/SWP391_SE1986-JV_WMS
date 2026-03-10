@@ -1,13 +1,8 @@
 package com.example.service;
 
-import com.example.dao.BrandDAO;
-import com.example.dao.CategoryDAO;
-import com.example.dao.ProductDAO;
+import com.example.dao.*;
 import com.example.dto.ProductDTO;
-import com.example.model.Brand;
-import com.example.model.Category;
-import com.example.model.Product;
-import com.example.model.ProductItem;
+import com.example.model.*;
 import com.example.util.AppConstants;
 
 import java.util.HashMap;
@@ -18,6 +13,12 @@ public class ProductService {
     private ProductDAO productDAO = new ProductDAO();
     private CategoryDAO categoryDAO = new CategoryDAO();
     private BrandDAO brandDAO = new BrandDAO();
+    private ModelDAO modelDAO = new ModelDAO();
+    private ChipDAO chipDAO = new ChipDAO();
+    private RamDAO ramDAO = new RamDAO();
+    private StorageDAO storageDAO = new StorageDAO();
+    private SizeDAO sizeDAO = new SizeDAO();
+    private UnitDAO unitDAO = new UnitDAO();
 
     public List<Product> findAll(String searchName, String brandName, String categoryName, String modelName, String chipName,
                                  String ramSize, String storageSize, String screenSize, Boolean isActive, int pageNo)
@@ -34,10 +35,30 @@ public class ProductService {
         return productDAO.countProducts(searchName, brandName, categoryName, modelName, chipName, ramSize, storageSize, screenSize, isActive);
     }
 
-    public boolean addProduct(String productName, String productDescription, String imgUrl, long brandId,
-            long categoryId) {
+    public void addProduct(String productDescription, String imgUrl, long brandId,
+            long categoryId, long modelId, long chipId, long ramId, long storageId, long screenSizeId, long unitId) {
         Brand brand = brandDAO.findById(brandId);
         Category category = categoryDAO.findById(categoryId);
+        Model model = modelDAO.getById(modelId);
+        Chip chip = chipDAO.getById(chipId);
+        Ram ram = ramDAO.getById(ramId);
+        Storage storage = storageDAO.getById(storageId);
+        Size size = sizeDAO.getById(screenSizeId);
+        Unit unit = unitDAO.getById(unitId);
+
+        // Generate product name based on the attributes
+        String productName = String.format("%s %s %s %s %s %s",
+                brand.getName(),
+                model.getName(),
+                chip.getName(),
+                ram.getSize(),
+                storage.getSize(),
+                size.getSize());
+
+        // Check if a product with the same name already exists
+        if(productDAO.existedByName(productName)) {
+            throw new IllegalArgumentException("A product with the same name already exists: " + productName);
+        }
 
         Product product = new Product();
         product.setName(productName);
@@ -45,8 +66,14 @@ public class ProductService {
         product.setImgUrl(imgUrl);
         product.setBrand(brand);
         product.setCategory(category);
+        product.setModel(model);
+        product.setChip(chip);
+        product.setRam(ram);
+        product.setStorage(storage);
+        product.setSize(size);
+        product.setUnit(unit);
 
-        return productDAO.create(product);
+        productDAO.create(product);
     }
 
     public Product findProductById(long productId) {

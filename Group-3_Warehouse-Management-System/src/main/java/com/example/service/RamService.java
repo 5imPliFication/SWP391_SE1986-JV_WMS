@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.dao.RamDAO;
+import com.example.model.Model;
 import com.example.model.Ram;
 import java.util.List;
 
@@ -14,5 +15,9 @@ public class RamService {
 
     public List<Ram> getAllRams() {
         return ramDAO.getAll();
+    }
+
+    public Ram getRamById(long ramId) {
+        return ramDAO.getById(ramId);
     }
 }
