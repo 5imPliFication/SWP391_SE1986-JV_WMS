@@ -252,7 +252,7 @@ public class PurchaseRequestDAO {
 
             b.name AS brand_name,
             c.name AS category_name,
-            u.symbol,
+            u.name,
 
             m.name AS model_name,
             ch.name AS chip_name,
@@ -293,7 +293,7 @@ public class PurchaseRequestDAO {
                 p.setCategory(category);
 
                 Unit unit = new Unit();
-                unit.setSymbol(rs.getString("symbol"));
+                unit.setSymbol(rs.getString("name"));
                 p.setUnit(unit);
 
                 Model model = new Model();
@@ -393,7 +393,7 @@ public class PurchaseRequestDAO {
                 pri.product_id,
                 p.name AS product_name,
                 pri.quantity,
-                u.symbol AS unit,
+                u.name AS unit,
                 b.name AS brand_name,
                 c.name AS category_name
             FROM purchase_request_items pri
