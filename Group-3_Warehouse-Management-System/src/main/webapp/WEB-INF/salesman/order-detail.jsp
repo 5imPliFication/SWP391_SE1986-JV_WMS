@@ -536,12 +536,12 @@
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <c:choose>
-                                            <c:when test="${p.totalQuantity > 20}">
+                                            <c:when test="${p.totalQuantity > 20 and p.isActive == true}">
                                                 <span class="product-stock stock-high">
                                                     <i class="fas fa-check-circle"></i> In Stock
                                                 </span>
                                             </c:when>
-                                            <c:when test="${p.totalQuantity > 0}">
+                                            <c:when test="${p.totalQuantity > 0 and p.isActive == true}">
                                                 <span class="product-stock stock-medium">
                                                     <i class="fas fa-exclamation-triangle"></i> Low Stock
                                                 </span>

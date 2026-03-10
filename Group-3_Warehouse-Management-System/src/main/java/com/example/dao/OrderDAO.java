@@ -87,7 +87,6 @@ public class OrderDAO {
             Coupon coupon = new Coupon();
             coupon.setId(couponId);
             coupon.setCode(rs.getString("coupon_code"));
-            coupon.setDiscountType(rs.getString("discount_type"));
             coupon.setDiscountValue(rs.getBigDecimal("discount_value"));
             order.setCoupon(coupon);
         }
@@ -942,7 +941,31 @@ public class OrderDAO {
     }
 
     public List<Order> findBySalesmanAndDateRange(Long salesmanId, Timestamp startDate, Timestamp endDate) {
-        String sql = "SELECT * FROM orders WHERE created_by = ? AND order_date BETWEEN ? AND ? ORDER BY order_date DESC";
+        String sql = """
+        SELECT
+            o.id,
+            o.order_code,
+            o.customer_name,
+            o.customer_phone,
+            o.note,
+            o.status,
+            o.total_price as total,
+            o.order_date,
+            o.processed_at,
+
+            u.id AS created_user_id,
+            u.fullname AS created_user_name,
+
+            c.id AS coupon_id,
+            c.code AS coupon_code,
+            c.discount_type,
+            c.discount_value
+        FROM orders o
+        JOIN users u ON o.created_by = u.id
+        LEFT JOIN coupons c ON o.coupon_id = c.id
+        WHERE o.created_by = ? AND o.order_date BETWEEN ? AND ?
+        ORDER BY o.order_date DESC
+        """;
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -961,7 +984,31 @@ public class OrderDAO {
     }
 
     public List<Order> findRecentBySalesman(Long salesmanId, Timestamp since, int limit) {
-        String sql = "SELECT * FROM orders WHERE created_by = ? AND order_date >= ? ORDER BY order_date DESC LIMIT ?";
+        String sql = """
+        SELECT
+            o.id,
+            o.order_code,
+            o.customer_name,
+            o.customer_phone,
+            o.note,
+            o.status,
+            o.total_price as total,
+            o.order_date,
+            o.processed_at,
+
+            u.id AS created_user_id,
+            u.fullname AS created_user_name,
+
+            c.id AS coupon_id,
+            c.code AS coupon_code,
+            c.discount_type,
+            c.discount_value
+        FROM orders o
+        JOIN users u ON o.created_by = u.id
+        LEFT JOIN coupons c ON o.coupon_id = c.id
+        WHERE o.created_by = ? AND o.order_date >= ?
+        ORDER BY o.order_date DESC LIMIT ?
+        """;
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -980,9 +1027,30 @@ public class OrderDAO {
     }
 
     public List<Order> findRecentOrders(int limit) {
-        String sql = "SELECT o.*, u.fullname FROM orders o " +
-                "LEFT JOIN users u ON o.created_by = u.id " +
-                "ORDER BY o.order_date DESC LIMIT ?";
+        String sql = """
+        SELECT
+            o.id,
+            o.order_code,
+            o.customer_name,
+            o.customer_phone,
+            o.note,
+            o.status,
+            o.total_price as total,
+            o.order_date,
+            o.processed_at,
+
+            u.id AS created_user_id,
+            u.fullname AS created_user_name,
+
+            c.id AS coupon_id,
+            c.code AS coupon_code,
+            c.discount_type,
+            c.discount_value
+        FROM orders o
+        LEFT JOIN users u ON o.created_by = u.id
+        LEFT JOIN coupons c ON o.coupon_id = c.id
+        ORDER BY o.order_date DESC LIMIT ?
+        """;
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -991,8 +1059,8 @@ public class OrderDAO {
                 while (rs.next()) {
                     Order order = mapOrder(rs);
                     User creator = new User();
-                    creator.setId(rs.getLong("created_by"));
-                    creator.setFullName(rs.getString("fullname"));
+                    creator.setId(rs.getLong("created_user_id"));
+                    creator.setFullName(rs.getString("created_user_name"));
                     order.setCreatedBy(creator);
                     orders.add(order);
                 }
