@@ -158,7 +158,7 @@
                                                 class="btn btn-sm btn-primary add-btn"
                                                 data-id="${p.id}"
                                                 data-name="${p.name}"
-                                                data-unit="${p.unit.symbol}">
+                                                data-unit="${p.unit.name}">
                                             Add
                                         </button>
                                     </td>
