@@ -3,7 +3,6 @@ package com.example.service;
 import com.example.dao.InventoryDAO;
 import com.example.dto.OrderDTO;
 import com.example.dto.ProductItemDTO;
-import com.example.dto.ProductDTO;
 import com.example.util.AppConstants;
 import com.example.validator.ImportProductItemValidator;
 import jakarta.servlet.http.Part;
@@ -14,6 +13,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ public class InventoryService {
         // loop any row
         for (int i = 0; i < serials.length; i++) {
             String serial = serials[i];
-            double price = Double.parseDouble(prices[i]);
+            Long price = parsePriceToLong(prices[i]);
             Long productId = Long.parseLong(productIds[i]);
 
             ProductItemDTO dto = new ProductItemDTO();
@@ -67,11 +68,32 @@ public class InventoryService {
         return items;
     }
 
+    /**
+     * Parse price from UI into Long (integer currency) to match DB BIGINT.
+     * Accepts strings like "1000000", "1,000,000", or "1000000.0".
+     */
+    private Long parsePriceToLong(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String s = raw.trim().replace(",", "");
+        if (s.isEmpty()) {
+            return null;
+        }
+        try {
+            // Handles "1000", "1000.0", etc. (round half up).
+            BigDecimal bd = new BigDecimal(s);
+            return bd.setScale(0, RoundingMode.HALF_UP).longValueExact();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     // check valid data from list product items import
     private String validateProductItems(List<ProductItemDTO> productItemDTOs) {
         for (ProductItemDTO item : productItemDTOs) {
             String serial = item.getSerial();
-            double price = item.getImportPrice();
+            Long price = item.getImportPrice();
 
             // validator
             String messageValidator = ImportProductItemValidator.validateImportProductItem(serial, price);
@@ -136,13 +158,14 @@ public class InventoryService {
 
                     // get price of import product item
                     double importPrice = priceCell.getNumericCellValue();
+                    Long importPriceLong = (long) Math.round(importPrice);
 
                     // init dto
                     ProductItemDTO dto = new ProductItemDTO();
                     dto.setProductId(productId);
                     dto.setProductName(productName);
                     dto.setSerial(serial);
-                    dto.setImportPrice(importPrice);
+                    dto.setImportPrice(importPriceLong);
 
                     // add to list
                     importItems.add(dto);

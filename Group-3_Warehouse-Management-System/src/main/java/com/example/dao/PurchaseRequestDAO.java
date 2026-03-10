@@ -554,18 +554,26 @@ public class PurchaseRequestDAO {
     }
 
     public PurchaseRequestDTO findPurchaseById(Long purchaseId) {
-        StringBuilder sql = new StringBuilder("select * from purchase_requests where 1 = 1 ");
-
-        if (purchaseId != null) {
-            sql.append(" and id = ?");
+        if (purchaseId == null) {
+            return null;
         }
-        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            if (purchaseId != null) {
-                ps.setLong(1, purchaseId);
-            }
 
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
+        String sql = """
+                SELECT id, request_code, note
+                FROM purchase_requests
+                WHERE id = ?
+                """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, purchaseId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+
                 PurchaseRequestDTO purchaseRequestDTO = new PurchaseRequestDTO();
                 purchaseRequestDTO.setPurchaseId(rs.getLong("id"));
                 purchaseRequestDTO.setPurchaseCode(rs.getString("request_code"));
@@ -573,7 +581,7 @@ public class PurchaseRequestDAO {
                 return purchaseRequestDTO;
             }
         } catch (Exception e) {
+            throw new RuntimeException("Find purchase request header failed (id=" + purchaseId + ")", e);
         }
-        return null;
     }
 }

@@ -141,10 +141,12 @@
 
                                 </c:forEach>
 
-                            </c:set>
+                        </c:set>
 
                             <!-- COMMON TABLE -->
                             <jsp:include page="/WEB-INF/common/table.jsp"/>
+
+                        </c:if>
 
                         </div>
                     </div>
