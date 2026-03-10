@@ -3,7 +3,7 @@ package com.example.validator;
 public class ImportProductItemValidator {
 
     // check validate input of import product item
-    public static String validateImportProductItem(String serial, Double price){
+    public static String validateImportProductItem(String serial, Long price){
 
         // check serial
         if(serial == null || serial.trim().isEmpty()){

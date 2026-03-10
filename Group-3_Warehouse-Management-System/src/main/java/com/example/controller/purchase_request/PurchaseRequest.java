@@ -2,16 +2,18 @@ package com.example.controller.purchase_request;
 
 import com.example.model.PurchaseRequestItem;
 import com.example.model.User;
-import com.example.service.BrandService;
-import com.example.service.CategoryService;
+import com.example.service.ChipService;
+import com.example.service.ModelService;
 import com.example.service.PurchaseRequestService;
+import com.example.service.RamService;
+import com.example.service.SizeService;
+import com.example.service.StorageService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,10 +25,20 @@ import java.util.Map;
 public class PurchaseRequest extends HttpServlet {
 
     private PurchaseRequestService p;
+    private ModelService m;
+    private ChipService c;
+    private RamService r;
+    private StorageService sto;
+    private SizeService s;
 
     @Override
     public void init() {
         p = new PurchaseRequestService();
+        m = new ModelService();
+        c = new ChipService();
+        r = new RamService();
+        sto = new StorageService();
+        s = new SizeService();
     }
 
     @Override
@@ -36,6 +48,11 @@ public class PurchaseRequest extends HttpServlet {
         request.setAttribute("productName", p.getProductDropdown());
         request.setAttribute("brands", p.getBrandsDropdown());
         request.setAttribute("categories", p.getCategoryDropdown());
+        request.setAttribute("models", m.getAllActiveModels());
+        request.setAttribute("chips", c.getAllActiveChips());
+        request.setAttribute("rams", r.getAllActiveRams());
+        request.setAttribute("storages", sto.getAllActiveStorage());
+        request.setAttribute("sizes", s.getAllActiveSize());
 
         request.getRequestDispatcher("/WEB-INF/purchase_request/CreatePurchaseRequest.jsp")
                 .forward(request, response);

@@ -33,148 +33,235 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content" id="editModalContent">
 
-            <form method="post"
-                  action="${pageContext.request.contextPath}/purchase-request/edit"
-                  id="editForm">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Purchase Request</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body d-flex flex-column" style="height:70vh">
-
-                    <input type="hidden" name="id" value="${prList.id}"/>
-
-                    <!-- NOTE -->
-                    <div class="mb-3">
-                        <label class="fw-semibold">Note</label>
-                        <textarea class="form-control"
-                                  name="note"
-                                  rows="3">${prList.note}</textarea>
+            <div class="row bg-white m-2 p-2 rounded-4 shadow-sm h-75">
+                <!-- LEFT: Filters -->
+                <div class="col-md-4">
+                    <h2>Filter Product</h2>
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold mb-1">Brand</label>
+                        <select class="form-select form-select-sm brand-select" onchange="filterProduct()">
+                            <option value="">Select Brand</option>
+                            <c:forEach var="b" items="${brands}">
+                                <option value="${b.name}">${b.name}</option>
+                            </c:forEach>
+                        </select>
                     </div>
 
-                    <button type="button"
-                            class="btn btn-primary btn-sm align-self-start"
-                            onclick="addModalRow()">
-                        ➕ Thêm dòng
-                    </button>
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold mb-1">Category</label>
+                        <select class="form-select form-select-sm category-select" onchange="filterProduct()" disabled>
+                            <option value="">Select Category</option>
+                            <c:forEach var="c" items="${categories}">
+                                <option value="${c.name}">${c.name}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
 
-                    <div class="table-responsive mt-2"
-                         style="flex:1 1 auto; overflow-y:auto; min-height:0;">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold mb-1">Model</label>
+                        <select class="form-select form-select-sm model-select" onchange="filterProduct()" disabled>
+                            <option value="">Select Model</option>
+
+                            <c:forEach var="m" items="${models}">
+                                <option value="${m.name}" data-brand="${m.brandName}">
+                                    ${m.name}
+                                </option>
+                            </c:forEach>
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold mb-1">Chip</label>
+                        <select class="form-select form-select-sm chip-select" onchange="filterProduct()" disabled>
+                            <option value="">Select Chip</option>
+                            <c:forEach var="c" items="${chips}">
+                                <option value="${c.name}">${c.name}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold mb-1">Ram</label>
+                        <select class="form-select form-select-sm ram-select" onchange="filterProduct()" disabled>
+                            <option value="">Select Ram</option>
+                            <c:forEach var="r" items="${rams}">
+                                <option value="${r.size}">${r.size}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold mb-1">Storage</label>
+                        <select class="form-select form-select-sm storage-select" onchange="filterProduct()" disabled>
+                            <option value="">Select Storage</option>
+                            <c:forEach var="s" items="${storages}">
+                                <option value="${s.size}">${s.size}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold mb-1">Size</label>
+                        <select class="form-select form-select-sm size-select" onchange="filterProduct()" disabled>
+                            <option value="">Select Size</option>
+                            <c:forEach var="s" items="${sizes}">
+                                <option value="${s.size}">${s.size}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+
+                </div>
+
+
+                <!-- RIGHT: Table -->
+                <div class="col-md-8">
+                    <div class="table-container">
 
                         <c:set var="tableHeader" scope="request">
                             <tr>
-                                <th class="col-brand">Brand</th>
-                                <th class="col-category">Category</th>
                                 <th class="col-product">Product</th>
-                                <th class="col-qty">Quantity</th>
                                 <th class="col-action">Action</th>
                             </tr>
                         </c:set>
-
+                        <c:set var="tbodyId" value="productTableBody" scope="request"/>
 
                         <c:set var="tableBody" scope="request">
 
-                            <c:forEach items="${items}" var="i">
-
-                                <tr>
-
-                                    <!-- BRAND -->
+                            <c:forEach var="p" items="${productName}">
+                                <tr
+                                    data-brand="${p.brand.name}"
+                                    data-category="${p.category.name}"
+                                    data-model="${p.model.name}"
+                                    data-chip="${p.chip.name}"
+                                    data-ram="${p.ram.size}"
+                                    data-storage="${p.storage.size}"
+                                    data-size="${p.size.size}"
+                                    >
+                                    <td>${p.name}</td>
                                     <td>
-                                        <select class="form-select brand-select"
-                                                onchange="filterModalProduct(this)">
-                                            <option value="">Select Brand</option>
-
-                                            <c:forEach var="b" items="${brandName}">
-                                                <option value="${b.id}"
-                                                        <c:if test="${b.name eq i.brandName}">selected</c:if>>
-                                                    ${b.name}
-                                                </option>
-                                            </c:forEach>
-                                        </select>
-                                    </td>
-
-
-                                    <!-- CATEGORY -->
-                                    <td>
-                                        <select class="form-select category-select"
-                                                onchange="filterModalProduct(this)">
-                                            <option value="">Select Category</option>
-
-                                            <c:forEach var="c" items="${CategoryName}">
-                                                <option value="${c.id}"
-                                                        <c:if test="${c.name eq i.categoryName}">selected</c:if>>
-                                                    ${c.name}
-                                                </option>
-                                            </c:forEach>
-                                        </select>
-                                    </td>
-
-
-                                    <!-- PRODUCT -->
-                                    <td>
-                                        <select name="productId[]"
-                                                class="form-select product-select"
-                                                onchange="onModalProductChange(this)">
-
-                                            <option value="">Select Product</option>
-
-                                            <c:forEach var="p" items="${productName}">
-                                                <option value="${p.id}"
-                                                        <c:if test="${p.id == i.productId}">selected</c:if>>
-                                                    ${p.name}
-                                                </option>
-                                            </c:forEach>
-
-                                        </select>
-                                    </td>
-
-
-                                    <!-- QUANTITY -->
-                                    <td>
-                                        <input type="number"
-                                               name="quantity[]"
-                                               class="form-control quantity-input"
-                                               min="1"
-                                               value="${i.quantity}">
-                                    </td>
-
-
-                                    <!-- ACTION -->
-                                    <td class="text-center">
                                         <button type="button"
-                                                class="btn btn-outline-danger btn-sm"
-                                                onclick="removeModalRow(this)">
-                                            ❌
+                                                class="btn btn-sm btn-primary add-btn"
+                                                data-id="${p.id}"
+                                                data-name="${p.name}"
+                                                data-unit="${p.unit.name}">
+                                            Add
                                         </button>
                                     </td>
-
                                 </tr>
-
                             </c:forEach>
 
+                            <tr id="noDataRow" style="display:none">
+                                <td colspan="2" class="text-center text-muted">
+                                    Vui lòng chọn bên trái
+                                </td>
+                            </tr>
+
                         </c:set>
-
-
                         <jsp:include page="/WEB-INF/common/table.jsp"/>
+
+                    </div>
+                </div>
+            </div>
+            <div class="row bg-white m-2 p-2 rounded-4 shadow-sm">
+                <h2>Create Purchase Request</h2>
+
+                <form method="post"
+                      action="${pageContext.request.contextPath}/purchase-request/edit"
+                      id="editForm">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Purchase Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
-                </div>
+                    <div class="modal-body d-flex flex-column" style="height:70vh">
 
-                <div class="modal-footer">
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-                        Cancel
-                    </button>
+                        <input type="hidden" name="id" value="${prList.id}"/>
 
-                    <button type="submit"
-                            class="btn btn-success">
-                        💾 Save Changes
-                    </button>
-                </div>
-            </form>
+                        <!-- NOTE -->
+                        <div class="mb-3">
+                            <label class="fw-semibold">Note</label>
+                            <textarea class="form-control"
+                                      name="note"
+                                      rows="3">${prList.note}</textarea>
+                        </div>
+                        <div class="table-responsive mt-2"
+                             style="flex:1 1 auto; overflow-y:auto; min-height:0;">
+
+                            <c:set var="tableHeader" scope="request">
+                                <tr>
+                                    <th class="col-product">Product</th>
+                                    <th class="col-qty">Quantity</th>
+                                    <th class="col-qty">Unit</th>
+                                    <th class="col-action">Action</th>
+                                </tr>
+                            </c:set>
+
+                            <c:set var="tbodyId" value="itemsBody" scope="request"/>
+                            <c:set var="tableBody" scope="request">
+                                <tbody id="modalItemsBody">
+
+                                    <c:forEach items="${items}" var="i">
+                                        <tr>
+
+                                            <td>
+                                                <c:forEach var="p" items="${productName}">
+                                                    <c:if test="${p.id == i.productId}">
+                                                        ${p.name}
+                                                    </c:if>
+                                                </c:forEach>
+                                            </td>
+
+
+                                            <!-- QUANTITY -->
+                                            <td>
+                                                <input type="number"
+                                                       name="quantity[]"
+                                                       class="form-control quantity-input"
+                                                       min="1"
+                                                       value="${i.quantity}">
+                                            </td>   
+
+                                            <td class="unit-cell">
+                                                ${i.unit}
+                                            </td>
+
+                                            <!-- ACTION -->
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">
+                                                    Remove
+                                                </button>
+                                            </td>
+
+                                        </tr>
+
+                                    </c:forEach>
+                                </tbody>
+                            </c:set>
+
+
+                            <jsp:include page="/WEB-INF/common/table.jsp"/>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button type="submit"
+                                class="btn btn-success">
+                            💾 Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>  
+
         </div>
     </div>
 </div>
@@ -182,214 +269,219 @@
 
 <!-- ================= SCRIPT ================= -->
 <script>
-    /* ================= FILTER PRODUCT ================= */
-
-    const allProducts = [
-    <c:forEach var="p" items="${productName}" varStatus="s">
-    {
-    id: ${p.id},
-            name: "${p.name}",
-            brandId: ${p.brand.id},
-            categoryId: ${p.category.id}
-    }<c:if test="${!s.last}">,</c:if>
-    </c:forEach>
-    ];
-</script>
-<script>
-    function filterModalProduct(selectEl) {
-
-        const row = selectEl.closest("tr");
-        const brandId = Number(row.querySelector(".brand-select").value);
-        const categoryId = Number(row.querySelector(".category-select").value);
-        const productSelect = row.querySelector(".product-select");
-        const currentValue = productSelect.value;
-        productSelect.innerHTML = '<option value="">Select Product</option>';
-        if (!brandId || !categoryId) {
-            productSelect.disabled = true;
-            return;
-        }
-
-        const filteredProducts = allProducts.filter(p =>
-            p.brandId === brandId &&
-                    p.categoryId === categoryId
-        );
-        if (filteredProducts.length === 0) {
-            const qtyInput = row.querySelector(".quantity-input");
-            const option = document.createElement("option");
-            option.value = "";
-            option.textContent = "⚠ Không có sản phẩm";
-            option.selected = true;
-
-            productSelect.appendChild(option);
-
-            productSelect.disabled = true;
-
-            qtyInput.value = "";
-            qtyInput.disabled = true;
-
-            return;
-        }
-
-
-        filteredProducts.forEach(p => {
-
-            const option = document.createElement("option");
-            option.value = p.id;
-            option.textContent = p.name;
-
-            if (p.id == currentValue) {
-                option.selected = true;
-            }
-
-            productSelect.appendChild(option);
-
-        });
-
-        productSelect.disabled = false;
-        refreshModalProductOptions();
-    }
-
-
-    /* ================= PRODUCT CHANGE ================= */
-
-    function onModalProductChange(select) {
-
-        const row = select.closest("tr");
-        const qtyInput = row.querySelector(".quantity-input");
-        if (select.value !== "") {
-
-            qtyInput.disabled = false;
-            qtyInput.focus();
-        } else {
-
-            qtyInput.disabled = true;
-            qtyInput.value = "";
-        }
-
-        refreshModalProductOptions();
-    }
-
-
-    /* ================= PREVENT DUPLICATE PRODUCT ================= */
-
-    function refreshModalProductOptions() {
-
-        const selects = document.querySelectorAll("#modalItemsBody .product-select");
-        const selectedValues =
-                Array.from(selects)
-                .map(s => s.value)
-                .filter(v => v !== "");
-        selects.forEach(select => {
-
-            const currentValue = select.value;
-            Array.from(select.options).forEach(option => {
-
-                if (option.value === "")
-                    return;
-                option.disabled =
-                        selectedValues.includes(option.value) &&
-                        option.value !== currentValue;
-            });
-        });
-    }
-
-
-    /* ================= ADD ROW ================= */
-
-    function addModalRow() {
-
-        const tbody = document.getElementById("modalItemsBody");
-        const row = document.createElement("tr");
-        row.innerHTML = `
-
-<td>
-<select class="form-select brand-select"
-    onchange="filterModalProduct(this)">
-<option value="">Select Brand</option>
-
-    <c:forEach var="b" items="${brandName}">
-    <option value="${b.id}">${b.name}</option>
-    </c:forEach>
-
-</select>
-</td>
-
-<td>
-<select class="form-select category-select"
-    onchange="filterModalProduct(this)">
-<option value="">Select Category</option>
-
-    <c:forEach var="c" items="${CategoryName}">
-<option value="${c.id}">${c.name}</option>
-    </c:forEach>
-
-</select>
-</td>
-
-<td>
-<select name="productId[]"
-    class="form-select product-select"
-    onchange="onModalProductChange(this)"
-    disabled>
-
-<option value="">Select Product</option>
-
-</select>
-</td>
-
-<td>
-<input type="number"
-   name="quantity[]"
-   class="form-control quantity-input"
-   min="1"
-   disabled>
-</td>
-
-<td class="text-center">
-<button type="button"
-    class="btn btn-outline-danger btn-sm"
-    onclick="removeModalRow(this)">
-❌
-</button>
-</td>
-
-`;
-        tbody.appendChild(row);
-        row.scrollIntoView({behavior: "smooth", block: "end"});
-    }
-
-
-    function removeModalRow(btn) {
-        btn.closest("tr").remove();
-    }
-
-    function initModalFilter() {
-
-        const rows = document.querySelectorAll("#modalItemsBody tr");
-
-        rows.forEach(row => {
-
-            const brandSelect = row.querySelector(".brand-select");
-            const categorySelect = row.querySelector(".category-select");
-
-            if (brandSelect.value && categorySelect.value) {
-                filterModalProduct(brandSelect);
-            }
-
-        });
-
-    }
-
     document.addEventListener("DOMContentLoaded", function () {
 
-        const modal = document.getElementById("editModal");
+        filterProduct();
 
-        modal.addEventListener("shown.bs.modal", function () {
-            initModalFilter();
+        document.querySelectorAll(".add-btn").forEach(btn => {
+            btn.addEventListener("click", function () {
+
+                const id = this.dataset.id;
+                const name = this.dataset.name;
+                const unit = this.dataset.unit;
+
+                addProduct(id, name, unit);
+            });
         });
 
     });
 
 
+    document.addEventListener("DOMContentLoaded", function () {
 
+        filterProduct();
+
+        document.querySelector(".brand-select").addEventListener("change", function () {
+
+            let brand = this.value;
+
+            let categorySelect = document.querySelector(".category-select");
+            let modelSelect = document.querySelector(".model-select");
+            let chipSelect = document.querySelector(".chip-select");
+            let ramSelect = document.querySelector(".ram-select");
+            let storageSelect = document.querySelector(".storage-select");
+            let sizeSelect = document.querySelector(".size-select");
+
+            // reset tất cả select phía sau
+            categorySelect.value = "";
+            modelSelect.value = "";
+            chipSelect.value = "";
+            ramSelect.value = "";
+            storageSelect.value = "";
+            sizeSelect.value = "";
+
+            let options = modelSelect.querySelectorAll("option");
+
+            options.forEach(opt => {
+
+                let modelBrand = opt.dataset.brand;
+
+                if (!modelBrand)
+                    return;
+
+                if (!brand || modelBrand === brand) {
+                    opt.style.display = "";
+                } else {
+                    opt.style.display = "none";
+                }
+
+            });
+
+            filterProduct();
+        });
+
+
+    });
+
+
+    function filterProduct() {
+
+        let brandSelect = document.querySelector(".brand-select");
+        let categorySelect = document.querySelector(".category-select");
+        let modelSelect = document.querySelector(".model-select");
+        let chipSelect = document.querySelector(".chip-select");
+        let ramSelect = document.querySelector(".ram-select");
+        let storageSelect = document.querySelector(".storage-select");
+        let sizeSelect = document.querySelector(".size-select");
+
+        let brand = brandSelect.value;
+        let category = categorySelect.value;
+        let model = modelSelect.value;
+        let chip = chipSelect.value;
+        let ram = ramSelect.value;
+        let storage = storageSelect.value;
+        let size = sizeSelect.value;
+
+        // Nếu chưa chọn brand → không hiển thị data
+        // Nếu chưa chọn brand → reset toàn bộ filter
+        if (!brand) {
+
+            categorySelect.value = "";
+            modelSelect.value = "";
+            chipSelect.value = "";
+            ramSelect.value = "";
+            storageSelect.value = "";
+            sizeSelect.value = "";
+
+            categorySelect.disabled = true;
+            modelSelect.disabled = true;
+            chipSelect.disabled = true;
+            ramSelect.disabled = true;
+            storageSelect.disabled = true;
+            sizeSelect.disabled = true;
+
+            document.querySelectorAll("#productTableBody tr[data-brand]")
+                    .forEach(row => row.style.display = "none");
+
+            let noDataRow = document.getElementById("noDataRow");
+
+            if (noDataRow) {
+                noDataRow.style.display = "";
+            }
+
+            return;
+        }
+
+
+        // ENABLE SELECT
+        categorySelect.disabled = !brand;
+        modelSelect.disabled = !category;
+        chipSelect.disabled = !model;
+        ramSelect.disabled = !chip;
+        storageSelect.disabled = !ram;
+        sizeSelect.disabled = !storage;
+
+        let rows = document.querySelectorAll("#productTableBody tr[data-brand]");
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+
+            let show = true;
+
+            if (brand && row.dataset.brand !== brand)
+                show = false;
+            if (category && row.dataset.category !== category)
+                show = false;
+            if (model && row.dataset.model !== model)
+                show = false;
+            if (chip && row.dataset.chip !== chip)
+                show = false;
+            if (ram && row.dataset.ram !== ram)
+                show = false;
+            if (storage && row.dataset.storage !== storage)
+                show = false;
+            if (size && row.dataset.size !== size)
+                show = false;
+
+            row.style.display = show ? "" : "none";
+
+            if (show)
+                visibleCount++;
+
+        });
+
+        let noDataRow = document.getElementById("noDataRow");
+
+        if (noDataRow) {
+            noDataRow.style.display = visibleCount === 0 ? "" : "none";
+        }
+    }
+
+
+    function addProduct(id, name, unit) {
+
+        const table = document.querySelector("#itemsBody");
+
+        if (!table) {
+            console.log("itemsBody not found");
+            return;
+        }
+
+        const emptyRow = document.getElementById("emptyRow");
+        if (emptyRow)
+            emptyRow.remove();
+
+        const existing = table.querySelector('input[name="productId[]"][value="' + id + '"]');
+
+        if (existing) {
+
+            const qtyInput = existing.closest("tr").querySelector('input[name="quantity[]"]');
+            qtyInput.value = parseInt(qtyInput.value) + 1;
+            return;
+        }
+
+        const row = document.createElement("tr");
+
+        row.innerHTML =
+                '<td>' + name +
+                '<input type="hidden" name="productId[]" value="' + id + '">' +
+                '</td>' +
+                '<td>' +
+                '<input type="number" name="quantity[]" class="form-control form-control-sm" value="1" min="1">' +
+                '</td>' +
+                '<td>' + unit + '</td>' +
+                '<td>' +
+                '<button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">Remove</button>' +
+                '</td>';
+
+        table.appendChild(row);
+    }
+
+    function removeRow(btn) {
+
+        const table = document.querySelector("#itemsBody");
+
+        btn.closest("tr").remove();
+
+        if (table.children.length === 0) {
+
+            const row = document.createElement("tr");
+            row.id = "emptyRow";
+
+            row.innerHTML =
+                    '<td colspan="4" class="text-center text-muted">No Data</td>';
+
+            table.appendChild(row);
+        }
+    }
 </script>

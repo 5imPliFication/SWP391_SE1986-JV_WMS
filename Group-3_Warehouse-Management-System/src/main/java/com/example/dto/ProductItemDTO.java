@@ -11,9 +11,12 @@ public class ProductItemDTO {
     private Long productId;
     private String productName;
     private String serial;
-    private Double importPrice;
+    /**
+     * Imported price stored as integer (e.g., VND) to match DB column BIGINT.
+     */
+    private Long importPrice;
 
-    public ProductItemDTO(Long productId, String serial, Double importPrice) {
+    public ProductItemDTO(Long productId, String serial, Long importPrice) {
         this.productId = productId;
         this.serial = serial;
         this.importPrice = importPrice;

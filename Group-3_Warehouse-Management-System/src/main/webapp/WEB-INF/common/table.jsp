@@ -79,7 +79,7 @@
             ${requestScope.tableHeader}
         </thead>
 
-        <tbody class="text-left">
+        <tbody  id="${tbodyId}" class="text-left">
             ${requestScope.tableBody}
         </tbody>
     </table>
