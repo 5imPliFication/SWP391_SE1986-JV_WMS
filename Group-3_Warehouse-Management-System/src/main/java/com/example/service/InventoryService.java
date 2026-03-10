@@ -54,12 +54,30 @@ public class InventoryService {
         // loop any row
         for (int i = 0; i < serials.length; i++) {
             String serial = serials[i];
-            double price = Double.parseDouble(prices[i]);
-            Long productId = Long.parseLong(productIds[i]);
+            String priceStr = prices[i];
+            String productIdStr = productIds[i];
+
+            // validate required fields 
+            if (serial == null || serial.trim().isEmpty()
+                    || priceStr == null || priceStr.trim().isEmpty()
+                    || productIdStr == null || productIdStr.trim().isEmpty()) {
+                // if fail -> skip
+                continue;
+            }
+
+            double price;
+            long productId;
+            try {
+                price = Double.parseDouble(priceStr);
+                productId = Long.parseLong(productIdStr);
+            } catch (NumberFormatException ex) {
+                // if can not parse -> skip
+                continue;
+            }
 
             ProductItemDTO dto = new ProductItemDTO();
             dto.setProductId(productId);
-            dto.setSerial(serial);
+            dto.setSerial(serial.trim());
             dto.setImportPrice(price);
 
             items.add(dto);
