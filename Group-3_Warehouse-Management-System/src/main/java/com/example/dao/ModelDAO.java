@@ -2,6 +2,7 @@ package com.example.dao;
 
 import com.example.config.DBConfig;
 import com.example.model.Model;
+import com.example.model.ProductItem;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -83,4 +84,37 @@ public class ModelDAO {
         return list;
     }
 
+    public Model getById(long modelId) {
+        String sql = """
+            SELECT 
+                m.id,
+                m.name,
+                m.is_active,
+                m.brand_id,
+                b.name AS brand_name
+            FROM models m
+            JOIN brands b ON m.brand_id = b.id
+            WHERE m.id = ?
+            """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            Model model = null;
+            ps.setLong(1, modelId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                model = new Model();
+                model.setId(rs.getLong("id"));
+                model.setName(rs.getString("name"));
+                model.setActive(rs.getBoolean("is_active"));
+                model.setBrandName(rs.getString("brand_name"));
+            }
+
+            return model;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

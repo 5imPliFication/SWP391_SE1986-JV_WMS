@@ -5,27 +5,24 @@
 package com.example.service;
 
 import com.example.dao.SizeDAO;
-import com.example.model.Model;
+import com.example.dao.UnitDAO;
 import com.example.model.Size;
+import com.example.model.Unit;
+
 import java.util.List;
 
 /**
  *
  * @author PC
  */
-public class SizeService {
+public class UnitService {
 
-    private SizeDAO s = new SizeDAO();
+    private UnitDAO unitDAO = new UnitDAO();
 
-    public List<Size> getAllActiveSize() {
-        return s.getAllActive();
+    public List<Unit> getAllUnit() {
+        return unitDAO.getAll();
     }
-
-    public List<Size> getAllSizes() {
-        return s.getAll();
-    }
-
-    public Size getSizeById(long sizeId) {
-        return s.getById(sizeId);
+    public Unit getUnitById(long sizeId) {
+        return unitDAO.getById(sizeId);
     }
 }

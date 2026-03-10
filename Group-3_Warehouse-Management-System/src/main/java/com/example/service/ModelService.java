@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.dao.ModelDAO;
+import com.example.model.Brand;
 import com.example.model.Model;
 import java.util.List;
 
@@ -14,5 +15,9 @@ public class ModelService {
 
     public List<Model> getAllModels() {
         return m.getAll();
+    }
+
+    public Model getModelById(long modelId) {
+        return m.getById(modelId);
     }
 }
