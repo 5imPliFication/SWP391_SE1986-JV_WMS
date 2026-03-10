@@ -84,7 +84,7 @@ public class PurchaseRequestService {
     }
 
     public List<Product> getProductDropdown() {
-        return p.getActiveProductDropdown();
+        return p.getActiveProduct();
     }
 
     public List<Brand> getBrandsDropdown() {

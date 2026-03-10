@@ -8,9 +8,14 @@ import com.example.config.DBConfig;
 import com.example.dto.PurchaseRequestDTO;
 import com.example.model.Brand;
 import com.example.model.Category;
+import com.example.model.Chip;
+import com.example.model.Model;
 import com.example.model.Product;
 import com.example.model.PurchaseRequest;
 import com.example.model.PurchaseRequestItem;
+import com.example.model.Ram;
+import com.example.model.Size;
+import com.example.model.Storage;
 import com.example.model.Unit;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -236,21 +241,39 @@ public class PurchaseRequestDAO {
         return 0;
     }
 
-    public List<Product> getActiveProductDropdown() {
+    public List<Product> getActiveProduct() {
 
         List<Product> list = new ArrayList<>();
 
         String sql = """
-               SELECT 
-                    p.id,
-                    p.name,
-                    p.brand_id,
-                    p.category_id,
-                    u.symbol
-                FROM products p
-                LEFT JOIN units u ON p.unit_id = u.id
-                WHERE p.is_active = true
-                ORDER BY p.name
+        SELECT 
+            p.id,
+            p.name,
+
+            b.name AS brand_name,
+            c.name AS category_name,
+            u.symbol,
+
+            m.name AS model_name,
+            ch.name AS chip_name,
+            r.size AS ram_size,
+            s.size AS storage_size,
+            sz.size AS size_value
+
+        FROM products p
+
+        LEFT JOIN brands b ON p.brand_id = b.id
+        LEFT JOIN categories c ON p.category_id = c.id
+        LEFT JOIN units u ON p.unit_id = u.id
+
+        LEFT JOIN models m ON p.model_id = m.id
+        LEFT JOIN chips ch ON p.chip_id = ch.id
+        LEFT JOIN rams r ON p.ram_id = r.id
+        LEFT JOIN storages s ON p.storage_id = s.id
+        LEFT JOIN sizes sz ON p.size_id = sz.id
+
+        WHERE p.is_active = true
+        ORDER BY p.name
     """;
 
         try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -262,16 +285,36 @@ public class PurchaseRequestDAO {
                 p.setName(rs.getString("name"));
 
                 Brand brand = new Brand();
-                brand.setId(rs.getLong("brand_id"));
+                brand.setName(rs.getString("brand_name"));
                 p.setBrand(brand);
 
                 Category category = new Category();
-                category.setId(rs.getLong("category_id"));
+                category.setName(rs.getString("category_name"));
                 p.setCategory(category);
 
                 Unit unit = new Unit();
                 unit.setSymbol(rs.getString("symbol"));
                 p.setUnit(unit);
+
+                Model model = new Model();
+                model.setName(rs.getString("model_name"));
+                p.setModel(model);
+
+                Chip chip = new Chip();
+                chip.setName(rs.getString("chip_name"));
+                p.setChip(chip);
+
+                Ram ram = new Ram();
+                ram.setSize(rs.getString("ram_size"));
+                p.setRam(ram);
+
+                Storage storage = new Storage();
+                storage.setSize(rs.getString("storage_size"));
+                p.setStorage(storage);
+
+                Size size = new Size();
+                size.setSize(rs.getString("size_value"));
+                p.setSize(size);
 
                 list.add(p);
             }
