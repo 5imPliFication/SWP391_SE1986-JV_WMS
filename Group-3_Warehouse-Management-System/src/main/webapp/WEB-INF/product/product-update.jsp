@@ -25,11 +25,6 @@
                             <form action="${pageContext.request.contextPath}/products/update" method="post">
 
                                 <input type="hidden" name="productId" value="${product.id}">
-                                <input type="hidden" name="pageNo" value="${param.pageNo}">
-                                <input type="hidden" name="searchName" value="${param.searchName}">
-                                <input type="hidden" name="brandName" value="${param.categoryName}">
-                                <input type="hidden" name="categoryName" value="${param.categoryName}">
-                                <input type="hidden" name="isActive" value="${param.isActive}">
 
                                 <!-- Product Name -->
                                 <div class="mb-3">
@@ -38,8 +33,8 @@
                                            name="productName"
                                            class="form-control"
                                            value="${product.name}"
-                                           placeholder="Enter product name"
-                                           required>
+                                           placeholder="Automatically generated with format: [Brand] [Model] [Chip] [Ram] [Storage] [Screen]"
+                                           readonly>
                                 </div>
 
                                 <!-- Description -->
@@ -90,6 +85,84 @@
                                     </select>
                                 </div>
 
+                                <!-- Model -->
+                                <div class="mb-3">
+                                    <label class="form-label">Model</label>
+                                    <select name="modelId" class="form-select">
+                                        <c:forEach items="${models}" var="c">
+                                            <option value="${c.id}"
+                                                    <c:if test="${product.model.id == c.id}">selected</c:if>>
+                                                    ${c.name}
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+
+                                <!-- Chip -->
+                                <div class="mb-3">
+                                    <label class="form-label">Chip</label>
+                                    <select name="chipId" class="form-select">
+                                        <c:forEach items="${chips}" var="c">
+                                            <option value="${c.id}"
+                                                    <c:if test="${product.chip.id == c.id}">selected</c:if>>
+                                                    ${c.name}
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+
+                                <!-- Ram -->
+                                <div class="mb-3">
+                                    <label class="form-label">Ram</label>
+                                    <select name="ramId" class="form-select">
+                                        <c:forEach items="${rams}" var="c">
+                                            <option value="${c.id}"
+                                                    <c:if test="${product.ram.id == c.id}">selected</c:if>>
+                                                    ${c.size}
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+
+                                <!-- Storage -->
+                                <div class="mb-3">
+                                    <label class="form-label">Storage</label>
+                                    <select name="storageId" class="form-select">
+                                        <c:forEach items="${storages}" var="c">
+                                            <option value="${c.id}"
+                                                    <c:if test="${product.storage.id == c.id}">selected</c:if>>
+                                                    ${c.size}
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+
+                                <!-- Screen Size -->
+                                <div class="mb-3">
+                                    <label class="form-label">Screen Size</label>
+                                    <select name="sizeId" class="form-select">
+                                        <c:forEach items="${sizes}" var="c">
+                                            <option value="${c.id}"
+                                                    <c:if test="${product.size.id == c.id}">selected</c:if>>
+                                                    ${c.size}
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+
+                                <!-- Product Unit -->
+                                <div class="mb-3">
+                                    <label class="form-label">Product Unit</label>
+                                    <select name="unitId" class="form-select">
+                                        <c:forEach items="${units}" var="c">
+                                            <option value="${c.id}"
+                                                    <c:if test="${product.unit.id == c.id}">selected</c:if>>
+                                                    ${c.name}
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+
                                 <%--Status--%>
                                 <div class="mb-3">
                                     <label class="form-label">Status</label>
@@ -101,7 +174,7 @@
 
                                 <!-- Buttons -->
                                 <div class="d-flex justify-content-between">
-                                    <a href="${pageContext.request.contextPath}/products?pageNo=${param.pageNo}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&isActive=${param.isActive}"
+                                    <a href="${pageContext.request.contextPath}/products"
                                        class="btn btn-secondary">
                                         Back to products list
                                     </a>

@@ -116,7 +116,7 @@
 
                         <!-- Screen Size -->
                         <div class="mb-3">
-                            <label class="form-label">Screen size</label>
+                            <label class="form-label">Screen Size</label>
                             <select name="sizeId" class="form-select">
                                 <c:forEach items="${sizes}" var="c">
                                     <option value="${c.id}">${c.size}</option>
