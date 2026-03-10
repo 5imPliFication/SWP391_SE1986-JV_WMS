@@ -19,4 +19,8 @@ public class SizeService {
     public List<Size> getAllActiveSize() {
         return s.getAllActive();
     }
+
+    public List<Size> getAllSizes() {
+        return s.getAll();
+    }
 }

@@ -22,20 +22,33 @@ public class ProductDAO {
         return ts == null ? null : ts.toLocalDateTime();
     }
 
-    public List<Product> getAll(String searchName, String brandName,
-                                String categoryName, Boolean isActive, int pageNo) {
+    public List<Product> getAll(String searchName, String brandName, String categoryName,String modelName, String chipName,
+                                String ramSize, String storageSize, String screenSize, Boolean isActive, int pageNo)
+    {
 
         List<Product> products = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("""
                     SELECT p.id, p.name, p.description, p.img_url, p.is_active, p.total_quantity,
-                           b.name AS brand_name,
-                           c.name AS category_name,
-                           p.created_at, p.updated_at
-                    FROM products p
-                    JOIN brands b ON p.brand_id = b.id
-                    JOIN categories c ON p.category_id = c.id
-                    WHERE 1=1
+                              	b.name AS brand_name,
+                              	c.name AS category_name,
+                                  m.name AS model_name,
+                                  ch.name AS chip_name,
+                                  r.size AS ram_size,
+                                  s.size AS storage_size,
+                                  sz.size AS screen_size,
+                                  u.name AS unit_name,
+                              	p.created_at, p.updated_at
+                      FROM products p
+                      JOIN brands b ON p.brand_id = b.id
+                      JOIN categories c ON p.category_id = c.id
+                      JOIN models m ON p.model_id = m.id
+                      JOIN chips ch ON p.chip_id = ch.id
+                      JOIN rams r ON p.ram_id = r.id
+                      JOIN storages s ON p.storage_id = s.id
+                      JOIN sizes sz ON p.size_id = sz.id
+                      JOIN units u on p.unit_id = u.id
+                      WHERE 1=1
                 """);
 
         if (searchName != null && !searchName.trim().isEmpty()) {
@@ -46,6 +59,21 @@ public class ProductDAO {
         }
         if (categoryName != null && !categoryName.trim().isEmpty()) {
             sql.append(" AND c.name = ? ");
+        }
+        if (modelName != null && !modelName.trim().isEmpty()) {
+            sql.append(" AND m.name = ? ");
+        }
+        if (chipName != null && !chipName.trim().isEmpty()) {
+            sql.append(" AND ch.name = ? ");
+        }
+        if (ramSize != null && !ramSize.trim().isEmpty()) {
+            sql.append(" AND r.size = ? ");
+        }
+        if (storageSize != null && !storageSize.trim().isEmpty()) {
+            sql.append(" AND s.size = ? ");
+        }
+        if (screenSize != null && !screenSize.trim().isEmpty()) {
+            sql.append(" AND sz.size = ? ");
         }
         if (isActive != null) {
             sql.append(" AND p.is_active = ? ");
@@ -67,6 +95,21 @@ public class ProductDAO {
             }
             if (categoryName != null && !categoryName.trim().isEmpty()) {
                 ps.setString(index++, categoryName);
+            }
+            if(modelName != null && !modelName.trim().isEmpty()) {
+                ps.setString(index++, modelName);
+            }
+            if(chipName != null && !chipName.trim().isEmpty()) {
+                ps.setString(index++, chipName);
+            }
+            if(ramSize != null && !ramSize.trim().isEmpty()) {
+                ps.setString(index++, ramSize);
+            }
+            if(storageSize != null && !storageSize.trim().isEmpty()) {
+                ps.setString(index++, storageSize);
+            }
+            if(screenSize != null && !screenSize.trim().isEmpty()) {
+                ps.setString(index++, screenSize);
             }
             if (isActive != null) {
                 ps.setBoolean(index++, isActive);
@@ -92,12 +135,35 @@ public class ProductDAO {
 
                 Brand brand = new Brand();
                 brand.setName(rs.getString("brand_name"));
+                product.setBrand(brand);
 
                 Category category = new Category();
                 category.setName(rs.getString("category_name"));
-
-                product.setBrand(brand);
                 product.setCategory(category);
+
+                Model model = new Model();
+                model.setName(rs.getString("model_name"));
+                product.setModel(model);
+
+                Chip chip = new Chip();
+                chip.setName(rs.getString("chip_name"));
+                product.setChip(chip);
+
+                Ram ram = new Ram();
+                ram.setSize(rs.getString("ram_size"));
+                product.setRam(ram);
+
+                Storage storage = new Storage();
+                storage.setSize(rs.getString("storage_size"));
+                product.setStorage(storage);
+
+                Size size = new Size();
+                size.setSize(rs.getString("screen_size"));
+                product.setSize(size);
+
+                Unit unit = new Unit();
+                unit.setName(rs.getString("unit_name"));
+                product.setUnit(unit);
 
                 products.add(product);
             }
@@ -109,15 +175,21 @@ public class ProductDAO {
         }
     }
 
-    public int countProducts(String searchName, String brandName,
-                             String categoryName, Boolean isActive) {
+    public int countProducts(String searchName, String brandName, String categoryName, String modelName, String chipName,
+                             String ramSize, String storageSize, String screenSize, Boolean isActive) {
 
         StringBuilder sql = new StringBuilder("""
                     SELECT COUNT(*)
                     FROM products p
-                    JOIN brands b ON p.brand_id = b.id
-                    JOIN categories c ON p.category_id = c.id
-                    WHERE 1=1
+                      JOIN brands b ON p.brand_id = b.id
+                      JOIN categories c ON p.category_id = c.id
+                      JOIN models m ON p.model_id = m.id
+                      JOIN chips ch ON p.chip_id = ch.id
+                      JOIN rams r ON p.ram_id = r.id
+                      JOIN storages s ON p.storage_id = s.id
+                      JOIN sizes sz ON p.size_id = sz.id
+                      JOIN units u on p.unit_id = u.id
+                      WHERE 1=1
                 """);
 
         if (searchName != null && !searchName.trim().isEmpty()) {
@@ -128,6 +200,21 @@ public class ProductDAO {
         }
         if (categoryName != null && !categoryName.trim().isEmpty()) {
             sql.append(" AND c.name = ? ");
+        }
+        if (modelName != null && !modelName.trim().isEmpty()) {
+            sql.append(" AND m.name = ? ");
+        }
+        if (chipName != null && !chipName.trim().isEmpty()) {
+            sql.append(" AND ch.name = ? ");
+        }
+        if (ramSize != null && !ramSize.trim().isEmpty()) {
+            sql.append(" AND r.size = ? ");
+        }
+        if (storageSize != null && !storageSize.trim().isEmpty()) {
+            sql.append(" AND s.size = ? ");
+        }
+        if (screenSize != null && !screenSize.trim().isEmpty()) {
+            sql.append(" AND sz.size = ? ");
         }
         if (isActive != null) {
             sql.append(" AND p.is_active = ? ");
@@ -146,6 +233,21 @@ public class ProductDAO {
             }
             if (categoryName != null && !categoryName.trim().isEmpty()) {
                 ps.setString(index++, categoryName);
+            }
+            if(modelName != null && !modelName.trim().isEmpty()) {
+                ps.setString(index++, modelName);
+            }
+            if(chipName != null && !chipName.trim().isEmpty()) {
+                ps.setString(index++, chipName);
+            }
+            if(ramSize != null && !ramSize.trim().isEmpty()) {
+                ps.setString(index++, ramSize);
+            }
+            if(storageSize != null && !storageSize.trim().isEmpty()) {
+                ps.setString(index++, storageSize);
+            }
+            if(screenSize != null && !screenSize.trim().isEmpty()) {
+                ps.setString(index++, screenSize);
             }
             if (isActive != null) {
                 ps.setBoolean(index++, isActive);
@@ -185,12 +287,25 @@ public class ProductDAO {
 
     public Product findById(long productId) {
         String sql = """
-                SELECT p.id as product_id, p.name as product_name, p.description, p.img_url, p.is_active, p.total_quantity,
-                       b.id as brand_id, b.name as brand_name,
-                       c.id as category_id, c.name as category_name
-                FROM products p
-                JOIN brands b on p.brand_id = b.id
-                JOIN categories c on p.category_id = c.id
+                SELECT p.id AS product_id, p.name AS product_name, p.description, p.img_url, p.is_active, p.total_quantity,
+                            b.name AS brand_name, b.id AS brand_id,
+                            c.name AS category_name, c.id AS category_id,
+                              m.name AS model_name, m.id AS model_id,
+                              ch.name AS chip_name, ch.id AS chip_id,
+                              r.size AS ram_size, r.id AS ram_id,
+                              s.size AS storage_size, s.id AS storage_id,
+                              sz.size AS screen_size, sz.id AS size_id,
+                              u.name AS unit_name, u.id AS unit_id,
+                            p.created_at, p.updated_at
+                  FROM products p
+                  JOIN brands b ON p.brand_id = b.id
+                  JOIN categories c ON p.category_id = c.id
+                  JOIN models m ON p.model_id = m.id
+                  JOIN chips ch ON p.chip_id = ch.id
+                  JOIN rams r ON p.ram_id = r.id
+                  JOIN storages s ON p.storage_id = s.id
+                  JOIN sizes sz ON p.size_id = sz.id
+                  JOIN units u on p.unit_id = u.id
                 WHERE p.id = ?;
                 """;
         try (Connection conn = DBConfig.getDataSource().getConnection();
@@ -219,6 +334,40 @@ public class ProductDAO {
                 category.setId(rs.getLong("category_id"));
                 category.setName(rs.getString("category_name"));
                 product.setCategory(category);
+
+                Model model = new Model();
+                model.setId(rs.getLong("model_id"));
+                model.setName(rs.getString("model_name"));
+                product.setModel(model);
+
+                Chip chip = new Chip();
+                chip.setId(rs.getLong("chip_id"));
+                chip.setName(rs.getString("chip_name"));
+                product.setChip(chip);
+
+                Ram ram = new Ram();
+                ram.setId(rs.getLong("ram_id"));
+                ram.setSize(rs.getString("ram_size"));
+                product.setRam(ram);
+
+                Storage storage = new Storage();
+                storage.setId(rs.getLong("storage_id"));
+                storage.setSize(rs.getString("storage_size"));
+                product.setStorage(storage);
+
+                Size size = new Size();
+                size.setId(rs.getLong("size_id"));
+                size.setSize(rs.getString("screen_size"));
+                product.setSize(size);
+
+                Unit unit = new Unit();
+                unit.setId(rs.getLong("unit_id"));
+                unit.setName(rs.getString("unit_name"));
+                product.setUnit(unit);
+
+                // SAFE timestamp
+                product.setCreatedAt(getLocalDateTime(rs, "created_at"));
+                product.setUpdatedAt(getLocalDateTime(rs, "updated_at"));
             }
 
             return product;

@@ -39,4 +39,32 @@ public class RamDAO {
 
         return list;
     }
+
+    public List<Ram> getAll() {
+        List<Ram> list = new ArrayList<>();
+
+        String sql = """
+                SELECT *
+                FROM rams
+                """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Ram ram = new Ram();
+                ram.setId(rs.getLong("id"));
+                ram.setSize(rs.getString("size"));
+
+                list.add(ram);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return list;
+    }
 }
