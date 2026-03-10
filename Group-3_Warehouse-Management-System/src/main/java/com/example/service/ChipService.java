@@ -15,4 +15,8 @@ public class ChipService {
     public List<Chip> getAllActiveChips() {
         return c.getAllActive();
     }
+
+    public List<Chip> getAllChips() {
+        return c.getAll();
+    }
 }

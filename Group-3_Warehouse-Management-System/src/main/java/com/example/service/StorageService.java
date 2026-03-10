@@ -19,4 +19,8 @@ public class StorageService {
     public List<Storage> getAllActiveStorage() {
         return s.getAllActive();
     }
+
+    public List<Storage> getAllStorage() {
+        return s.getAll();
+    }
 }

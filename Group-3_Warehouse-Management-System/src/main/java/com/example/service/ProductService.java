@@ -19,16 +19,19 @@ public class ProductService {
     private CategoryDAO categoryDAO = new CategoryDAO();
     private BrandDAO brandDAO = new BrandDAO();
 
-    public List<Product> findAll(String searchName, String brandName, String categoryName, Boolean isActive,
-            int pageNo) {
-        return productDAO.getAll(searchName, brandName, categoryName, isActive, pageNo);
+    public List<Product> findAll(String searchName, String brandName, String categoryName, String modelName, String chipName,
+                                 String ramSize, String storageSize, String screenSize, Boolean isActive, int pageNo)
+    {
+        return productDAO.getAll(searchName, brandName, categoryName, modelName, chipName, ramSize, storageSize, screenSize, isActive, pageNo);
     }
+
     public List<Product> findAll() {
         return productDAO.getAllProducts();
     }
 
-    public int getTotalProducts(String searchName, String brandName, String categoryName, Boolean isActive) {
-        return productDAO.countProducts(searchName, brandName, categoryName, isActive);
+    public int getTotalProducts(String searchName, String brandName, String categoryName, String modelName, String chipName,
+                                String ramSize, String storageSize, String screenSize, Boolean isActive) {
+        return productDAO.countProducts(searchName, brandName, categoryName, modelName, chipName, ramSize, storageSize, screenSize, isActive);
     }
 
     public boolean addProduct(String productName, String productDescription, String imgUrl, long brandId,

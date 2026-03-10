@@ -11,4 +11,8 @@ public class ModelService {
     public List<Model> getAllActiveModels() {
         return m.getAllActive();
     }
+
+    public List<Model> getAllModels() {
+        return m.getAll();
+    }
 }
