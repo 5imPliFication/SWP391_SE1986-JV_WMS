@@ -182,22 +182,6 @@
 
                 </c:if>
 
-
-                <!-- Import Product -->
-                <c:if test="${sessionScope.user != null
-                              and sessionScope.user.role != null
-                              and sessionScope.user.role.active
-                              and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
-
-                      <li>
-                          <a href="${pageContext.request.contextPath}/inventory/import">
-                              <span>Import Product</span>
-                          </a>
-                      </li>
-
-                </c:if>
-
-
                 <!-- Purchase Request -->
                 <c:if test="${sessionScope.user != null
                               and sessionScope.user.role != null

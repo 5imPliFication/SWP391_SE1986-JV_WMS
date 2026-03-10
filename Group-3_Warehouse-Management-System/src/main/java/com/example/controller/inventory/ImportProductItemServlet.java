@@ -42,15 +42,22 @@ public class ImportProductItemServlet extends HttpServlet {
         // get session
         HttpSession session = request.getSession();
 
-        if ("delete".equals(action)) {
-            handleDelete(session, request, response);
-            return;
-        } else if ("import".equals(action)) {
-            handleImport(session, request);
+        try {
+            if ("delete".equals(action)) {
+                handleDelete(session, request, response);
+                return;
+            } else if ("import".equals(action)) {
+                handleImport(session, request);
+            }
+        } catch (Exception e) {
+            session.setAttribute("message", "Cannot open import page: " + e.getMessage());
+            session.setAttribute("messageType", "danger");
         }
 
-        // pagination for importItems
+        // get full list from session
         List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
+
+        // pagination for display 
         if (importItems != null && !importItems.isEmpty()) {
             int pageSize = AppConstants.PAGE_SIZE;
             int totalItems = importItems.size();
@@ -58,7 +65,6 @@ public class ImportProductItemServlet extends HttpServlet {
 
             // get pageNo
             String pageNoStr = request.getParameter("pageNo");
-            // default value
             int pageNo = AppConstants.DEFAULT_PAGE_NO;
             if (pageNoStr != null && !pageNoStr.isEmpty()) {
                 try {
@@ -68,17 +74,18 @@ public class ImportProductItemServlet extends HttpServlet {
                 }
             }
 
-            // index start cut in session importItems
+
             int start = (pageNo - 1) * pageSize;
-            // index end cut in session importItems
             int end = Math.min(start + pageSize, totalItems);
 
-            // cut
             List<ProductItemDTO> pageItems = importItems.subList(start, end);
 
             request.setAttribute("importItems", pageItems);
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("pageNo", pageNo);
+            request.setAttribute("startIndex", start);
+        } else {
+            request.setAttribute("importItems", importItems);
         }
 
         request.getRequestDispatcher("/WEB-INF/inventory/import-products.jsp").forward(request, response);
@@ -88,10 +95,23 @@ public class ImportProductItemServlet extends HttpServlet {
     private void handleImport(HttpSession session, HttpServletRequest request) {
 
         // get purchaseId from purchase request detail
-        Long purchaseId = Long.parseLong(request.getParameter("purchaseId"));
+        String purchaseIdRaw = request.getParameter("purchaseId");
+        if (purchaseIdRaw == null || purchaseIdRaw.isBlank()) {
+            throw new IllegalArgumentException("Missing purchaseId");
+        }
+
+        Long purchaseId;
+        try {
+            purchaseId = Long.parseLong(purchaseIdRaw);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid purchaseId: " + purchaseIdRaw);
+        }
 
         // get purchase request
         PurchaseRequestDTO purchaseRequestDTO = purchaseRequestService.findPurchaseRequestById(purchaseId);
+        if (purchaseRequestDTO == null) {
+            throw new IllegalStateException("Purchase request not found (id=" + purchaseId + ")");
+        }
 
         // set data for information of purchase request in jsp
         session.setAttribute("purchaseId", purchaseId);
@@ -100,10 +120,19 @@ public class ImportProductItemServlet extends HttpServlet {
 
         // get purchase request items
         List<PurchaseRequestItem> purchaseRequestItems = purchaseRequestService.getItems(purchaseId);
+        if (purchaseRequestItems == null || purchaseRequestItems.isEmpty()) {
+            throw new IllegalStateException("Purchase request has no items (id=" + purchaseId + ")");
+        }
 
         List<ProductItemDTO> importItems = new ArrayList<>();
         // convert purchase request item -> product item
         for (PurchaseRequestItem purchaseRequestItem : purchaseRequestItems) {
+            if (purchaseRequestItem.getQuantity() == null || purchaseRequestItem.getQuantity() <= 0) {
+                continue;
+            }
+            if (purchaseRequestItem.getProductId() == null) {
+                continue;
+            }
             for (int i = 0; i < purchaseRequestItem.getQuantity(); i++) {
                 ProductItemDTO dto = new ProductItemDTO();
                 dto.setProductId(purchaseRequestItem.getProductId());
@@ -113,6 +142,9 @@ public class ImportProductItemServlet extends HttpServlet {
                 // add product item to list importItems
                 importItems.add(dto);
             }
+        }
+        if (importItems.isEmpty()) {
+            throw new IllegalStateException("No importable items for purchase request (id=" + purchaseId + ")");
         }
         // save list items to session for pagination and delete
         session.setAttribute("importItems", importItems);
@@ -136,9 +168,13 @@ public class ImportProductItemServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
-        // get action
+
+        String pagingParam = request.getParameter("paging");
         String action = request.getParameter("action");
-        if ("save".equals(action)) {
+
+        if (pagingParam != null) {
+            handlePaging(session, request, response);
+        } else if ("save".equals(action)) {
             handleSave(session, request, response);
         } else if ("file".equals(action)) {
             handleFile(session, request, response);
@@ -162,15 +198,70 @@ public class ImportProductItemServlet extends HttpServlet {
             throws IOException {
 
         // get purchaseId in form save
-        Long purchaseId = Long.parseLong(request.getParameter("purchaseId"));
+        String purchaseIdRaw = request.getParameter("purchaseId");
+        if (purchaseIdRaw == null || purchaseIdRaw.isBlank()) {
+            session.setAttribute("message", "Missing purchaseId");
+            session.setAttribute("messageType", "danger");
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            return;
+        }
+
+        Long purchaseId;
+        try {
+            purchaseId = Long.parseLong(purchaseIdRaw);
+        } catch (NumberFormatException e) {
+            session.setAttribute("message", "Invalid purchaseId: " + purchaseIdRaw);
+            session.setAttribute("messageType", "danger");
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            return;
+        }
 
         // get information warehouse handle import purchase
         User user = (User) session.getAttribute("user");
+        if (user == null) {
+            session.setAttribute("message", "Unauthorized");
+            session.setAttribute("messageType", "danger");
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            return;
+        }
 
-        // get value
-        String[] productIds = request.getParameterValues("productId");
-        String[] serials = request.getParameterValues("serial");
-        String[] prices = request.getParameterValues("price");
+        // get full list from session (all pages)
+        List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
+
+        if (importItems == null || importItems.isEmpty()) {
+            session.setAttribute("message", "No product items to save");
+            session.setAttribute("messageType", "danger");
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            return;
+        }
+
+        // update data in current page into session before save
+        String[] indexesStr = request.getParameterValues("rowIndex");
+        String[] serialsStr = request.getParameterValues("serial");
+        String[] pricesStr = request.getParameterValues("price");
+
+        if (indexesStr != null && serialsStr != null && pricesStr != null) {
+            for (int i = 0; i < indexesStr.length; i++) {
+                // index of row
+                int index = Integer.parseInt(indexesStr[i]);
+                if (index >= 0 && index < importItems.size()) {
+                    ProductItemDTO dto = importItems.get(index);
+                    dto.setSerial(serialsStr[i]);
+                    dto.setImportPrice(Double.parseDouble(pricesStr[i]));
+                }
+            }
+        }
+
+        String[] productIds = new String[importItems.size()];
+        String[] serials = new String[importItems.size()];
+        String[] prices = new String[importItems.size()];
+
+        for (int i = 0; i < importItems.size(); i++) {
+            ProductItemDTO dto = importItems.get(i);
+            productIds[i] = dto.getProductId() != null ? String.valueOf(dto.getProductId()) : null;
+            serials[i] = dto.getSerial();
+            prices[i] = dto.getImportPrice() != null ? String.valueOf(dto.getImportPrice()) : null;
+        }
 
         // call service to handle import
         String resultSave = inventoryService.importProductItems(purchaseId, user.getId(), productIds, serials, prices);
@@ -186,5 +277,38 @@ public class ImportProductItemServlet extends HttpServlet {
         // delete session after save success
         session.removeAttribute("importItems");
         response.sendRedirect(request.getContextPath() + "/inventory/import");
+    }
+
+    // update importItems in session when changing page
+    private void handlePaging(HttpSession session, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
+
+        // index
+        String[] indexes = request.getParameterValues("rowIndex");
+        String[] serials = request.getParameterValues("serial");
+        String[] prices = request.getParameterValues("price");
+
+        if (indexes != null && serials != null && prices != null) {
+            for (int i = 0; i < indexes.length; i++) {
+                // index of row
+                int index = Integer.parseInt(indexes[i]);
+                if (index >= 0 && index < importItems.size()) {
+                    ProductItemDTO dto = importItems.get(index);
+                    dto.setSerial(serials[i]);
+                    dto.setImportPrice(Double.parseDouble(prices[i]));
+                }
+            }
+        }
+
+        session.setAttribute("importItems", importItems);
+
+        // redirect to page click on pagination
+        String pageNo = request.getParameter("paging");
+        if (pageNo == null || pageNo.isEmpty()) {
+            pageNo = "1";
+        }
+        response.sendRedirect(request.getContextPath() + "/inventory/import?pageNo=" + pageNo);
     }
 }
