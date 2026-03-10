@@ -213,15 +213,15 @@ public class CouponDAO {
     }
 
     /**
-     * Check if a user has already used a coupon
+     * Check if a customer has already used a coupon
      */
-    public boolean hasUserUsedCoupon(Long userId, Long couponId) {
-        String sql = "SELECT COUNT(*) FROM coupon_user_usage WHERE user_id = ? AND coupon_id = ?";
+    public boolean hasCustomerUsedCoupon(String customerName, Long couponId) {
+        String sql = "SELECT COUNT(*) FROM coupon_user_usage WHERE customer_name = ? AND coupon_id = ?";
 
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setLong(1, userId);
+            ps.setString(1, customerName);
             ps.setLong(2, couponId);
 
             ResultSet rs = ps.executeQuery();
@@ -232,45 +232,45 @@ public class CouponDAO {
             return false;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to check coupon user usage", e);
+            throw new RuntimeException("Failed to check coupon customer usage", e);
         }
     }
 
     /**
-     * Record that a user has used a coupon
+     * Record that a customer has used a coupon
      */
-    public void recordUserCouponUsage(Long userId, Long couponId) {
-        String sql = "INSERT INTO coupon_user_usage (user_id, coupon_id, used_at) VALUES (?, ?, NOW())";
+    public void recordCustomerCouponUsage(String customerName, Long couponId) {
+        String sql = "INSERT INTO coupon_user_usage (customer_name, coupon_id, used_at) VALUES (?, ?, NOW())";
 
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setLong(1, userId);
+            ps.setString(1, customerName);
             ps.setLong(2, couponId);
 
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to record coupon user usage", e);
+            throw new RuntimeException("Failed to record coupon customer usage", e);
         }
     }
 
     /**
-     * Remove user's coupon usage record (when coupon is removed from order)
+     * Remove customer's coupon usage record (when coupon is removed from order)
      */
-    public void removeUserCouponUsage(Long userId, Long couponId) {
-        String sql = "DELETE FROM coupon_user_usage WHERE user_id = ? AND coupon_id = ?";
+    public void removeCustomerCouponUsage(String customerName, Long couponId) {
+        String sql = "DELETE FROM coupon_user_usage WHERE customer_name = ? AND coupon_id = ?";
 
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setLong(1, userId);
+            ps.setString(1, customerName);
             ps.setLong(2, couponId);
 
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to remove coupon user usage", e);
+            throw new RuntimeException("Failed to remove coupon customer usage", e);
         }
     }
 

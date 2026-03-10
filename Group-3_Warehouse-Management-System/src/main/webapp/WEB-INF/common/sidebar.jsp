@@ -244,15 +244,15 @@
 
                 <!-- Summary Report -->
                 <c:if test="${sessionScope.user != null
-                                and sessionScope.user.role != null
-                                and sessionScope.user.role.active
-                                and fn:contains(sessionScope.userPermissions, 'READ_REPORT')}">
+                              and sessionScope.user.role != null
+                              and sessionScope.user.role.active
+                              and fn:contains(sessionScope.userPermissions, 'READ_REPORT')}">
 
-                    <li>
-                        <a href="${pageContext.request.contextPath}/summary_report">
-                            <span>Summary Report</span>
-                        </a>
-                    </li>
+                      <li>
+                          <a href="${pageContext.request.contextPath}/summary_report">
+                              <span>Summary Report</span>
+                          </a>
+                      </li>
 
                 </c:if>
 
@@ -261,9 +261,7 @@
         </aside>
 
 
-        <div class="main-header sticky-top h-100">
-            <jsp:include page="/WEB-INF/common/header.jsp"/>
-        </div>
+        <jsp:include page="/WEB-INF/common/header.jsp"/>
 
 
         <script>

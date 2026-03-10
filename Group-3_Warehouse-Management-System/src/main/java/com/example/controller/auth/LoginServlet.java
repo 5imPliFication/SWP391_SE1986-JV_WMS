@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.example.service.ActivityLogService;
 import com.example.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -25,6 +26,7 @@ import static com.example.util.PasswordUtil.checkPassword;
 public class LoginServlet extends HttpServlet {
 
     private final UserService userService = new UserService();
+    private final ActivityLogService activityLogService = new ActivityLogService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -61,11 +63,7 @@ public class LoginServlet extends HttpServlet {
 
         HttpSession session = req.getSession(true);
         session.setAttribute("user", user);
-        try (Connection conn = DBConfig.getDataSource().getConnection()) {
-            new UserActivityDAO().log(conn, user, "Login");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        activityLogService.log(user, "Login");
 
         // --- XỬ LÝ VÀ DEBUG PERMISSIONS ---
         List<String> userPermissions = new ArrayList<>();

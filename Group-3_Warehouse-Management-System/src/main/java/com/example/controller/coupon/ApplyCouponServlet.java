@@ -1,6 +1,7 @@
 package com.example.controller.coupon;
 
 import com.example.model.Coupon;
+import com.example.model.Order;
 import com.example.model.User;
 import com.example.service.CouponService;
 import com.example.service.OrderService;
@@ -58,18 +59,26 @@ public class ApplyCouponServlet extends HttpServlet {
                 return;
             }
 
-            // Validate coupon (with per-user check)
-            Optional<Coupon> couponOpt = couponService.validateCoupon(couponCode, orderTotal, user.getId());
+            // Get order to retrieve customer name
+            Order order = orderService.getOrderDetail(orderId, user.getId(), user.getRole().getName());
+            if (order == null) {
+                String errorMsg = URLEncoder.encode("Order not found", StandardCharsets.UTF_8);
+                resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&error=" + errorMsg);
+                return;
+            }
+
+            // Validate coupon (with per-customer check using customer name)
+            Optional<Coupon> couponOpt = couponService.validateCoupon(couponCode, orderTotal, order.getCustomerName());
 
             if (couponOpt.isEmpty()) {
-                String errorMsg = URLEncoder.encode("Invalid, expired, inapplicable, or already used coupon code", StandardCharsets.UTF_8);
+                String errorMsg = URLEncoder.encode("Invalid, expired, inapplicable, or already used coupon code for this customer", StandardCharsets.UTF_8);
                 resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&error=" + errorMsg);
                 return;
             }
 
             Coupon coupon = couponOpt.get();
 
-            // Apply coupon to order (with user ID)
+            // Apply coupon to order (with customer name)
             orderService.applyCouponToOrder(orderId, coupon.getId(), user.getId());
 
             String successMsg = URLEncoder.encode("Coupon applied successfully!", StandardCharsets.UTF_8);

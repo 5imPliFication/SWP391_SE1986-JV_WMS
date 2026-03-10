@@ -252,7 +252,7 @@ public class PurchaseRequestDAO {
 
             b.name AS brand_name,
             c.name AS category_name,
-            u.name,
+            u.name AS unit_name,
 
             m.name AS model_name,
             ch.name AS chip_name,
@@ -293,7 +293,7 @@ public class PurchaseRequestDAO {
                 p.setCategory(category);
 
                 Unit unit = new Unit();
-                unit.setSymbol(rs.getString("name"));
+                unit.setName(rs.getString("unit_name"));
                 p.setUnit(unit);
 
                 Model model = new Model();

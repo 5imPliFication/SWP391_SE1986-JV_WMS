@@ -15,6 +15,4 @@ public class Unit {
 
     private Long id;
     private String name;
-    private String symbol;
-    private String description;
 }
