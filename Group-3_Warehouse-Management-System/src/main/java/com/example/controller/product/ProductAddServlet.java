@@ -72,12 +72,6 @@ public class ProductAddServlet extends HttpServlet {
         long sizeId = Long.parseLong(request.getParameter("sizeId"));
         long unitId = Long.parseLong(request.getParameter("unitId"));
 
-//        if(productService.addProduct(description, imgUrl, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId)) {
-//            request.getSession().setAttribute("success-message", "Product added successfully");
-//        } else {
-//            request.getSession().setAttribute("error-message", "Product add failed");
-//        }
-
         try {
             productService.addProduct(description, imgUrl, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId, unitId);
             request.getSession().setAttribute("successMessage", "Product added successfully");
