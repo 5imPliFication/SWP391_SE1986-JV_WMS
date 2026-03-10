@@ -2,7 +2,6 @@ package com.example.dao;
 
 import com.example.config.DBConfig;
 import com.example.dto.OrderDTO;
-import com.example.dto.ProductDTO;
 import com.example.dto.ProductItemDTO;
 import com.example.util.AppConstants;
 
@@ -96,12 +95,8 @@ public class InventoryDAO {
              PreparedStatement ps = conn.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
 
             // set value
-            if (warehouseUserId != null) {
-                ps.setLong(1, purchaseRequestId);
-            }
-            if (warehouseUserId != null) {
-                ps.setLong(2, warehouseUserId);
-            }
+            ps.setLong(1, purchaseRequestId);
+            ps.setLong(2, warehouseUserId);
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
@@ -140,8 +135,8 @@ public class InventoryDAO {
             for (ProductItemDTO item : productItemDTOs) {
                 int index = 1;
                 ps.setString(index++, item.getSerial());
-                ps.setDouble(index++, item.getImportPrice());
-                ps.setDouble(index++, item.getImportPrice());
+                ps.setLong(index++, item.getImportPrice());
+                ps.setLong(index++, item.getImportPrice());
                 ps.setBoolean(index++, true);
                 ps.setLong(index, item.getProductId());
                 ps.addBatch();
