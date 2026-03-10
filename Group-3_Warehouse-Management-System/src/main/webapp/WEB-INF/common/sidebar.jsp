@@ -37,6 +37,10 @@
                 margin-left:300px;
                 padding:20px;
             }
+            .bootstrap-select .dropdown-menu{
+                z-index:9999 !important;
+            }
+
 
         </style>
 
