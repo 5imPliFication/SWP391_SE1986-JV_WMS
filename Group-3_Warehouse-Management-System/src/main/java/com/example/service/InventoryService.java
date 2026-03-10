@@ -79,7 +79,7 @@ public class InventoryService {
             ProductItemDTO dto = new ProductItemDTO();
             dto.setProductId(productId);
             dto.setSerial(serial.trim());
-//            dto.setImportPrice(price);
+            dto.setImportPrice(price);
 
             items.add(dto);
         }

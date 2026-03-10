@@ -645,7 +645,7 @@ public class OrderDAO {
 
     //for pagination
     public int countOrders(String status, String searchCode) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders WHERE status not like 'DRAFT'");
 
         if (status != null && !status.isEmpty()) {
             sql.append(" AND status = ?");
@@ -682,7 +682,7 @@ public class OrderDAO {
 
     public List<Order> getOrders(String status, String searchCode, String sortBy, String sortDir, int offset, int limit) {
         StringBuilder sql = new StringBuilder(
-                "SELECT * FROM orders o WHERE 1=1"
+                "SELECT * FROM orders o WHERE o.status not like 'DRAFT'"
         );
 
         if (status != null && !status.isEmpty()) {
