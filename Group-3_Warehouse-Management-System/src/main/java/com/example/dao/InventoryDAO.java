@@ -100,41 +100,49 @@ public class InventoryDAO {
             ps.setLong(1, purchaseRequestId);
             ps.setLong(2, warehouseUserId);
             ps.executeUpdate();
+
+            // get id of goods receipt
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
                     receiptId = rs.getLong(1);
                 }
             }
         }
+
+        // return id of goods receipt
         return receiptId;
     }
 
     // save goods receipt item correspond receiptId
     private Map<Long, Long> insertGoodsReceiptItems(Long receiptId, Map<Long, Long> quantityByProduct)
             throws SQLException {
-        // productId -> goods receipt item id
+        // create map to save productId and goods receipt item id after insert
         Map<Long, Long> productIdGoodsReceiptItemId = new HashMap<>();
         String sql = "insert into goods_receipt_items(goods_receipt_id, product_id, actual_quantity) values (?, ?, ?)";
         try (Connection conn = DBConfig.getDataSource().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
+            // create list to save productId for get generated keys after insert
             List<Long> productIds = new ArrayList<>();
             // for each any product (key: productId, value: quantity)
             for (Map.Entry<Long, Long> entry : quantityByProduct.entrySet()) {
                 int index = 1;
                 ps.setLong(index++, receiptId);
+                // set productId
                 ps.setLong(index++, entry.getKey());
+                // set quantity
                 ps.setLong(index, entry.getValue());
                 ps.addBatch();
-                // save productId
+                // add productId to list for get generated keys after insert
                 productIds.add(entry.getKey());
             }
             ps.executeBatch();
 
-            // get keys
+            // get generated keys and map productId to goods receipt item id
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 int i = 0;
                 while (rs.next()) {
+                    // get generated id of goods receipt item
                     Long generatedId = rs.getLong(1);
                     // map productId to goods receipt item id
                     productIdGoodsReceiptItemId.put(productIds.get(i), generatedId);
@@ -161,6 +169,7 @@ public class InventoryDAO {
                 ps.setBoolean(index++, true);
                 ps.setLong(index++, item.getProductId());
 
+                // get goods receipt item id correspond productId
                 Long goodsReceiptItemId = receiptItemIds.get(item.getProductId());
                 if (goodsReceiptItemId != null) {
                     ps.setLong(index, goodsReceiptItemId);
