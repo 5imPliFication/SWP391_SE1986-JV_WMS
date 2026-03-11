@@ -169,12 +169,13 @@ public class GoodsHistoryDAO {
     public List<GoodsReceiptItemDTO> getGoodsReceiptItems(Long receiptId) {
         List<GoodsReceiptItemDTO> items = new ArrayList<>();
         String sql = """
-                select gri.id, pr.name, pri.quantity as expected_quantity, gri.actual_quantity from
+                select gri.id, pr.name, pri.quantity as expected_quantity, gri.actual_quantity, u.name as unit_name from
                goods_receipt_items gri
                join goods_receipts gr
                on gri.goods_receipt_id = gr.id
                join products pr
                on gri.product_id = pr.id
+               join units u on pr.unit_id = u.id
                join purchase_request_items pri
                on pri.purchase_request_id = gr.purchase_request_id and pri.product_id = gri.product_id
                 where gri.goods_receipt_id = ?;
@@ -191,6 +192,7 @@ public class GoodsHistoryDAO {
                     GoodsReceiptItemDTO dto = new GoodsReceiptItemDTO();
                     dto.setId(rs.getLong("id"));
                     dto.setProductName(rs.getString("name"));
+                    dto.setUnitName(rs.getString("unit_name"));
                     dto.setExpectedQuantity(rs.getLong("expected_quantity"));
                     dto.setActualQuantity(rs.getLong("actual_quantity"));
                     // get product items by receipt item id

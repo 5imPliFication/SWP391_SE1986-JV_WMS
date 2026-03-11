@@ -15,6 +15,7 @@ public class GoodsReceiptItemDTO {
     private Long id;
     private Long productId;
     private String productName;
+    private String unitName;
     private Long expectedQuantity;
     private Long actualQuantity;
     private List<ProductItemDTO> productItems;

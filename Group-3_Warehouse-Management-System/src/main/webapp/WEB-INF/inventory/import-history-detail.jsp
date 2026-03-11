@@ -85,6 +85,7 @@
                         <th>Product Name / Serial</th>
                         <th style="width: 200px;" class="text-center">Expected Quantity</th>
                         <th style="width: 200px;" class="text-center">Actual Quantity</th>
+                        <th style="width: 150px;" class="text-center">Unit</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -101,6 +102,7 @@
                                         <span id="icon-${item.id}">&#9658;</span>
                                             ${item.productName}
                                     </td>
+                                    <td class="text-center align-middle">${item.unitName}</td>
                                     <td class="text-center align-middle">
                                             ${item.expectedQuantity}
                                     </td>
@@ -126,6 +128,9 @@
                                                     </a>
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            -
                                         </td>
                                         <td class="text-center align-middle">
                                             -
