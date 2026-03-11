@@ -127,13 +127,15 @@
                                 <c:set var="currentProductId" value="${item.productId}"/>
 
                                 <%-- count items in group --%>
-                                <%--init count variable = 0--%>
+                                <%--init count variable=0--%>
                                 <c:set var="groupCount" value="0"/>
                                 <%-- loop any item in list--%>
                                 <c:forEach items="${importItems}" var="tmp">
                                     <%-- if have same product id -> count++--%>
-                                    <c:if test="${tmp.productId == item.productId}">
-                                        <c:set var="groupCount" value="${groupCount + 1}"/>
+                                    <c:if
+                                            test="${tmp.productId == item.productId}">
+                                        <c:set var="groupCount"
+                                               value="${groupCount + 1}"/>
                                     </c:if>
                                 </c:forEach>
 
@@ -155,8 +157,9 @@
                                     </td>
 
                                     <td onclick="event.stopPropagation();">
-                                        <input type="number" placeholder="Set price for all"
+                                        <input type="number"
                                                class="form-control form-control-sm text-right master-price-input"
+                                               value="${item.importPrice}"
                                                oninput="updateGroupPrice('${item.productId}', this.value)">
                                     </td>
 
@@ -201,10 +204,12 @@
                                 </td>
 
                                 <td class="text-center align-middle">
-                                    <a href="${pageContext.request.contextPath}/inventory/import?action=delete&index=${status.index}"
-                                       class="btn btn-outline-danger btn-sm">
+                                    <button type="submit" name="delete"
+                                            value="${status.index}"
+                                            class="btn btn-outline-danger btn-sm"
+                                            formaction="${pageContext.request.contextPath}/inventory/import?action=delete">
                                         Delete
-                                    </a>
+                                    </button>
                                 </td>
 
                             </tr>

@@ -43,10 +43,7 @@ public class ImportProductItemServlet extends HttpServlet {
         HttpSession session = request.getSession();
 
         try {
-            if ("delete".equals(action)) {
-                handleDelete(session, request, response);
-                return;
-            } else if ("import".equals(action)) {
+            if ("import".equals(action)) {
                 handleImport(session, request);
             }
         } catch (Exception e) {
@@ -105,21 +102,6 @@ public class ImportProductItemServlet extends HttpServlet {
         session.setAttribute("importItems", importItems);
     }
 
-    // delete 1 product items from list import product items
-    private void handleDelete(HttpSession session, HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        // get list importItems from session
-        List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
-
-        // get index need to delete
-        if (importItems != null) {
-            int index = Integer.parseInt(request.getParameter("index"));
-            importItems.remove(index);
-        }
-        session.setAttribute("importItems", importItems);
-        response.sendRedirect(request.getContextPath() + "/inventory/import");
-    }
-
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
@@ -130,7 +112,48 @@ public class ImportProductItemServlet extends HttpServlet {
             handleSave(session, request, response);
         } else if ("file".equals(action)) {
             handleFile(session, request, response);
+        } else if ("delete".equals(action)) {
+            handleDelete(session, request, response);
         }
+    }
+
+    private void handleDelete(HttpSession session, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
+        if (importItems == null) {
+            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            return;
+        }
+
+        // read arrays directly from form submission to preserve input data before
+        // deleting
+        String[] productIds = request.getParameterValues("productId");
+        String[] serials = request.getParameterValues("serial");
+        String[] prices = request.getParameterValues("price");
+
+        if (productIds != null && serials != null && prices != null) {
+            int maxLimit = Math.min(importItems.size(), productIds.length);
+
+            for (int i = 0; i < maxLimit; i++) {
+                ProductItemDTO dto = importItems.get(i);
+
+                dto.setSerial(serials[i]);
+
+                try {
+                    dto.setImportPrice(Long.parseLong(prices[i]));
+                } catch (NumberFormatException e) {
+                }
+            }
+        }
+
+        // delete item by delete index
+        String deleteIndexStr = request.getParameter("delete");
+        int deleteIndex = Integer.parseInt(deleteIndexStr);
+        importItems.remove(deleteIndex);
+
+        session.setAttribute("importItems", importItems);
+        response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 
     private void handleFile(HttpSession session, HttpServletRequest request, HttpServletResponse response)
