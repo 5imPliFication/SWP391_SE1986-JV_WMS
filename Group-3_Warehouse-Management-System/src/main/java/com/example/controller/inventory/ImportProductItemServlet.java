@@ -141,7 +141,7 @@ public class ImportProductItemServlet extends HttpServlet {
                 dto.setSerial(serials[i]);
 
                 try {
-                    dto.setImportPrice(Long.parseLong(prices[i]));
+                    dto.setImportPrice(Double.parseDouble(prices[i]));
                 } catch (NumberFormatException e) {
                 }
             }

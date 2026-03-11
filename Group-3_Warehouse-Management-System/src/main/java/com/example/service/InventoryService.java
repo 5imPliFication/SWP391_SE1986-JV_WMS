@@ -27,7 +27,7 @@ public class InventoryService {
     private final InventoryDAO inventoryDAO = new InventoryDAO();
 
     public String importProductItems(Long purchaseRequestId, Long warehouseUserId,
-                                     String[] productIds, String[] serials, String[] prices) {
+            String[] productIds, String[] serials, String[] prices) {
 
         // get information from list import product item
         List<ProductItemDTO> importProductItemDTOs = getImportProductItemDTOs(productIds, serials, prices);
@@ -42,7 +42,7 @@ public class InventoryService {
                 : "Import failed";
     }
 
-    // get list product items import from table import 
+    // get list product items import from table import
     private List<ProductItemDTO> getImportProductItemDTOs(String[] productIds, String[] serials, String[] prices) {
 
         // init list to store
@@ -54,13 +54,13 @@ public class InventoryService {
             String priceStr = prices[i];
             String productIdStr = productIds[i];
 
-            long price = Long.parseLong(priceStr);
+            double price = Double.parseDouble(priceStr);
             long productId = Long.parseLong(productIdStr);
 
             ProductItemDTO dto = new ProductItemDTO();
             dto.setProductId(productId);
             dto.setSerial(serial.trim());
-//            dto.setImportPrice(price);
+            dto.setImportPrice(price);
 
             items.add(dto);
         }
@@ -71,7 +71,7 @@ public class InventoryService {
     private String validateProductItems(List<ProductItemDTO> productItemDTOs) {
         for (ProductItemDTO item : productItemDTOs) {
             String serial = item.getSerial();
-            Long price = item.getImportPrice();
+            Double price = item.getImportPrice();
 
             // validator
             String messageValidator = ImportProductItemValidator.validateImportProductItem(serial, price);
@@ -95,7 +95,7 @@ public class InventoryService {
             return null;
         } else {
             try (InputStream inputStream = filePart.getInputStream();
-                 Workbook workbook = new XSSFWorkbook(inputStream)) {
+                    Workbook workbook = new XSSFWorkbook(inputStream)) {
 
                 // get first sheet
                 Sheet sheet = workbook.getSheetAt(0);
@@ -136,14 +136,13 @@ public class InventoryService {
 
                     // get price of import product item
                     double importPrice = priceCell.getNumericCellValue();
-                    Long importPriceLong = (long) Math.round(importPrice);
 
                     // init dto
                     ProductItemDTO dto = new ProductItemDTO();
                     dto.setProductId(productId);
                     dto.setProductName(productName);
                     dto.setSerial(serial);
-                    dto.setImportPrice(importPriceLong);
+                    dto.setImportPrice(importPrice);
 
                     // add to list
                     importItems.add(dto);
@@ -157,7 +156,8 @@ public class InventoryService {
     }
 
     // handle export product items
-    public Map<String, Object> getExportOrders(String name, String fromDateStr, String toDateStr, String status, int pageNo) {
+    public Map<String, Object> getExportOrders(String name, String fromDateStr, String toDateStr, String status,
+            int pageNo) {
         LocalDate fromDate;
         LocalDate toDate;
 
@@ -189,7 +189,6 @@ public class InventoryService {
         result.put("totalPages", totalPages);
         return result;
     }
-
 
     public int getTotalOrders(String name, LocalDate fromDate, LocalDate toDate, String status) {
         return inventoryDAO.countExportOrders(name, fromDate, toDate, status);
