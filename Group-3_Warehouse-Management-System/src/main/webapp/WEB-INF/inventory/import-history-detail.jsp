@@ -101,7 +101,6 @@
                                         <span id="icon-${item.id}">&#9658;</span>
                                             ${item.productName}
                                     </td>
-
                                     <td class="text-center align-middle">
                                             ${item.expectedQuantity}
                                     </td>
@@ -112,16 +111,21 @@
 
                                 <%-- detail rows --%>
                                 <c:forEach items="${item.productItems}"
-                                           var="prodItem" varStatus="prodStatus">
+                                           var="productItem" varStatus="productStatus">
                                     <tr class="sub-item item-group-${item.id}"
                                         style="display:none;">
                                         <td class="text-center align-middle">
-                                                ${prodStatus.index + 1}
+                                                ${productStatus.index + 1}
                                         </td>
                                         <td>
-                                            <input type="text"
-                                                   class="form-control form-control-sm"
-                                                   value="${prodItem.serial}" readonly>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control" value="${productItem.serial}" readonly>
+                                                <div class="input-group-append">
+                                                    <a class="btn btn-outline-info" href="${pageContext.request.contextPath}/products/items/update?productItemId=${productItem.id}&searchSerial=${prodItem.serial}&pageNo=1&isActive=true" title="View Detail">
+                                                        View
+                                                    </a>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td class="text-center align-middle">
                                             -
@@ -131,23 +135,11 @@
                                         </td>
                                     </tr>
                                 </c:forEach>
-
-                                <%-- if no prod items yet --%>
-                                <c:if test="${empty item.productItems}">
-                                    <tr class="sub-item item-group-${item.id}"
-                                        style="display:none;">
-                                        <td colspan="4"
-                                            class="text-center text-muted">
-                                            No specific product items found.
-                                        </td>
-                                    </tr>
-                                </c:if>
-
                             </c:forEach>
                         </c:when>
                         <c:otherwise>
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-3">
+                                <td colspan="5" class="text-center text-muted py-3">
                                     No items found for this receipt.
                                 </td>
                             </tr>
@@ -155,9 +147,6 @@
                     </c:choose>
                     </tbody>
                 </table>
-            </div>
-            <div class="alert alert-warning">
-                Receipt not found.
             </div>
         </c:if>
     </div>

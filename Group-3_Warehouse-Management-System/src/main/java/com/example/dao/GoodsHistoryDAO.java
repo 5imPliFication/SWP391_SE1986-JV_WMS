@@ -204,10 +204,11 @@ public class GoodsHistoryDAO {
         return items;
     }
 
+    // get product items by receipt item id
     private List<ProductItemDTO> getProductItemsByReceiptItemId(Long goodsReceiptItemId) {
         List<ProductItemDTO> list = new ArrayList<>();
         String sql = """
-                select p.id, p.name, pi.serial, pi.imported_price from\s
+                select pi.id as item_id, p.id, p.name, pi.serial, pi.imported_price from\s
                 product_items pi
                 join products p
                 on p.id = pi.product_id
@@ -219,6 +220,7 @@ public class GoodsHistoryDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ProductItemDTO dto = new ProductItemDTO();
+                    dto.setId(rs.getLong("item_id"));
                     dto.setProductId(rs.getLong("id"));
                     dto.setProductName(rs.getString("name"));
                     dto.setSerial(rs.getString("serial"));
