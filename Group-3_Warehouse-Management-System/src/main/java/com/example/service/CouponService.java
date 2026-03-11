@@ -17,9 +17,9 @@ public class CouponService {
     }
 
     /**
-     * Validate coupon for an order (includes global and per-user checks)
+     * Validate coupon for an order (includes global and per-customer checks)
      */
-    public Optional<Coupon> validateCoupon(String code, BigDecimal orderTotal, Long userId) {
+    public Optional<Coupon> validateCoupon(String code, BigDecimal orderTotal, String customerName) {
         if (code == null || code.trim().isEmpty()) {
             return Optional.empty();
         }
@@ -41,8 +41,8 @@ public class CouponService {
             return Optional.empty();
         }
 
-        // Check if user has already used this coupon (per-user restriction)
-        if (couponDAO.hasUserUsedCoupon(userId, coupon.getId())) {
+        // Check if customer has already used this coupon (per-customer restriction)
+        if (couponDAO.hasCustomerUsedCoupon(customerName, coupon.getId())) {
             return Optional.empty();
         }
 

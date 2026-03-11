@@ -1,11 +1,13 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
+import com.example.model.Chip;
 import com.example.model.Size;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,5 +68,31 @@ public class SizeDAO {
         }
 
         return list;
+    }
+
+    public Size getById(long sizeId) {
+        String sql = """
+            SELECT *
+            FROM sizes c
+            WHERE c.id = ?
+            """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            Size size = null;
+            ps.setLong(1, sizeId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                size = new Size();
+                size.setId(rs.getLong("id"));
+                size.setSize(rs.getString("size"));
+            }
+
+            return size;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

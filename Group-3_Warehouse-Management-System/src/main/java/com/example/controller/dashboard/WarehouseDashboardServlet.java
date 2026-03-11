@@ -58,11 +58,20 @@ public class WarehouseDashboardServlet extends HttpServlet {
             Timestamp todayDate = Timestamp.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
             int completedToday = orderService.countOrdersByStatusAndDate("COMPLETED", todayDate, now);
 
-            // Pending orders (SUBMITTED status)
-            List<Order> pendingOrders = orderService.getOrdersByStatus("SUBMITTED");
+            // Pending orders (SUBMITTED status) - limit to 10 for dashboard
+            List<Order> allPendingOrders = orderService.getOrdersByStatus("SUBMITTED");
+            int maxDashboardOrders = 10;
+            boolean hasMorePending = allPendingOrders.size() > maxDashboardOrders;
+            List<Order> pendingOrders = allPendingOrders.size() > maxDashboardOrders 
+                    ? allPendingOrders.subList(0, maxDashboardOrders) 
+                    : allPendingOrders;
 
-            // Orders currently processing
-            List<Order> processingOrders = orderService.getOrdersByStatus("PROCESSING");
+            // Orders currently processing - limit to 10 for dashboard
+            List<Order> allProcessingOrders = orderService.getOrdersByStatus("PROCESSING");
+            boolean hasMoreProcessing = allProcessingOrders.size() > maxDashboardOrders;
+            List<Order> processingOrders = allProcessingOrders.size() > maxDashboardOrders
+                    ? allProcessingOrders.subList(0, maxDashboardOrders)
+                    : allProcessingOrders;
 
             // Low stock products (threshold: 10 units)
             List<Product> lowStockProducts = productService.getLowStockProducts(10);
@@ -75,7 +84,9 @@ public class WarehouseDashboardServlet extends HttpServlet {
             req.setAttribute("lowStockCount", lowStockCount);
 
             req.setAttribute("pendingOrders", pendingOrders);
+            req.setAttribute("hasMorePending", hasMorePending);
             req.setAttribute("processingOrders", processingOrders);
+            req.setAttribute("hasMoreProcessing", hasMoreProcessing);
             req.setAttribute("lowStockProducts", lowStockProducts);
 
             req.getRequestDispatcher("/WEB-INF/views/home/warehouse-dashboard.jsp").forward(req, resp);

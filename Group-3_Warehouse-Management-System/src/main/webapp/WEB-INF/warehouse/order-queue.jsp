@@ -15,7 +15,7 @@
     </head>
     <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
-
+        
         <main class="main-content">
 
             <!-- Page Header -->
