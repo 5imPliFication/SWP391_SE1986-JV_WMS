@@ -96,6 +96,7 @@ public class ImportProductItemServlet extends HttpServlet {
                 dto.setProductName(purchaseRequestItem.getProductName());
                 dto.setSerial("");
                 dto.setImportPrice(null);
+                dto.setUnit(purchaseRequestItem.getUnit());
                 // add product item to list importItems
                 importItems.add(dto);
             }

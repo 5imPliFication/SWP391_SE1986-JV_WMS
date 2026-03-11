@@ -12,10 +12,12 @@ public class ProductItemDTO {
     private String productName;
     private String serial;
     private Long importPrice;
+    private String unit;
 
-    public ProductItemDTO(Long productId, String serial, Long importPrice) {
+    public ProductItemDTO(Long productId, String serial, Long importPrice, String unit) {
         this.productId = productId;
         this.serial = serial;
         this.importPrice = importPrice;
+        this.unit = unit;
     }
 }

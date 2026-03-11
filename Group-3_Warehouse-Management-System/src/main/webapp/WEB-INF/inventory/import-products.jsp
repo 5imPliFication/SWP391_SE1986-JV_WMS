@@ -24,6 +24,9 @@
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
+
+        <c:remove var="message" scope="session"/>
+        <c:remove var="messageType" scope="session"/>
     </c:if>
 
     <div class="card p-3 mb-3 shadow-sm">
@@ -91,105 +94,127 @@
                 <thead class="thead-dark">
                 <tr>
                     <th style="width: 60px;" class="text-center">No.</th>
-                    <th style="width: 250px;">Product Name</th>
                     <th>Serial / IMEI</th>
                     <th style="width: 100px;" class="text-center">Quantity</th>
-                    <th style="width: 160px;" class="text-right">Price</th>
+                    <th style="width: 100px;" class="text-center">Unit</th>
+                    <th style="width: 160px;" class="text-center">Price</th>
                     <th style="width: 90px;" class="text-center">Action</th>
                 </tr>
                 </thead>
+
                 <tbody>
+
                 <c:choose>
                     <c:when test="${empty importItems}">
                         <tr>
                             <td colspan="6" class="text-center text-muted py-3">
-                                No product items to import. Please go from Purchase Request or
-                                upload an Excel file.
+                                No product items to import. Please go from Purchase Request
+                                or upload an Excel file.
                             </td>
                         </tr>
                     </c:when>
+
                     <c:otherwise>
-                        <%-- create group header by productId --%>
+
                         <c:set var="currentProductId" value="-1"/>
                         <c:set var="displayIndex" value="1"/>
 
                         <c:forEach items="${importItems}" var="item" varStatus="status">
-                            <%-- if meet new productId, create group header --%>
-                            <c:if test="${currentProductId != item.productId}">
-                                <%-- set current productId --%>
-                                <c:set var="currentProductId"
-                                       value="${item.productId}"/>
 
-                                <%-- count number of item belong to productId to display quantity --%>
+                            <%-- create group header --%>
+                            <c:if test="${currentProductId != item.productId}">
+                                <%--save current productID--%>
+                                <c:set var="currentProductId" value="${item.productId}"/>
+
+                                <%-- count items in group --%>
+                                <%--init count variable = 0--%>
                                 <c:set var="groupCount" value="0"/>
+                                <%-- loop any item in list--%>
                                 <c:forEach items="${importItems}" var="tmp">
+                                    <%-- if have same product id -> count++--%>
                                     <c:if test="${tmp.productId == item.productId}">
-                                        <c:set var="groupCount"
-                                               value="${groupCount + 1}"/>
+                                        <c:set var="groupCount" value="${groupCount + 1}"/>
                                     </c:if>
                                 </c:forEach>
 
                                 <tr class="group-header"
-                                    style="cursor: pointer; background-color: #f8f9fa;"
+                                    style="cursor:pointer;background:#f8f9fa;"
                                     onclick="toggleGroup('${item.productId}')">
-                                    <td colspan="2"
-                                        class="align-middle font-weight-bold">
-                                                                            <span
-                                                                                    id="icon-${item.productId}">&#9658;</span>
-                                        <!-- right triangle -->
+
+                                    <td colspan="2" class="font-weight-bold">
+                                        <span id="icon-${item.productId}">&#9658;</span>
                                             ${item.productName}
                                     </td>
-                                    <td class="align-middle text-muted"><em></em>
-                                    </td>
+                                        <%--quantity--%>
                                     <td class="text-center align-middle">
-                                            ${groupCount} Item
+                                            ${groupCount}
                                     </td>
+
+                                    <td class="text-center align-middle">
+                                            ${item.unit}
+                                    </td>
+
                                     <td onclick="event.stopPropagation();">
-                                        <input type="number"
-                                               placeholder="Set price for all"
+                                        <input type="number" placeholder="Set price for all"
                                                class="form-control form-control-sm text-right master-price-input"
                                                oninput="updateGroupPrice('${item.productId}', this.value)">
                                     </td>
+
                                     <td></td>
                                 </tr>
+
                             </c:if>
 
-                            <%-- each row detail --%>
+                            <%-- detail row --%>
                             <tr class="sub-item item-group-${item.productId}"
-                                style="display: none;">
+                                style="display:none;">
+
                                 <input type="hidden" name="productId"
                                        value="${item.productId}">
                                 <input type="hidden" name="rowIndex"
                                        value="${status.index}">
+
                                 <td class="text-center align-middle">
                                         ${displayIndex}
-                                    <c:set var="displayIndex"
-                                           value="${displayIndex + 1}"/>
+                                    <c:set var="displayIndex" value="${displayIndex + 1}"/>
                                 </td>
-                                <td class="align-middle">
-                                        ${item.productName}
-                                </td>
+
                                 <td>
                                     <input type="text" name="serial"
                                            class="form-control form-control-sm"
                                            value="${item.serial}">
                                 </td>
-                                <td class="text-center align-middle">1</td>
-                                <td>
-                                    <input type="number" readonly name="price"
-                                           class="form-control form-control-sm text-right detail-price price-${item.productId}"
+
+                                <td class="text-center align-middle">
+                                    1
+                                </td>
+
+                                <td class="text-center align-middle">
+                                        ${item.unit}
+                                </td>
+
+                                <td class="text-center text-muted">
+                                    -
+                                    <input type="hidden" name="price"
+                                           class="detail-price price-${item.productId}"
                                            value="<c:out value='${item.importPrice}'/>">
                                 </td>
+
                                 <td class="text-center align-middle">
                                     <a href="${pageContext.request.contextPath}/inventory/import?action=delete&index=${status.index}"
                                        class="btn btn-outline-danger btn-sm">
                                         Delete
                                     </a>
                                 </td>
+
                             </tr>
+
                         </c:forEach>
+
                     </c:otherwise>
+
                 </c:choose>
+
                 </tbody>
             </table>
         </div>
