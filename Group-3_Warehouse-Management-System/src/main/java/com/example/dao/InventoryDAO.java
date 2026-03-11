@@ -43,7 +43,6 @@ public class InventoryDAO {
         return null;
     }
 
-    // save import product items and others information relative
     public boolean saveProductItems(Long purchaseRequestId, Long warehouseUserId,
             List<ProductItemDTO> productItemDTOs) {
 
@@ -51,17 +50,18 @@ public class InventoryDAO {
         Map<Long, Long> quantityByProduct = countQuantityImportByProductId(productItemDTOs);
 
         try {
-            // save product item
-            insertProductItems(productItemDTOs);
-
             // update status of purchase request -> completed
             completePurchaseRequest(purchaseRequestId);
 
             // save to table goods receipts
             Long receiptId = insertGoodsReceipt(purchaseRequestId, warehouseUserId);
 
-            // save purchase request item to table goods receipt items
-            insertGoodsReceiptItems(receiptId, quantityByProduct);
+            // save purchase request item to table goods receipt items and get generated ids
+            Map<Long, Long> receiptItemIds = insertGoodsReceiptItems(receiptId, quantityByProduct);
+
+            // save product item
+            insertProductItems(productItemDTOs, receiptItemIds);
+
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -94,42 +94,69 @@ public class InventoryDAO {
                 "insert into goods_receipts(purchase_request_id, warehouse_id, received_at) values (?, ?, NOW())");
         Long receiptId = null;
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
 
             // set value
             ps.setLong(1, purchaseRequestId);
             ps.setLong(2, warehouseUserId);
             ps.executeUpdate();
+
+            // get id of goods receipt
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
                     receiptId = rs.getLong(1);
                 }
             }
         }
+
+        // return id of goods receipt
         return receiptId;
     }
 
     // save goods receipt item correspond receiptId
-    private void insertGoodsReceiptItems(Long receiptId, Map<Long, Long> quantityByProduct)
+    private Map<Long, Long> insertGoodsReceiptItems(Long receiptId, Map<Long, Long> quantityByProduct)
             throws SQLException {
+        // create map to save productId and goods receipt item id after insert
+        Map<Long, Long> productIdGoodsReceiptItemId = new HashMap<>();
         String sql = "insert into goods_receipt_items(goods_receipt_id, product_id, actual_quantity) values (?, ?, ?)";
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            // for each any item
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            // create list to save productId for get generated keys after insert
+            List<Long> productIds = new ArrayList<>();
+            // for each any product (key: productId, value: quantity)
             for (Map.Entry<Long, Long> entry : quantityByProduct.entrySet()) {
                 int index = 1;
                 ps.setLong(index++, receiptId);
+                // set productId
                 ps.setLong(index++, entry.getKey());
+                // set quantity
                 ps.setLong(index, entry.getValue());
                 ps.addBatch();
+                // add productId to list for get generated keys after insert
+                productIds.add(entry.getKey());
             }
             ps.executeBatch();
+
+            // get generated keys and map productId to goods receipt item id
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                int i = 0;
+                while (rs.next()) {
+                    // get generated id of goods receipt item
+                    Long generatedId = rs.getLong(1);
+                    // map productId to goods receipt item id
+                    productIdGoodsReceiptItemId.put(productIds.get(i), generatedId);
+                    i++;
+                }
+            }
         }
+        return productIdGoodsReceiptItemId;
     }
 
     // insert product item to table product_items
-    private void insertProductItems(List<ProductItemDTO> productItemDTOs) throws SQLException {
-        String sql = "insert into product_items(serial, imported_price, current_price, is_active, imported_at, updated_at, product_id) values (?, ?, ?, ?, NOW(), NOW(), ?)";
+    private void insertProductItems(List<ProductItemDTO> productItemDTOs, Map<Long, Long> receiptItemIds)
+            throws SQLException {
+        String sql = "insert into product_items(serial, imported_price, current_price, is_active, imported_at, updated_at, product_id, goods_receipt_item_id) values (?, ?, ?, ?, NOW(), NOW(), ?, ?)";
         try (Connection conn = DBConfig.getDataSource().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -140,7 +167,14 @@ public class InventoryDAO {
                 ps.setDouble(index++, item.getImportPrice());
                 ps.setDouble(index++, item.getImportPrice());
                 ps.setBoolean(index++, true);
-                ps.setLong(index, item.getProductId());
+                ps.setLong(index++, item.getProductId());
+
+                // get goods receipt item id correspond productId
+                Long goodsReceiptItemId = receiptItemIds.get(item.getProductId());
+                if (goodsReceiptItemId != null) {
+                    ps.setLong(index, goodsReceiptItemId);
+                }
+
                 ps.addBatch();
             }
             ps.executeBatch();
