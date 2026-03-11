@@ -45,12 +45,8 @@ public class ImportHistoryServlet extends HttpServlet {
         // call service
         GoodsReceiptDTO goodsReceipt = goodsHistoryService.getGoodsReceiptById(id);
 
-        System.out.println(goodsReceipt);
         List<GoodsReceiptItemDTO> goodsReceiptItems = goodsHistoryService.getGoodsReceiptItems(id);
 
-        for (GoodsReceiptItemDTO goodsReceiptItem : goodsReceiptItems) {
-            System.out.println(goodsReceiptItem);
-        }
         request.setAttribute("goodsReceipt", goodsReceipt);
         request.setAttribute("goodsReceiptItems", goodsReceiptItems);
         request.getRequestDispatcher("/WEB-INF/inventory/import-history-detail.jsp").forward(request, response);
