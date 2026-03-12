@@ -16,12 +16,13 @@ public class StockMovement {
     private Long productId;
     private String productName;
 
-
     private Long quantity;
 
     private MovementType type;
 
     private ReferenceType referenceType;
+    
+    private Long referenceId;
 
     private LocalDateTime createdAt;
 }

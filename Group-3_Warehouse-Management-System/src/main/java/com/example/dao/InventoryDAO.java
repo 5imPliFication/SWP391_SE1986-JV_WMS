@@ -62,6 +62,14 @@ public class InventoryDAO {
             // save product item
             insertProductItems(productItemDTOs, receiptItemIds);
 
+            // save stock movement
+            new StockMovementDAO().insertStockMovements(
+                    quantityByProduct, 
+                    com.example.enums.MovementType.IMPORT, 
+                    com.example.enums.ReferenceType.GOODS_RECEIPT, 
+                    purchaseRequestId
+            );
+
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
