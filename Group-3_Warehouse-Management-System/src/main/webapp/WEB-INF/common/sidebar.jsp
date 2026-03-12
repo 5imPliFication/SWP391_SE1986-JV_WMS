@@ -211,7 +211,19 @@
 
                 </c:if>
 
+                <!-- Export History -->
+                <c:if test="${sessionScope.user != null
+                              and sessionScope.user.role != null
+                              and sessionScope.user.role.active
+                              and fn:contains(sessionScope.userPermissions, 'EXPORT_PRODUCT')}">
 
+                    <li>
+                        <a href="${pageContext.request.contextPath}/inventory/export-history">
+                            <span>Export History</span>
+                        </a>
+                    </li>
+
+                </c:if>
                 <!-- Out Of Stock -->
                 <c:if test="${sessionScope.user != null
                               and sessionScope.user.role != null
