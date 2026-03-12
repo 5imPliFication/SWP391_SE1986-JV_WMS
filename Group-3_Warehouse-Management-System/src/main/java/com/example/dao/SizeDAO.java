@@ -22,8 +22,42 @@ public class SizeDAO {
                 WHERE is_active = true
                 """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Size size = new Size();
+                size.setId(rs.getLong("id"));
+                size.setSize(rs.getString("size"));
+
+                list.add(size);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return list;
+    }
+
+    public List<Size> getSizesByPage(int pageNo, int pageSize) {
+
+        List<Size> list = new ArrayList<>();
+
+        String sql = """
+            SELECT id, size
+            FROM sizes
+            ORDER BY id
+            LIMIT ? OFFSET ?
+            """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            int offset = (pageNo - 1) * pageSize;
+
+            ps.setInt(1, pageSize);
+            ps.setInt(2, offset);
 
             ResultSet rs = ps.executeQuery();
 
@@ -50,8 +84,7 @@ public class SizeDAO {
                 FROM sizes
                 """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ResultSet rs = ps.executeQuery();
 
@@ -77,8 +110,7 @@ public class SizeDAO {
             WHERE c.id = ?
             """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             Size size = null;
             ps.setLong(1, sizeId);
             ResultSet rs = ps.executeQuery();
@@ -94,5 +126,22 @@ public class SizeDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public int count() {
+
+        String sql = "SELECT COUNT(*) FROM sizes";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 }

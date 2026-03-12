@@ -17,7 +17,15 @@ public class ModelService {
         return m.getAll();
     }
 
+    public List<Model> getModelByPage(int pageNo, int pageSize) {
+        return m.getModelsByPage(pageNo, pageSize);
+    }
+
     public Model getModelById(long modelId) {
         return m.getById(modelId);
+    }
+
+    public int countModel() {
+        return m.count();
     }
 }

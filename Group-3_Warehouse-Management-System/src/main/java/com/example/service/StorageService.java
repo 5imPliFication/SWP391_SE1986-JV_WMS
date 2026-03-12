@@ -23,4 +23,12 @@ public class StorageService {
     public List<Storage> getAllStorage() {
         return s.getAll();
     }
+
+    public List<Storage> getStorageByPage(int pageNo, int pageSize) {
+        return s.getStoragesByPage(pageNo, pageSize);
+    }
+
+    public int countStorage() {
+        return s.count();
+    }
 }

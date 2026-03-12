@@ -180,7 +180,7 @@
                           </a>
                       </li>
                       <li>
-                          <a href="${pageContext.request.contextPath}/specification">
+                          <a href="${pageContext.request.contextPath}/specification/model">
                               <span>Specification</span>
                           </a>
                       </li>
@@ -293,12 +293,19 @@
 
                     const linkPath = new URL(link.href).pathname;
 
-                    if (linkPath === "/home") {
-                        if (currentPath.includes("dashboard")) {
-                            link.classList.add("active");
-                        }
+                    // Dashboard
+                    if (linkPath === "/home" && currentPath.includes("dashboard")) {
+                        link.classList.add("active");
+                        return;
                     }
 
+                    // Specification group
+                    if (linkPath.startsWith("/specification") && currentPath.startsWith("/specification")) {
+                        link.classList.add("active");
+                        return;
+                    }
+
+                    // Logic cũ
                     if (currentPath.startsWith(linkPath) && linkPath.length > bestLength) {
                         bestMatch = link;
                         bestLength = linkPath.length;
@@ -311,6 +318,7 @@
                 }
 
             });
+
 
 
         </script>
