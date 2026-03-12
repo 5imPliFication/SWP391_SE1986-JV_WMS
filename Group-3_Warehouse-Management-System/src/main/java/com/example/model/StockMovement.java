@@ -24,6 +24,8 @@ public class StockMovement {
     
     private Long referenceId;
 
+    private Long goodsReceiptId;
+
     private String staffName;
 
     private LocalDateTime createdAt;

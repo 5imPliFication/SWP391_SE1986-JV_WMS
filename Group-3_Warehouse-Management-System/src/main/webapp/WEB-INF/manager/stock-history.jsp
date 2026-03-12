@@ -246,7 +246,18 @@
                                 <tr>
 
                                     <td>
-                                            ${item.productName}
+                                        <c:choose>
+                                            <c:when test="${item.type == 'IMPORT' && item.goodsReceiptId != null}">
+                                                <a href="${pageContext.request.contextPath}/inventory/import/history?action=detail&id=${item.goodsReceiptId}" class="font-weight-bold text-primary"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer">
+                                                    ${item.productName}
+                                                </a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                ${item.productName}
+                                            </c:otherwise>
+                                        </c:choose>
                                     </td>
 
                                     <td>
