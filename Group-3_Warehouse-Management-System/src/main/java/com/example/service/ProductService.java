@@ -20,19 +20,19 @@ public class ProductService {
     private SizeDAO sizeDAO = new SizeDAO();
     private UnitDAO unitDAO = new UnitDAO();
 
-    public List<Product> findAll(String searchName, String brandName, String categoryName, String modelName, String chipName,
-                                 String ramSize, String storageSize, String screenSize, Boolean isActive, int pageNo)
+    public List<Product> findAll(String searchName, Long brandId, Long categoryId, Long modelId, Long chipId,
+                                 Long ramId, Long storageId, Long sizeId, Boolean isActive, int pageNo)
     {
-        return productDAO.getAll(searchName, brandName, categoryName, modelName, chipName, ramSize, storageSize, screenSize, isActive, pageNo);
+        return productDAO.getAll(searchName, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId, isActive, pageNo);
     }
 
     public List<Product> findAll() {
         return productDAO.getAllProducts();
     }
 
-    public int getTotalProducts(String searchName, String brandName, String categoryName, String modelName, String chipName,
-                                String ramSize, String storageSize, String screenSize, Boolean isActive) {
-        return productDAO.countProducts(searchName, brandName, categoryName, modelName, chipName, ramSize, storageSize, screenSize, isActive);
+    public int getTotalProducts(String searchName, Long brandId, Long categoryId, Long modelId, Long chipId,
+                                Long ramId, Long storageId, Long sizeId, Boolean isActive) {
+        return productDAO.countProducts(searchName, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId, isActive);
     }
 
     public void addProduct(String productDescription, String imgUrl, long brandId,
