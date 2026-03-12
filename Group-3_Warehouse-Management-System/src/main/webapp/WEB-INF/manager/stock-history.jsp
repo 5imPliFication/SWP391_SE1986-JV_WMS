@@ -230,11 +230,11 @@
                         <!-- HEADER -->
                         <c:set var="tableHeader" scope="request">
                             <tr>
-                                <th>Movement ID</th>
                                 <th>Product </th>
                                 <th>Quantity</th>
                                 <th>Type</th>
                                 <th>Reference Type</th>
+                                <th>Staff Name</th>
                                 <th>Date & Time</th>
                             </tr>
                         </c:set>
@@ -244,10 +244,6 @@
 
                             <c:forEach var="item" items="${list}">
                                 <tr>
-
-                                    <td>
-                                        <strong>#${item.id}</strong>
-                                    </td>
 
                                     <td>
                                             ${item.productName}
@@ -313,6 +309,13 @@
                                         <span class="badge badge-light"
                                               style="font-size:13px;border:1px solid #ddd;color:#555;">
                                             ${item.referenceType}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="font-weight-500 text-dark">
+                                            <i class="fas fa-user-circle text-secondary mr-1"></i>
+                                            ${item.staffName != null ? item.staffName : 'System'}
                                         </span>
                                     </td>
 
