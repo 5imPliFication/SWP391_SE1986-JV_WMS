@@ -24,7 +24,8 @@ public class StockMovementDAO {
 
         StringBuilder sql = new StringBuilder("""
                 SELECT sm.id, sm.product_id, p.name AS product_name, sm.quantity, sm.type, sm.reference_type, sm.reference_id, sm.created_at,
-                       COALESCE(u_import.fullname, u_export.fullname, 'System/Unknown') AS staff_name
+                       COALESCE(u_import.fullname, u_export.fullname, 'System/Unknown') AS staff_name,
+                       gr.id AS goods_receipt_id
                 FROM stock_movements sm
                 JOIN products p on p.id=sm.product_id
                 LEFT JOIN goods_receipts gr ON sm.reference_type = 'GOODS_RECEIPT' AND sm.reference_id = gr.purchase_request_id
@@ -81,6 +82,7 @@ public class StockMovementDAO {
                         MovementType.valueOf(rs.getString("type")),
                         ReferenceType.valueOf(rs.getString("reference_type")),
                         rs.getObject("reference_id") != null ? rs.getLong("reference_id") : null,
+                        rs.getObject("goods_receipt_id") != null ? rs.getLong("goods_receipt_id") : null,
                         rs.getString("staff_name"),
                         rs.getTimestamp("created_at").toLocalDateTime()
                 );
