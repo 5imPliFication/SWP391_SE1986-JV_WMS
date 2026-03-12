@@ -44,13 +44,13 @@ public class InventoryAuditAddServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String searchName = request.getParameter("searchName");
-        String brandName = request.getParameter("brandName");
-        String categoryName = request.getParameter("categoryName");
-        String modelName = request.getParameter("modelName");
-        String chipName = request.getParameter("chipName");
-        String ramSize = request.getParameter("ramSize");
-        String storageSize = request.getParameter("storageSize");
-        String screenSize = request.getParameter("screenSize");
+        Long categoryId  = request.getParameter("categoryId") != null && !request.getParameter("categoryId").isEmpty() ? Long.parseLong(request.getParameter("categoryId")) : null;
+        Long brandId  = request.getParameter("brandId") != null && !request.getParameter("brandId").isEmpty() ? Long.parseLong(request.getParameter("brandId")) : null;
+        Long modelId  = request.getParameter("modelId") != null && !request.getParameter("modelId").isEmpty() ? Long.parseLong(request.getParameter("modelId")) : null;
+        Long chipId  = request.getParameter("chipId") != null && !request.getParameter("chipId").isEmpty() ? Long.parseLong(request.getParameter("chipId")) : null;
+        Long ramId  = request.getParameter("ramId") != null && !request.getParameter("ramId").isEmpty() ? Long.parseLong(request.getParameter("ramId")) : null;
+        Long storageId  = request.getParameter("storageId") != null && !request.getParameter("storageId").isEmpty() ? Long.parseLong(request.getParameter("storageId")) : null;
+        Long sizeId  = request.getParameter("sizeId") != null && !request.getParameter("sizeId").isEmpty() ? Long.parseLong(request.getParameter("sizeId")) : null;
 
         String isActiveParam = request.getParameter("isActive");
         // Nếu parse sang boolean ngay sẽ lỗi All Status == false (parse("") => false)
@@ -62,16 +62,16 @@ public class InventoryAuditAddServlet extends HttpServlet {
         // Using when the first time load this page (No param pageNo in URL)
         int pageNo = 1;
         // Get total record
-        int totalProducts = productService.getTotalProducts(searchName, brandName, categoryName, modelName, chipName, ramSize, storageSize, screenSize, isActive);
+        int totalProducts = productService.getTotalProducts(searchName, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId, isActive);
         // Count total pages
         int totalPages = (int) Math.ceil((double) totalProducts / AppConstants.PAGE_SIZE);
 
         if (request.getParameter("pageNo") != null && !request.getParameter("pageNo").isEmpty()) {
             pageNo = Integer.parseInt(request.getParameter("pageNo"));
         }
-        List<Product> products = productService.findAll(searchName, brandName, categoryName, modelName, chipName, ramSize, storageSize, screenSize, isActive, pageNo);
-        List<Brand> brands = brandService.getActiveBrands();
-        List<Category> categories = categoryService.getActiveCategories();
+        List<Product> products = productService.findAll(searchName, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId, isActive, pageNo);
+        List<Brand> brands = brandService.getAllBrands();
+        List<Category> categories = categoryService.getAllCategories();
         List<Model> models = modelService.getAllModels();
         List<Chip> chips = chipService.getAllChips();
         List<Ram> rams = ramService.getAllRams();

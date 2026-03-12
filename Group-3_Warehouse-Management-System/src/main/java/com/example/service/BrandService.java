@@ -45,6 +45,10 @@ public class BrandService {
         return b.getAllActive();
     }
 
+    public List<Brand> getAllBrands() {
+        return b.getAll();
+    }
+
     public void updateStatus(long id, boolean status) {
         b.changeStatus(id, status);
     }

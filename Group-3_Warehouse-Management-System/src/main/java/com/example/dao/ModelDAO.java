@@ -1,6 +1,7 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
+import com.example.model.Brand;
 import com.example.model.Model;
 import com.example.model.ProductItem;
 
@@ -37,7 +38,11 @@ public class ModelDAO {
                 model.setId(rs.getLong("id"));
                 model.setName(rs.getString("name"));
                 model.setActive(rs.getBoolean("is_active"));
-                model.setBrandName(rs.getString("brand_name"));
+
+                Brand brand = new Brand();
+                brand.setId(rs.getLong("brand_id"));
+                brand.setName(rs.getString("brand_name"));
+                model.setBrand(brand);
 
                 list.add(model);
             }
@@ -72,7 +77,11 @@ public class ModelDAO {
                 model.setId(rs.getLong("id"));
                 model.setName(rs.getString("name"));
                 model.setActive(rs.getBoolean("is_active"));
-                model.setBrandName(rs.getString("brand_name"));
+
+                Brand brand = new Brand();
+                brand.setId(rs.getLong("brand_id"));
+                brand.setName(rs.getString("brand_name"));
+                model.setBrand(brand);
 
                 list.add(model);
             }
@@ -108,7 +117,11 @@ public class ModelDAO {
                 model.setId(rs.getLong("id"));
                 model.setName(rs.getString("name"));
                 model.setActive(rs.getBoolean("is_active"));
-                model.setBrandName(rs.getString("brand_name"));
+
+                Brand brand = new Brand();
+                brand.setId(rs.getLong("brand_id"));
+                brand.setName(rs.getString("brand_name"));
+                model.setBrand(brand);
             }
 
             return model;

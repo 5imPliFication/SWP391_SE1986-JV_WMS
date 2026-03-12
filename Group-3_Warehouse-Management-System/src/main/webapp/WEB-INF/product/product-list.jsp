@@ -36,27 +36,28 @@
                    value="${param.searchName}">
         </div>
 
-        <%--sort by brand name--%>
+
+        <%--sort by category name--%>
         <div class="col-auto">
-            <select name="brandName" class="form-select">
-                <option value="">All Brand</option>
-                <c:forEach var="b" items="${brands}">
-                    <option value="${b.name}"
-                        ${param.brandName == b.name ? 'selected' : ''}>
-                            ${b.name}
+            <select name="categoryId" class="form-select">
+                <option value="">All Category</option>
+                <c:forEach var="c" items="${categories}">
+                    <option value="${c.id}"
+                        ${param.categoryId == c.id.toString() ? 'selected' : ''}>
+                            ${c.name}
                     </option>
                 </c:forEach>
             </select>
         </div>
 
-        <%--sort by category name--%>
+        <%--sort by brand name--%>
         <div class="col-auto">
-            <select name="categoryName" class="form-select">
-                <option value="">All Category</option>
-                <c:forEach var="c" items="${categories}">
-                    <option value="${c.name}"
-                        ${param.categoryName == c.name ? 'selected' : ''}>
-                            ${c.name}
+            <select id="brandSelect" name="brandId" class="form-select">
+                <option value="">All Brand</option>
+                <c:forEach var="b" items="${brands}">
+                    <option value="${b.id}"
+                        ${param.brandId == b.id.toString() ? 'selected' : ''}>
+                            ${b.name}
                     </option>
                 </c:forEach>
             </select>
@@ -64,11 +65,11 @@
 
         <%--sort by model name--%>
         <div class="col-auto">
-            <select name="modelName" class="form-select">
+            <select id="modelSelect" name="modelId" class="form-select">
                 <option value="">All Model</option>
                 <c:forEach var="c" items="${models}">
-                    <option value="${c.name}"
-                        ${param.modelName == c.name ? 'selected' : ''}>
+                    <option value="${c.id}" data-brand="${c.brand.id}"
+                        ${param.modelId == c.id.toString() ? 'selected' : ''}>
                             ${c.name}
                     </option>
                 </c:forEach>
@@ -77,11 +78,11 @@
 
         <%--sort by chip name--%>
         <div class="col-auto">
-            <select name="chipName" class="form-select">
-                <option value="">All Model</option>
+            <select name="chipId" class="form-select">
+                <option value="">All Chip</option>
                 <c:forEach var="c" items="${chips}">
-                    <option value="${c.name}"
-                        ${param.chipName == c.name ? 'selected' : ''}>
+                    <option value="${c.id}"
+                        ${param.chipId == c.id.toString() ? 'selected' : ''}>
                             ${c.name}
                     </option>
                 </c:forEach>
@@ -90,11 +91,11 @@
 
         <%--sort by ram size--%>
         <div class="col-auto">
-            <select name="ramSize" class="form-select">
+            <select name="ramId" class="form-select">
                 <option value="">All Ram</option>
                 <c:forEach var="c" items="${rams}">
-                    <option value="${c.size}"
-                        ${param.ramSize == c.size ? 'selected' : ''}>
+                    <option value="${c.id}"
+                        ${param.ramId == c.id.toString() ? 'selected' : ''}>
                             ${c.size}
                     </option>
                 </c:forEach>
@@ -103,11 +104,11 @@
 
         <%--sort by storage size--%>
         <div class="col-auto">
-            <select name="storageSize" class="form-select">
+            <select name="storageId" class="form-select">
                 <option value="">All Storage</option>
                 <c:forEach var="c" items="${storages}">
-                    <option value="${c.size}"
-                        ${param.storageSize == c.size ? 'selected' : ''}>
+                    <option value="${c.id}"
+                        ${param.storageId == c.id.toString() ? 'selected' : ''}>
                             ${c.size}
                     </option>
                 </c:forEach>
@@ -116,11 +117,11 @@
 
         <%--sort by screen size--%>
         <div class="col-auto">
-            <select name="screenSize" class="form-select">
+            <select name="sizeId" class="form-select">
                 <option value="">All Screen</option>
                 <c:forEach var="c" items="${sizes}">
-                    <option value="${c.size}"
-                        ${param.screenSize == c.size ? 'selected' : ''}>
+                    <option value="${c.id}"
+                        ${param.sizeId == c.id.toString() ? 'selected' : ''}>
                             ${c.size}
                     </option>
                 </c:forEach>
@@ -260,6 +261,22 @@
         </nav>
     </c:if>
 </div>
+
+<script>
+    document.getElementById("brandSelect").addEventListener("change", function () {
+        let brandId = this.value;
+        let options = document.querySelectorAll("#modelSelect option");
+        options.forEach(opt => {
+            let modelBrand = opt.dataset.brand;
+            if (!modelBrand) return;
+            if (brandId === "" || modelBrand === brandId) {
+                opt.style.display = "";
+            } else {
+                opt.style.display = "none";
+            }
+        });
+    });
+</script>
 
 </body>
 </html>

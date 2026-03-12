@@ -54,22 +54,23 @@
                                    required>
                         </div>
 
-                        <!-- Brand -->
+                        <!-- Category -->
                         <div class="mb-3">
-                            <label class="form-label">Brand</label>
-                            <select name="brandId" class="form-select">
-                                <c:forEach items="${brands}" var="b">
-                                    <option value="${b.id}">${b.name}</option>
+                            <label class="form-label">Category</label>
+                            <select name="categoryId" class="form-select" required>
+                                <c:forEach items="${categories}" var="c">
+                                    <option value="${c.id}">${c.name}</option>
                                 </c:forEach>
                             </select>
                         </div>
 
-                        <!-- Category -->
+                        <!-- Brand -->
                         <div class="mb-3">
-                            <label class="form-label">Category</label>
-                            <select name="categoryId" class="form-select">
-                                <c:forEach items="${categories}" var="c">
-                                    <option value="${c.id}">${c.name}</option>
+                            <label class="form-label">Brand</label>
+                            <select id="brandSelect" name="brandId" class="form-select" required>
+                                <option value="">Select Brand</option>
+                                <c:forEach items="${brands}" var="b">
+                                    <option value="${b.id}">${b.name}</option>
                                 </c:forEach>
                             </select>
                         </div>
@@ -77,9 +78,12 @@
                         <!-- Model -->
                         <div class="mb-3">
                             <label class="form-label">Model</label>
-                            <select name="modelId" class="form-select">
-                                <c:forEach items="${models}" var="c">
-                                    <option value="${c.id}">${c.name}</option>
+                            <select id="modelSelect" name="modelId" class="form-select" required>
+                                <option value="">Select Model</option>
+                                <c:forEach var="m" items="${models}">
+                                    <option value="${m.id}" data-brand="${m.brand.id}">
+                                            ${m.name}
+                                    </option>
                                 </c:forEach>
                             </select>
                         </div>
@@ -87,7 +91,8 @@
                         <!-- Chip -->
                         <div class="mb-3">
                             <label class="form-label">Chip</label>
-                            <select name="chipId" class="form-select">
+                            <select name="chipId" class="form-select" required>
+                                <option value="">Select Chip</option>
                                 <c:forEach items="${chips}" var="c">
                                     <option value="${c.id}">${c.name}</option>
                                 </c:forEach>
@@ -97,7 +102,8 @@
                         <!-- Ram -->
                         <div class="mb-3">
                             <label class="form-label">Ram</label>
-                            <select name="ramId" class="form-select">
+                            <select name="ramId" class="form-select" required>
+                                <option value="">Select Ram</option>
                                 <c:forEach items="${rams}" var="c">
                                     <option value="${c.id}">${c.size}</option>
                                 </c:forEach>
@@ -107,7 +113,8 @@
                         <!-- Storage -->
                         <div class="mb-3">
                             <label class="form-label">Storage</label>
-                            <select name="storageId" class="form-select">
+                            <select name="storageId" class="form-select" required>
+                                <option value="">Select Storage</option>
                                 <c:forEach items="${storages}" var="c">
                                     <option value="${c.id}">${c.size}</option>
                                 </c:forEach>
@@ -117,7 +124,8 @@
                         <!-- Screen Size -->
                         <div class="mb-3">
                             <label class="form-label">Screen Size</label>
-                            <select name="sizeId" class="form-select">
+                            <select name="sizeId" class="form-select" required>
+                                <option value="">Select Screen Size</option>
                                 <c:forEach items="${sizes}" var="c">
                                     <option value="${c.id}">${c.size}</option>
                                 </c:forEach>
@@ -127,7 +135,8 @@
                         <!-- Product Unit -->
                         <div class="mb-3">
                             <label class="form-label">Product Unit</label>
-                            <select name="unitId" class="form-select">
+                            <select name="unitId" class="form-select" required>
+                                <option value="">Select Unit</option>
                                 <c:forEach items="${units}" var="c">
                                     <option value="${c.id}">${c.name}</option>
                                 </c:forEach>
@@ -166,6 +175,22 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById("brandSelect").addEventListener("change", function () {
+        let brandId = this.value;
+        let options = document.querySelectorAll("#modelSelect option");
+        options.forEach(opt => {
+            let modelBrand = opt.dataset.brand;
+            if (!modelBrand) return;
+            if (brandId === "" || modelBrand === brandId) {
+                opt.style.display = "";
+            } else {
+                opt.style.display = "none";
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
