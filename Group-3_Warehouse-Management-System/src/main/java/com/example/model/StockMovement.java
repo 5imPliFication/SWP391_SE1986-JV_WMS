@@ -24,5 +24,7 @@ public class StockMovement {
     
     private Long referenceId;
 
+    private String staffName;
+
     private LocalDateTime createdAt;
 }
