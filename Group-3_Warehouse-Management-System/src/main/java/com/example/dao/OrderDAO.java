@@ -4,10 +4,12 @@ import com.example.config.DBConfig;
 import com.example.model.Coupon;
 import com.example.model.Order;
 import com.example.model.User;
+import com.example.util.AppConstants;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1087,5 +1089,112 @@ public class OrderDAO {
             throw new RuntimeException("Failed to count orders by status and date range", e);
         }
         return 0;
+    }
+
+    public int countExportHistory(String searchCode, LocalDate fromDate, LocalDate toDate) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders WHERE status = 'COMPLETED'");
+        
+        if (searchCode != null && !searchCode.isEmpty()) {
+            sql.append(" AND order_code LIKE ?");
+        }
+        if (fromDate != null) {
+            sql.append(" AND CAST(processed_at AS DATE) >= ?");
+        }
+        if (toDate != null) {
+            sql.append(" AND CAST(processed_at AS DATE) <= ?");
+        }
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            if (searchCode != null && !searchCode.isEmpty()) {
+                ps.setString(paramIndex++, "%" + searchCode + "%");
+            }
+            if (fromDate != null) {
+                ps.setDate(paramIndex++, Date.valueOf(fromDate));
+            }
+            if (toDate != null) {
+                ps.setDate(paramIndex++, Date.valueOf(toDate));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to count export history orders", e);
+        }
+        return 0;
+    }
+
+    public List<Order> getExportHistoryOrders(String searchCode, LocalDate fromDate, LocalDate toDate, int offset) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT o.*, u.fullname AS created_user_name, pu.fullname AS processed_user_name " +
+            "FROM orders o " +
+            "LEFT JOIN users u ON o.created_by = u.id " +
+            "LEFT JOIN users pu ON o.processed_by = pu.id " +
+            "WHERE o.status = 'COMPLETED'"
+        );
+
+        if (searchCode != null && !searchCode.isEmpty()) {
+            sql.append(" AND o.order_code LIKE ?");
+        }
+        if (fromDate != null) {
+            sql.append(" AND CAST(o.processed_at AS DATE) >= ?");
+        }
+        if (toDate != null) {
+            sql.append(" AND CAST(o.processed_at AS DATE) <= ?");
+        }
+        
+        sql.append(" ORDER BY o.processed_at DESC LIMIT ? OFFSET ?");
+
+        List<Order> orders = new ArrayList<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            if (searchCode != null && !searchCode.isEmpty()) {
+                ps.setString(paramIndex++, "%" + searchCode + "%");
+            }
+            if (fromDate != null) {
+                ps.setDate(paramIndex++, Date.valueOf(fromDate));
+            }
+            if (toDate != null) {
+                ps.setDate(paramIndex++, Date.valueOf(toDate));
+            }
+            int limit = AppConstants.PAGE_SIZE;
+
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex++, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order();
+                    order.setId(rs.getLong("id"));
+                    order.setOrderCode(rs.getString("order_code"));
+                    order.setCustomerName(rs.getString("customer_name"));
+                    order.setCustomerPhone(rs.getString("customer_phone"));
+                    order.setStatus(rs.getString("status"));
+                    order.setTotal(rs.getBigDecimal("total_price"));
+                    order.setCreatedAt(rs.getTimestamp("order_date"));
+                    order.setProcessedAt(rs.getTimestamp("processed_at"));
+
+                    User processedBy = new User();
+                    long processedUserId = rs.getLong("processed_by");
+                    if (!rs.wasNull()) {
+                        processedBy.setId(processedUserId);
+                        processedBy.setFullName(rs.getString("processed_user_name"));
+                        order.setProcessedBy(processedBy);
+                    }
+                    orders.add(order);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get export history orders", e);
+        }
+        return orders;
     }
 }
