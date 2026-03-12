@@ -179,6 +179,11 @@
                               <span>Categories</span>
                           </a>
                       </li>
+                      <li>
+                          <a href="${pageContext.request.contextPath}/specification">
+                              <span>Specification</span>
+                          </a>
+                      </li>
 
                 </c:if>
 
@@ -217,11 +222,11 @@
                               and sessionScope.user.role.active
                               and fn:contains(sessionScope.userPermissions, 'EXPORT_PRODUCT')}">
 
-                    <li>
-                        <a href="${pageContext.request.contextPath}/inventory/export-history">
-                            <span>Export History</span>
-                        </a>
-                    </li>
+                      <li>
+                          <a href="${pageContext.request.contextPath}/inventory/export-history">
+                              <span>Export History</span>
+                          </a>
+                      </li>
 
                 </c:if>
                 <!-- Out Of Stock -->
