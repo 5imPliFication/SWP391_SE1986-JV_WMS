@@ -28,7 +28,8 @@ public class OrderItemService {
 
         return orderItemDAO.findByOrderId(orderId);
     }
-    public void updateQuantity(Long itemId, int quantity) {
+    public void updateQuantity(Long orderId, Long itemId, int quantity) {
         orderItemDAO.updateQuantity(itemId, quantity);
+        orderDAO.refreshOrderFinalTotal(orderId);
     }
 }

@@ -9,6 +9,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Processing - Warehouse</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
+    <style>
+        .order-description-block {
+            min-height: 40px;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            background-color: #f8f9fa;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 <body>
 <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
@@ -30,7 +40,6 @@
                 <h2 class="font-weight-bold text-dark mb-1">
                     <i class="fas fa-clipboard-check mr-2"></i>Order Processing
                 </h2>
-                <p class="text-muted mb-0">Review and process order fulfillment</p>
             </div>
             <a href="${pageContext.request.contextPath}/warehouse/orders" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left mr-2"></i>Back to Queue
@@ -152,15 +161,20 @@
                         </div>
                     </div>
 
-                    <c:if test="${order.note != null && !order.note.isEmpty()}">
-                        <hr class="my-3">
-                        <div class="alert alert-light mb-0" role="alert">
-                            <p class="text-muted mb-1 small font-weight-bold text-uppercase">
-                                <i class="fas fa-sticky-note mr-1"></i>Order Notes
-                            </p>
-                            <p class="mb-0">${order.note}</p>
-                        </div>
-                    </c:if>
+                    <hr class="my-3">
+                    <p class="text-muted mb-2 small font-weight-bold text-uppercase">
+                        <i class="fas fa-sticky-note mr-1"></i>Order Description
+                    </p>
+                    <div class="order-description-block">
+                        <c:choose>
+                            <c:when test="${not empty order.note}">
+                                ${order.note}
+                            </c:when>
+                            <c:otherwise>
+                                No description provided.
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
                 </div>
             </div>
 

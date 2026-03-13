@@ -58,6 +58,11 @@ public class OrderService {
             throw new IllegalArgumentException("Item not found");
 
         orderItemDAO.deleteByOrderItemId(orderId, orderItemId);
+        orderDAO.refreshOrderFinalTotal(orderId);
+    }
+
+    public void refreshOrderFinalTotal(Long orderId) {
+        orderDAO.refreshOrderFinalTotal(orderId);
     }
 
     /* ================= SHARED ================= */
@@ -300,6 +305,8 @@ public class OrderService {
 
                 orderItemDAO.addItem(orderItem);
             }
+
+            orderDAO.refreshOrderFinalTotal(orderId);
 
             return null; // Success - no error
 

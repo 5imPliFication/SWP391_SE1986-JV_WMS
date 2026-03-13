@@ -49,8 +49,8 @@ public class UpdateOrderItemQuantityServlet extends HttpServlet {
                 return;
             }
 
-            // Update quantity
-            orderItemService.updateQuantity(itemId, quantity);
+            // Update quantity and refresh order totals
+            orderItemService.updateQuantity(orderId, itemId, quantity);
 
             String successMsg = URLEncoder.encode("Quantity updated successfully", StandardCharsets.UTF_8);
             resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&success=" + successMsg);

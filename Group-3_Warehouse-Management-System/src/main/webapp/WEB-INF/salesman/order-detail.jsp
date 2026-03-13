@@ -131,6 +131,15 @@
         .coupon-input-uppercase {
             text-transform: uppercase;
         }
+
+        .order-description-block {
+            min-height: 30px;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            background-color: #f8f9fa;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -211,6 +220,20 @@
                         </c:when>
                         <c:otherwise>
                             <span class="badge badge-secondary badge-pill px-3 py-2">${order.status}</span>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <p class="text-muted mb-2">Order Description</p>
+                <div class="order-description-block">
+                    <c:choose>
+                        <c:when test="${not empty order.note}">
+                            ${order.note}
+                        </c:when>
+                        <c:otherwise>
+                            No description provided.
                         </c:otherwise>
                     </c:choose>
                 </div>

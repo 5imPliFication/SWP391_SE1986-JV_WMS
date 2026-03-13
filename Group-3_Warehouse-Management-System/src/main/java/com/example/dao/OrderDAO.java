@@ -141,36 +141,36 @@ public class OrderDAO {
 
 
     public Order findById(Long orderId) {
-         String sql = """
-                     SELECT
-                         o.id,
-                         o.order_code,
-                         o.customer_name,
-                         o.customer_phone,
-                         o.note,
-                         o.status,
-                         o.total_price as total,
-                         o.order_date,
-                         o.processed_at,
-                         o.discount_amount,
-                         o.final_total,
-                 
-                         cu.id           AS created_user_id,
-                         cu.fullname     AS created_user_name,
-                 
-                         pu.id           AS processed_user_id,
-                         pu.fullname     AS processed_user_name,
-                 
-                         c.id            AS coupon_id,
-                         c.code          AS coupon_code,
-                         c.discount_type,
-                         c.discount_value
-                     FROM orders o
-                     JOIN users cu ON o.created_by = cu.id
-                     LEFT JOIN users pu ON o.processed_by = pu.id
-                     LEFT JOIN coupons c ON o.coupon_id = c.id
-                     WHERE o.id = ?
-                 """;
+        String sql = """
+                    SELECT
+                        o.id,
+                        o.order_code,
+                        o.customer_name,
+                        o.customer_phone,
+                        o.note,
+                        o.status,
+                        o.total_price as total,
+                        o.order_date,
+                        o.processed_at,
+                        o.discount_amount,
+                        o.final_total,
+                
+                        cu.id           AS created_user_id,
+                        cu.fullname     AS created_user_name,
+                
+                        pu.id           AS processed_user_id,
+                        pu.fullname     AS processed_user_name,
+                
+                        c.id            AS coupon_id,
+                        c.code          AS coupon_code,
+                        c.discount_type,
+                        c.discount_value
+                    FROM orders o
+                    JOIN users cu ON o.created_by = cu.id
+                    LEFT JOIN users pu ON o.processed_by = pu.id
+                    LEFT JOIN coupons c ON o.coupon_id = c.id
+                    WHERE o.id = ?
+                """;
 
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -285,30 +285,30 @@ public class OrderDAO {
 
     public List<Order> findBySalesman(Long salesmanId) {
         String sql = """
-        SELECT
-            o.id,
-            o.order_code,
-            o.customer_name,
-            o.customer_phone,
-            o.note,
-            o.status,
-            o.total_price as total,
-            o.order_date,
-            o.processed_at,
-
-            u.id AS created_user_id,
-            u.fullname AS created_user_name,
-
-            c.id AS coupon_id,
-            c.code AS coupon_code,
-            c.discount_type,
-            c.discount_value
-        FROM orders o
-        JOIN users u ON o.created_by = u.id
-        LEFT JOIN coupons c ON o.coupon_id = c.id
-        WHERE o.created_by = ?
-        ORDER BY o.order_date DESC
-    """;
+                    SELECT
+                        o.id,
+                        o.order_code,
+                        o.customer_name,
+                        o.customer_phone,
+                        o.note,
+                        o.status,
+                        o.total_price as total,
+                        o.order_date,
+                        o.processed_at,
+                
+                        u.id AS created_user_id,
+                        u.fullname AS created_user_name,
+                
+                        c.id AS coupon_id,
+                        c.code AS coupon_code,
+                        c.discount_type,
+                        c.discount_value
+                    FROM orders o
+                    JOIN users u ON o.created_by = u.id
+                    LEFT JOIN coupons c ON o.coupon_id = c.id
+                    WHERE o.created_by = ?
+                    ORDER BY o.order_date DESC
+                """;
 
         List<Order> list = new ArrayList<>();
 
@@ -329,30 +329,30 @@ public class OrderDAO {
 
     public List<Order> findByStatus(String status) {
         String sql = """
-        SELECT
-            o.id,
-            o.order_code,
-            o.customer_name,
-            o.customer_phone,
-            o.note,
-            o.status,
-            o.total_price as total,
-            o.order_date,
-            o.processed_at,
-
-            u.id AS created_user_id,
-            u.fullname AS created_user_name,
-
-            c.id AS coupon_id,
-            c.code AS coupon_code,
-            c.discount_type,
-            c.discount_value
-        FROM orders o
-        JOIN users u ON o.created_by = u.id
-        LEFT JOIN coupons c ON o.coupon_id = c.id
-        WHERE o.status = ?
-        ORDER BY o.order_date ASC
-    """;
+                    SELECT
+                        o.id,
+                        o.order_code,
+                        o.customer_name,
+                        o.customer_phone,
+                        o.note,
+                        o.status,
+                        o.total_price as total,
+                        o.order_date,
+                        o.processed_at,
+                
+                        u.id AS created_user_id,
+                        u.fullname AS created_user_name,
+                
+                        c.id AS coupon_id,
+                        c.code AS coupon_code,
+                        c.discount_type,
+                        c.discount_value
+                    FROM orders o
+                    JOIN users u ON o.created_by = u.id
+                    LEFT JOIN coupons c ON o.coupon_id = c.id
+                    WHERE o.status = ?
+                    ORDER BY o.order_date ASC
+                """;
 
         List<Order> list = new ArrayList<>();
 
@@ -377,13 +377,13 @@ public class OrderDAO {
                                 String note) {
 
         String sql = """
-        UPDATE orders
-        SET status = ?,
-            processed_by = ?,
-            processed_at = ?,
-            note = ?
-        WHERE id = ?
-    """;
+                    UPDATE orders
+                    SET status = ?,
+                        processed_by = ?,
+                        processed_at = ?,
+                        note = ?
+                    WHERE id = ?
+                """;
 
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -449,7 +449,7 @@ public class OrderDAO {
     /**
      * Apply coupon to order
      */
-    public void applyCoupon(Long orderId, Long couponId) {
+    public void applyCoupon(Long orderId, Long couponId){
         String selectOrderSql = """
                 SELECT SUM(oi.quantity * oi.price_at_purchase) as subtotal
                 FROM order_items oi
@@ -533,22 +533,86 @@ public class OrderDAO {
                 // Commit transaction
                 con.commit();
 
-            } catch (Exception e) {
-                // Rollback on error
-                con.rollback();
-                throw e;
-            } finally {
-                con.setAutoCommit(true);
+            } catch (SQLException sqlException){
+                throw new RuntimeException("Failed to apply coupon to order", sqlException);
             }
-
+            catch (Exception e) {
+                throw e;
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to apply coupon to order", e);
         }
     }
 
-    /**
-     * Remove coupon from order
-     */
+    public void refreshOrderFinalTotal(Long orderId) {
+        String subtotalSql = "SELECT COALESCE(SUM(quantity * price_at_purchase), 0) AS subtotal FROM order_items WHERE order_id = ?";
+        String couponSql = """
+                SELECT c.id, c.discount_type, c.discount_value
+                FROM orders o
+                LEFT JOIN coupons c ON o.coupon_id = c.id
+                WHERE o.id = ?
+                """;
+        String updateSql = "UPDATE orders SET total_price = ?, discount_amount = ?, final_total = ? WHERE id = ?";
+
+        try (Connection con = DBConfig.getDataSource().getConnection()) {
+            BigDecimal subtotal = BigDecimal.ZERO;
+            Coupon coupon = null;
+
+            try (PreparedStatement ps = con.prepareStatement(subtotalSql)) {
+                ps.setLong(1, orderId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && rs.getBigDecimal("subtotal") != null) {
+                        subtotal = rs.getBigDecimal("subtotal");
+                    }
+                }
+            }
+
+            try (PreparedStatement ps = con.prepareStatement(couponSql)) {
+                ps.setLong(1, orderId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && rs.getObject("id") != null) {
+                        coupon = new Coupon();
+                        coupon.setId(rs.getLong("id"));
+                        coupon.setDiscountType(rs.getString("discount_type"));
+                        coupon.setDiscountValue(rs.getBigDecimal("discount_value"));
+                    }
+                }
+            }
+
+            BigDecimal discountAmount = BigDecimal.ZERO;
+            if (coupon != null) {
+                discountAmount = calculateDiscountAmount(coupon, subtotal);
+            }
+
+            BigDecimal finalTotal = subtotal.subtract(discountAmount);
+            if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
+                finalTotal = BigDecimal.ZERO;
+            }
+
+            subtotal = subtotal.setScale(2, RoundingMode.HALF_UP);
+            discountAmount = discountAmount.setScale(2, RoundingMode.HALF_UP);
+            finalTotal = finalTotal.setScale(2, RoundingMode.HALF_UP);
+
+            try (PreparedStatement ps = con.prepareStatement(updateSql)) {
+                ps.setBigDecimal(1, subtotal);
+                ps.setBigDecimal(2, discountAmount);
+                ps.setBigDecimal(3, finalTotal);
+                ps.setLong(4, orderId);
+
+                int affected = ps.executeUpdate();
+                if (affected == 0) {
+                    throw new SQLException("Order not found with ID: " + orderId);
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to refresh order final total", e);
+            } finally {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to refresh order final total", e);
+        }
+    }
+
     public void removeCoupon(Long orderId) {
         String selectOrderSql = """
                 SELECT SUM(oi.quantity * oi.price_at_purchase) as subtotal, o.coupon_id
@@ -632,7 +696,7 @@ public class OrderDAO {
                 ps.setString(1, status);
             }
 
-            if(orderCode != null && !orderCode.trim().isEmpty()) {
+            if (orderCode != null && !orderCode.trim().isEmpty()) {
                 ps.setString(2, orderCode);
             }
 
@@ -713,12 +777,12 @@ public class OrderDAO {
                     orderBy = "o.order_date";
             }
         }
-        
+
         String direction = "DESC";
         if (sortDir != null && sortDir.equalsIgnoreCase("asc")) {
             direction = "ASC";
         }
-        
+
         sql.append(" ORDER BY ").append(orderBy).append(" ").append(direction).append(" LIMIT ? OFFSET ?");
 
         List<Order> orders = new ArrayList<>();
@@ -834,12 +898,12 @@ public class OrderDAO {
                     orderBy = "o.order_date";
             }
         }
-        
+
         String direction = "DESC";
         if (sortDir != null && sortDir.equalsIgnoreCase("asc")) {
             direction = "ASC";
         }
-        
+
         sql.append(" ORDER BY ").append(orderBy).append(" ").append(direction).append(" LIMIT ? OFFSET ?");
 
         List<Order> orders = new ArrayList<>();
@@ -888,6 +952,7 @@ public class OrderDAO {
             throw new RuntimeException("Failed to get orders for salesman", e);
         }
     }
+
     public int countByDateRange(Timestamp startDate, Timestamp endDate) {
         String sql = "SELECT COUNT(*) FROM orders WHERE order_date BETWEEN ? AND ?";
         try (Connection con = DBConfig.getDataSource().getConnection();
@@ -942,30 +1007,30 @@ public class OrderDAO {
 
     public List<Order> findBySalesmanAndDateRange(Long salesmanId, Timestamp startDate, Timestamp endDate) {
         String sql = """
-        SELECT
-            o.id,
-            o.order_code,
-            o.customer_name,
-            o.customer_phone,
-            o.note,
-            o.status,
-            o.total_price as total,
-            o.order_date,
-            o.processed_at,
-
-            u.id AS created_user_id,
-            u.fullname AS created_user_name,
-
-            c.id AS coupon_id,
-            c.code AS coupon_code,
-            c.discount_type,
-            c.discount_value
-        FROM orders o
-        JOIN users u ON o.created_by = u.id
-        LEFT JOIN coupons c ON o.coupon_id = c.id
-        WHERE o.created_by = ? AND o.order_date BETWEEN ? AND ?
-        ORDER BY o.order_date DESC
-        """;
+                SELECT
+                    o.id,
+                    o.order_code,
+                    o.customer_name,
+                    o.customer_phone,
+                    o.note,
+                    o.status,
+                    o.total_price as total,
+                    o.order_date,
+                    o.processed_at,
+                
+                    u.id AS created_user_id,
+                    u.fullname AS created_user_name,
+                
+                    c.id AS coupon_id,
+                    c.code AS coupon_code,
+                    c.discount_type,
+                    c.discount_value
+                FROM orders o
+                JOIN users u ON o.created_by = u.id
+                LEFT JOIN coupons c ON o.coupon_id = c.id
+                WHERE o.created_by = ? AND o.order_date BETWEEN ? AND ?
+                ORDER BY o.order_date DESC
+                """;
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -985,30 +1050,30 @@ public class OrderDAO {
 
     public List<Order> findRecentBySalesman(Long salesmanId, Timestamp since, int limit) {
         String sql = """
-        SELECT
-            o.id,
-            o.order_code,
-            o.customer_name,
-            o.customer_phone,
-            o.note,
-            o.status,
-            o.total_price as total,
-            o.order_date,
-            o.processed_at,
-
-            u.id AS created_user_id,
-            u.fullname AS created_user_name,
-
-            c.id AS coupon_id,
-            c.code AS coupon_code,
-            c.discount_type,
-            c.discount_value
-        FROM orders o
-        JOIN users u ON o.created_by = u.id
-        LEFT JOIN coupons c ON o.coupon_id = c.id
-        WHERE o.created_by = ? AND o.order_date >= ?
-        ORDER BY o.order_date DESC LIMIT ?
-        """;
+                SELECT
+                    o.id,
+                    o.order_code,
+                    o.customer_name,
+                    o.customer_phone,
+                    o.note,
+                    o.status,
+                    o.total_price as total,
+                    o.order_date,
+                    o.processed_at,
+                
+                    u.id AS created_user_id,
+                    u.fullname AS created_user_name,
+                
+                    c.id AS coupon_id,
+                    c.code AS coupon_code,
+                    c.discount_type,
+                    c.discount_value
+                FROM orders o
+                JOIN users u ON o.created_by = u.id
+                LEFT JOIN coupons c ON o.coupon_id = c.id
+                WHERE o.created_by = ? AND o.order_date >= ?
+                ORDER BY o.order_date DESC LIMIT ?
+                """;
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -1028,29 +1093,29 @@ public class OrderDAO {
 
     public List<Order> findRecentOrders(int limit) {
         String sql = """
-        SELECT
-            o.id,
-            o.order_code,
-            o.customer_name,
-            o.customer_phone,
-            o.note,
-            o.status,
-            o.total_price as total,
-            o.order_date,
-            o.processed_at,
-
-            u.id AS created_user_id,
-            u.fullname AS created_user_name,
-
-            c.id AS coupon_id,
-            c.code AS coupon_code,
-            c.discount_type,
-            c.discount_value
-        FROM orders o
-        LEFT JOIN users u ON o.created_by = u.id
-        LEFT JOIN coupons c ON o.coupon_id = c.id
-        ORDER BY o.order_date DESC LIMIT ?
-        """;
+                SELECT
+                    o.id,
+                    o.order_code,
+                    o.customer_name,
+                    o.customer_phone,
+                    o.note,
+                    o.status,
+                    o.total_price as total,
+                    o.order_date,
+                    o.processed_at,
+                
+                    u.id AS created_user_id,
+                    u.fullname AS created_user_name,
+                
+                    c.id AS coupon_id,
+                    c.code AS coupon_code,
+                    c.discount_type,
+                    c.discount_value
+                FROM orders o
+                LEFT JOIN users u ON o.created_by = u.id
+                LEFT JOIN coupons c ON o.coupon_id = c.id
+                ORDER BY o.order_date DESC LIMIT ?
+                """;
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
