@@ -76,7 +76,7 @@
                     <tr>
                         <td>${st.index + 1}</td>
                         <td>${i.productName}</td>
-                        <td >${i.quantity}</td>
+                        <td>${i.quantity}</td>
                         <td>${i.unit}</td>
                     </tr>
                 </c:forEach>
