@@ -14,6 +14,6 @@ public class ExportItemDTO {
     private Long id;
     private String productName;
     private int quantity;
-    private BigDecimal priceAtPurchase;
+    private Double priceAtPurchase;
     private List<ExportProductItemDTO> productItems;
 }
