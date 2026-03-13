@@ -7,17 +7,33 @@ import java.util.List;
 
 public class RamService {
 
-    private RamDAO ramDAO = new RamDAO();
+    private RamDAO r = new RamDAO();
 
     public List<Ram> getAllActiveRams() {
-        return ramDAO.getAllActive();
+        return r.getAllActive();
     }
 
     public List<Ram> getAllRams() {
-        return ramDAO.getAll();
+        return r.getAll();
+    }
+
+    public List<Ram> getRamByPage(int pageNo, int pageSize) {
+        return r.getRamsByPage(pageNo, pageSize);
     }
 
     public Ram getRamById(long ramId) {
-        return ramDAO.getById(ramId);
+        return r.getById(ramId);
+    }
+
+    public int countRam() {
+        return r.count();
+    }
+
+    public void changeRamStatus(long id, boolean is_active) {
+        r.updateRamStatus(id, is_active);
+    }
+
+    public boolean CreateRam(String size, boolean active) {
+        return r.createRam(size, active);
     }
 }

@@ -22,8 +22,7 @@ public class SizeDAO {
                 WHERE is_active = true
                 """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ResultSet rs = ps.executeQuery();
 
@@ -42,6 +41,41 @@ public class SizeDAO {
         return list;
     }
 
+    public List<Size> getSizesByPage(int pageNo, int pageSize) {
+
+        List<Size> list = new ArrayList<>();
+
+        String sql = """
+            SELECT id, size,is_active
+            FROM sizes
+            ORDER BY id
+            LIMIT ? OFFSET ?
+            """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            int offset = (pageNo - 1) * pageSize;
+
+            ps.setInt(1, pageSize);
+            ps.setInt(2, offset);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Size size = new Size();
+                size.setId(rs.getLong("id"));
+                size.setSize(rs.getString("size"));
+                size.setActive(rs.getBoolean("is_active"));
+                list.add(size);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return list;
+    }
+
     public List<Size> getAll() {
         List<Size> list = new ArrayList<>();
 
@@ -50,8 +84,7 @@ public class SizeDAO {
                 FROM sizes
                 """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ResultSet rs = ps.executeQuery();
 
@@ -77,8 +110,7 @@ public class SizeDAO {
             WHERE c.id = ?
             """;
 
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             Size size = null;
             ps.setLong(1, sizeId);
             ResultSet rs = ps.executeQuery();
@@ -94,5 +126,59 @@ public class SizeDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public int count() {
+
+        String sql = "SELECT COUNT(*) FROM sizes";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    public void updateSizeStatus(long id, boolean active) {
+
+        String sql = "UPDATE sizes SET is_active = ? WHERE id = ?";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setBoolean(1, active);
+            ps.setLong(2, id);
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean createSize(String size, boolean active) {
+
+        String sql = """
+        INSERT INTO sizes (size, is_active)
+        VALUES (?, ?)
+    """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, size);
+            ps.setBoolean(2, active);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

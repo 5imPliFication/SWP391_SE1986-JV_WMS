@@ -23,4 +23,20 @@ public class StorageService {
     public List<Storage> getAllStorage() {
         return s.getAll();
     }
+
+    public List<Storage> getStorageByPage(int pageNo, int pageSize) {
+        return s.getStoragesByPage(pageNo, pageSize);
+    }
+
+    public int countStorage() {
+        return s.count();
+    }
+
+    public void changeStorageStatus(long id, boolean is_active) {
+        s.updateStorageStatus(id, is_active);
+    }
+
+    public boolean CreateStorage(String size, boolean active) {
+        return s.createStorage(size, active);
+    }
 }

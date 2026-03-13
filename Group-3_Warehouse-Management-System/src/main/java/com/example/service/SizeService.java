@@ -25,7 +25,23 @@ public class SizeService {
         return s.getAll();
     }
 
+    public List<Size> getSizeByPage(int pageNo, int pageSize) {
+        return s.getSizesByPage(pageNo, pageSize);
+    }
+
     public Size getSizeById(long sizeId) {
         return s.getById(sizeId);
+    }
+
+    public int countSize() {
+        return s.count();
+    }
+
+    public void changeSizeStatus(long id, boolean is_active) {
+        s.updateSizeStatus(id, is_active);
+    }
+
+    public boolean CreateSize(String size, boolean active) {
+        return s.createSize(size, active);
     }
 }

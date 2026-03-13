@@ -179,6 +179,11 @@
                               <span>Categories</span>
                           </a>
                       </li>
+                      <li>
+                          <a href="${pageContext.request.contextPath}/specification/model">
+                              <span>Specification</span>
+                          </a>
+                      </li>
 
                 </c:if>
 
@@ -217,11 +222,11 @@
                               and sessionScope.user.role.active
                               and fn:contains(sessionScope.userPermissions, 'EXPORT_PRODUCT')}">
 
-                    <li>
-                        <a href="${pageContext.request.contextPath}/inventory/export-history">
-                            <span>Export History</span>
-                        </a>
-                    </li>
+                      <li>
+                          <a href="${pageContext.request.contextPath}/inventory/export-history">
+                              <span>Export History</span>
+                          </a>
+                      </li>
 
                 </c:if>
                 <!-- Out Of Stock -->
@@ -288,12 +293,19 @@
 
                     const linkPath = new URL(link.href).pathname;
 
-                    if (linkPath === "/home") {
-                        if (currentPath.includes("dashboard")) {
-                            link.classList.add("active");
-                        }
+                    // Dashboard
+                    if (linkPath === "/home" && currentPath.includes("dashboard")) {
+                        link.classList.add("active");
+                        return;
                     }
 
+                    // Specification group
+                    if (linkPath.startsWith("/specification") && currentPath.startsWith("/specification")) {
+                        link.classList.add("active");
+                        return;
+                    }
+
+                    // Logic cũ
                     if (currentPath.startsWith(linkPath) && linkPath.length > bestLength) {
                         bestMatch = link;
                         bestLength = linkPath.length;
@@ -306,6 +318,7 @@
                 }
 
             });
+
 
 
         </script>

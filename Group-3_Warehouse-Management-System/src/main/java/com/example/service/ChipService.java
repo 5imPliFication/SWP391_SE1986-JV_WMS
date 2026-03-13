@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.example.service;
 
 import com.example.dao.ChipDAO;
@@ -22,7 +18,23 @@ public class ChipService {
         return c.getAll();
     }
 
+    public List<Chip> getChipByPage(int pageNo, int pageSize) {
+        return c.getChipsByPage(pageNo, pageSize);
+    }
+
     public Chip getChipById(long chipId) {
         return c.getById(chipId);
+    }
+
+    public int countChip() {
+        return c.count();
+    }
+
+    public void changeChipStatus(long id, boolean is_active) {
+        c.updateChipStatus(id, is_active);
+    }
+
+    public boolean CreateChip(String name, boolean active) {
+        return c.createChip(name, active);
     }
 }
