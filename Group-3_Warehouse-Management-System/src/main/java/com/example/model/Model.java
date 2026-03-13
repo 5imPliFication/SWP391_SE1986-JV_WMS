@@ -15,6 +15,6 @@ public class Model {
 
     private boolean isActive;
 
-    private Brand brand;
+    private String brandName;
 
 }
