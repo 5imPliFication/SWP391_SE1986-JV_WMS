@@ -1,6 +1,8 @@
 package com.example.service;
 
 import com.example.dao.*;
+import com.example.dto.ExportDTO;
+import com.example.dto.ExportItemDTO;
 import com.example.dto.OrderDTO;
 import com.example.model.*;
 
@@ -531,5 +533,12 @@ public class OrderService {
 
     public List<Order> getExportHistoryOrders(String searchCode, LocalDate fromDate, LocalDate toDate, int offset) {
         return orderDAO.getExportHistoryOrders(searchCode, fromDate, toDate, offset);
+    }
+
+    public ExportDTO getExportHistoryDetail(Long orderId) {
+        ExportDTO exportDTO = orderDAO.getExportOrderHeader(orderId);
+        if (exportDTO == null) return null;
+        exportDTO.setItems(orderDAO.getExportOrderItems(orderId));
+        return exportDTO;
     }
 }
