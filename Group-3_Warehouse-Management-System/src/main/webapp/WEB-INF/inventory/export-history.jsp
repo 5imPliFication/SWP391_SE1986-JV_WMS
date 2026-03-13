@@ -88,7 +88,7 @@
                                     ${order.processedBy != null ? order.processedBy.fullName : '-'}
                             </td>
                             <td class="text-center align-middle">
-                                <a href="${pageContext.request.contextPath}/inventory/export-history/detail?id=${order.id}"
+                                <a href="${pageContext.request.contextPath}/inventory/export-history/detail?orderId=${order.id}"
                                    class="btn btn-info btn-sm">
                                     View
                                 </a>

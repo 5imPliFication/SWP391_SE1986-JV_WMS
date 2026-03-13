@@ -37,20 +37,19 @@
                         </div>
                         <div class="col-md-6">
                             <p><strong>Total Value:</strong>
-                                <fmt:formatNumber value="${order.total}" type="currency" currencySymbol="VND"
-                                                  maxFractionDigits="0"/>
+                                    ${order.total}
                             </p>
                         </div>
                     </div>
 
                     <div class="row mb-2">
                         <div class="col-md-6">
-                            <p><strong>Salesman:</strong> ${order.createdBy != null ? order.createdBy.fullName : '-'}
+                            <p><strong>Salesman:</strong> ${order.salesmanName}
                             </p>
                         </div>
                         <div class="col-md-6">
                             <p><strong>Order Date:</strong>
-                                <fmt:formatDate pattern="dd/MM/yyyy HH:mm" value="${order.createdAt}"/>
+                                    ${order.createdAt}
                             </p>
                         </div>
                     </div>
@@ -58,11 +57,11 @@
                     <div class="row mb-2">
                         <div class="col-md-6">
                             <p><strong>Warehouse
-                                Staff:</strong> ${order.processedBy != null ? order.processedBy.fullName : '-'}</p>
+                                Staff:</strong> ${order.warehouseStaffName}</p>
                         </div>
                         <div class="col-md-6">
                             <p><strong>Processed Date:</strong>
-                                <fmt:formatDate pattern="dd/MM/yyyy HH:mm" value="${order.processedAt}"/>
+                                    ${order.processedAt}
                             </p>
                         </div>
                     </div>
@@ -82,14 +81,15 @@
                     <tr>
                         <th style="width: 60px;" class="text-center">No.</th>
                         <th>Product Name / Serial</th>
-                        <th style="width: 150px;" class="text-center">Export Quantity</th>
-                        <th style="width: 200px;" class="text-center">Unit Price</th>
+                        <th style="width: 150px;" class="text-center">Quantity</th>
+                        <th style="width: 200px;" class="text-center">Unit</th>
+                        <th style="width: 200px;" class="text-center">Price</th>
                     </tr>
                     </thead>
                     <tbody>
                     <c:choose>
-                        <c:when test="${not empty items}">
-                            <c:forEach items="${items}" var="item" varStatus="status">
+                        <c:when test="${not empty order.items}">
+                            <c:forEach items="${order.items}" var="item" varStatus="status">
                                 <%-- group-header --%>
                                 <tr class="group-header"
                                     style="cursor:pointer;background:#f8f9fa;"
@@ -97,14 +97,15 @@
 
                                     <td colspan="2" class="font-weight-bold">
                                         <span id="icon-${item.id}">&#9658;</span>
-                                            ${item.product.name}
+                                            ${item.productName}
                                     </td>
                                     <td class="text-center align-middle">
                                             ${item.quantity}
                                     </td>
                                     <td class="text-center align-middle">
-                                        <fmt:formatNumber value="${item.priceAtPurchase}" type="currency"
-                                                          currencySymbol="VND" maxFractionDigits="0"/>
+                                            ${item.priceAtPurchase}
+                                    </td><td class="text-center align-middle">
+                                            Piece
                                     </td>
                                 </tr>
 
@@ -128,10 +129,8 @@
                                             </div>
                                         </td>
                                         <td class="text-center align-middle">-</td>
-                                        <td class="text-center align-middle">
-                                            <fmt:formatNumber value="${productItem.currentPrice}" type="currency"
-                                                              currencySymbol="VND" maxFractionDigits="0"/>
-                                        </td>
+                                        <td class="text-center align-middle">-</td>
+                                        <td class="text-center align-middle">-</td>
                                     </tr>
                                 </c:forEach>
                             </c:forEach>
