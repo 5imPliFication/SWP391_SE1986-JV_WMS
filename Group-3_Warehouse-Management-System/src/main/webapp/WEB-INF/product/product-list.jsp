@@ -173,7 +173,8 @@
         <c:forEach items="${products}" var="p">
             <tr>
                 <td>
-                    <img src="${p.imgUrl}" class="product-img" alt="${p.name}">
+                    <img src="${p.imgUrl}" class="product-img" alt=""
+                         style="width:60px; height:60px; object-fit:cover;">
                 </td>
                 <td>
                     <!-- Click -> Move to Product Item List -->
