@@ -89,9 +89,7 @@ public class PurchaseRequestDetail extends HttpServlet {
         request.setAttribute("storages", sto.getAllActiveStorage());
         request.setAttribute("sizes", s.getAllActiveSize());
 
-        request.getRequestDispatcher(
-                "/WEB-INF/purchase_request/PurchaseRequestDetail.jsp"
-        ).forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/purchase_request/PurchaseRequestDetail.jsp").forward(request, response);
     }
 
     @Override

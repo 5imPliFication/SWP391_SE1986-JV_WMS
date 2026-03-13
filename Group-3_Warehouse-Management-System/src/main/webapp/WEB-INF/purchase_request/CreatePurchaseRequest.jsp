@@ -76,7 +76,7 @@
                             <option value="">Select Model</option>
 
                             <c:forEach var="m" items="${models}">
-                                <option value="${m.name}" data-brand="${m.brandName}">
+                                <option value="${m.name}" data-brand="${m.brand.name}">
                                     ${m.name}
                                 </option>
                             </c:forEach>
