@@ -15,4 +15,24 @@ public class ModelService {
     public List<Model> getAllModels() {
         return m.getAll();
     }
+
+    public List<Model> getModelByPage(int pageNo, int pageSize) {
+        return m.getModelsByPage(pageNo, pageSize);
+    }
+
+    public Model getModelById(long modelId) {
+        return m.getById(modelId);
+    }
+
+    public int countModel() {
+        return m.count();
+    }
+
+    public void changeModelStatus(long id, boolean is_active) {
+        m.updateModelStatus(id, is_active);
+    }
+
+    public boolean CreateModel(String name, long BrandID, boolean active) {
+        return m.createModel(name, BrandID, active);
+    }
 }

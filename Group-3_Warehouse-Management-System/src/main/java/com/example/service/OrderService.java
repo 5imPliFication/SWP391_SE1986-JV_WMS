@@ -7,6 +7,7 @@ import com.example.model.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.*;
 
 public class OrderService {
@@ -529,5 +530,13 @@ public class OrderService {
     // Get orders by status
     public List<Order> getOrdersByStatus(String status) {
         return orderDAO.findByStatus(status);
+    }
+
+    public int countExportHistory(String searchCode, LocalDate fromDate, LocalDate toDate) {
+        return orderDAO.countExportHistory(searchCode, fromDate, toDate);
+    }
+
+    public List<Order> getExportHistoryOrders(String searchCode, LocalDate fromDate, LocalDate toDate, int offset) {
+        return orderDAO.getExportHistoryOrders(searchCode, fromDate, toDate, offset);
     }
 }

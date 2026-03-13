@@ -17,6 +17,7 @@ import com.example.model.Ram;
 import com.example.model.Size;
 import com.example.model.Storage;
 import com.example.model.Unit;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -40,10 +41,10 @@ public class PurchaseRequestDAO {
         try {
             // 1. Insert purchase_requests
             String prSql = """
-                INSERT INTO purchase_requests
-                (request_code, created_by, status, note, created_at)
-                VALUES (?, ?, 'PENDING', ?, NOW())
-            """;
+                        INSERT INTO purchase_requests
+                        (request_code, created_by, status, note, created_at)
+                        VALUES (?, ?, 'PENDING', ?, NOW())
+                    """;
 
             PreparedStatement ps = conn.prepareStatement(
                     prSql, Statement.RETURN_GENERATED_KEYS
@@ -82,10 +83,10 @@ public class PurchaseRequestDAO {
     ) throws SQLException {
 
         String sql = """
-            INSERT INTO purchase_request_items
-            (purchase_request_id, product_id, quantity)
-            VALUES (?, ?, ?)
-        """;
+                    INSERT INTO purchase_request_items
+                    (purchase_request_id, product_id, quantity)
+                    VALUES (?, ?, ?)
+                """;
 
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setLong(1, prId);
@@ -107,14 +108,14 @@ public class PurchaseRequestDAO {
         List<PurchaseRequest> list = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("""
-        SELECT pr.id, pr.request_code, pr.status, pr.note, pr.created_at,
-               u1.fullname AS created_by_name,
-               u2.fullname AS approved_by_name
-        FROM purchase_requests pr
-        JOIN users u1 ON pr.created_by = u1.id
-        LEFT JOIN users u2 ON pr.approved_by = u2.id
-        WHERE 1 = 1
-    """);
+                    SELECT pr.id, pr.request_code, pr.status, pr.note, pr.created_at,
+                           u1.fullname AS created_by_name,
+                           u2.fullname AS approved_by_name
+                    FROM purchase_requests pr
+                    JOIN users u1 ON pr.created_by = u1.id
+                    LEFT JOIN users u2 ON pr.approved_by = u2.id
+                    WHERE 1 = 1
+                """);
 
         List<Object> params = new ArrayList<>();
 
@@ -191,10 +192,10 @@ public class PurchaseRequestDAO {
     ) {
 
         StringBuilder sql = new StringBuilder("""
-        SELECT COUNT(*)
-        FROM purchase_requests pr
-        WHERE 1 = 1
-    """);
+                    SELECT COUNT(*)
+                    FROM purchase_requests pr
+                    WHERE 1 = 1
+                """);
 
         List<Object> params = new ArrayList<>();
 
@@ -333,14 +334,14 @@ public class PurchaseRequestDAO {
     ) {
 
         StringBuilder sql = new StringBuilder("""
-        SELECT pr.id, pr.request_code, pr.status, pr.note, pr.created_at,
-               u1.id AS created_by, u1.fullname AS created_by_name,
-               u2.id AS approved_by, u2.fullname AS approved_by_name
-        FROM purchase_requests pr
-        JOIN users u1 ON pr.created_by = u1.id
-        LEFT JOIN users u2 ON pr.approved_by = u2.id
-        WHERE pr.id = ?
-    """);
+                    SELECT pr.id, pr.request_code, pr.status, pr.note, pr.created_at,
+                           u1.id AS created_by, u1.fullname AS created_by_name,
+                           u2.id AS approved_by, u2.fullname AS approved_by_name
+                    FROM purchase_requests pr
+                    JOIN users u1 ON pr.created_by = u1.id
+                    LEFT JOIN users u2 ON pr.approved_by = u2.id
+                    WHERE pr.id = ?
+                """);
 
         List<Object> params = new ArrayList<>();
         params.add(requestId);
@@ -389,20 +390,20 @@ public class PurchaseRequestDAO {
         List<PurchaseRequestItem> items = new ArrayList<>();
 
         String sql = """
-            SELECT
-                pri.product_id,
-                p.name AS product_name,
-                pri.quantity,
-                u.name AS unit,
-                b.name AS brand_name,
-                c.name AS category_name
-            FROM purchase_request_items pri
-            JOIN products p ON pri.product_id = p.id
-            LEFT JOIN units u ON p.unit_id = u.id
-            LEFT JOIN brands b ON p.brand_id = b.id
-            LEFT JOIN categories c ON p.category_id = c.id
-            WHERE pri.purchase_request_id = ?;
-    """;
+                        SELECT
+                            pri.product_id,
+                            p.name AS product_name,
+                            pri.quantity,
+                            u.name AS unit,
+                            b.name AS brand_name,
+                            c.name AS category_name
+                        FROM purchase_request_items pri
+                        JOIN products p ON pri.product_id = p.id
+                        LEFT JOIN units u ON p.unit_id = u.id
+                        LEFT JOIN brands b ON p.brand_id = b.id
+                        LEFT JOIN categories c ON p.category_id = c.id
+                        WHERE pri.purchase_request_id = ?;
+                """;
 
         try (
                 Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -437,10 +438,10 @@ public class PurchaseRequestDAO {
     // Dành cho MANAGER
     public boolean updateStatusByManager(Long prId, String status, Long managerId) {
         String sql = """
-        UPDATE purchase_requests
-        SET status = ?, approved_by = ?
-        WHERE id = ?
-    """;
+                    UPDATE purchase_requests
+                    SET status = ?, approved_by = ?
+                    WHERE id = ?
+                """;
 
         try (Connection con = DBConfig.getDataSource().getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -456,10 +457,10 @@ public class PurchaseRequestDAO {
 
     public boolean updateStatus(Long prId, String status) {
         String sql = """
-        UPDATE purchase_requests
-        SET status = ?
-        WHERE id = ?
-    """;
+                    UPDATE purchase_requests
+                    SET status = ?
+                    WHERE id = ?
+                """;
 
         try (Connection con = DBConfig.getDataSource().getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -475,10 +476,10 @@ public class PurchaseRequestDAO {
     public String getStatusById(Long prId) {
 
         String sql = """
-        SELECT status
-        FROM purchase_requests
-        WHERE id = ?
-    """;
+                    SELECT status
+                    FROM purchase_requests
+                    WHERE id = ?
+                """;
 
         try (Connection con = DBConfig.getDataSource().getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -500,15 +501,15 @@ public class PurchaseRequestDAO {
     public void updateItems(Long requestId, List<PurchaseRequestItem> items) {
 
         String deleteSql = """
-            DELETE FROM purchase_request_items
-            WHERE purchase_request_id = ?
-        """;
+                    DELETE FROM purchase_request_items
+                    WHERE purchase_request_id = ?
+                """;
 
         String insertSql = """
-            INSERT INTO purchase_request_items
-            (purchase_request_id, product_id, quantity)
-            VALUES (?, ?, ?)
-        """;
+                    INSERT INTO purchase_request_items
+                    (purchase_request_id, product_id, quantity)
+                    VALUES (?, ?, ?)
+                """;
 
         try (Connection conn = DBConfig.getDataSource().getConnection()) {
 
@@ -537,10 +538,10 @@ public class PurchaseRequestDAO {
     public void updateNote(Long requestId, String note) {
 
         String sql = """
-            UPDATE purchase_requests
-            SET note = ?
-            WHERE id = ? AND status = 'PENDING'
-        """;
+                    UPDATE purchase_requests
+                    SET note = ?
+                    WHERE id = ? AND status = 'PENDING'
+                """;
 
         try (
                 Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -559,9 +560,11 @@ public class PurchaseRequestDAO {
         }
 
         String sql = """
-                SELECT id, request_code, note
-                FROM purchase_requests
-                WHERE id = ?
+                select pr.id, u.fullname, pr.request_code, pr.note, pr.created_at
+                from purchase_requests pr
+                join users u
+                on pr.created_by = u.id
+                where pr.id = ?
                 """;
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
@@ -569,19 +572,20 @@ public class PurchaseRequestDAO {
 
             ps.setLong(1, purchaseId);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    return null;
-                }
-
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
                 PurchaseRequestDTO purchaseRequestDTO = new PurchaseRequestDTO();
                 purchaseRequestDTO.setPurchaseId(rs.getLong("id"));
                 purchaseRequestDTO.setPurchaseCode(rs.getString("request_code"));
                 purchaseRequestDTO.setNote(rs.getString("note"));
+                purchaseRequestDTO.setCreatedBy(rs.getString("fullname"));
+                purchaseRequestDTO.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 return purchaseRequestDTO;
             }
+
         } catch (Exception e) {
             throw new RuntimeException("Find purchase request header failed (id=" + purchaseId + ")", e);
         }
+        return null;
     }
 }

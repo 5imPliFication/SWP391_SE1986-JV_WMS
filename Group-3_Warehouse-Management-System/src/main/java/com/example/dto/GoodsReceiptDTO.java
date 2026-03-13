@@ -18,4 +18,6 @@ public class GoodsReceiptDTO {
     private LocalDateTime receivedAt;
     private String warehouseName;
     private String note;
+    private String requestorName;
+    private LocalDateTime requestDate;
 }

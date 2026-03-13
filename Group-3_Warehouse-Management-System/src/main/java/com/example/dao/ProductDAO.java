@@ -22,23 +22,22 @@ public class ProductDAO {
         return ts == null ? null : ts.toLocalDateTime();
     }
 
-    public List<Product> getAll(String searchName, String brandName, String categoryName,String modelName, String chipName,
-                                String ramSize, String storageSize, String screenSize, Boolean isActive, int pageNo)
+    public List<Product> getAll(String searchName, Long brandId, Long categoryId, Long modelId, Long chipId,
+                                Long ramId, Long storageId, Long sizeId, Boolean isActive, int pageNo)
     {
 
         List<Product> products = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("""
-                    SELECT p.id, p.name, p.description, p.img_url, p.is_active, p.total_quantity,
-                              	b.name AS brand_name,
-                              	c.name AS category_name,
-                                  m.name AS model_name,
-                                  ch.name AS chip_name,
-                                  r.size AS ram_size,
-                                  s.size AS storage_size,
-                                  sz.size AS screen_size,
-                                  u.name AS unit_name,
-                              	p.created_at, p.updated_at
+                    SELECT p.id, p.name, p.description, p.img_url, p.is_active, p.total_quantity, p.created_at, p.updated_at,
+                              	b.id AS brand_id, b.name AS brand_name,
+                              	c.id AS category_id, c.name AS category_name,
+                                m.id AS model_id, m.name AS model_name,
+                                ch.id AS chip_id, ch.name AS chip_name,
+                                r.id AS ram_id, r.size AS ram_size,
+                                s.id AS storage_id, s.size AS storage_size,
+                                sz.id AS screen_id, sz.size AS screen_size,
+                                u.id AS unit_id, u.name AS unit_name
                       FROM products p
                       JOIN brands b ON p.brand_id = b.id
                       JOIN categories c ON p.category_id = c.id
@@ -54,26 +53,26 @@ public class ProductDAO {
         if (searchName != null && !searchName.trim().isEmpty()) {
             sql.append(" AND p.name LIKE ? ");
         }
-        if (brandName != null && !brandName.trim().isEmpty()) {
-            sql.append(" AND b.name = ? ");
+        if (brandId != null) {
+            sql.append(" AND b.id = ? ");
         }
-        if (categoryName != null && !categoryName.trim().isEmpty()) {
-            sql.append(" AND c.name = ? ");
+        if (categoryId != null) {
+            sql.append(" AND c.id = ? ");
         }
-        if (modelName != null && !modelName.trim().isEmpty()) {
-            sql.append(" AND m.name = ? ");
+        if (modelId != null) {
+            sql.append(" AND m.id = ? ");
         }
-        if (chipName != null && !chipName.trim().isEmpty()) {
-            sql.append(" AND ch.name = ? ");
+        if (chipId != null) {
+            sql.append(" AND ch.id = ? ");
         }
-        if (ramSize != null && !ramSize.trim().isEmpty()) {
-            sql.append(" AND r.size = ? ");
+        if (ramId != null) {
+            sql.append(" AND r.id = ? ");
         }
-        if (storageSize != null && !storageSize.trim().isEmpty()) {
-            sql.append(" AND s.size = ? ");
+        if (storageId != null) {
+            sql.append(" AND s.id = ? ");
         }
-        if (screenSize != null && !screenSize.trim().isEmpty()) {
-            sql.append(" AND sz.size = ? ");
+        if (sizeId != null) {
+            sql.append(" AND sz.id = ? ");
         }
         if (isActive != null) {
             sql.append(" AND p.is_active = ? ");
@@ -90,26 +89,26 @@ public class ProductDAO {
             if (searchName != null && !searchName.trim().isEmpty()) {
                 ps.setString(index++, "%" + searchName + "%");
             }
-            if (brandName != null && !brandName.trim().isEmpty()) {
-                ps.setString(index++, brandName);
+            if (brandId != null) {
+                ps.setLong(index++, brandId);
             }
-            if (categoryName != null && !categoryName.trim().isEmpty()) {
-                ps.setString(index++, categoryName);
+            if (categoryId != null) {
+                ps.setLong(index++, categoryId);
             }
-            if(modelName != null && !modelName.trim().isEmpty()) {
-                ps.setString(index++, modelName);
+            if (modelId != null) {
+                ps.setLong(index++, modelId);
             }
-            if(chipName != null && !chipName.trim().isEmpty()) {
-                ps.setString(index++, chipName);
+            if (chipId != null) {
+                ps.setLong(index++, chipId);
             }
-            if(ramSize != null && !ramSize.trim().isEmpty()) {
-                ps.setString(index++, ramSize);
+            if (ramId != null) {
+                ps.setLong(index++, ramId);
             }
-            if(storageSize != null && !storageSize.trim().isEmpty()) {
-                ps.setString(index++, storageSize);
+            if (storageId != null) {
+                ps.setLong(index++, storageId);
             }
-            if(screenSize != null && !screenSize.trim().isEmpty()) {
-                ps.setString(index++, screenSize);
+            if (sizeId != null) {
+                ps.setLong(index++, sizeId);
             }
             if (isActive != null) {
                 ps.setBoolean(index++, isActive);
@@ -134,34 +133,42 @@ public class ProductDAO {
                 product.setUpdatedAt(getLocalDateTime(rs, "updated_at"));
 
                 Brand brand = new Brand();
+                brand.setId(rs.getLong("brand_id"));
                 brand.setName(rs.getString("brand_name"));
                 product.setBrand(brand);
 
                 Category category = new Category();
+                category.setId(rs.getLong("category_id"));
                 category.setName(rs.getString("category_name"));
                 product.setCategory(category);
 
                 Model model = new Model();
+                model.setId(rs.getLong("model_id"));
                 model.setName(rs.getString("model_name"));
                 product.setModel(model);
 
                 Chip chip = new Chip();
+                chip.setId(rs.getLong("chip_id"));
                 chip.setName(rs.getString("chip_name"));
                 product.setChip(chip);
 
                 Ram ram = new Ram();
+                ram.setId(rs.getLong("ram_id"));
                 ram.setSize(rs.getString("ram_size"));
                 product.setRam(ram);
 
                 Storage storage = new Storage();
+                storage.setId(rs.getLong("storage_id"));
                 storage.setSize(rs.getString("storage_size"));
                 product.setStorage(storage);
 
                 Size size = new Size();
+                size.setId(rs.getLong("screen_id"));
                 size.setSize(rs.getString("screen_size"));
                 product.setSize(size);
 
                 Unit unit = new Unit();
+                unit.setId(rs.getLong("unit_id"));
                 unit.setName(rs.getString("unit_name"));
                 product.setUnit(unit);
 
@@ -175,8 +182,8 @@ public class ProductDAO {
         }
     }
 
-    public int countProducts(String searchName, String brandName, String categoryName, String modelName, String chipName,
-                             String ramSize, String storageSize, String screenSize, Boolean isActive) {
+    public int countProducts(String searchName, Long brandId, Long categoryId, Long modelId, Long chipId,
+                             Long ramId, Long storageId, Long sizeId, Boolean isActive) {
 
         StringBuilder sql = new StringBuilder("""
                     SELECT COUNT(*)
@@ -195,26 +202,26 @@ public class ProductDAO {
         if (searchName != null && !searchName.trim().isEmpty()) {
             sql.append(" AND p.name LIKE ? ");
         }
-        if (brandName != null && !brandName.trim().isEmpty()) {
-            sql.append(" AND b.name = ? ");
+        if (brandId != null) {
+            sql.append(" AND b.id = ? ");
         }
-        if (categoryName != null && !categoryName.trim().isEmpty()) {
-            sql.append(" AND c.name = ? ");
+        if (categoryId != null) {
+            sql.append(" AND c.id = ? ");
         }
-        if (modelName != null && !modelName.trim().isEmpty()) {
-            sql.append(" AND m.name = ? ");
+        if (modelId != null) {
+            sql.append(" AND m.id = ? ");
         }
-        if (chipName != null && !chipName.trim().isEmpty()) {
-            sql.append(" AND ch.name = ? ");
+        if (chipId != null) {
+            sql.append(" AND ch.id = ? ");
         }
-        if (ramSize != null && !ramSize.trim().isEmpty()) {
-            sql.append(" AND r.size = ? ");
+        if (ramId != null) {
+            sql.append(" AND r.id = ? ");
         }
-        if (storageSize != null && !storageSize.trim().isEmpty()) {
-            sql.append(" AND s.size = ? ");
+        if (storageId != null) {
+            sql.append(" AND s.id = ? ");
         }
-        if (screenSize != null && !screenSize.trim().isEmpty()) {
-            sql.append(" AND sz.size = ? ");
+        if (sizeId != null) {
+            sql.append(" AND sz.id = ? ");
         }
         if (isActive != null) {
             sql.append(" AND p.is_active = ? ");
@@ -228,26 +235,26 @@ public class ProductDAO {
             if (searchName != null && !searchName.trim().isEmpty()) {
                 ps.setString(index++, "%" + searchName + "%");
             }
-            if (brandName != null && !brandName.trim().isEmpty()) {
-                ps.setString(index++, brandName);
+            if (brandId != null) {
+                ps.setLong(index++, brandId);
             }
-            if (categoryName != null && !categoryName.trim().isEmpty()) {
-                ps.setString(index++, categoryName);
+            if (categoryId != null) {
+                ps.setLong(index++, categoryId);
             }
-            if(modelName != null && !modelName.trim().isEmpty()) {
-                ps.setString(index++, modelName);
+            if (modelId != null) {
+                ps.setLong(index++, modelId);
             }
-            if(chipName != null && !chipName.trim().isEmpty()) {
-                ps.setString(index++, chipName);
+            if (chipId != null) {
+                ps.setLong(index++, chipId);
             }
-            if(ramSize != null && !ramSize.trim().isEmpty()) {
-                ps.setString(index++, ramSize);
+            if (ramId != null) {
+                ps.setLong(index++, ramId);
             }
-            if(storageSize != null && !storageSize.trim().isEmpty()) {
-                ps.setString(index++, storageSize);
+            if (storageId != null) {
+                ps.setLong(index++, storageId);
             }
-            if(screenSize != null && !screenSize.trim().isEmpty()) {
-                ps.setString(index++, screenSize);
+            if (sizeId != null) {
+                ps.setLong(index++, sizeId);
             }
             if (isActive != null) {
                 ps.setBoolean(index++, isActive);
@@ -264,8 +271,8 @@ public class ProductDAO {
     // Create new product
     public boolean create(Product product) {
         String sql = """
-                INSERT INTO products (name, description, img_url, brand_id, category_id, is_active, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())
+                INSERT INTO products (name, description, img_url, brand_id, category_id, model_id, chip_id, ram_id, storage_id, size_id, unit_id ,is_active, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
                 """;
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -275,6 +282,12 @@ public class ProductDAO {
             ps.setString(3, product.getImgUrl());
             ps.setLong(4, product.getBrand().getId());
             ps.setLong(5, product.getCategory().getId());
+            ps.setLong(6, product.getModel().getId());
+            ps.setLong(7, product.getChip().getId());
+            ps.setLong(8, product.getRam().getId());
+            ps.setLong(9, product.getStorage().getId());
+            ps.setLong(10, product.getSize().getId());
+            ps.setLong(11, product.getUnit().getId());
 
             int affectedRows = ps.executeUpdate();
 
@@ -385,6 +398,12 @@ public class ProductDAO {
                     img_url = ?,
                     brand_id = ?,
                     category_id = ?,
+                    model_id = ?,
+                    chip_id = ?,
+                    ram_id = ?,
+                    storage_id = ?,
+                    size_id = ?,
+                    unit_id = ?,
                     is_active = ?,
                     updated_at = NOW()
                 WHERE id = ?
@@ -398,8 +417,14 @@ public class ProductDAO {
             ps.setString(3, product.getImgUrl());
             ps.setLong(4, product.getBrand().getId());
             ps.setLong(5, product.getCategory().getId());
-            ps.setBoolean(6, product.getIsActive());
-            ps.setLong(7, product.getId());
+            ps.setLong(6, product.getModel().getId());
+            ps.setLong(7, product.getChip().getId());
+            ps.setLong(8, product.getRam().getId());
+            ps.setLong(9, product.getStorage().getId());
+            ps.setLong(10, product.getSize().getId());
+            ps.setLong(11, product.getUnit().getId());
+            ps.setBoolean(12, product.getIsActive());
+            ps.setLong(13, product.getId());
 
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
@@ -728,5 +753,24 @@ public class ProductDAO {
             throw new RuntimeException(e);
         }
         return products;
+    }
+
+    public boolean existedByName(String productName) {
+        String sql = """
+                SELECT *
+                FROM products p
+                WHERE p.name = ?;
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, productName);
+            ResultSet rs = ps.executeQuery();
+
+            return rs.next();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

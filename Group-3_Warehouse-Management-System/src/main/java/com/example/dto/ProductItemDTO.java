@@ -8,14 +8,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductItemDTO {
+    private Long id;
     private Long productId;
     private String productName;
     private String serial;
-    private Long importPrice;
+    private Double importPrice;
+    private String unit;
 
-    public ProductItemDTO(Long productId, String serial, Long importPrice) {
+    public ProductItemDTO(Long productId, String serial, Double importPrice, String unit) {
         this.productId = productId;
         this.serial = serial;
         this.importPrice = importPrice;
+        this.unit = unit;
     }
 }

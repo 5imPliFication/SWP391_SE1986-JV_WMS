@@ -230,11 +230,11 @@
                         <!-- HEADER -->
                         <c:set var="tableHeader" scope="request">
                             <tr>
-                                <th>Movement ID</th>
                                 <th>Product </th>
                                 <th>Quantity</th>
                                 <th>Type</th>
                                 <th>Reference Type</th>
+                                <th>Staff Name</th>
                                 <th>Date & Time</th>
                             </tr>
                         </c:set>
@@ -246,11 +246,18 @@
                                 <tr>
 
                                     <td>
-                                        <strong>#${item.id}</strong>
-                                    </td>
-
-                                    <td>
-                                            ${item.productName}
+                                        <c:choose>
+                                            <c:when test="${item.type == 'IMPORT' && item.goodsReceiptId != null}">
+                                                <a href="${pageContext.request.contextPath}/inventory/import/history?action=detail&id=${item.goodsReceiptId}" class="font-weight-bold text-primary"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer">
+                                                    ${item.productName}
+                                                </a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                ${item.productName}
+                                            </c:otherwise>
+                                        </c:choose>
                                     </td>
 
                                     <td>
@@ -313,6 +320,13 @@
                                         <span class="badge badge-light"
                                               style="font-size:13px;border:1px solid #ddd;color:#555;">
                                             ${item.referenceType}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="font-weight-500 text-dark">
+                                            <i class="fas fa-user-circle text-secondary mr-1"></i>
+                                            ${item.staffName != null ? item.staffName : 'System'}
                                         </span>
                                     </td>
 

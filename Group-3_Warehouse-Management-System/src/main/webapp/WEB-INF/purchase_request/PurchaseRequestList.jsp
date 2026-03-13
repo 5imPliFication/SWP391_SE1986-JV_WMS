@@ -18,7 +18,9 @@
     <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp"/>
         <main class="main-content">
-
+            <h2 class="mb-3">
+                Purchase Request List
+            </h2>
             <div class="card-body p-2">
                 <c:if test="${sessionScope.user != null
                               and sessionScope.user.role != null

@@ -184,4 +184,29 @@ public class BrandDAO {
         }
     }
 
+    public List<Brand> getAll() {
+        List<Brand> brands = new ArrayList<>();
+        String sql = """
+                    SELECT *
+                    FROM brands
+                """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Brand brand = new Brand();
+
+                brand.setId(rs.getLong("id"));
+                brand.setName(rs.getString("name"));
+
+                // Add to list
+                brands.add(brand);
+            }
+            return brands;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
