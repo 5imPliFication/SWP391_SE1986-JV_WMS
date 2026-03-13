@@ -32,4 +32,8 @@ public class RamService {
     public void changeRamStatus(long id, boolean is_active) {
         r.updateRamStatus(id, is_active);
     }
+
+    public boolean CreateRam(String size, boolean active) {
+        return r.createRam(size, active);
+    }
 }

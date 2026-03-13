@@ -192,4 +192,26 @@ public class ModelDAO {
         }
     }
 
+    public boolean createModel(String name, long brandId, boolean active) {
+
+        String sql = """
+        INSERT INTO models (name, brand_id, is_active)
+        VALUES (?, ?, ?)
+    """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, name);
+            ps.setLong(2, brandId);
+            ps.setBoolean(3, active);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
 }

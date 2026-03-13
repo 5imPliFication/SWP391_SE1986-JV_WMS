@@ -33,4 +33,8 @@ public class ChipService {
     public void changeChipStatus(long id, boolean is_active) {
         c.updateChipStatus(id, is_active);
     }
+
+    public boolean CreateChip(String name, boolean active) {
+        return c.createChip(name, active);
+    }
 }

@@ -5,6 +5,7 @@
 package com.example.controller.model;
 
 import com.example.model.Model;
+import com.example.service.BrandService;
 import com.example.service.ModelService;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -22,11 +23,13 @@ import java.util.List;
 public class ModelList extends HttpServlet {
 
     private ModelService m;
-    private static final int PAGE_SIZE = 2;
+    private BrandService b;
+    private static final int PAGE_SIZE = 5;
 
     @Override
     public void init() {
         m = new ModelService();
+        b = new BrandService();
     }
 
     @Override
@@ -55,6 +58,7 @@ public class ModelList extends HttpServlet {
         request.setAttribute("models", models);
         request.setAttribute("pageNo", pageNo);
         request.setAttribute("totalPages", totalPages);
+        request.setAttribute("brands", b.getActiveBrands());
 
         request.getRequestDispatcher("/WEB-INF/specification/model/modelList.jsp")
                 .forward(request, response);

@@ -19,7 +19,7 @@ import java.util.List;
 public class StorageList extends HttpServlet {
 
     private StorageService s;
-    private static final int PAGE_SIZE = 2;
+    private static final int PAGE_SIZE = 5;
 
     @Override
     public void init() {

@@ -40,4 +40,8 @@ public class SizeService {
     public void changeSizeStatus(long id, boolean is_active) {
         s.updateSizeStatus(id, is_active);
     }
+
+    public boolean CreateSize(String size, boolean active) {
+        return s.createSize(size, active);
+    }
 }

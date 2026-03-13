@@ -24,7 +24,7 @@ import java.util.List;
 public class RamList extends HttpServlet {
    
     private RamService r;
-    private static final int PAGE_SIZE = 2;
+    private static final int PAGE_SIZE = 5;
 
     @Override
     public void init() {

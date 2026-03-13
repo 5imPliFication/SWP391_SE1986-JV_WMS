@@ -160,4 +160,25 @@ public class StorageDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public boolean createStorage(String size, boolean active) {
+
+        String sql = """
+        INSERT INTO storages (size, is_active)
+        VALUES (?, ?)
+    """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, size);
+            ps.setBoolean(2, active);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

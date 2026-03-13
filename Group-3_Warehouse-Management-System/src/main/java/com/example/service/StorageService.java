@@ -35,4 +35,8 @@ public class StorageService {
     public void changeStorageStatus(long id, boolean is_active) {
         s.updateStorageStatus(id, is_active);
     }
+
+    public boolean CreateStorage(String size, boolean active) {
+        return s.createStorage(size, active);
+    }
 }

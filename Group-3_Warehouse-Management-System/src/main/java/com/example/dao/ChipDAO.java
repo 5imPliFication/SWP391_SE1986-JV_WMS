@@ -163,4 +163,25 @@ public class ChipDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public boolean createChip(String name, boolean active) {
+
+        String sql = """
+        INSERT INTO chips (name, is_active)
+        VALUES (?, ?)
+    """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, name);
+            ps.setBoolean(2, active);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }
