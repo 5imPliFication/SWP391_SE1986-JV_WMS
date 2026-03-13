@@ -84,7 +84,7 @@
 
                                     <td>${m.name}</td>
 
-                                    <td>${m.brandName}</td>
+                                    <td>${m.brand.name}</td>
 
                                     <td>
 
