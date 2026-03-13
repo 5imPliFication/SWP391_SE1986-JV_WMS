@@ -6,7 +6,7 @@
     Required Parameters:
     - pageNo: Current page number
     - totalPages: Total number of pages
-    - baseUrl: Base URL for pagination links (e.g., "/user/list", "/coupons", "/salesman/orders")
+    - baseUrl: Base URL for pagination links (e.g., "/user/list", "/salesman/orders")
     
     Optional Parameters (pass as queryParams):
     - searchName: Search query

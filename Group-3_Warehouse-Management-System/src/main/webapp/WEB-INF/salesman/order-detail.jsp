@@ -106,32 +106,6 @@
             text-align: center;
         }
 
-        .coupon-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            display: inline-block;
-        }
-
-        .coupon-applied-box {
-            background: #f8f9fa;
-            border-left: 4px solid #28a745;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .discount-highlight {
-            color: #28a745;
-            font-weight: bold;
-        }
-
-        .coupon-input-uppercase {
-            text-transform: uppercase;
-        }
-
         .order-description-block {
             min-height: 30px;
             padding: 1rem;
@@ -350,70 +324,7 @@
                 <div class="row">
                     <div class="col-md-8">
                         <h5 class="mb-3"><i class="fas fa-receipt mr-2"></i>Order Summary</h5>
-
-                        <!-- Coupon Section -->
-                        <c:choose>
-                            <c:when test="${not empty order.coupon}">
-                                <div class="coupon-applied-box">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div class="mb-2">
-                                                <span class="coupon-badge">
-                                                    <i class="fas fa-ticket-alt mr-1"></i>${order.coupon.code}
-                                                </span>
-                                            </div>
-                                            <h6 class="mb-1 font-weight-bold text-success">
-                                                <i class="fas fa-check-circle mr-1"></i>
-                                                <c:choose>
-                                                    <c:when test="${order.coupon.discountType == 'PERCENTAGE'}">
-                                                        <fmt:formatNumber value="${order.coupon.discountValue}" pattern="#"/>% OFF Applied
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        ${currency:format(order.coupon.discountValue)} VND OFF Applied
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </h6>
-                                            <small class="text-muted">
-                                                <i class="fas fa-info-circle mr-1"></i>${order.coupon.description}
-                                            </small>
-                                        </div>
-                                        <c:if test="${order.status == 'DRAFT'}">
-                                            <form action="${pageContext.request.contextPath}/salesman/order/remove-coupon" method="post"
-                                                  onsubmit="return confirm('Remove this coupon?');">
-                                                <input type="hidden" name="orderId" value="${order.id}"/>
-                                                <button type="submit" class="btn btn-outline-danger btn-sm">
-                                                    <i class="fas fa-times mr-1"></i>Remove
-                                                </button>
-                                            </form>
-                                        </c:if>
-                                    </div>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <c:if test="${order.status == 'DRAFT'}">
-                                    <div class="form-group">
-                                        <label class="font-weight-bold text-muted">
-                                            <i class="fas fa-tag mr-1"></i>Discount Coupon
-                                        </label>
-                                        <form action="${pageContext.request.contextPath}/salesman/order/apply-coupon" method="post">
-                                            <input type="hidden" name="orderId" value="${order.id}"/>
-                                            <div class="input-group">
-                                                <input type="text" name="couponCode" class="form-control coupon-input-uppercase"
-                                                       placeholder="Enter coupon code" pattern="[A-Z0-9]+" maxlength="50" required>
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-outline-primary" type="submit">
-                                                        <i class="fas fa-check mr-1"></i>Apply
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <small class="form-text text-muted">
-                                                <i class="fas fa-info-circle mr-1"></i>Enter a valid coupon code
-                                            </small>
-                                        </form>
-                                    </div>
-                                </c:if>
-                            </c:otherwise>
-                        </c:choose>
+                        <p class="text-muted mb-0">Export totals are calculated directly from selected items.</p>
                     </div>
 
                     <div class="col-md-4">
@@ -425,40 +336,13 @@
                                         ${currency:format(total)} VND
                                     </span>
                                 </div>
-
-                                <c:choose>
-                                    <c:when test="${not empty order.coupon}">
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span class="text-muted"><i class="fas fa-tag mr-1"></i>Discount:</span>
-                                            <span class="discount-highlight">
-                                                -${currency:format(order.discountAmount)} VND
-                                            </span>
-                                        </div>
-                                        <hr>
-                                        <div class="d-flex justify-content-between">
-                                            <span class="h5 mb-0">Total:</span>
-                                            <span class="h4 mb-0 text-primary font-weight-bold">
-                                                ${currency:format(order.finalTotal)} VND
-                                            </span>
-                                        </div>
-                                        <small class="text-muted d-block mt-2 font-italic">
-                                            <i class="fas fa-solid fa-sack-dollar mr-1"></i>You saved ${currency:format(order.discountAmount)} VND!
-                                        </small>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span class="text-muted">Discount:</span>
-                                            <span class="text-success">0 VND</span>
-                                        </div>
-                                        <hr>
-                                        <div class="d-flex justify-content-between">
-                                            <span class="h5 mb-0">Total:</span>
-                                            <span class="h4 mb-0 text-primary font-weight-bold">
-                                                ${currency:format(total)} VND
-                                            </span>
-                                        </div>
-                                    </c:otherwise>
-                                </c:choose>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <span class="h5 mb-0">Total:</span>
+                                    <span class="h4 mb-0 text-primary font-weight-bold">
+                                        ${currency:format(total)} VND
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -627,11 +511,6 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Auto-uppercase coupon input
-    $('.coupon-input-uppercase').on('input', function() {
-        this.value = this.value.toUpperCase();
-    });
-
     // Auto-dismiss alerts
     setTimeout(function() {
         $('.alert-dismissible').fadeOut('slow');

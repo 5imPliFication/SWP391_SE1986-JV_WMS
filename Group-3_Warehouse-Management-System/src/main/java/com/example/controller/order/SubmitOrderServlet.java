@@ -38,7 +38,7 @@ public class SubmitOrderServlet extends HttpServlet {
         try {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
 
-            // This will increment coupon usage if coupon is applied
+            // Submit draft order for warehouse processing
             orderService.submitOrder(orderId, user.getId());
 
             resp.sendRedirect(req.getContextPath() + "/salesman/orders?submitted=true");

@@ -126,21 +126,6 @@
                 </c:if>
 
 
-                <!-- Coupons -->
-                <c:if test="${sessionScope.user != null
-                              and sessionScope.user.role.name eq 'Manager'
-                              and sessionScope.user.role.active
-                              and fn:contains(sessionScope.userPermissions, 'READ_COUPON')}">
-
-                      <li>
-                          <a href="${pageContext.request.contextPath}/coupons">
-                              <span>Coupons</span>
-                          </a>
-                      </li>
-
-                </c:if>
-
-
                 <!-- Password Reset -->
                 <c:if test="${sessionScope.user != null
                               and sessionScope.user.role != null

@@ -1,7 +1,6 @@
 package com.example.controller.order;
 
 import com.example.model.*;
-import com.example.service.CouponService;
 import com.example.service.OrderItemService;
 import com.example.service.OrderService;
 import com.example.service.ProductService;
@@ -49,13 +48,6 @@ public class SalesmanOrderDetailServlet extends HttpServlet {
             Order order = orderService.getOrderDetail(orderId, user.getId(), "Salesman");
             List<OrderItem> items = orderItemService.getItemsByOrder(orderId, user.getId(), "Salesman");
             List<Product> availableProducts = productService.findAll();
-
-            // If order has a coupon, load it
-            if (order.getCoupon() != null) {
-                CouponService couponService = new CouponService();
-                Coupon coupon = couponService.getCouponById(order.getCoupon().getId());
-                order.setCoupon(coupon);
-            }
 
             req.setAttribute("order", order);
             req.setAttribute("items", items);

@@ -189,11 +189,11 @@
                 <div class="col-md-4 mb-4">
                     <div class="card shadow h-100">
                         <div class="card-body text-center">
-                            <i class="fas fa-tag fa-3x text-success mb-3"></i>
-                            <h5>Manage Coupons</h5>
-                            <p class="text-muted">Create and manage discount coupons</p>
-                            <a href="${pageContext.request.contextPath}/coupons" class="btn btn-success">
-                                <i class="fas fa-arrow-right mr-1"></i>Go to Coupons
+                            <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                            <h5>View Export Summary</h5>
+                            <p class="text-muted">Monitor completed exports and performance</p>
+                            <a href="${pageContext.request.contextPath}/manager/summary-report" class="btn btn-success">
+                                <i class="fas fa-arrow-right mr-1"></i>Go to Summary
                             </a>
                         </div>
                     </div>

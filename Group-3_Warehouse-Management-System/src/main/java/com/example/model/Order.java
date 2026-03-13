@@ -24,8 +24,5 @@ public class Order {
     private User processedBy;
     private Timestamp processedAt;
     private BigDecimal total;
-    private Coupon coupon;
-    private BigDecimal discountAmount;
-    private BigDecimal finalTotal;
 
 }

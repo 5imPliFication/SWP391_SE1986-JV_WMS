@@ -270,62 +270,16 @@
                         </span>
                     </div>
 
-                    <!-- Coupon Info -->
-                    <c:if test="${order.coupon != null}">
-                        <div class="alert alert-success p-2 mb-2" role="alert">
-                            <small>
-                                <i class="fas fa-tag mr-1"></i>
-                                <strong>${order.coupon.code}</strong>
-                                <br>${order.coupon.description}
-                            </small>
-                        </div>
-
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-success">Discount:</span>
-                            <span class="text-success font-weight-bold">
-                                <c:choose>
-                                    <c:when test="${order.coupon.discountType == 'PERCENTAGE'}">
-                                        -${order.coupon.discountValue}%
-                                    </c:when>
-                                    <c:otherwise>
-                                        -${currency:format(order.coupon.discountValue)} VND
-                                    </c:otherwise>
-                                </c:choose>
-                            </span>
-                        </div>
-
-                        <%-- Calculate discount amount --%>
-                        <c:choose>
-                            <c:when test="${order.coupon.discountType == 'PERCENTAGE'}">
-                                <c:set var="discountAmount" value="${total * (order.coupon.discountValue / 100)}"/>
-                            </c:when>
-                            <c:otherwise>
-                                <c:set var="discountAmount" value="${order.coupon.discountValue}"/>
-                            </c:otherwise>
-                        </c:choose>
-                        <c:set var="finalTotal" value="${total - discountAmount}"/>
-                    </c:if>
-
-                    <c:if test="${order.coupon == null}">
-                        <c:set var="finalTotal" value="${total}"/>
-                    </c:if>
-
                     <hr class="my-3">
 
                     <!-- Final Total -->
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="h5 mb-0 font-weight-bold">Total:</span>
                         <span class="h4 mb-0 text-primary font-weight-bold">
-                            ${currency:format(finalTotal)} VND
+                            ${currency:format(total)} VND
                         </span>
                     </div>
 
-                    <c:if test="${order.coupon != null}">
-                        <small class="text-success d-block mt-2 text-right">
-                            <i class="fas fa-piggy-bank mr-1"></i>
-                            You saved ${currency:format(discountAmount)} VND!
-                        </small>
-                    </c:if>
                 </div>
             </div>
 
