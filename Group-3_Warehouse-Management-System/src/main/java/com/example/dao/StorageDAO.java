@@ -46,7 +46,7 @@ public class StorageDAO {
         List<Storage> list = new ArrayList<>();
 
         String sql = """
-            SELECT id, size
+            SELECT id, size,is_active
             FROM storages
             ORDER BY id
             LIMIT ? OFFSET ?
@@ -65,7 +65,7 @@ public class StorageDAO {
                 Storage storage = new Storage();
                 storage.setId(rs.getLong("id"));
                 storage.setSize(rs.getString("size"));
-
+                storage.setActive(rs.getBoolean("is_active"));
                 list.add(storage);
             }
 
@@ -143,5 +143,21 @@ public class StorageDAO {
         }
 
         return 0;
+    }
+
+    public void updateStorageStatus(long id, boolean active) {
+
+        String sql = "UPDATE storages SET is_active = ? WHERE id = ?";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setBoolean(1, active);
+            ps.setLong(2, id);
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

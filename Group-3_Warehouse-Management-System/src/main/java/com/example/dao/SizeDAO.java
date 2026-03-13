@@ -46,7 +46,7 @@ public class SizeDAO {
         List<Size> list = new ArrayList<>();
 
         String sql = """
-            SELECT id, size
+            SELECT id, size,is_active
             FROM sizes
             ORDER BY id
             LIMIT ? OFFSET ?
@@ -65,7 +65,7 @@ public class SizeDAO {
                 Size size = new Size();
                 size.setId(rs.getLong("id"));
                 size.setSize(rs.getString("size"));
-
+                size.setActive(rs.getBoolean("is_active"));
                 list.add(size);
             }
 
@@ -143,5 +143,21 @@ public class SizeDAO {
         }
 
         return 0;
+    }
+
+    public void updateSizeStatus(long id, boolean active) {
+
+        String sql = "UPDATE sizes SET is_active = ? WHERE id = ?";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setBoolean(1, active);
+            ps.setLong(2, id);
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -52,9 +52,10 @@
 
                 <c:set var="tableHeader" scope="request">
                     <tr>
-                        <th>#</th>
+                        <th style="width: 100px">#</th>
                         <th>Ram Size</th>
-                        <th>Status</th>
+                        <th style="width: 400px">Status</th>
+                        <th style="width: 200px">Action</th>
                     </tr>
                 </c:set>
 
@@ -63,7 +64,23 @@
                         <tr>
                             <td>${(pageNo - 1) * 2 + s.index + 1}</td>
                             <td>${r.size}</td>
-                            <td>${r.active}</td>
+                            <td >
+                                <jsp:include page="/WEB-INF/common/statusBadge.jsp">
+                                    <jsp:param name="active" value="${r.active}" />
+                                </jsp:include>
+                            </td>
+                            <td>
+                                <form action="${pageContext.request.contextPath}/active-ram" method="post">
+
+                                    <input type="hidden" name="id" value="${r.id}" />
+                                    <input type="hidden" name="active" value="${!r.active}" />
+
+                                    <button class="btn btn-sm ${!r.active ? 'btn-success' : 'btn-danger'}">
+                                        ${!r.active ? 'Active' : 'Inactive'}
+                                    </button>
+
+                                </form>
+                            </td>
                         </tr>
                     </c:forEach>
                 </c:set>

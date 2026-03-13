@@ -36,4 +36,8 @@ public class SizeService {
     public int countSize() {
         return s.count();
     }
+
+    public void changeSizeStatus(long id, boolean is_active) {
+        s.updateSizeStatus(id, is_active);
+    }
 }

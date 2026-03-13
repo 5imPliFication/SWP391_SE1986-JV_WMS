@@ -31,4 +31,8 @@ public class StorageService {
     public int countStorage() {
         return s.count();
     }
+
+    public void changeStorageStatus(long id, boolean is_active) {
+        s.updateStorageStatus(id, is_active);
+    }
 }

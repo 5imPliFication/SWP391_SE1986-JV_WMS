@@ -52,10 +52,11 @@
 
                 <c:set var="tableHeader" scope="request">
                     <tr>
-                        <th>#</th>
+                        <th style="width: 100px">#</th>
                         <th>Model Name</th>
                         <th>Brand</th>
-                        <th>Status</th>
+                        <th style="width: 400px">Status</th>
+                        <th style="width: 200px">Action</th>
                     </tr>
                 </c:set>
 
@@ -65,7 +66,23 @@
                             <td>${(pageNo - 1) * 2 + s.index + 1}</td>
                             <td>${m.name}</td>
                             <td>${m.brandName}</td>
-                            <td>${m.active}</td>
+                            <td >
+                                <jsp:include page="/WEB-INF/common/statusBadge.jsp">
+                                    <jsp:param name="active" value="${m.active}" />
+                                </jsp:include>
+                            </td>
+                            <td>
+                                <form action="${pageContext.request.contextPath}/active-model" method="post">
+
+                                    <input type="hidden" name="id" value="${m.id}" />
+                                    <input type="hidden" name="active" value="${!m.active}" />
+
+                                    <button class="btn btn-sm ${!m.active ? 'btn-success' : 'btn-danger'}">
+                                        ${!m.active ? 'Active' : 'Inactive'}
+                                    </button>
+
+                                </form>
+                            </td>
                         </tr>
                     </c:forEach>
                 </c:set>

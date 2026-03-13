@@ -28,4 +28,8 @@ public class RamService {
     public int countRam() {
         return r.count();
     }
+
+    public void changeRamStatus(long id, boolean is_active) {
+        r.updateRamStatus(id, is_active);
+    }
 }

@@ -29,4 +29,8 @@ public class ChipService {
     public int countChip() {
         return c.count();
     }
+
+    public void changeChipStatus(long id, boolean is_active) {
+        c.updateChipStatus(id, is_active);
+    }
 }

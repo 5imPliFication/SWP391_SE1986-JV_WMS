@@ -46,7 +46,7 @@ public class RamDAO {
         List<Ram> list = new ArrayList<>();
 
         String sql = """
-            SELECT id, size
+            SELECT id, size,is_active
             FROM rams
             ORDER BY id
             LIMIT ? OFFSET ?
@@ -65,7 +65,7 @@ public class RamDAO {
                 Ram ram = new Ram();
                 ram.setId(rs.getLong("id"));
                 ram.setSize(rs.getString("size"));
-
+                ram.setActive(rs.getBoolean("is_active"));
                 list.add(ram);
             }
 
@@ -143,5 +143,21 @@ public class RamDAO {
         }
 
         return 0;
+    }
+
+    public void updateRamStatus(long id, boolean active) {
+
+        String sql = "UPDATE rams SET is_active = ? WHERE id = ?";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setBoolean(1, active);
+            ps.setLong(2, id);
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

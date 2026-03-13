@@ -53,9 +53,10 @@
 
                 <c:set var="tableHeader" scope="request">
                     <tr>
-                        <th>#</th>
+                        <th style="width: 100px">#</th>
                         <th>Screen Size</th>
-                        <th>Status</th>
+                        <th style="width: 400px">Status</th>
+                        <th style="width: 200px">Action</th>
                     </tr>
                 </c:set>
 
@@ -64,7 +65,23 @@
                         <tr>
                             <td>${(pageNo - 1) * 2 + a.index + 1}</td>
                             <td>${s.size}</td>
-                            <td>${s.active}</td>
+                            <td >
+                                <jsp:include page="/WEB-INF/common/statusBadge.jsp">
+                                    <jsp:param name="active" value="${s.active}" />
+                                </jsp:include>
+                            </td>
+                            <td>
+                                <form action="${pageContext.request.contextPath}/active-size" method="post">
+
+                                    <input type="hidden" name="id" value="${s.id}" />
+                                    <input type="hidden" name="active" value="${!s.active}" />
+
+                                    <button class="btn btn-sm ${!s.active ? 'btn-success' : 'btn-danger'}">
+                                        ${!s.active ? 'Active' : 'Inactive'}
+                                    </button>
+
+                                </form>
+                            </td>
                         </tr>
                     </c:forEach>
                 </c:set>

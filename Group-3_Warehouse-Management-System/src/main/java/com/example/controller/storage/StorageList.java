@@ -24,7 +24,6 @@ public class StorageList extends HttpServlet {
     @Override
     public void init() {
         s = new StorageService();
-
     }
 
     @Override

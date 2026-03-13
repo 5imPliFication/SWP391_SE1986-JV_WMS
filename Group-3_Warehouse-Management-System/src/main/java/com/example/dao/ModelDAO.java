@@ -176,4 +176,20 @@ public class ModelDAO {
         return 0;
     }
 
+    public void updateModelStatus(long id, boolean active) {
+
+        String sql = "UPDATE models SET is_active = ? WHERE id = ?";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setBoolean(1, active);
+            ps.setLong(2, id);
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
