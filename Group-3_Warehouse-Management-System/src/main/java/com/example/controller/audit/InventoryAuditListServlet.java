@@ -48,8 +48,20 @@ public class InventoryAuditListServlet extends HttpServlet {
     // Change status of inventory audit
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("btnAction");
         Long inventoryAuditId = Long.parseLong(request.getParameter("inventoryAuditId"));
-        inventoryAuditService.cancelInventoryAudit(inventoryAuditId);
+
+        switch (action) {
+            case "CANCEL":
+                inventoryAuditService.cancelInventoryAudit(inventoryAuditId);
+                break;
+            case "REJECT":
+                inventoryAuditService.rejectInventoryAudit(inventoryAuditId);
+                break;
+            case "APPROVE":
+                inventoryAuditService.approveInventoryAudit(inventoryAuditId);
+                break;
+        }
 
         // Redirect to the inventory audit list page after canceling
         String pageNo = request.getParameter("pageNo");
