@@ -40,3 +40,5 @@ Thumbs.db
 *.tmp
 *.swp
 
+# Save product images
+src/main/webapp/static/images/products/*

@@ -2,15 +2,24 @@ package com.example.controller.product;
 
 import com.example.model.*;
 import com.example.service.*;
+import com.example.util.FileUtil;
+import jakarta.mail.Store;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
+@MultipartConfig
 @WebServlet("/products/add")
 public class ProductAddServlet extends HttpServlet {
 
@@ -61,8 +70,11 @@ public class ProductAddServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        Part imageFile = request.getPart("imageFile");
+        String imgUrl = FileUtil.saveFile(imageFile, request);
+
         String description = request.getParameter("productDescription");
-        String imgUrl = request.getParameter("imgUrl");
         long brandId = Long.parseLong(request.getParameter("brandId"));
         long categoryId = Long.parseLong(request.getParameter("categoryId"));
         long modelId = Long.parseLong(request.getParameter("modelId"));

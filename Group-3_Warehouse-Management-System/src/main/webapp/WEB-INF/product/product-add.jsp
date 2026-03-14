@@ -22,7 +22,8 @@
                 </div>
 
                 <div class="card-body">
-                    <form action="${pageContext.request.contextPath}/products/add" method="post">
+                    <form action="${pageContext.request.contextPath}/products/add" method="post"
+                          enctype="multipart/form-data">
 
                         <!-- Product Name -->
                         <div class="mb-3">
@@ -44,20 +45,24 @@
                                    required>
                         </div>
 
-                        <!-- Image URL -->
+                        <!-- Upload Image-->
                         <div class="mb-3">
-                            <label class="form-label">Image URL</label>
-                            <input type="text"
-                                   name="imgUrl"
+                            <label class="form-label">Image</label>
+                            <input type="file"
+                                   name="imageFile"
+                                   id="imageInput"
                                    class="form-control"
-                                   placeholder="Enter image url"
+                                   accept="image/*"
                                    required>
+                            <%--Image preview--%>
+                            <img id="preview" style="margin-top:10px; width:120px; display:none; border-radius:6px;">
                         </div>
 
                         <!-- Category -->
                         <div class="mb-3">
                             <label class="form-label">Category</label>
                             <select name="categoryId" class="form-select" required>
+                                <option value="">Select Category</option>
                                 <c:forEach items="${categories}" var="c">
                                     <option value="${c.id}">${c.name}</option>
                                 </c:forEach>
@@ -164,7 +169,7 @@
                     </c:if>
 
                     <c:if test="${not empty sessionScope.errorMessage}">
-                        <div class="alert alert-info">
+                        <div class="alert alert-warning">
                                 ${sessionScope.errorMessage}
                         </div>
                         <c:remove var="errorMessage" scope="session"/>
@@ -189,6 +194,15 @@
                 opt.style.display = "none";
             }
         });
+    });
+
+    document.getElementById("imageInput").addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const img = document.getElementById("preview");
+        img.src = URL.createObjectURL(file);
+        img.style.display = "block";
     });
 </script>
 
