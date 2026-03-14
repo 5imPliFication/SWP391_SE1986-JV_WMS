@@ -57,7 +57,7 @@
                             <th>No.</th>
                             <th>Product Name</th>
                             <th>System Quantity</th>
-                            <th>Physical Quantity</th>
+                            <th>Actual Quantity</th>
                             <th>Discrepancy</th>
                             <th>Reason</th>
                         </tr>
