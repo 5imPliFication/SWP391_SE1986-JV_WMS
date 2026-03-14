@@ -29,6 +29,7 @@ public class StockHistoryServlet extends HttpServlet {
         String to = request.getParameter("toDate");
         String typeParam = request.getParameter("type");
         String refTypeParam = request.getParameter("referenceType");
+        String staffName = request.getParameter("staffName");
         String pageParam = request.getParameter("page");
 
         LocalDate fromDate = (from != null && !from.isEmpty())
@@ -59,11 +60,11 @@ public class StockHistoryServlet extends HttpServlet {
         if (limit <= 0) {
             throw new IllegalArgumentException("limit must be > 0");
         }
-        int totalCount = dao.getTotalCount(fromDate, toDate, type, referenceType);
+        int totalCount = dao.getTotalCount(fromDate, toDate, type, referenceType, staffName);
         int totalPages = (int) Math.ceil((double) totalCount / limit);
 
         List<StockMovement> list =
-                dao.getStockHistory(fromDate, toDate, type, referenceType, limit, offset);
+                dao.getStockHistory(fromDate, toDate, type, referenceType, staffName, limit, offset);
 
         request.setAttribute("list", list);
         request.setAttribute("currentPage", page);
@@ -72,6 +73,7 @@ public class StockHistoryServlet extends HttpServlet {
         request.setAttribute("toDate", to);
         request.setAttribute("type", typeParam);
         request.setAttribute("referenceType", refTypeParam);
+        request.setAttribute("staffName", staffName);
 
         request.getRequestDispatcher("/WEB-INF/manager/stock-history.jsp")
                 .forward(request, response);

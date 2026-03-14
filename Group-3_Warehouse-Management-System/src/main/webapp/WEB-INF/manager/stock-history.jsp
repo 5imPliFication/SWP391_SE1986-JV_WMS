@@ -101,6 +101,7 @@
                 border-radius: 6px;
                 font-weight: 600;
                 font-size: 12px;
+                white-space: nowrap;
             }
 
             .type-import {
@@ -186,7 +187,7 @@
                                     <input type="date" class="form-control" id="toDate" name="toDate" value="${toDate}">
                                 </div>
                             </div>
-                            <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="col-md-2 mb-3 mb-md-0">
                                 <div class="form-group mb-0">
                                     <label for="type"><i class="fas fa-exchange-alt mr-1"></i>Movement Type</label>
                                     <select class="form-control" id="type" name="type">
@@ -198,7 +199,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="col-md-2 mb-3 mb-md-0">
                                 <div class="form-group mb-0">
                                     <label for="referenceType"><i class="fas fa-file-alt mr-1"></i>Reference Type</label>
                                     <select class="form-control" id="referenceType" name="referenceType">
@@ -209,6 +210,12 @@
                                         <option value="AUDIT_ADJUSTMENT" ${referenceType=='AUDIT_ADJUSTMENT' ? 'selected' : '' }>AUDIT
                                             ADJUSTMENT</option>
                                     </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-3 mb-md-0">
+                                <div class="form-group mb-0">
+                                    <label for="staffName"><i class="fas fa-user mr-1"></i>Staff Name</label>
+                                    <input type="text" class="form-control" id="staffName" name="staffName" value="${staffName}" placeholder="Search staff...">
                                 </div>
                             </div>
                             <div class="col-md-2">
@@ -234,6 +241,7 @@
                                 <th>Quantity</th>
                                 <th>Type</th>
                                 <th>Reference Type</th>
+                                <th>Refer ID</th>
                                 <th>Staff Name</th>
                                 <th>Date & Time</th>
                             </tr>
@@ -246,18 +254,7 @@
                                 <tr>
 
                                     <td>
-                                        <c:choose>
-                                            <c:when test="${item.type == 'IMPORT' && item.goodsReceiptId != null}">
-                                                <a href="${pageContext.request.contextPath}/inventory/import/history?action=detail&id=${item.goodsReceiptId}" class="font-weight-bold text-primary"
-                                                   target="_blank"
-                                                   rel="noopener noreferrer">
-                                                    ${item.productName}
-                                                </a>
-                                            </c:when>
-                                            <c:otherwise>
-                                                ${item.productName}
-                                            </c:otherwise>
-                                        </c:choose>
+                                        ${item.productName}
                                     </td>
 
                                     <td>
@@ -324,6 +321,24 @@
                                     </td>
 
                                     <td>
+                                        <c:choose>
+                                            <c:when test="${item.type == 'IMPORT' && item.goodsReceiptId != null}">
+                                                <a href="${pageContext.request.contextPath}/inventory/import/history?action=detail&id=${item.goodsReceiptId}" class="font-weight-bold" style="color: #2e7d32;">
+                                                    #IM-${item.goodsReceiptId}
+                                                </a>
+                                            </c:when>
+                                            <c:when test="${item.type == 'EXPORT' && item.referenceType == 'ORDER' && item.referenceId != null}">
+                                                <a href="${pageContext.request.contextPath}/warehouse/order/detail?id=${item.referenceId}" class="font-weight-bold" style="color: #e65100;">
+                                                    #EX-${item.referenceId}
+                                                </a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="text-muted">-</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+
+                                    <td>
                                         <span class="font-weight-500 text-dark">
                                             <i class="fas fa-user-circle text-secondary mr-1"></i>
                                             ${item.staffName != null ? item.staffName : 'System'}
@@ -340,7 +355,7 @@
 
                             <c:if test="${empty list}">
                                 <tr>
-                                    <td colspan="6" class="text-center py-5">
+                                    <td colspan="7" class="text-center py-5">
 
                                         <div class="text-muted mb-2">
                                             <i class="fas fa-inbox fa-3x"></i>
@@ -376,7 +391,7 @@
                             <ul class="pagination mb-0">
                                 <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
                                     <a class="page-link"
-                                       href="${pageContext.request.contextPath}/stock-history?page=${currentPage - 1}&fromDate=${fromDate != null ? fromDate : ''}&toDate=${toDate != null ? toDate : ''}&type=${type != null ? type : ''}&referenceType=${referenceType != null ? referenceType : ''}">
+                                       href="${pageContext.request.contextPath}/stock-history?page=${currentPage - 1}&fromDate=${fromDate != null ? fromDate : ''}&toDate=${toDate != null ? toDate : ''}&type=${type != null ? type : ''}&referenceType=${referenceType != null ? referenceType : ''}&staffName=${staffName != null ? staffName : ''}">
                                         <i class="fas fa-chevron-left mr-1"></i>Previous
                                     </a>
                                 </li>
@@ -386,7 +401,7 @@
                                         <c:when test="${i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2)}">
                                             <li class="page-item ${currentPage == i ? 'active' : ''}">
                                                 <a class="page-link"
-                                                   href="${pageContext.request.contextPath}/stock-history?page=${i}&fromDate=${fromDate != null ? fromDate : ''}&toDate=${toDate != null ? toDate : ''}&type=${type != null ? type : ''}&referenceType=${referenceType != null ? referenceType : ''}">${i}</a>
+                                                   href="${pageContext.request.contextPath}/stock-history?page=${i}&fromDate=${fromDate != null ? fromDate : ''}&toDate=${toDate != null ? toDate : ''}&type=${type != null ? type : ''}&referenceType=${referenceType != null ? referenceType : ''}&staffName=${staffName != null ? staffName : ''}">${i}</a>
                                             </li>
                                         </c:when>
                                         <c:when test="${i == currentPage - 3 || i == currentPage + 3}">
@@ -397,7 +412,7 @@
 
                                 <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
                                     <a class="page-link"
-                                       href="${pageContext.request.contextPath}/stock-history?page=${currentPage + 1}&fromDate=${fromDate != null ? fromDate : ''}&toDate=${toDate != null ? toDate : ''}&type=${type != null ? type : ''}&referenceType=${referenceType != null ? referenceType : ''}">
+                                       href="${pageContext.request.contextPath}/stock-history?page=${currentPage + 1}&fromDate=${fromDate != null ? fromDate : ''}&toDate=${toDate != null ? toDate : ''}&type=${type != null ? type : ''}&staffName=${staffName != null ? staffName : ''}">
                                         Next<i class="fas fa-chevron-right ml-1"></i>
                                     </a>
                                 </li>
