@@ -62,6 +62,7 @@
                         <div class="mb-3">
                             <label class="form-label">Category</label>
                             <select name="categoryId" class="form-select" required>
+                                <option value="">Select Category</option>
                                 <c:forEach items="${categories}" var="c">
                                     <option value="${c.id}">${c.name}</option>
                                 </c:forEach>
