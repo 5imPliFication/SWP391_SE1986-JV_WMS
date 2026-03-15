@@ -4,6 +4,8 @@
  */
 package com.example.controller.ram;
 
+import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.RamService;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,6 +14,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  *
@@ -21,10 +24,13 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ActiveRam extends HttpServlet {
 
     private RamService r;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         r = new RamService();
+        activityLogService = new ActivityLogService();
+
     }
 
     @Override
@@ -32,9 +38,14 @@ public class ActiveRam extends HttpServlet {
             throws ServletException, IOException {
         long id = Long.parseLong(request.getParameter("id"));
         boolean active = Boolean.parseBoolean(request.getParameter("active"));
-
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
         r.changeRamStatus(id, active);
-
+        if (active) {
+            activityLogService.log(user, "Active ram");
+        } else {
+            activityLogService.log(user, "Deactive ram");
+        }
         response.sendRedirect(request.getContextPath() + "/specification/ram");
     }
 

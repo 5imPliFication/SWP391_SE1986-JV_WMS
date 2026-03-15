@@ -1,6 +1,8 @@
 package com.example.controller.audit;
 
 import com.example.model.InventoryAudit;
+import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.InventoryAuditService;
 import com.example.util.AppConstants;
 import jakarta.servlet.ServletException;
@@ -8,6 +10,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,10 +19,12 @@ import java.util.List;
 public class InventoryAuditListServlet extends HttpServlet {
 
     private InventoryAuditService inventoryAuditService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         inventoryAuditService = new InventoryAuditService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -48,8 +53,25 @@ public class InventoryAuditListServlet extends HttpServlet {
     // Change status of inventory audit
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("btnAction");
         Long inventoryAuditId = Long.parseLong(request.getParameter("inventoryAuditId"));
-        inventoryAuditService.cancelInventoryAudit(inventoryAuditId);
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+
+        switch (action) {
+            case "CANCEL":
+                inventoryAuditService.cancelInventoryAudit(inventoryAuditId);
+                activityLogService.log(user, "Cancel inventory audit");
+                break;
+            case "REJECT":
+                inventoryAuditService.rejectInventoryAudit(inventoryAuditId);
+                activityLogService.log(user, "Reject inventory audit");
+                break;
+            case "APPROVE":
+                inventoryAuditService.approveInventoryAudit(inventoryAuditId);
+                activityLogService.log(user, "Approve inventory audit");
+                break;
+        }
 
         // Redirect to the inventory audit list page after canceling
         String pageNo = request.getParameter("pageNo");

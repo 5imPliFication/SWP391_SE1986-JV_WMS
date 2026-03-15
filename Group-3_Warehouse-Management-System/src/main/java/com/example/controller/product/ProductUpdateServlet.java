@@ -2,15 +2,24 @@ package com.example.controller.product;
 
 import com.example.model.*;
 import com.example.service.*;
+import com.example.util.FileUtil;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
+@MultipartConfig
 @WebServlet("/products/update")
 public class ProductUpdateServlet extends HttpServlet {
 
@@ -23,6 +32,7 @@ public class ProductUpdateServlet extends HttpServlet {
     private StorageService storageService;
     private SizeService sizeService;
     private UnitService unitService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
@@ -35,6 +45,7 @@ public class ProductUpdateServlet extends HttpServlet {
         storageService = new StorageService();
         sizeService = new SizeService();
         unitService = new UnitService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -67,8 +78,12 @@ public class ProductUpdateServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         long productId = Long.parseLong(request.getParameter("productId"));
+        Product existingProduct = productService.findProductById(productId);
+
+        Part imageFile = request.getPart("imageFile");
+        String imgUrl = FileUtil.updateImage(imageFile, existingProduct.getImgUrl(), request);
+
         String productDescription = request.getParameter("productDescription");
-        String imgUrl = request.getParameter("imgUrl");
         long brandId = Long.parseLong(request.getParameter("brandId"));
         long categoryId = Long.parseLong(request.getParameter("categoryId"));
         long modelId = Long.parseLong(request.getParameter("modelId"));
@@ -79,7 +94,11 @@ public class ProductUpdateServlet extends HttpServlet {
         long unitId = Long.parseLong(request.getParameter("unitId"));
         boolean productIsActive = Boolean.parseBoolean(request.getParameter("productIsActive"));
 
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+
         if (productService.updateProduct(productDescription, imgUrl, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId, unitId, productIsActive, productId)) {
+            activityLogService.log(user, "Update product");
             request.getSession().setAttribute("successMessage", "Product updated successfully");
         } else {
             request.getSession().setAttribute("errorMessage", "Product update failed");

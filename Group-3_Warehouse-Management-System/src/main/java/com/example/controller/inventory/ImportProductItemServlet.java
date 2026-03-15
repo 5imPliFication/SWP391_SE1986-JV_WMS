@@ -4,6 +4,7 @@ import com.example.dto.ProductItemDTO;
 import com.example.dto.PurchaseRequestDTO;
 import com.example.model.PurchaseRequestItem;
 import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.InventoryService;
 import com.example.service.PurchaseRequestService;
 import com.example.util.AppConstants;
@@ -26,11 +27,13 @@ public class ImportProductItemServlet extends HttpServlet {
 
     private InventoryService inventoryService;
     private PurchaseRequestService purchaseRequestService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() throws ServletException {
         inventoryService = new InventoryService();
         purchaseRequestService = new PurchaseRequestService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -41,10 +44,12 @@ public class ImportProductItemServlet extends HttpServlet {
 
         // get session
         HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
 
         try {
             if ("import".equals(action)) {
                 handleImport(session, request);
+                activityLogService.log(user, "Import product");
             }
         } catch (Exception e) {
             session.setAttribute("message", "Cannot open import page: " + e.getMessage());

@@ -19,6 +19,7 @@ public class OrderService {
     private final ProductDAO productDAO;
     private final CouponDAO couponDAO;
     private final UserDAO userDAO;
+    private final StockMovementDAO stockMovementDAO;
 
     public OrderService() {
         orderDAO = new OrderDAO();
@@ -27,6 +28,7 @@ public class OrderService {
         productDAO = new ProductDAO();
         couponDAO = new CouponDAO();
         userDAO = new UserDAO();
+        stockMovementDAO = new StockMovementDAO();
     }
 
     public Map<String, Integer> getOrderStatistics() {
@@ -180,6 +182,22 @@ public class OrderService {
             throw new IllegalStateException("Order is not in queue");
 
         orderDAO.updateStatus(orderId, "COMPLETED", warehouseKeeperId, null);
+
+        // Record stock movement for EXPORT
+        List<com.example.dto.OrderItemDTO> orderItems = orderItemDAO.findOrderItemsByOrderId(orderId);
+        Map<Long, Long> quantityByProduct = new HashMap<>();
+        for (com.example.dto.OrderItemDTO itemDTO : orderItems) {
+            quantityByProduct.put(itemDTO.getProductId(), (long) itemDTO.getQuantity());
+        }
+
+        if (!quantityByProduct.isEmpty()) {
+            stockMovementDAO.insertStockMovements(
+                    quantityByProduct,
+                    com.example.enums.MovementType.EXPORT,
+                    com.example.enums.ReferenceType.ORDER,
+                    orderId
+            );
+        }
     }
 
 

@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import com.example.model.PurchaseRequest;
+import com.example.service.ActivityLogService;
 import com.example.service.ChipService;
 import com.example.service.ModelService;
 import com.example.service.RamService;
@@ -35,6 +36,7 @@ public class PurchaseRequestDetail extends HttpServlet {
     private RamService r;
     private StorageService sto;
     private SizeService s;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
@@ -44,6 +46,7 @@ public class PurchaseRequestDetail extends HttpServlet {
         r = new RamService();
         sto = new StorageService();
         s = new SizeService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -106,14 +109,22 @@ public class PurchaseRequestDetail extends HttpServlet {
         String action = req.getParameter("action");
 
         switch (action) {
-            case "cancel" ->
+            case "cancel" -> {
                 pr.cancel(id);
-            case "approve" ->
+                activityLogService.log(user, "Cancel purchase request");
+            }
+            case "approve" -> {
                 pr.approve(id, user.getId());
-            case "reject" ->
+                activityLogService.log(user, "Approve purchase request");
+            }
+            case "reject" -> {
                 pr.reject(id, user.getId());
-            case "complete" ->
+                activityLogService.log(user, "Reject purchase request");
+            }
+            case "complete" -> {
                 pr.complete(id);
+                activityLogService.log(user, "Complete purchase request");
+            }
         }
 
         resp.sendRedirect(req.getContextPath() + "/purchase-request/list");

@@ -25,6 +25,9 @@
                 scrollbar-width:none;
             }
 
+            a{
+                text-decoration: none
+            }
             .sidebar::-webkit-scrollbar{
                 display:none;
             }
@@ -61,7 +64,7 @@
 
                 <!-- Dashboard -->
                 <li>
-                    <a href="${pageContext.request.contextPath}/home">
+                    <a href="${pageContext.request.contextPath}/home" class="nav-link">
                         <span>Dashboard</span>
                     </a>
                 </li>

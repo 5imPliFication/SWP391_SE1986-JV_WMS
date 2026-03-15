@@ -38,4 +38,8 @@ public class CategoryService {
     public List<Category> getActiveCategories() {
         return categoryDAO.getAllActive();
     }
+
+    public List<Category> searchCategories(String name, Integer isActive) {
+        return categoryDAO.searchCategories(name, isActive);
+    }
 }

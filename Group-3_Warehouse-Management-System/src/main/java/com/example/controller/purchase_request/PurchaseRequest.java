@@ -2,6 +2,7 @@ package com.example.controller.purchase_request;
 
 import com.example.model.PurchaseRequestItem;
 import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.ChipService;
 import com.example.service.ModelService;
 import com.example.service.PurchaseRequestService;
@@ -30,6 +31,7 @@ public class PurchaseRequest extends HttpServlet {
     private RamService r;
     private StorageService sto;
     private SizeService s;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
@@ -39,6 +41,7 @@ public class PurchaseRequest extends HttpServlet {
         r = new RamService();
         sto = new StorageService();
         s = new SizeService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -101,7 +104,7 @@ public class PurchaseRequest extends HttpServlet {
             }
 
             p.createPurchaseRequest(user.getId(), note, items);
-
+            activityLogService.log(user, "Create purchase request");
             response.sendRedirect(request.getContextPath() + "/purchase-request/list");
 
         } catch (Exception e) {

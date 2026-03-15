@@ -6,6 +6,7 @@ package com.example.controller.purchase_request;
 
 import com.example.model.PurchaseRequestItem;
 import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.PurchaseRequestService;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -44,10 +45,13 @@ public class PurchaseRequestUpdate extends HttpServlet {
     }
 
     private PurchaseRequestService pr;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         pr = new PurchaseRequestService();
+        activityLogService = new ActivityLogService();
+
     }
 
     @Override
@@ -69,7 +73,7 @@ public class PurchaseRequestUpdate extends HttpServlet {
         String[] quantities = req.getParameterValues("quantity[]");
 
         // 1. Sử dụng Map để gộp các sản phẩm trùng ID
-        Map<Long, Long> aggregatedItems = new LinkedHashMap<>(); 
+        Map<Long, Long> aggregatedItems = new LinkedHashMap<>();
 
         if (productIds != null && quantities != null) {
             for (int i = 0; i < productIds.length; i++) {
@@ -91,7 +95,7 @@ public class PurchaseRequestUpdate extends HttpServlet {
         }
 
         pr.updatePurchaseRequest(requestId, note, items, user);
-
+        activityLogService.log(user, "Update purchase request");
         resp.sendRedirect(req.getContextPath() + "/purchase-request/list");
     }
 

@@ -23,8 +23,18 @@ public class CategoryListServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            List<Category> categories = categoryService.getAllCategories();
+            String searchName = request.getParameter("searchName");
+            String statusParam = request.getParameter("statusFilter");
+
+            Integer isActive = null;
+            if (statusParam != null && !statusParam.isEmpty()) {
+                isActive = Integer.parseInt(statusParam);
+            }
+
+            List<Category> categories = categoryService.searchCategories(searchName, isActive);
             request.setAttribute("categories", categories);
+            request.setAttribute("searchName", searchName);
+            request.setAttribute("statusFilter", statusParam);
             request.getRequestDispatcher("/WEB-INF/category/category-list.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();

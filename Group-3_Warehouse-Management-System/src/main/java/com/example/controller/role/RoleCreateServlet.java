@@ -4,8 +4,9 @@
  */
 package com.example.controller.role;
 
-
 import com.example.model.Permission;
+import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.PermissionService;
 import com.example.service.RoleService;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -23,14 +25,15 @@ import java.util.List;
 @WebServlet(name = "RoleCreateServlet", urlPatterns = {"/create-role"})
 public class RoleCreateServlet extends HttpServlet {
 
-
     private RoleService r;
     private PermissionService p;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         r = new RoleService();
         p = new PermissionService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -52,7 +55,11 @@ public class RoleCreateServlet extends HttpServlet {
             boolean isActive = request.getParameter("status") != null && request.getParameter("status").equals("true");
             String[] permissionIds = request.getParameterValues("permissionIds");
 
+            HttpSession session = request.getSession();
+            User user = (User) session.getAttribute("user");
+
             r.createRole(roleName, description, isActive, permissionIds);
+            activityLogService.log(user, "Create role");
 
             response.sendRedirect("roles?status=add_success");
         } catch (Exception e) {

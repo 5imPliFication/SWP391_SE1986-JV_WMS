@@ -17,6 +17,7 @@ public class StockMovementDAO {
             LocalDate toDate,
             MovementType type,
             ReferenceType referenceType,
+            String staffName,
             int limit,
             int offset) {
 
@@ -31,23 +32,26 @@ public class StockMovementDAO {
                 LEFT JOIN goods_receipts gr ON sm.reference_type = 'GOODS_RECEIPT' AND sm.reference_id = gr.purchase_request_id
                 LEFT JOIN users u_import ON gr.warehouse_id = u_import.id
                 LEFT JOIN orders o ON sm.reference_type = 'ORDER' AND sm.reference_id = o.id
-                LEFT JOIN users u_export ON o.created_by = u_export.id
+                LEFT JOIN users u_export ON o.processed_by = u_export.id
                 WHERE 1=1
                 """);
 
         if (fromDate != null)
-            sql.append(" AND DATE(created_at) >= ?");
+            sql.append(" AND DATE(sm.created_at) >= ?");
 
         if (toDate != null)
-            sql.append(" AND DATE(created_at) <= ?");
+            sql.append(" AND DATE(sm.created_at) <= ?");
 
         if (type != null)
             sql.append(" AND type = ?");
 
         if (referenceType != null)
-            sql.append(" AND reference_type = ?");
+            sql.append(" AND sm.reference_type = ?");
 
-        sql.append(" ORDER BY created_at DESC");
+        if (staffName != null && !staffName.isEmpty())
+            sql.append(" AND COALESCE(u_import.fullname, u_export.fullname, 'System/Unknown') LIKE ?");
+
+        sql.append(" ORDER BY sm.created_at DESC");
         sql.append(" LIMIT ? OFFSET ?");
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
@@ -66,6 +70,9 @@ public class StockMovementDAO {
 
             if (referenceType != null)
                 ps.setString(index++, referenceType.name());
+
+            if (staffName != null && !staffName.isEmpty())
+                ps.setString(index++, "%" + staffName + "%");
 
             ps.setInt(index++, limit);
             ps.setInt(index++, offset);
@@ -97,24 +104,36 @@ public class StockMovementDAO {
         return list;
     }
 
-    public int getTotalCount(LocalDate fromDate, LocalDate toDate, MovementType type, ReferenceType referenceType) {
+    public int getTotalCount(LocalDate fromDate, LocalDate toDate, MovementType type, ReferenceType referenceType, String staffName) {
         StringBuilder sql = new StringBuilder("""
-                SELECT COUNT(*)
-                FROM stock_movements
-                WHERE 1=1
+                SELECT COUNT(*) FROM (
+                    SELECT sm.id,
+                           COALESCE(u_import.fullname, u_export.fullname, 'System/Unknown') AS staff_name
+                    FROM stock_movements sm
+                    JOIN products p ON p.id = sm.product_id
+                    LEFT JOIN goods_receipts gr ON sm.reference_type = 'GOODS_RECEIPT' AND sm.reference_id = gr.purchase_request_id
+                    LEFT JOIN users u_import ON gr.warehouse_id = u_import.id
+                    LEFT JOIN orders o ON sm.reference_type = 'ORDER' AND sm.reference_id = o.id
+                    LEFT JOIN users u_export ON o.processed_by = u_export.id
+                    WHERE 1=1
                 """);
 
         if (fromDate != null)
-            sql.append(" AND DATE(created_at) >= ?");
+            sql.append(" AND DATE(sm.created_at) >= ?");
 
         if (toDate != null)
-            sql.append(" AND DATE(created_at) <= ?");
+            sql.append(" AND DATE(sm.created_at) <= ?");
 
         if (type != null)
-            sql.append(" AND type = ?");
+            sql.append(" AND sm.type = ?");
 
         if (referenceType != null)
-            sql.append(" AND reference_type = ?");
+            sql.append(" AND sm.reference_type = ?");
+
+        if (staffName != null && !staffName.isEmpty())
+            sql.append(" AND COALESCE(u_import.fullname, u_export.fullname, 'System/Unknown') LIKE ?");
+
+        sql.append(") AS filtered");
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -132,6 +151,9 @@ public class StockMovementDAO {
 
             if (referenceType != null)
                 ps.setString(index++, referenceType.name());
+
+            if (staffName != null && !staffName.isEmpty())
+                ps.setString(index++, "%" + staffName + "%");
 
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {

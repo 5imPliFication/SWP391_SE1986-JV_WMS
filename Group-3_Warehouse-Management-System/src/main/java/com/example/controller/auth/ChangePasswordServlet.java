@@ -1,6 +1,7 @@
 package com.example.controller.auth;
 
 import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,11 +14,15 @@ import java.io.IOException;
 
 @WebServlet("/change-password")
 public class ChangePasswordServlet extends HttpServlet {
+
     private UserService userService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         userService = new UserService();
+        activityLogService = new ActivityLogService();
+
     }
 
     @Override
@@ -47,10 +52,11 @@ public class ChangePasswordServlet extends HttpServlet {
                 currentPassword,
                 newPassword
         );
-        if(success){
+        activityLogService.log(user, "Change password!");
+        if (success) {
             session.invalidate();
             response.sendRedirect(request.getContextPath() + "/login.jsp");
-        }else {
+        } else {
             request.setAttribute("error", "Invalid current password");
             request.getRequestDispatcher("/WEB-INF/auth/change-password.jsp")
                     .forward(request, response);
