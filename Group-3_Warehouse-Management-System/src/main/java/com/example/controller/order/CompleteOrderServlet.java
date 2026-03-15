@@ -1,6 +1,7 @@
 package com.example.controller.order;
 
 import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.OrderService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,10 +15,13 @@ import java.io.IOException;
 public class CompleteOrderServlet extends HttpServlet {
 
     private OrderService orderService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         orderService = new OrderService();
+        activityLogService = new ActivityLogService();
+
     }
 
     @Override
@@ -33,6 +37,7 @@ public class CompleteOrderServlet extends HttpServlet {
         try {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
             orderService.completeProcessing(orderId, user.getId());
+            activityLogService.log(user, "Completed order");
             resp.sendRedirect(req.getContextPath() + "/warehouse/orders?completed=true");
         } catch (Exception e) {
             e.printStackTrace();

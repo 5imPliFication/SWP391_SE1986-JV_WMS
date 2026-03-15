@@ -10,6 +10,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 
 import java.io.File;
@@ -32,6 +33,7 @@ public class ProductAddServlet extends HttpServlet {
     private StorageService storageService;
     private SizeService sizeService;
     private UnitService unitService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
@@ -44,6 +46,7 @@ public class ProductAddServlet extends HttpServlet {
         storageService = new StorageService();
         sizeService = new SizeService();
         unitService = new UnitService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -73,6 +76,8 @@ public class ProductAddServlet extends HttpServlet {
 
         Part imageFile = request.getPart("imageFile");
         String imgUrl = FileUtil.saveFile(imageFile, request);
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
 
         String description = request.getParameter("productDescription");
         long brandId = Long.parseLong(request.getParameter("brandId"));
@@ -86,6 +91,7 @@ public class ProductAddServlet extends HttpServlet {
 
         try {
             productService.addProduct(description, imgUrl, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId, unitId);
+            activityLogService.log(user, "Create product");
             request.getSession().setAttribute("successMessage", "Product added successfully");
         } catch (RuntimeException e) {
             request.getSession().setAttribute("errorMessage", e.getMessage());

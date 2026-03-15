@@ -1,6 +1,7 @@
 package com.example.controller.order;
 
 import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.OrderService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,11 +15,14 @@ import java.nio.charset.StandardCharsets;
 
 @WebServlet("/salesman/order/item/remove")
 public class RemoveOrderItemServlet extends HttpServlet {
+
     private OrderService orderService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         orderService = new OrderService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -44,6 +48,7 @@ public class RemoveOrderItemServlet extends HttpServlet {
 
             // Remove item
             orderService.removeItem(orderId, orderItemId);
+            activityLogService.log(user, "Remove item from order");
 
             String successMsg = URLEncoder.encode("Item removed successfully", StandardCharsets.UTF_8);
             resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&success=" + successMsg);

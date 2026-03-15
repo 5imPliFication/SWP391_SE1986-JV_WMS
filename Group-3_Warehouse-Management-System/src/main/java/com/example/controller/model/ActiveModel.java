@@ -4,6 +4,8 @@
  */
 package com.example.controller.model;
 
+import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.ModelService;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,6 +14,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  *
@@ -21,10 +24,12 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ActiveModel extends HttpServlet {
 
     private ModelService m;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         m = new ModelService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -32,9 +37,15 @@ public class ActiveModel extends HttpServlet {
             throws ServletException, IOException {
         long id = Long.parseLong(request.getParameter("id"));
         boolean active = Boolean.parseBoolean(request.getParameter("active"));
-
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        
         m.changeModelStatus(id, active);
-
+        if (active) {
+            activityLogService.log(user, "Active model");
+        } else {
+            activityLogService.log(user, "Deactive model");
+        }
         response.sendRedirect(request.getContextPath() + "/specification/model");
     }
 

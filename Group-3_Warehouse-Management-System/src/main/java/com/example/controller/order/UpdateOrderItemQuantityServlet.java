@@ -1,6 +1,7 @@
 package com.example.controller.order;
 
 import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.OrderItemService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,10 +17,13 @@ import java.nio.charset.StandardCharsets;
 public class UpdateOrderItemQuantityServlet extends HttpServlet {
 
     private OrderItemService orderItemService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         orderItemService = new OrderItemService();
+        activityLogService = new ActivityLogService();
+
     }
 
     @Override
@@ -48,6 +52,7 @@ public class UpdateOrderItemQuantityServlet extends HttpServlet {
                 resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&error=" + errorMsg);
                 return;
             }
+            activityLogService.log(user, "Update order");
 
             // Update quantity
             orderItemService.updateQuantity(itemId, quantity);
