@@ -24,9 +24,6 @@
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
-
-        <c:remove var="message" scope="session"/>
-        <c:remove var="messageType" scope="session"/>
     </c:if>
 
     <div class="card p-3 mb-3 shadow-sm">
