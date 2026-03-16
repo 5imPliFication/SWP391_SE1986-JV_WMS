@@ -218,7 +218,7 @@ public class ImportProductItemServlet extends HttpServlet {
 
         // delete session after save success
         session.removeAttribute("importItems");
-        response.sendRedirect(request.getContextPath() + "/inventory/import");
+        response.sendRedirect(request.getContextPath() + "/inventory/import-history");
     }
 
 }

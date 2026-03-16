@@ -27,7 +27,7 @@ public class InventoryService {
     private final InventoryDAO inventoryDAO = new InventoryDAO();
 
     public String importProductItems(Long purchaseRequestId, Long warehouseUserId,
-            String[] productIds, String[] serials, String[] prices) {
+                                     String[] productIds, String[] serials, String[] prices) {
 
         // get information from list import product item
         List<ProductItemDTO> importProductItemDTOs = getImportProductItemDTOs(productIds, serials, prices);
@@ -95,7 +95,7 @@ public class InventoryService {
             return null;
         } else {
             try (InputStream inputStream = filePart.getInputStream();
-                    Workbook workbook = new XSSFWorkbook(inputStream)) {
+                 Workbook workbook = new XSSFWorkbook(inputStream)) {
 
                 // get first sheet
                 Sheet sheet = workbook.getSheetAt(0);
@@ -157,7 +157,7 @@ public class InventoryService {
 
     // handle export product items
     public Map<String, Object> getExportOrders(String name, String fromDateStr, String toDateStr, String status,
-            int pageNo) {
+                                               int pageNo) {
         LocalDate fromDate;
         LocalDate toDate;
 
