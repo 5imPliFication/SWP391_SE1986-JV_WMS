@@ -4,6 +4,8 @@
  */
 package com.example.controller.model;
 
+import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.ModelService;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -11,6 +13,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  *
@@ -20,16 +23,20 @@ import jakarta.servlet.http.HttpServletResponse;
 public class CreateModel extends HttpServlet {
 
     private ModelService m;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         m = new ModelService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String name = request.getParameter("name");
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
 
         long brandId = Long.parseLong(
                 request.getParameter("brandId")
@@ -40,6 +47,7 @@ public class CreateModel extends HttpServlet {
         );
 
         m.CreateModel(name, brandId, active);
+        activityLogService.log(user, "Crete model");
 
         response.sendRedirect(
                 request.getContextPath()

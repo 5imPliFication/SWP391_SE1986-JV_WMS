@@ -26,6 +26,7 @@ public class InventoryAuditAddServlet extends HttpServlet {
     private RamService ramService;
     private StorageService storageService;
     private SizeService sizeService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() throws ServletException {
@@ -38,19 +39,20 @@ public class InventoryAuditAddServlet extends HttpServlet {
         ramService = new RamService();
         storageService = new StorageService();
         sizeService = new SizeService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String searchName = request.getParameter("searchName");
-        Long categoryId  = request.getParameter("categoryId") != null && !request.getParameter("categoryId").isEmpty() ? Long.parseLong(request.getParameter("categoryId")) : null;
-        Long brandId  = request.getParameter("brandId") != null && !request.getParameter("brandId").isEmpty() ? Long.parseLong(request.getParameter("brandId")) : null;
-        Long modelId  = request.getParameter("modelId") != null && !request.getParameter("modelId").isEmpty() ? Long.parseLong(request.getParameter("modelId")) : null;
-        Long chipId  = request.getParameter("chipId") != null && !request.getParameter("chipId").isEmpty() ? Long.parseLong(request.getParameter("chipId")) : null;
-        Long ramId  = request.getParameter("ramId") != null && !request.getParameter("ramId").isEmpty() ? Long.parseLong(request.getParameter("ramId")) : null;
-        Long storageId  = request.getParameter("storageId") != null && !request.getParameter("storageId").isEmpty() ? Long.parseLong(request.getParameter("storageId")) : null;
-        Long sizeId  = request.getParameter("sizeId") != null && !request.getParameter("sizeId").isEmpty() ? Long.parseLong(request.getParameter("sizeId")) : null;
+        Long categoryId = request.getParameter("categoryId") != null && !request.getParameter("categoryId").isEmpty() ? Long.parseLong(request.getParameter("categoryId")) : null;
+        Long brandId = request.getParameter("brandId") != null && !request.getParameter("brandId").isEmpty() ? Long.parseLong(request.getParameter("brandId")) : null;
+        Long modelId = request.getParameter("modelId") != null && !request.getParameter("modelId").isEmpty() ? Long.parseLong(request.getParameter("modelId")) : null;
+        Long chipId = request.getParameter("chipId") != null && !request.getParameter("chipId").isEmpty() ? Long.parseLong(request.getParameter("chipId")) : null;
+        Long ramId = request.getParameter("ramId") != null && !request.getParameter("ramId").isEmpty() ? Long.parseLong(request.getParameter("ramId")) : null;
+        Long storageId = request.getParameter("storageId") != null && !request.getParameter("storageId").isEmpty() ? Long.parseLong(request.getParameter("storageId")) : null;
+        Long sizeId = request.getParameter("sizeId") != null && !request.getParameter("sizeId").isEmpty() ? Long.parseLong(request.getParameter("sizeId")) : null;
 
         String isActiveParam = request.getParameter("isActive");
         // Nếu parse sang boolean ngay sẽ lỗi All Status == false (parse("") => false)
@@ -101,6 +103,7 @@ public class InventoryAuditAddServlet extends HttpServlet {
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
         // get action
         String action = request.getParameter("action");
         if ("add".equals(action)) {
@@ -128,6 +131,8 @@ public class InventoryAuditAddServlet extends HttpServlet {
                 }
             }
             tmpInventoryAuditItems.add(inventoryAuditItem);
+            User user = (User) session.getAttribute("user");
+            activityLogService.log(user, "Add inventory audit");
 
             // save again to session
             session.setAttribute("TMP_INVENTORY_AUDIT_ITEMS", tmpInventoryAuditItems);
@@ -145,6 +150,8 @@ public class InventoryAuditAddServlet extends HttpServlet {
             for (InventoryAuditItem tmpInventoryAuditItem : tmpInventoryAuditItems) {
                 if (tmpInventoryAuditItem.getProduct().getId().equals(product.getId())) {
                     tmpInventoryAuditItems.remove(tmpInventoryAuditItem);
+                    User user = (User) session.getAttribute("user");
+                    activityLogService.log(user, "Delete inventory audit");
                     break;
                 }
             }
@@ -156,7 +163,7 @@ public class InventoryAuditAddServlet extends HttpServlet {
             // Get session
             HttpSession session = request.getSession();
             List<InventoryAuditItem> tmpInventoryAuditItems = (List<InventoryAuditItem>) session.getAttribute("TMP_INVENTORY_AUDIT_ITEMS");
-            if(tmpInventoryAuditItems == null) {
+            if (tmpInventoryAuditItems == null) {
                 session.setAttribute("auditNoProductMessage", "No product in audit list");
                 response.sendRedirect(request.getContextPath() + "/inventory-audits/add");
                 return;
@@ -165,6 +172,7 @@ public class InventoryAuditAddServlet extends HttpServlet {
                 Long createdBy = user.getId();
                 try {
                     inventoryAuditService.createFullAudit(createdBy, tmpInventoryAuditItems);
+                    activityLogService.log(user, "Create inventory audit");
                     // remove session after create success
                     session.removeAttribute("TMP_INVENTORY_AUDIT_ITEMS");
                     session.setAttribute("auditCreatedSuccessMessage", "Inventory audit created successfully");

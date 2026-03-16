@@ -1,6 +1,7 @@
 package com.example.controller.auth;
 
 import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.PasswordResetService;
 import com.example.service.UserService;
 import jakarta.servlet.ServletException;
@@ -8,19 +9,23 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
 // Using when User forget password and request new password
 @WebServlet("/forget-password")
 public class ForgetPasswordServlet extends HttpServlet {
+
     private UserService userService;
     private PasswordResetService passwordResetService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         userService = new UserService();
         passwordResetService = new PasswordResetService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -31,6 +36,8 @@ public class ForgetPasswordServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String email = request.getParameter("email");
+        HttpSession session = request.getSession();
+        User temp = (User) session.getAttribute("user");
 
         // Check user existed by email
         User user = userService.getUserByEmail(email);
@@ -40,11 +47,11 @@ public class ForgetPasswordServlet extends HttpServlet {
         } else {
             // Create a new password reset request
             passwordResetService.createPasswordResetRequest(user.getId());
+            activityLogService.log(temp, "Create password reset request");
 
-            request.setAttribute("status","Your reset password request was sent successfully!");
+            request.setAttribute("status", "Your reset password request was sent successfully!");
             request.getRequestDispatcher("/WEB-INF/auth/forget-password.jsp").forward(request, response);
         }
-
 
     }
 }

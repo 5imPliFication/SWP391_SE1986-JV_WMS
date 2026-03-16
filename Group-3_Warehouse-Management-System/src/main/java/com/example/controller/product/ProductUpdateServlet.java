@@ -9,6 +9,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 
 import java.io.File;
@@ -31,6 +32,7 @@ public class ProductUpdateServlet extends HttpServlet {
     private StorageService storageService;
     private SizeService sizeService;
     private UnitService unitService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
@@ -43,6 +45,7 @@ public class ProductUpdateServlet extends HttpServlet {
         storageService = new StorageService();
         sizeService = new SizeService();
         unitService = new UnitService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -91,7 +94,11 @@ public class ProductUpdateServlet extends HttpServlet {
         long unitId = Long.parseLong(request.getParameter("unitId"));
         boolean productIsActive = Boolean.parseBoolean(request.getParameter("productIsActive"));
 
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+
         if (productService.updateProduct(productDescription, imgUrl, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId, unitId, productIsActive, productId)) {
+            activityLogService.log(user, "Update product");
             request.getSession().setAttribute("successMessage", "Product updated successfully");
         } else {
             request.getSession().setAttribute("errorMessage", "Product update failed");

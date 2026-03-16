@@ -5,6 +5,8 @@
 package com.example.controller.brand;
 
 import com.example.model.Brand;
+import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.BrandService;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,16 +15,19 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 @WebServlet(name = "BrandList", urlPatterns = {"/brands"})
 public class BrandList extends HttpServlet {
 
     private BrandService b;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         b = new BrandService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -56,6 +61,8 @@ public class BrandList extends HttpServlet {
             String name = request.getParameter("name");
             String description = request.getParameter("description");
             boolean isActive = request.getParameter("active") != null && request.getParameter("active").equals("true");
+            HttpSession session = request.getSession();
+            User user = (User) session.getAttribute("user");
 
             Brand brand = new Brand();
             brand.setName(name);
@@ -68,6 +75,7 @@ public class BrandList extends HttpServlet {
                 response.sendRedirect("brands?status=name_existed");
                 return;
             }
+            activityLogService.log(user, "Add new brand");
             response.sendRedirect("brands?status=success");
         } catch (Exception e) {
             e.printStackTrace();
