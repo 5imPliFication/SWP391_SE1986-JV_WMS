@@ -809,6 +809,7 @@ public class OrderDAO {
                     o.customer_phone,
                     o.note,
                     o.status,
+                    o.processed_at,
                     o.total_price as total,
                     o.order_date,
                 
