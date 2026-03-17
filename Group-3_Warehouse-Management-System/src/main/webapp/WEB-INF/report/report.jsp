@@ -40,10 +40,13 @@
     <h2 class="mb-4">Inventory Report</h2>
 
     <!-- ===== SELECT YEAR ===== -->
-    <form action="${pageContext.request.contextPath}/inventory/report" method="get" class="mb-3">
-        <input type="number" name="year" class="form-control"
-               placeholder="Select year"
-               value="${param.year}">
+    <form action="${pageContext.request.contextPath}/report" method="get" class="mb-3">
+        <div class="d-flex gap-2 mb-2">
+            <input type="number" name="year" class="form-control w-auto"
+                   placeholder="Select year"
+                   value="${param.year}">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
     </form>
 
     <div class="mb-3">
@@ -72,33 +75,24 @@
     <div class="mb-4">
         <c:choose>
             <c:when test="${not empty chartData}">
-                <!-- Sau này bạn render chart bằng JS -->
-                <div class="alert alert-info text-center">
-                    [Biểu đồ sẽ render tại đây]
+                <div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                    <canvas id="importChart" width="400" height="150"></canvas>
                 </div>
             </c:when>
-            <c:otherwise>
-                <div class="text-muted text-center">
-                    Chọn loại báo cáo để hiển thị biểu đồ
-                </div>
-            </c:otherwise>
         </c:choose>
     </div>
-
-    <div class="mb-4">
-        Biểu đồ hiển thị đủ 12 tháng trong năm đã chọn,
-        nếu không có dữ liệu thì hiển thị 0
-    </div>
-
     <!-- ===== SELECT MONTH ===== -->
-    <form action="${pageContext.request.contextPath}/inventory/report" method="get" class="mb-3">
+    <form action="${pageContext.request.contextPath}/report" method="get" class="mb-3">
 
         <input type="hidden" name="type" value="${param.type}">
         <input type="hidden" name="year" value="${param.year}">
 
-        <input type="month" name="month"
-               class="form-control"
-               value="${param.month}">
+        <div class="d-flex gap-2 align-items-center">
+            <input type="month" name="month"
+                   class="form-control w-auto"
+                   value="${param.month}">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
 
     </form>
 
@@ -108,9 +102,9 @@
         <!-- HEADER -->
         <c:set var="tableHeader" scope="request">
             <tr>
-                <th style="width: 80px;">STT</th>
-                <th>Tên sản phẩm</th>
-                <th style="width: 150px;">Số lượng</th>
+                <th style="width: 80px;">No.</th>
+                <th>Product</th>
+                <th style="width: 150px;">Quantity</th>
             </tr>
         </c:set>
 
@@ -142,7 +136,7 @@
                 <c:otherwise>
                     <tr>
                         <td colspan="3" class="text-center text-muted py-3">
-                            Chọn tháng để xem dữ liệu
+                            No data.
                         </td>
                     </tr>
                 </c:otherwise>
@@ -153,10 +147,53 @@
 
         <!-- COMMON TABLE -->
         <jsp:include page="/WEB-INF/common/table.jsp"/>
-
     </div>
 
 </main>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    <c:if test="${not empty chartData}">
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById('importChart').getContext('2d');
+        const data = ${chartData};
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 
+                         'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+                datasets: [{
+                    label: 'Số lượng nhập',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Biểu đồ xuất nhập tồn trong năm ${param.year != null ? param.year : year}'
+                    }
+                }
+            }
+        });
+    });
+    </c:if>
+</script>
 
 </body>
 
