@@ -36,6 +36,40 @@
                 </div>
             </c:if>
 
+            <div class="card mb-3">
+                <div class="card-body py-3">
+                    <form method="get" action="${pageContext.request.contextPath}/categories">
+                        <div class="row align-items-end g-3">
+                            <div class="col-md-4">
+                                <label for="searchName" class="form-label mb-1" style="font-size:13px;font-weight:600;color:#555;">
+                                    <i class="fas fa-search me-1"></i>Search Name
+                                </label>
+                                <input type="text" class="form-control" id="searchName" name="searchName"
+                                       value="${searchName}" placeholder="Search category name...">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="statusFilter" class="form-label mb-1" style="font-size:13px;font-weight:600;color:#555;">
+                                    <i class="fas fa-filter me-1"></i>Status
+                                </label>
+                                <select class="form-select" id="statusFilter" name="statusFilter">
+                                    <option value="">All Status</option>
+                                    <option value="1" ${statusFilter == '1' ? 'selected' : ''}>Active</option>
+                                    <option value="0" ${statusFilter == '0' ? 'selected' : ''}>Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-1"></i>Filter
+                                </button>
+                                <a href="${pageContext.request.contextPath}/categories" class="btn btn-outline-secondary">
+                                    <i class="fas fa-redo"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="table-responsive">
 
                 <!-- HEADER -->

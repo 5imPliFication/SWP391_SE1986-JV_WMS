@@ -1,6 +1,7 @@
 package com.example.controller.order;
 
 import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.OrderService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,10 +17,13 @@ import java.nio.charset.StandardCharsets;
 public class AddOrderItemServlet extends HttpServlet {
 
     private OrderService orderService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         orderService = new OrderService();
+        activityLogService = new ActivityLogService();
+
     }
 
     @Override
@@ -58,6 +62,7 @@ public class AddOrderItemServlet extends HttpServlet {
                 redirectWithQuantityError(req, resp, orderId, productId, String.valueOf(quantity), error);
                 return;
             }
+            activityLogService.log(user, "Add item into order");
 
             resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId);
 
@@ -69,11 +74,11 @@ public class AddOrderItemServlet extends HttpServlet {
     }
 
     private void redirectWithQuantityError(HttpServletRequest req,
-                                           HttpServletResponse resp,
-                                           Long orderId,
-                                           Long productId,
-                                           String quantity,
-                                           String message) throws IOException {
+            HttpServletResponse resp,
+            Long orderId,
+            Long productId,
+            String quantity,
+            String message) throws IOException {
         String redirectUrl = req.getContextPath() + "/salesman/order/detail?id=" + orderId
                 + "&productItemId=" + productId
                 + "&quantity=" + URLEncoder.encode(quantity == null ? "" : quantity, StandardCharsets.UTF_8)

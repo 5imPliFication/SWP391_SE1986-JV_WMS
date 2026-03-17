@@ -66,6 +66,14 @@ public class InventoryAuditService {
     public boolean cancelInventoryAudit(Long auditId) {
         return inventoryAuditDAO.updateInventoryAuditStatus(auditId, InventoryAuditStatus.CANCELLED);
     }
+    // Manager can change SUBMITTED -> REJECTED
+    public boolean rejectInventoryAudit(Long auditId) {
+        return inventoryAuditDAO.updateInventoryAuditStatus(auditId, InventoryAuditStatus.REJECTED);
+    }
+    // Manager can change SUBMITTED -> COMPLETED
+    public boolean approveInventoryAudit(Long auditId) {
+        return inventoryAuditDAO.updateInventoryAuditStatus(auditId, InventoryAuditStatus.COMPLETED);
+    }
 
     // Save loop --> need Transaction, if any error -> rollback
     public void performInventoryAudit(Long auditId, String[] inventoryAuditItemIds, String[] physicalQuantities, String[] reasons) throws SQLException {
@@ -83,7 +91,7 @@ public class InventoryAuditService {
             }
 
             // Update status of InventoryAudit to COMPLETED
-            inventoryAuditDAO.updateInventoryAuditStatus(auditId, InventoryAuditStatus.COMPLETED);
+            inventoryAuditDAO.updateInventoryAuditStatus(auditId, InventoryAuditStatus.SUBMITTED);
 
             conn.commit();
         } catch (Exception e) {

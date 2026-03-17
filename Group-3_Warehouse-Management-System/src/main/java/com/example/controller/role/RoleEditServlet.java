@@ -3,6 +3,8 @@ package com.example.controller.role;
 import com.example.model.Permission;
 import com.example.model.Role;
 import com.example.config.DBConfig;
+import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.PermissionService;
 import com.example.service.RoleService;
 import jakarta.servlet.ServletException;
@@ -10,6 +12,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -22,11 +25,14 @@ public class RoleEditServlet extends HttpServlet {
 
     private RoleService r;
     private PermissionService p;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         r = new RoleService();
         p = new PermissionService();
+        activityLogService = new ActivityLogService();
+
     }
 
     // ===================== GET =====================
@@ -53,18 +59,17 @@ public class RoleEditServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         try (Connection conn = DBConfig.getDataSource().getConnection()) {
-
+            HttpSession session = request.getSession();
+            User user = (User) session.getAttribute("user");
             conn.setAutoCommit(false); // 🔥 transaction
 
             Long roleId = Long.parseLong(request.getParameter("roleID"));
             String roleName = request.getParameter("roleName");
             String description = request.getParameter("description");
-            
-            
+
             boolean test = Boolean.parseBoolean(request.getParameter("currentStatus"));
             r.changeRoleStatus(roleId, test);
-            
-            
+
             String[] permissionIds = request.getParameterValues("permissionIds");
 
             // convert permissionIds -> List<Long>
@@ -91,8 +96,8 @@ public class RoleEditServlet extends HttpServlet {
                     permissionIdList
             );
 
-            conn.commit(); 
-
+            conn.commit();
+            activityLogService.log(user, "Update role");
             response.sendRedirect("roles?message=update_success");
 
         } catch (SQLException e) {

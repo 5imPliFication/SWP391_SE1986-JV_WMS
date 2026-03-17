@@ -1,6 +1,7 @@
 package com.example.controller.order;
 
 import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.OrderService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,10 +15,12 @@ import java.io.IOException;
 public class SubmitOrderServlet extends HttpServlet {
 
     private OrderService orderService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         orderService = new OrderService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -40,6 +43,7 @@ public class SubmitOrderServlet extends HttpServlet {
 
             // Submit draft order for warehouse processing
             orderService.submitOrder(orderId, user.getId());
+            activityLogService.log(user, "Submit order");
 
             resp.sendRedirect(req.getContextPath() + "/salesman/orders?submitted=true");
 
@@ -66,4 +70,3 @@ public class SubmitOrderServlet extends HttpServlet {
         }
     }
 }
-

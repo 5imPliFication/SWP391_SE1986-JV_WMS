@@ -14,11 +14,4 @@ public class ProductItemDTO {
     private String serial;
     private Double importPrice;
     private String unit;
-
-    public ProductItemDTO(Long productId, String serial, Double importPrice, String unit) {
-        this.productId = productId;
-        this.serial = serial;
-        this.importPrice = importPrice;
-        this.unit = unit;
-    }
 }

@@ -2,15 +2,25 @@ package com.example.controller.product;
 
 import com.example.model.*;
 import com.example.service.*;
+import com.example.util.FileUtil;
+import jakarta.mail.Store;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
+@MultipartConfig
 @WebServlet("/products/add")
 public class ProductAddServlet extends HttpServlet {
 
@@ -23,6 +33,7 @@ public class ProductAddServlet extends HttpServlet {
     private StorageService storageService;
     private SizeService sizeService;
     private UnitService unitService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
@@ -35,6 +46,7 @@ public class ProductAddServlet extends HttpServlet {
         storageService = new StorageService();
         sizeService = new SizeService();
         unitService = new UnitService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -61,8 +73,13 @@ public class ProductAddServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        Part imageFile = request.getPart("imageFile");
+        String imgUrl = FileUtil.saveFile(imageFile, request);
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+
         String description = request.getParameter("productDescription");
-        String imgUrl = request.getParameter("imgUrl");
         long brandId = Long.parseLong(request.getParameter("brandId"));
         long categoryId = Long.parseLong(request.getParameter("categoryId"));
         long modelId = Long.parseLong(request.getParameter("modelId"));
@@ -74,6 +91,7 @@ public class ProductAddServlet extends HttpServlet {
 
         try {
             productService.addProduct(description, imgUrl, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId, unitId);
+            activityLogService.log(user, "Create product");
             request.getSession().setAttribute("successMessage", "Product added successfully");
         } catch (RuntimeException e) {
             request.getSession().setAttribute("errorMessage", e.getMessage());

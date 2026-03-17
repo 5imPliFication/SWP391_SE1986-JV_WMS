@@ -26,7 +26,7 @@ public class InventoryDAO {
         int index = 1;
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // if searchName has value -> set value to query
             if (searchName != null && !searchName.trim().isEmpty()) {
@@ -44,7 +44,7 @@ public class InventoryDAO {
     }
 
     public boolean saveProductItems(Long purchaseRequestId, Long warehouseUserId,
-            List<ProductItemDTO> productItemDTOs) {
+                                    List<ProductItemDTO> productItemDTOs) {
 
         // count quantity import product for each product
         Map<Long, Long> quantityByProduct = countQuantityImportByProductId(productItemDTOs);
@@ -64,9 +64,9 @@ public class InventoryDAO {
 
             // save stock movement
             new StockMovementDAO().insertStockMovements(
-                    quantityByProduct, 
-                    com.example.enums.MovementType.IMPORT, 
-                    com.example.enums.ReferenceType.GOODS_RECEIPT, 
+                    quantityByProduct,
+                    com.example.enums.MovementType.IMPORT,
+                    com.example.enums.ReferenceType.GOODS_RECEIPT,
                     purchaseRequestId
             );
 
@@ -102,7 +102,7 @@ public class InventoryDAO {
                 "insert into goods_receipts(purchase_request_id, warehouse_id, received_at) values (?, ?, NOW())");
         Long receiptId = null;
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
 
             // set value
             ps.setLong(1, purchaseRequestId);
@@ -128,7 +128,7 @@ public class InventoryDAO {
         Map<Long, Long> productIdGoodsReceiptItemId = new HashMap<>();
         String sql = "insert into goods_receipt_items(goods_receipt_id, product_id, actual_quantity) values (?, ?, ?)";
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             // create list to save productId for get generated keys after insert
             List<Long> productIds = new ArrayList<>();
@@ -166,7 +166,7 @@ public class InventoryDAO {
             throws SQLException {
         String sql = "insert into product_items(serial, imported_price, current_price, is_active, imported_at, updated_at, product_id, goods_receipt_item_id) values (?, ?, ?, ?, NOW(), NOW(), ?, ?)";
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
             // for each productItems to get data
             for (ProductItemDTO item : productItemDTOs) {
@@ -194,7 +194,7 @@ public class InventoryDAO {
     private void completePurchaseRequest(Long purchaseRequestId) throws SQLException {
         String sql = "update purchase_requests set status = 'COMPLETED', updated_at = NOW() where id = ?";
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             // set value
             if (purchaseRequestId != null) {
                 ps.setLong(1, purchaseRequestId);
@@ -214,7 +214,7 @@ public class InventoryDAO {
 
         // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             // if searchName has value -> set value to query
             if (serial != null) {
@@ -230,7 +230,7 @@ public class InventoryDAO {
     }
 
     public List<OrderDTO> searchExportOrders(String name, LocalDate fromDate, LocalDate toDate, String status,
-            int offset) {
+                                             int offset) {
         StringBuilder sql = new StringBuilder("""
                     select o.id, o.order_code, o.order_date, u.fullname as salesman_name, o.customer_name, o.status
                     from orders o
@@ -263,7 +263,7 @@ public class InventoryDAO {
 
         List<OrderDTO> list = new ArrayList<>();
         try (Connection con = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = con.prepareStatement(sql.toString())) {
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             int index = 1;
             if (name != null && !name.trim().isEmpty()) {
@@ -323,7 +323,7 @@ public class InventoryDAO {
         }
 
         try (Connection con = DBConfig.getDataSource().getConnection();
-                PreparedStatement ps = con.prepareStatement(sql.toString())) {
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             int index = 1;
             if (name != null && !name.trim().isEmpty()) {

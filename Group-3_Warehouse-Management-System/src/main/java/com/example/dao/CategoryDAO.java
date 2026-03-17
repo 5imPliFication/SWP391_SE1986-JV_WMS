@@ -146,4 +146,43 @@ public class CategoryDAO {
         }
         return categories;
     }
+
+    public List<Category> searchCategories(String name, Integer isActive) {
+        List<Category> categories = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM categories WHERE 1=1");
+
+        if (name != null && !name.isEmpty())
+            sql.append(" AND name LIKE ?");
+
+        if (isActive != null)
+            sql.append(" AND is_active = ?");
+
+        sql.append(" ORDER BY id DESC");
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int index = 1;
+            if (name != null && !name.isEmpty())
+                ps.setString(index++, "%" + name + "%");
+
+            if (isActive != null)
+                ps.setInt(index++, isActive);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Category category = new Category();
+                    category.setId(rs.getLong("id"));
+                    category.setName(rs.getString("name"));
+                    category.setDescription(rs.getString("description"));
+                    category.setIsActive(rs.getInt("is_active"));
+                    categories.add(category);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error searching categories", e);
+        }
+        return categories;
+    }
 }

@@ -5,6 +5,8 @@
 package com.example.controller.brand;
 
 import com.example.model.Brand;
+import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.BrandService;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -12,15 +14,18 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @WebServlet(name = "BrandUpdate", urlPatterns = {"/brand-update"})
 public class BrandUpdate extends HttpServlet {
 
     private BrandService b;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         b = new BrandService();
+        activityLogService = new ActivityLogService();
     }
 
     @Override
@@ -41,6 +46,8 @@ public class BrandUpdate extends HttpServlet {
             String name = request.getParameter("name").trim();
             String description = request.getParameter("description");
             boolean status = Boolean.parseBoolean(request.getParameter("status"));
+            HttpSession session = request.getSession();
+            User user = (User) session.getAttribute("user");
 
             Brand brand = new Brand();
             brand.setId(id);
@@ -52,10 +59,11 @@ public class BrandUpdate extends HttpServlet {
 
             if (!success) {
                 request.setAttribute("error", "Tên brand đã tồn tại");
-                request.setAttribute("brand", brand); 
+                request.setAttribute("brand", brand);
                 request.getRequestDispatcher("/WEB-INF/product/brand/update-brand.jsp").forward(request, response);
                 return;
             }
+            activityLogService.log(user, "Update brand");
             response.sendRedirect("brands?status=update_success");
         } catch (Exception e) {
             throw new ServletException(e);

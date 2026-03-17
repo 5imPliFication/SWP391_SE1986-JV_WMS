@@ -1,6 +1,7 @@
 package com.example.controller.order;
 
 import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.OrderService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,10 +16,13 @@ import java.io.IOException;
 public class CancelOrderServlet extends HttpServlet {
 
     private OrderService orderService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         orderService = new OrderService();
+        activityLogService = new ActivityLogService();
+
     }
 
     @Override
@@ -52,6 +56,7 @@ public class CancelOrderServlet extends HttpServlet {
                 // Salesman cancellation without note
                 orderService.cancelOrder(orderId, user.getId());
             }
+            activityLogService.log(user, "Cancel order");
 
             // Redirect based on role
             if ("Salesman".equalsIgnoreCase(role)) {

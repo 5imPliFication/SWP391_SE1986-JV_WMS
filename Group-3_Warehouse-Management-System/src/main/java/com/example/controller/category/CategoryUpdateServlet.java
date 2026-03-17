@@ -1,6 +1,8 @@
 package com.example.controller.category;
 
 import com.example.model.Category;
+import com.example.model.User;
+import com.example.service.ActivityLogService;
 import com.example.service.CategoryService;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -8,15 +10,19 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @WebServlet(name = "CategoryUpdateServlet", urlPatterns = {"/update-category"})
 public class CategoryUpdateServlet extends HttpServlet {
 
     private CategoryService categoryService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         categoryService = new CategoryService();
+        activityLogService = new ActivityLogService();
+
     }
 
     @Override
@@ -47,6 +53,8 @@ public class CategoryUpdateServlet extends HttpServlet {
         String name = request.getParameter("name");
         String description = request.getParameter("description");
         String statusStr = request.getParameter("status");
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
 
         if (idStr == null || idStr.trim().isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing category ID");
@@ -64,6 +72,9 @@ public class CategoryUpdateServlet extends HttpServlet {
             category.setIsActive(isActive);
 
             categoryService.updateCategory(category);
+
+            activityLogService.log(user, "Update Category");
+
             response.sendRedirect("categories?status=updated");
         } catch (NumberFormatException e) {
             e.printStackTrace();
