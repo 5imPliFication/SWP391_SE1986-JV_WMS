@@ -160,17 +160,19 @@
         const data = ${chartData};
         
         new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
-                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 
-                         'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+                labels: ['January', 'February', 'March', 'April', 'May', 'June',
+                         'July', 'August', 'September', 'October', 'November', 'December'],
                 datasets: [{
-                    label: 'Số lượng nhập',
+                    label: 'Quantity',
                     data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                    borderRadius: 4
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)'
                 }]
             },
             options: {
@@ -186,7 +188,7 @@
                     },
                     title: {
                         display: true,
-                        text: 'Biểu đồ xuất nhập tồn trong năm ${param.year != null ? param.year : year}'
+                        text: 'Chart of import product in year ${param.year != null ? param.year : year}'
                     }
                 }
             }
