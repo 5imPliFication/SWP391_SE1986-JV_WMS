@@ -23,6 +23,17 @@
             margin-right: 10px;
             border-radius: 5px;
         }
+
+        .report-type.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+            font-weight: bold;
+        }
+
+        .report-type:hover {
+            background-color: #0cf304;
+        }
     </style>
 </head>
 
@@ -50,18 +61,18 @@
 
     <%--  select type  --%>
     <div class="d-flex mb-3">
-        <a href="?type=import&year=${param.year}"
-           class="report-type ${type == 'import' ? 'active' : ''}">
-            Import
-        </a>
-
         <a href="?type=export&year=${param.year}"
-           class="report-type ${type == 'export' ? 'active' : ''}">
+           class="report-type ${requestScope.type eq 'export' ? 'active' : ''}">
             Export
         </a>
 
+        <a href="?type=import&year=${param.year}"
+           class="report-type ${requestScope.type eq 'import' ? 'active' : ''}">
+            Import
+        </a>
+
         <a href="?type=inventory&year=${param.year}"
-           class="report-type ${type == 'inventory' ? 'active' : ''}">
+           class="report-type ${requestScope.type eq 'inventory' ? 'active' : ''}">
             Inventory
         </a>
     </div>
