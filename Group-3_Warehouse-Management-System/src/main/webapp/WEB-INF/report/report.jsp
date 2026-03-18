@@ -32,7 +32,7 @@
 
 <main class="main-content">
 
-    <h2 class="mb-4">Inventory Report</h2>
+    <h2 class="mb-4">Import Report</h2>
 
     <%--input year--%>
     <form action="${pageContext.request.contextPath}/report" method="get" class="mb-3">
@@ -51,17 +51,17 @@
     <%--  select type  --%>
     <div class="d-flex mb-3">
         <a href="?type=import&year=${param.year}"
-           class="report-type ${param.type == 'import' ? 'active' : ''}">
+           class="report-type ${type == 'import' ? 'active' : ''}">
             Import
         </a>
 
         <a href="?type=export&year=${param.year}"
-           class="report-type ${param.type == 'export' ? 'active' : ''}">
+           class="report-type ${type == 'export' ? 'active' : ''}">
             Export
         </a>
 
         <a href="?type=inventory&year=${param.year}"
-           class="report-type ${param.type == 'inventory' ? 'active' : ''}">
+           class="report-type ${type == 'inventory' ? 'active' : ''}">
             Inventory
         </a>
     </div>
@@ -155,7 +155,7 @@
     <c:if test="${not empty chartData}">
     document.addEventListener("DOMContentLoaded", function () {
         const ctx = document.getElementById('importChart').getContext('2d');
-        const data = ${chartData};
+        const data = JSON.parse('${chartData}');
 
         new Chart(ctx, {
             type: 'line',
