@@ -12,19 +12,20 @@ import java.util.List;
 
 public class ReportDAO {
 
+    // get quantity imported for each month of the year
     public List<Long> getImportChartDataByYear(int year) {
-        // Initialize with 0 for 12 months
+        // init list with 0 for 12 months
         List<Long> data = new ArrayList<>();
         for (int i = 0; i < 12; i++) {
             data.add(0L);
         }
 
         String sql = """
-                    SELECT MONTH(gr.received_at) AS month, SUM(gri.actual_quantity) AS total_quantity
-                    FROM goods_receipt_items gri
-                    JOIN goods_receipts gr ON gri.goods_receipt_id = gr.id
-                    WHERE YEAR(gr.received_at) = ?
-                    GROUP BY MONTH(gr.received_at)
+                    select month(gr.received_at) as month, sum(gri.actual_quantity) as quantity from goods_receipts gr
+                  join goods_receipt_items gri\s
+                  on gr.id = gri.goods_receipt_id
+                  where year(gr.received_at) = ?
+                  group by month(gr.received_at)
                 """;
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
@@ -33,11 +34,9 @@ public class ReportDAO {
             ps.setInt(1, year);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    int month = rs.getInt("month"); // 1-indexed
-                    long quantity = rs.getLong("total_quantity");
-                    if (month >= 1 && month <= 12) {
-                        data.set(month - 1, quantity);
-                    }
+                    int month = rs.getInt("month");
+                    long quantity = rs.getLong("quantity");
+                    data.set(month - 1, quantity);
                 }
             }
         } catch (SQLException e) {
@@ -45,6 +44,8 @@ public class ReportDAO {
         }
         return data;
     }
+
+
 
     // Get list of items for import report
     public List<ReportItemDTO> getImportItems(int month, int year) {

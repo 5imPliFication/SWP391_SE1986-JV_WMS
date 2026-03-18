@@ -10,7 +10,7 @@ public class ReportService {
     private final ReportDAO reportDAO = new ReportDAO();
 
     public List<Long> getImportChartDataByYear(int year) {
-        return null;
+        return reportDAO.getImportChartDataByYear(year);
     }
 
     public List<ReportItemDTO> getItems(int month, int year) {

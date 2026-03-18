@@ -1,8 +1,8 @@
 package com.example.controller.report;
 
-import com.example.dao.ReportDAO;
 import com.example.dto.ReportItemDTO;
 import com.example.service.ReportService;
+import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,20 +10,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/report")
 public class ReportServlet extends HttpServlet {
 
     private ReportService reportService;
+    private Gson gson;
 
     @Override
     public void init() {
         reportService = new ReportService();
+        gson = new Gson();
     }
 
     @Override
@@ -36,6 +35,7 @@ public class ReportServlet extends HttpServlet {
             type = "import";
         }
 
+        // handle different report types
         if (type.equals("import")) {
             handleImportReport(request, response);
         } else if (type.equals("export")) {
@@ -71,8 +71,10 @@ public class ReportServlet extends HttpServlet {
 
         // get list items to display in table
         List<ReportItemDTO> reportItems;
+        List<Long> chartData;
         try {
             reportItems = reportService.getItems(month, year);
+            chartData = reportService.getImportChartDataByYear(year);
         } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
@@ -80,7 +82,11 @@ public class ReportServlet extends HttpServlet {
             return;
         }
 
+        // convert sang JSON
+        String jsonData = gson.toJson(chartData);
+
         request.setAttribute("reportItems", reportItems);
+        request.setAttribute("chartData", jsonData);
         request.setAttribute("type", "import");
         request.getRequestDispatcher("/WEB-INF/report/report.jsp").forward(request, response);
     }
