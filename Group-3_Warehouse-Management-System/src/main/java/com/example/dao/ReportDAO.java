@@ -12,32 +12,6 @@ import java.util.List;
 
 public class ReportDAO {
 
-    public List<ReportItemDTO> getImportReportByMonth(String yearMonth) {
-        List<ReportItemDTO> items = new ArrayList<>();
-        String sql = """
-            SELECT p.name AS product_name, SUM(gri.actual_quantity) AS quantity
-            FROM goods_receipt_items gri
-            JOIN goods_receipts gr ON gri.goods_receipt_id = gr.id
-            JOIN products p ON gri.product_id = p.id
-            WHERE DATE_FORMAT(gr.received_at, '%Y-%m') = ?
-            GROUP BY p.name
-            ORDER BY quantity DESC
-        """;
-        try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-             
-            ps.setString(1, yearMonth);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    items.add(new ReportItemDTO(rs.getString("product_name"), rs.getLong("quantity")));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return items;
-    }
-
     public List<Long> getImportChartDataByYear(int year) {
         // Initialize with 0 for 12 months
         List<Long> data = new ArrayList<>();
@@ -46,16 +20,16 @@ public class ReportDAO {
         }
 
         String sql = """
-            SELECT MONTH(gr.received_at) AS month, SUM(gri.actual_quantity) AS total_quantity
-            FROM goods_receipt_items gri
-            JOIN goods_receipts gr ON gri.goods_receipt_id = gr.id
-            WHERE YEAR(gr.received_at) = ?
-            GROUP BY MONTH(gr.received_at)
-        """;
-        
+                    SELECT MONTH(gr.received_at) AS month, SUM(gri.actual_quantity) AS total_quantity
+                    FROM goods_receipt_items gri
+                    JOIN goods_receipts gr ON gri.goods_receipt_id = gr.id
+                    WHERE YEAR(gr.received_at) = ?
+                    GROUP BY MONTH(gr.received_at)
+                """;
+
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-             
+
             ps.setInt(1, year);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -70,5 +44,35 @@ public class ReportDAO {
             e.printStackTrace();
         }
         return data;
+    }
+
+    // Get list of items for import report
+    public List<ReportItemDTO> getImportItems(int month, int year) {
+        List<ReportItemDTO> items = new ArrayList<>();
+        String sql = """
+                    select p.name, sum(gri.actual_quantity) as quantity from goods_receipt_items gri
+                  join products p\s
+                  on gri.product_id = p.id
+                  join goods_receipts gr\s
+                  on gr.id = gri.goods_receipt_id
+                  where year(gr.received_at) = ? and month(gr.received_at) = ?
+                  group by (p.name);
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            ps.setInt(2, month);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String productName = rs.getString("name");
+                long quantity = rs.getLong("quantity");
+                items.add(new ReportItemDTO(productName, quantity));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return items;
     }
 }
