@@ -23,11 +23,6 @@
             margin-right: 10px;
             border-radius: 5px;
         }
-
-        .report-type.active {
-            background-color: #007bff;
-            color: white;
-        }
     </style>
 </head>
 
@@ -39,11 +34,11 @@
 
     <h2 class="mb-4">Inventory Report</h2>
 
-    <!-- ===== SELECT YEAR ===== -->
+    <%--input year--%>
     <form action="${pageContext.request.contextPath}/report" method="get" class="mb-3">
         <div class="d-flex gap-2 mb-2">
             <input type="number" name="year" class="form-control w-auto"
-                   placeholder="Select year"
+                   placeholder="Input year"
                    value="${param.year}">
             <button type="submit" class="btn btn-primary">Search</button>
         </div>
@@ -53,16 +48,16 @@
         Biểu đồ kết hợp xuất, nhập, tồn (hiển thị đủ 12 tháng trong năm) (Alo Tùng à e)
     </div>
 
-    <!-- ===== TYPE SELECT ===== -->
+    <%--  select type  --%>
     <div class="d-flex mb-3">
-        <a href="?type=export&year=${param.year}"
-           class="report-type ${param.type == 'export' ? 'active' : ''}">
-            Export
-        </a>
-
         <a href="?type=import&year=${param.year}"
            class="report-type ${param.type == 'import' ? 'active' : ''}">
             Import
+        </a>
+
+        <a href="?type=export&year=${param.year}"
+           class="report-type ${param.type == 'export' ? 'active' : ''}">
+            Export
         </a>
 
         <a href="?type=inventory&year=${param.year}"
@@ -71,7 +66,7 @@
         </a>
     </div>
 
-    <!-- ===== CHART PLACEHOLDER ===== -->
+    <%--chart 12 months for each type--%>
     <div class="mb-4">
         <c:choose>
             <c:when test="${not empty chartData}">
@@ -81,73 +76,76 @@
             </c:when>
         </c:choose>
     </div>
-    <!-- ===== SELECT MONTH ===== -->
+
+    <%--select month--%>
     <form action="${pageContext.request.contextPath}/report" method="get" class="mb-3">
 
         <input type="hidden" name="type" value="${param.type}">
         <input type="hidden" name="year" value="${param.year}">
 
         <div class="d-flex gap-2 align-items-center">
-            <input type="month" name="month"
-                   class="form-control w-auto"
+            <input type="number" name="month"
+                   class="form-control w-auto" placeholder="Input month"
                    value="${param.month}">
             <button type="submit" class="btn btn-primary">Search</button>
         </div>
-
     </form>
 
-    <!-- ===== TABLE ===== -->
-    <div class="table-responsive">
+    <%-- message --%>
+    <c:if test="${not empty message}">
+        <div class="alert alert-${messageType} alert-dismissible fade show" role="alert">
+                ${message}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
 
-        <!-- HEADER -->
-        <c:set var="tableHeader" scope="request">
-            <tr>
-                <th style="width: 80px;">No.</th>
-                <th>Product</th>
-                <th style="width: 150px;">Quantity</th>
-            </tr>
-        </c:set>
+        <c:remove var="message" scope="session"/>
+        <c:remove var="messageType" scope="session"/>
+    </c:if>
 
-        <!-- BODY -->
-        <c:set var="tableBody" scope="request">
 
-            <c:choose>
-
-                <c:when test="${not empty reportItems}">
-                    <c:forEach items="${reportItems}" var="item" varStatus="loop">
-
-                        <tr>
-                            <td class="text-center">
-                                    ${loop.index + 1}
-                            </td>
-
-                            <td>
-                                    ${item.productName}
-                            </td>
-
-                            <td class="text-center">
-                                    ${item.quantity}
-                            </td>
-                        </tr>
-
-                    </c:forEach>
-                </c:when>
-
-                <c:otherwise>
+    <%--table detail--%>
+    <div class="table-card"> <div class="table-scroll"> <table class="modern-table">
+        <thead>
+        <tr>
+            <th style="width: 80px;" class="text-center">No.</th>
+            <th>Product</th>
+            <th style="width: 150px;" class="text-center">Quantity</th>
+        </tr>
+        </thead>
+        <tbody>
+        <c:choose>
+            <c:when test="${not empty reportItems}">
+                <c:forEach items="${reportItems}" var="item" varStatus="loop">
                     <tr>
-                        <td colspan="3" class="text-center text-muted py-3">
-                            No data.
+                        <td class="text-center">
+                                ${loop.index + 1}
+                        </td>
+                        <td>
+                                ${item.productName}
+                        </td>
+                        <td class="text-center">
+                                ${item.quantity}
                         </td>
                     </tr>
-                </c:otherwise>
+                </c:forEach>
+            </c:when>
+            <c:otherwise>
+                <tr>
+                    <td colspan="3" style="text-align: center; padding: 30px; color: #999;">
+                        No data available.
+                    </td>
+                </tr>
+            </c:otherwise>
+        </c:choose>
+        </tbody>
+    </table>
 
-            </c:choose>
-
-        </c:set>
-
-        <!-- COMMON TABLE -->
-        <jsp:include page="/WEB-INF/common/table.jsp"/>
     </div>
+    </div>
+
+    <jsp:include page="/WEB-INF/common/table.jsp"/>
 
 </main>
 
@@ -158,12 +156,12 @@
     document.addEventListener("DOMContentLoaded", function () {
         const ctx = document.getElementById('importChart').getContext('2d');
         const data = ${chartData};
-        
+
         new Chart(ctx, {
             type: 'line',
             data: {
                 labels: ['January', 'February', 'March', 'April', 'May', 'June',
-                         'July', 'August', 'September', 'October', 'November', 'December'],
+                    'July', 'August', 'September', 'October', 'November', 'December'],
                 datasets: [{
                     label: 'Quantity',
                     data: data,
