@@ -218,7 +218,10 @@
     <!-- Order Items Table -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="fas fa-box mr-2"></i>Order Items</h5>
+            <h5 class="mb-0">
+                <i class="fas fa-box mr-2"></i>Order Items
+                <span class="badge badge-light text-dark ml-2">${totalItemCount} items</span>
+            </h5>
             <c:if test="${order.status == 'DRAFT'}">
                 <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#productModal">
                     <i class="fas fa-plus-circle mr-1"></i>Add Products
@@ -246,7 +249,7 @@
                         <c:set var="subtotal" value="${i.priceAtPurchase * i.quantity}"/>
                         <c:set var="total" value="${total + subtotal}"/>
                         <tr>
-                            <td class="px-4 align-middle">${status.index + 1}</td>
+                            <td class="px-4 align-middle">${(itemPage - 1) * itemPageSize + status.index + 1}</td>
                             <td class="px-4 align-middle">
                                 <div class="font-weight-bold">${i.product.name}</div>
                             </td>
@@ -314,6 +317,36 @@
                     </tbody>
                 </table>
             </div>
+
+            <c:if test="${totalItemPages > 1}">
+                <nav class="p-3 border-top" aria-label="Order items pagination">
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        <li class="page-item ${itemPage == 1 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage - 1}&productPage=${productPage}"
+                               aria-label="Previous">&laquo;</a>
+                        </li>
+
+                        <c:forEach begin="1" end="${totalItemPages}" var="i">
+                            <c:if test="${i == 1 || i == totalItemPages || (i >= itemPage - 2 && i <= itemPage + 2)}">
+                                <li class="page-item ${i == itemPage ? 'active' : ''}">
+                                    <a class="page-link"
+                                       href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${i}&productPage=${productPage}">${i}</a>
+                                </li>
+                            </c:if>
+                            <c:if test="${i == itemPage - 3 || i == itemPage + 3}">
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            </c:if>
+                        </c:forEach>
+
+                        <li class="page-item ${itemPage == totalItemPages ? 'disabled' : ''}">
+                            <a class="page-link"
+                               href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage + 1}&productPage=${productPage}"
+                               aria-label="Next">&raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+            </c:if>
         </div>
     </div>
 
@@ -330,17 +363,10 @@
                     <div class="col-md-4">
                         <div class="card bg-light">
                             <div class="card-body">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted">Subtotal:</span>
-                                    <span class="font-weight-bold">
-                                        ${currency:format(total)} VND
-                                    </span>
-                                </div>
-                                <hr>
                                 <div class="d-flex justify-content-between">
                                     <span class="h5 mb-0">Total:</span>
                                     <span class="h4 mb-0 text-primary font-weight-bold">
-                                        ${currency:format(total)} VND
+                                        ${currency:format(order.total)} VND
                                     </span>
                                 </div>
                             </div>
@@ -503,6 +529,36 @@
                         <h5>No Products Available</h5>
                     </div>
                 </c:if>
+
+                <c:if test="${totalProductPages > 1}">
+                    <nav class="mt-3" aria-label="Product modal pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item ${productPage == 1 ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage}&productPage=${productPage - 1}&openProductModal=1"
+                                   aria-label="Previous">&laquo;</a>
+                            </li>
+
+                            <c:forEach begin="1" end="${totalProductPages}" var="pPage">
+                                <c:if test="${pPage == 1 || pPage == totalProductPages || (pPage >= productPage - 2 && pPage <= productPage + 2)}">
+                                    <li class="page-item ${pPage == productPage ? 'active' : ''}">
+                                        <a class="page-link"
+                                           href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage}&productPage=${pPage}&openProductModal=1">${pPage}</a>
+                                    </li>
+                                </c:if>
+                                <c:if test="${pPage == productPage - 3 || pPage == productPage + 3}">
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                </c:if>
+                            </c:forEach>
+
+                            <li class="page-item ${productPage == totalProductPages ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage}&productPage=${productPage + 1}&openProductModal=1"
+                                   aria-label="Next">&raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </c:if>
             </div>
         </div>
     </div>
@@ -515,6 +571,11 @@
     setTimeout(function() {
         $('.alert-dismissible').fadeOut('slow');
     }, 5000);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('openProductModal') === '1') {
+        $('#productModal').modal('show');
+    }
 
     // Product search (front-end filtering)
     $('#productSearch').on('keyup', function() {
@@ -532,6 +593,8 @@
     // Add product to order
     function addProductToOrder(orderId, productId) {
         const quantity = parseInt($('#qty-' + productId).val());
+        const itemPage = urlParams.get('itemPage') || '${itemPage}';
+        const productPage = urlParams.get('productPage') || '${productPage}';
 
         if (!quantity || quantity < 1) {
             alert('Please enter a valid quantity');
@@ -547,6 +610,8 @@
         form.append($('<input>', { type: 'hidden', name: 'orderId', value: orderId }));
         form.append($('<input>', { type: 'hidden', name: 'productId', value: productId }));
         form.append($('<input>', { type: 'hidden', name: 'quantity', value: quantity }));
+        form.append($('<input>', { type: 'hidden', name: 'itemPage', value: itemPage }));
+        form.append($('<input>', { type: 'hidden', name: 'productPage', value: productPage }));
 
         $('body').append(form);
         form.submit();
@@ -554,6 +619,9 @@
 
     // Update quantity
     function updateQuantity(orderId, itemId, newQuantity) {
+        const itemPage = urlParams.get('itemPage') || '${itemPage}';
+        const productPage = urlParams.get('productPage') || '${productPage}';
+
         if (newQuantity < 1) {
             alert('Quantity must be at least 1');
             return;
@@ -568,6 +636,8 @@
             form.append($('<input>', { type: 'hidden', name: 'orderId', value: orderId }));
             form.append($('<input>', { type: 'hidden', name: 'itemId', value: itemId }));
             form.append($('<input>', { type: 'hidden', name: 'quantity', value: newQuantity }));
+            form.append($('<input>', { type: 'hidden', name: 'itemPage', value: itemPage }));
+            form.append($('<input>', { type: 'hidden', name: 'productPage', value: productPage }));
 
             $('body').append(form);
             form.submit();
@@ -576,6 +646,9 @@
 
     // Remove item
     function removeItem(orderId, orderItemId) {
+        const itemPage = urlParams.get('itemPage') || '${itemPage}';
+        const productPage = urlParams.get('productPage') || '${productPage}';
+
         if (confirm('Remove this item from the order?')) {
             const form = $('<form>', {
                 method: 'POST',
@@ -584,6 +657,8 @@
 
             form.append($('<input>', { type: 'hidden', name: 'orderId', value: orderId }));
             form.append($('<input>', { type: 'hidden', name: 'orderItemId', value: orderItemId }));
+            form.append($('<input>', { type: 'hidden', name: 'itemPage', value: itemPage }));
+            form.append($('<input>', { type: 'hidden', name: 'productPage', value: productPage }));
 
             $('body').append(form);
             form.submit();

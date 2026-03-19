@@ -696,6 +696,76 @@ public class ProductDAO {
         return products;
     }
 
+    public int countAvailableProductsForOrder() {
+        String sql = """
+                SELECT COUNT(*)
+                FROM (
+                    SELECT p.id
+                    FROM products p
+                    JOIN product_items pi ON pi.product_id = p.id AND pi.is_active = 1
+                    GROUP BY p.id
+                ) grouped
+                """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Product> getAvailableProductsForOrder(int pageNo, int pageSize) {
+        String sql = """
+                SELECT p.id,
+                       p.name,
+                       p.description,
+                       p.img_url,
+                       p.is_active,
+                       p.brand_id,
+                       COUNT(pi.id) AS active_item_count
+                FROM products p
+                JOIN product_items pi ON pi.product_id = p.id AND pi.is_active = 1
+                GROUP BY p.id, p.name, p.description, p.img_url, p.is_active, p.brand_id
+                ORDER BY p.name ASC
+                LIMIT ? OFFSET ?
+                """;
+
+        List<Product> products = new ArrayList<>();
+        int safePageNo = Math.max(pageNo, 1);
+        int offset = (safePageNo - 1) * pageSize;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, pageSize);
+            ps.setInt(2, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Product product = new Product();
+                    product.setId(rs.getLong("id"));
+                    product.setName(rs.getString("name"));
+                    product.setTotalQuantity(rs.getLong("active_item_count"));
+                    product.setIsActive(rs.getBoolean("is_active"));
+                    product.setImgUrl(rs.getString("img_url"));
+                    Brand brand = new Brand();
+                    brand.setId(rs.getLong("brand_id"));
+                    product.setDescription(rs.getString("description"));
+                    product.setBrand(brand);
+                    products.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return products;
+    }
+
     public int countAll() {
         String sql = "SELECT COUNT(*) FROM products";
         try (Connection conn = DBConfig.getDataSource().getConnection();

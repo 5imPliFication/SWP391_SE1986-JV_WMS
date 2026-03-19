@@ -24,6 +24,48 @@
                 </a>
             </div>
 
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="get" action="${pageContext.request.contextPath}/salesman/orders" class="row g-3 align-items-end">
+                        <div class="col-md-5">
+                            <label for="searchCode" class="form-label">Search</label>
+                            <input
+                                    type="text"
+                                    class="form-control"
+                                    id="searchCode"
+                                    name="searchCode"
+                                    value="${param.searchCode}"
+                                    placeholder="Order code, customer name, phone"
+                            >
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select id="status" name="status" class="form-select">
+                                <option value="">All</option>
+                                <option value="DRAFT" ${param.status == 'DRAFT' ? 'selected' : ''}>DRAFT</option>
+                                <option value="SUBMITTED" ${param.status == 'SUBMITTED' ? 'selected' : ''}>SUBMITTED</option>
+                                <option value="PROCESSING" ${param.status == 'PROCESSING' ? 'selected' : ''}>PROCESSING</option>
+                                <option value="COMPLETED" ${param.status == 'COMPLETED' ? 'selected' : ''}>COMPLETED</option>
+                                <option value="CANCELLED" ${param.status == 'CANCELLED' ? 'selected' : ''}>CANCELLED</option>
+                            </select>
+                        </div>
+
+                        <input type="hidden" name="sortBy" value="${sortBy}">
+                        <input type="hidden" name="sortDir" value="${sortDir}">
+
+                        <div class="col-md-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i>Search
+                            </button>
+                            <a href="${pageContext.request.contextPath}/salesman/orders" class="btn btn-outline-secondary">
+                                Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Table Container -->
 
             <div class="table-responsive">

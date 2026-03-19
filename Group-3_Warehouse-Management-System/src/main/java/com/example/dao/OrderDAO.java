@@ -428,6 +428,162 @@ public class OrderDAO {
         }
     }
 
+    public int countOrdersByRole(Long userId, String roleName, String status, String searchKeyword) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders o WHERE 1=1");
+
+        if ("Salesman".equalsIgnoreCase(roleName)) {
+            sql.append(" AND o.created_by = ?");
+        } else {
+            sql.append(" AND o.status <> 'DRAFT'");
+        }
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND o.status = ?");
+        }
+
+        if (searchKeyword != null && !searchKeyword.isEmpty()) {
+            sql.append(" AND (o.order_code LIKE ? OR o.customer_name LIKE ? OR o.customer_phone LIKE ?)");
+        }
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+
+            if ("Salesman".equalsIgnoreCase(roleName)) {
+                if (userId == null) {
+                    return 0;
+                }
+                ps.setLong(paramIndex++, userId);
+            }
+
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+
+            if (searchKeyword != null && !searchKeyword.isEmpty()) {
+                String keyword = "%" + searchKeyword.trim() + "%";
+                ps.setString(paramIndex++, keyword);
+                ps.setString(paramIndex++, keyword);
+                ps.setString(paramIndex++, keyword);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+
+            return 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to count orders by role", e);
+        }
+    }
+
+    public List<Order> searchOrdersByRole(Long userId, String roleName, String status, String searchKeyword,
+                                          String sortBy, String sortDir, int offset, int limit) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT o.*, u.fullname " +
+                        "FROM orders o " +
+                        "LEFT JOIN users u ON o.created_by = u.id " +
+                        "WHERE 1=1"
+        );
+
+        if ("Salesman".equalsIgnoreCase(roleName)) {
+            sql.append(" AND o.created_by = ?");
+        } else {
+            sql.append(" AND o.status <> 'DRAFT'");
+        }
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND o.status = ?");
+        }
+
+        if (searchKeyword != null && !searchKeyword.isEmpty()) {
+            sql.append(" AND (o.order_code LIKE ? OR o.customer_name LIKE ? OR o.customer_phone LIKE ?)");
+        }
+
+        String orderBy = "o.order_date";
+        if (sortBy != null && !sortBy.isEmpty()) {
+            switch (sortBy) {
+                case "orderCode":
+                    orderBy = "o.order_code";
+                    break;
+                case "customerName":
+                    orderBy = "o.customer_name";
+                    break;
+                case "status":
+                    orderBy = "o.status";
+                    break;
+                case "createdAt":
+                    orderBy = "o.order_date";
+                    break;
+                default:
+                    orderBy = "o.order_date";
+            }
+        }
+
+        String direction = "DESC";
+        if (sortDir != null && sortDir.equalsIgnoreCase("asc")) {
+            direction = "ASC";
+        }
+
+        sql.append(" ORDER BY ").append(orderBy).append(" ").append(direction).append(" LIMIT ? OFFSET ?");
+
+        List<Order> orders = new ArrayList<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+
+            if ("Salesman".equalsIgnoreCase(roleName)) {
+                if (userId == null) {
+                    return orders;
+                }
+                ps.setLong(paramIndex++, userId);
+            }
+
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+
+            if (searchKeyword != null && !searchKeyword.isEmpty()) {
+                String keyword = "%" + searchKeyword.trim() + "%";
+                ps.setString(paramIndex++, keyword);
+                ps.setString(paramIndex++, keyword);
+                ps.setString(paramIndex++, keyword);
+            }
+
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex++, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order();
+                    order.setId(rs.getLong("id"));
+                    order.setOrderCode(rs.getString("order_code"));
+                    order.setCustomerName(rs.getString("customer_name"));
+                    order.setCustomerPhone(rs.getString("customer_phone"));
+                    order.setStatus(rs.getString("status"));
+                    order.setNote(rs.getString("note"));
+                    order.setCreatedAt(rs.getTimestamp("order_date"));
+
+                    User creator = new User();
+                    creator.setId(rs.getLong("created_by"));
+                    creator.setFullName(rs.getString("fullname"));
+                    order.setCreatedBy(creator);
+
+                    orders.add(order);
+                }
+            }
+
+            return orders;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to search orders by role", e);
+        }
+    }
+
     //for pagination
     public int countOrders(String status, String searchCode) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders WHERE status not like 'DRAFT'");

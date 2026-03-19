@@ -389,6 +389,15 @@ public class OrderService {
         return orderDAO.updateStatus(orderDTO.getCode(), orderDTO.getStatus());
     }
 
+    public int countOrdersByRole(Long userId, String roleName, String status, String searchKeyword) {
+        return orderDAO.countOrdersByRole(userId, roleName, status, searchKeyword);
+    }
+
+    public List<Order> searchOrdersByRole(Long userId, String roleName, String status, String searchKeyword,
+                                          String sortBy, String sortDir, int offset, int pageSize) {
+        return orderDAO.searchOrdersByRole(userId, roleName, status, searchKeyword, sortBy, sortDir, offset, pageSize);
+    }
+
     public int countOrders(String status, String searchCode) {
         return orderDAO.countOrders(status, searchCode);
     }

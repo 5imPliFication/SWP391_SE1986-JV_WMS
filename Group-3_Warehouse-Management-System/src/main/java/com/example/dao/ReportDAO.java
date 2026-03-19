@@ -76,4 +76,104 @@ public class ReportDAO {
         }
         return items;
     }
+
+    public List<Long> getInventoryChartDataByYear(int year) {
+        List<Long> data = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            data.add(0L);
+        }
+
+        // 1. Get initial balance before the year starts
+        long currentBalance = 0;
+        String initialBalanceSql = """
+                SELECT SUM(CASE WHEN type = 'IMPORT' THEN quantity ELSE -quantity END) as initial_balance
+                FROM stock_movements
+                WHERE YEAR(created_at) < ?
+                """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(initialBalanceSql)) {
+            ps.setInt(1, year);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    currentBalance = rs.getLong("initial_balance");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // 2. Get monthly net changes for the year
+        String monthlyChangesSql = """
+                SELECT MONTH(created_at) as month, SUM(CASE WHEN type = 'IMPORT' THEN quantity ELSE -quantity END) as net_change
+                FROM stock_movements
+                WHERE YEAR(created_at) = ?
+                GROUP BY MONTH(created_at)
+                ORDER BY MONTH(created_at)
+                """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(monthlyChangesSql)) {
+            ps.setInt(1, year);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int month = rs.getInt("month");
+                    long netChange = rs.getLong("net_change");
+                    // Inventory at end of month = previous balance + current net change
+
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Let's refine the logic to better handle months with no movements
+        long[] netChanges = new long[13]; // 1-12
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(monthlyChangesSql)) {
+            ps.setInt(1, year);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    netChanges[rs.getInt("month")] = rs.getLong("net_change");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        for (int m = 1; m <= 12; m++) {
+            currentBalance += netChanges[m];
+            data.set(m - 1, currentBalance);
+        }
+
+        return data;
+    }
+
+    public List<ReportItemDTO> getInventoryItems(int month, int year) {
+        List<ReportItemDTO> items = new ArrayList<>();
+        String sql = """
+                SELECT p.name, SUM(CASE WHEN sm.type = 'IMPORT' THEN sm.quantity ELSE -sm.quantity END) as quantity
+                FROM stock_movements sm
+                JOIN products p ON sm.product_id = p.id
+                WHERE YEAR(sm.created_at) < ? OR (YEAR(sm.created_at) = ? AND MONTH(sm.created_at) <= ?)
+                GROUP BY p.name
+                HAVING quantity > 0
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            ps.setInt(2, year);
+            ps.setInt(3, month);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    items.add(new ReportItemDTO(rs.getString("name"), rs.getLong("quantity")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return items;
+    }
+
 }

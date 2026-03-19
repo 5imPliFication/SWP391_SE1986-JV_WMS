@@ -166,6 +166,115 @@ public class OrderItemDAO {
         return new ArrayList<>(itemMap.values());
     }
 
+    public int countByOrderId(Long orderId) {
+        String sql = "SELECT COUNT(*) FROM order_items WHERE order_id = ?";
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+            return 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to count order items for order ID: " + orderId, e);
+        }
+    }
+
+    public List<OrderItem> findByOrderId(Long orderId, int offset, int limit) {
+        String idSql = "SELECT id FROM order_items WHERE order_id = ? ORDER BY id LIMIT ? OFFSET ?";
+        List<Long> pageItemIds = new ArrayList<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(idSql)) {
+            ps.setLong(1, orderId);
+            ps.setInt(2, limit);
+            ps.setInt(3, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    pageItemIds.add(rs.getLong("id"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch paged order item IDs", e);
+        }
+
+        if (pageItemIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        StringBuilder detailSql = new StringBuilder(
+                "SELECT oi.id, oi.quantity, oi.price_at_purchase, " +
+                        "pi.id AS product_item_id, pi.current_price, pi.serial AS product_item_serial, " +
+                        "p.id AS product_id, p.name AS product_name, p.description " +
+                        "FROM order_items oi " +
+                        "JOIN order_item_product_items oipi ON oi.id = oipi.order_item_id " +
+                        "JOIN product_items pi ON oipi.product_item_id = pi.id " +
+                        "JOIN products p ON pi.product_id = p.id " +
+                        "WHERE oi.order_id = ? AND oi.id IN ("
+        );
+
+        for (int i = 0; i < pageItemIds.size(); i++) {
+            if (i > 0) {
+                detailSql.append(",");
+            }
+            detailSql.append("?");
+        }
+        detailSql.append(") ORDER BY oi.id, pi.id");
+
+        Map<Long, OrderItem> itemMap = new LinkedHashMap<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(detailSql.toString())) {
+
+            int paramIndex = 1;
+            ps.setLong(paramIndex++, orderId);
+            for (Long itemId : pageItemIds) {
+                ps.setLong(paramIndex++, itemId);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Long orderItemId = rs.getLong("id");
+
+                    OrderItem item = itemMap.get(orderItemId);
+                    if (item == null) {
+                        Product product = new Product();
+                        product.setId(rs.getLong("product_id"));
+                        product.setName(rs.getString("product_name"));
+                        product.setDescription(rs.getString("description"));
+
+                        item = new OrderItem();
+                        item.setId(orderItemId);
+                        item.setProduct(product);
+                        item.setQuantity(rs.getInt("quantity"));
+                        item.setPriceAtPurchase(rs.getBigDecimal("price_at_purchase"));
+                        item.setProductItems(new ArrayList<>());
+                        itemMap.put(orderItemId, item);
+                    }
+
+                    ProductItem linkedProductItem = new ProductItem();
+                    linkedProductItem.setId(rs.getLong("product_item_id"));
+                    linkedProductItem.setSerial(rs.getString("product_item_serial"));
+                    linkedProductItem.setCurrentPrice(rs.getDouble("current_price"));
+                    linkedProductItem.setProductId(rs.getLong("product_id"));
+
+                    item.getProductItems().add(linkedProductItem);
+                    if (item.getProductItem() == null) {
+                        item.setProductItem(linkedProductItem);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch paged order items for order ID: " + orderId, e);
+        }
+
+        return new ArrayList<>(itemMap.values());
+    }
+
     public boolean deleteByOrderItemId(Long orderId, Long orderItemId) {
         String deleteLinksSql = "DELETE FROM order_item_product_items WHERE order_item_id = ?";
         String deleteItemSql = "DELETE FROM order_items WHERE id = ? AND order_id = ?";
