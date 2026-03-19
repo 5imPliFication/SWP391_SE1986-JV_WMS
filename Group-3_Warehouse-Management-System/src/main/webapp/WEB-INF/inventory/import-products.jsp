@@ -51,18 +51,18 @@
             <!-- Actions -->
             <div class="col-md-6 d-flex justify-content-end align-items-end">
 
-                <form action="${pageContext.request.contextPath}/inventory/import" method="post"
-                      enctype="multipart/form-data" class="mb-0">
+<%--                <form action="${pageContext.request.contextPath}/inventory/import" method="post"--%>
+<%--                      enctype="multipart/form-data" class="mb-0">--%>
 
-                    <input type="hidden" name="action" value="file">
+<%--                    <input type="hidden" name="action" value="file">--%>
 
-                    <label class="btn btn-outline-primary btn-sm mb-0">
-                        Import Excel
-                        <input type="file" name="excelFile" accept=".xls,.xlsx" hidden
-                               onchange="this.form.submit()">
-                    </label>
+<%--                    <label class="btn btn-outline-primary btn-sm mb-0">--%>
+<%--                        Import Excel--%>
+<%--                        <input type="file" name="excelFile" accept=".xls,.xlsx" hidden--%>
+<%--                               onchange="this.form.submit()">--%>
+<%--                    </label>--%>
 
-                </form>
+<%--                </form>--%>
 
                 <button type="submit" form="productItemsForm" class="btn btn-success btn-sm ml-2"
                         name="action" value="save" ${empty importItems ? 'disabled' : '' }>

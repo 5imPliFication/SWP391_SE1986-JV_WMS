@@ -197,7 +197,7 @@
                               and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
 
                       <li>
-                          <a href="${pageContext.request.contextPath}/inventory/import/history">
+                          <a href="${pageContext.request.contextPath}/inventory/import-history">
                               <span>Import History</span>
                           </a>
                       </li>

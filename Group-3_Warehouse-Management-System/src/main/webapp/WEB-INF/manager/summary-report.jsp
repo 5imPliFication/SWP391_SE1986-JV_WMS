@@ -169,7 +169,7 @@
                 <%-- Stat Cards Row --%>
                   <div class="row">
                     <%-- Import Card --%>
-                      <a class="col-md-4 mb-3" href="${pageContext.request.contextPath}/inventory/import/history">
+                      <a class="col-md-4 mb-3" href="${pageContext.request.contextPath}/inventory/import-history">
 
 
                           <div class="stat-card">
