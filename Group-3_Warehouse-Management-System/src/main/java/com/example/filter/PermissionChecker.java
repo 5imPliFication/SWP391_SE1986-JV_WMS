@@ -45,7 +45,8 @@ public class PermissionChecker {
         urlPermissionMap.put("/purchase-request/create", "CREATE_PURCHASE_REQUEST");
 
         // --- QUẢN LÝ BÁO CÁO ---
-        urlPermissionMap.put("/summary_report", "READ_REPORT");
+        urlPermissionMap.put("/summary_report", "VIEW_REPORT");
+        urlPermissionMap.put("/report", "VIEW_REPORT");
 
     }
 

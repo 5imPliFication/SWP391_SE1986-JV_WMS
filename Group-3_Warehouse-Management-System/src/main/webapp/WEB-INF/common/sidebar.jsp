@@ -251,7 +251,8 @@
                 <c:if test="${sessionScope.user != null
                               and sessionScope.user.role != null
                               and sessionScope.user.role.active
-                              and fn:contains(sessionScope.userPermissions, 'READ_REPORT')}">
+                              and sessionScope.user.role.name eq 'Manager'
+                              and fn:contains(sessionScope.userPermissions, 'VIEW_REPORT')}">
 
                       <li>
                           <a href="${pageContext.request.contextPath}/summary_report">
@@ -265,7 +266,8 @@
                 <c:if test="${sessionScope.user != null
                               and sessionScope.user.role != null
                               and sessionScope.user.role.active
-                              and fn:contains(sessionScope.userPermissions, 'READ_REPORT')}">
+                              and sessionScope.user.role.name eq 'Manager'
+                              and fn:contains(sessionScope.userPermissions, 'VIEW_REPORT')}">
 
                     <li>
                         <a href="${pageContext.request.contextPath}/report">
