@@ -1,5 +1,6 @@
 package com.example.controller.report;
 
+import com.example.dto.MonthSummaryDTO;
 import com.example.dto.ReportItemDTO;
 import com.example.service.ReportService;
 import com.google.gson.Gson;
@@ -34,6 +35,15 @@ public class ReportServlet extends HttpServlet {
         if (type == null || type.isEmpty()) {
             type = "import";
         }
+
+        // Use for total compare chart
+        String yearStr = request.getParameter("year");
+        int year = (yearStr != null && !yearStr.isEmpty())
+                ? Integer.parseInt(yearStr)
+                : LocalDate.now().getYear();
+        List<MonthSummaryDTO> summary = reportService.getMonthSummary(year);
+        String chartSummaryData = gson.toJson(summary);
+        request.setAttribute("chartSummaryData", chartSummaryData);
 
         // handle different report types
         if (type.equals("import")) {
