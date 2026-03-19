@@ -323,7 +323,7 @@
                                     <td>
                                         <c:choose>
                                             <c:when test="${item.type == 'IMPORT' && item.goodsReceiptId != null}">
-                                                <a href="${pageContext.request.contextPath}/inventory/import/history?action=detail&id=${item.goodsReceiptId}" class="font-weight-bold" style="color: #2e7d32;">
+                                                <a href="${pageContext.request.contextPath}/inventory/import-history?action=detail&id=${item.goodsReceiptId}" class="font-weight-bold" style="color: #2e7d32;">
                                                     #IM-${item.goodsReceiptId}
                                                 </a>
                                             </c:when>
