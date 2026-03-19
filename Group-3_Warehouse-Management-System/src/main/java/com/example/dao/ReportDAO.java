@@ -46,7 +46,6 @@ public class ReportDAO {
     }
 
 
-
     // Get list of items for import report
     public List<ReportItemDTO> getImportItems(int month, int year) {
         List<ReportItemDTO> items = new ArrayList<>();
@@ -175,5 +174,44 @@ public class ReportDAO {
         }
         return items;
     }
+
+    public long getImportByMonth(int month, int year) {
+        String sql = """
+                SELECT SUM(quantity) as total FROM stock_movements
+                WHERE type = 'IMPORT' AND YEAR(created_at) = ? AND MONTH(created_at) = ?
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            ps.setInt(2, month);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getLong("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public long getExportByMonth(int month, int year) {
+        String sql = """
+                SELECT SUM(quantity) as total FROM stock_movements
+                WHERE type = 'EXPORT' AND YEAR(created_at) = ? AND MONTH(created_at) = ?
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            ps.setInt(2, month);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getLong("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
 
 }

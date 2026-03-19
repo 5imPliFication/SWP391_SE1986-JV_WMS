@@ -12,7 +12,7 @@
     <style>
         .main-content {
             padding: 20px;
-            max-width: 1200px;
+            max-width: 80%;
             margin: auto;
         }
 
@@ -62,8 +62,11 @@
         </div>
     </form>
 
+    <%--Total Compare Chart--%>
     <div class="mb-3">
-        Biểu đồ kết hợp xuất, nhập, tồn (hiển thị đủ 12 tháng trong năm) (Alo Tùng à e)
+        <div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+            <canvas id="overviewChart" width="400" height="150"></canvas>
+        </div>
     </div>
 
     <%--  select type  --%>
@@ -124,43 +127,45 @@
 
 
     <%--table detail--%>
-    <div class="table-card"> <div class="table-scroll"> <table class="modern-table">
-        <thead>
-        <tr>
-            <th style="width: 80px;" class="text-center">No.</th>
-            <th>Product</th>
-            <th style="width: 150px;" class="text-center">Quantity</th>
-        </tr>
-        </thead>
-        <tbody>
-        <c:choose>
-            <c:when test="${not empty reportItems}">
-                <c:forEach items="${reportItems}" var="item" varStatus="loop">
-                    <tr>
-                        <td class="text-center">
-                                ${loop.index + 1}
-                        </td>
-                        <td>
-                                ${item.productName}
-                        </td>
-                        <td class="text-center">
-                                ${item.quantity}
-                        </td>
-                    </tr>
-                </c:forEach>
-            </c:when>
-            <c:otherwise>
+    <div class="table-card">
+        <div class="table-scroll">
+            <table class="modern-table">
+                <thead>
                 <tr>
-                    <td colspan="3" style="text-align: center; padding: 30px; color: #999;">
-                        No data available.
-                    </td>
+                    <th style="width: 80px;" class="text-center">No.</th>
+                    <th>Product</th>
+                    <th style="width: 150px;" class="text-center">Quantity</th>
                 </tr>
-            </c:otherwise>
-        </c:choose>
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                <c:choose>
+                    <c:when test="${not empty reportItems}">
+                        <c:forEach items="${reportItems}" var="item" varStatus="loop">
+                            <tr>
+                                <td class="text-center">
+                                        ${loop.index + 1}
+                                </td>
+                                <td>
+                                        ${item.productName}
+                                </td>
+                                <td class="text-center">
+                                        ${item.quantity}
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:when>
+                    <c:otherwise>
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding: 30px; color: #999;">
+                                No data available.
+                            </td>
+                        </tr>
+                    </c:otherwise>
+                </c:choose>
+                </tbody>
+            </table>
 
-    </div>
+        </div>
     </div>
 
     <jsp:include page="/WEB-INF/common/table.jsp"/>
@@ -211,6 +216,58 @@
         });
     });
     </c:if>
+
+    <c:if test="${not empty chartSummaryData}">
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const rawData = JSON.parse('${chartSummaryData}');
+
+        const importData = rawData.map(item => item.importQuantity);
+        const exportData = rawData.map(item => item.exportQuantity);
+
+        const ctx = document.getElementById('overviewChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [
+                    {
+                        label: 'Import',
+                        data: importData,
+                        backgroundColor: 'rgb(38, 10, 247)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Export',
+                        data: exportData,
+                        backgroundColor: 'rgb(222, 10, 10)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Compare quantity of import product vs export product in year ${year != null ? year : (param.year != null ? param.year : year)}'
+                    }
+                }
+            }
+        });
+
+    });
+    </c:if>
+
 </script>
 
 </body>
