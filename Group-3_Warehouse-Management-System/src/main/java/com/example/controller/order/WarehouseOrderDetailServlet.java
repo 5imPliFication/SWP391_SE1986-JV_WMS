@@ -44,11 +44,33 @@ public class WarehouseOrderDetailServlet extends HttpServlet {
         try {
             Long orderId = Long.parseLong(req.getParameter("id"));
 
+            int itemPage = 1;
+            String itemPageRaw = req.getParameter("itemPage");
+            if (itemPageRaw != null && !itemPageRaw.isBlank()) {
+                try {
+                    itemPage = Math.max(Integer.parseInt(itemPageRaw), 1);
+                } catch (NumberFormatException ignored) {
+                    itemPage = 1;
+                }
+            }
+
+            int itemPageSize = 8;
+
             Order order = orderService.getOrderDetail(orderId, user.getId(), "Warehouse");
-            List<OrderItem> items = orderItemService.getItemsByOrder(orderId, user.getId(), "Warehouse");
+
+            int totalItemCount = orderItemService.countItemsByOrder(orderId, user.getId(), "Warehouse");
+            int totalItemPages = (int) Math.ceil((double) totalItemCount / itemPageSize);
+            if (totalItemPages == 0) totalItemPages = 1;
+            if (itemPage > totalItemPages) itemPage = totalItemPages;
+            int itemOffset = (itemPage - 1) * itemPageSize;
+            List<OrderItem> items = orderItemService.getItemsByOrder(orderId, user.getId(), "Warehouse", itemOffset, itemPageSize);
 
             req.setAttribute("order", order);
             req.setAttribute("items", items);
+            req.setAttribute("itemPage", itemPage);
+            req.setAttribute("itemPageSize", itemPageSize);
+            req.setAttribute("totalItemPages", totalItemPages);
+            req.setAttribute("totalItemCount", totalItemCount);
             System.out.println(order.getCreatedBy().getFullName());
 
             req.getRequestDispatcher("/WEB-INF/warehouse/order-detail.jsp")

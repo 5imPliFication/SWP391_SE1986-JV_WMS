@@ -42,6 +42,8 @@ public class RemoveOrderItemServlet extends HttpServlet {
 
         try {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
+            String itemPage = req.getParameter("itemPage");
+            String productPage = req.getParameter("productPage");
 
             // Now get orderItemId instead of productItemId
             Long orderItemId = Long.parseLong(req.getParameter("orderItemId"));
@@ -51,14 +53,30 @@ public class RemoveOrderItemServlet extends HttpServlet {
             activityLogService.log(user, "Remove item from order");
 
             String successMsg = URLEncoder.encode("Item removed successfully", StandardCharsets.UTF_8);
-            resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&success=" + successMsg);
+            String redirectUrl = req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&success=" + successMsg;
+            if (itemPage != null && !itemPage.isBlank()) {
+                redirectUrl += "&itemPage=" + URLEncoder.encode(itemPage, StandardCharsets.UTF_8);
+            }
+            if (productPage != null && !productPage.isBlank()) {
+                redirectUrl += "&productPage=" + URLEncoder.encode(productPage, StandardCharsets.UTF_8);
+            }
+            resp.sendRedirect(redirectUrl);
 
         } catch (NumberFormatException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameters");
         } catch (IllegalStateException | IllegalArgumentException e) {
             String errorMsg = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
             Long orderId = Long.parseLong(req.getParameter("orderId"));
-            resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&error=" + errorMsg);
+            String itemPage = req.getParameter("itemPage");
+            String productPage = req.getParameter("productPage");
+            String redirectUrl = req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&error=" + errorMsg;
+            if (itemPage != null && !itemPage.isBlank()) {
+                redirectUrl += "&itemPage=" + URLEncoder.encode(itemPage, StandardCharsets.UTF_8);
+            }
+            if (productPage != null && !productPage.isBlank()) {
+                redirectUrl += "&productPage=" + URLEncoder.encode(productPage, StandardCharsets.UTF_8);
+            }
+            resp.sendRedirect(redirectUrl);
         } catch (Exception e) {
             e.printStackTrace();
             req.setAttribute("error", "Failed to remove item: " + e.getMessage());

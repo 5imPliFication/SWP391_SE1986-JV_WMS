@@ -30,6 +30,14 @@ public class ProductService {
         return productDAO.getAllProducts();
     }
 
+    public int countAvailableProductsForOrder() {
+        return productDAO.countAvailableProductsForOrder();
+    }
+
+    public List<Product> findAvailableProductsForOrder(int pageNo, int pageSize) {
+        return productDAO.getAvailableProductsForOrder(pageNo, pageSize);
+    }
+
     public int getTotalProducts(String searchName, Long brandId, Long categoryId, Long modelId, Long chipId,
                                 Long ramId, Long storageId, Long sizeId, Boolean isActive) {
         return productDAO.countProducts(searchName, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId, isActive);

@@ -45,11 +45,20 @@ public class UpdateOrderItemQuantityServlet extends HttpServlet {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
             Long itemId = Long.parseLong(req.getParameter("itemId"));
             int quantity = Integer.parseInt(req.getParameter("quantity"));
+            String itemPage = req.getParameter("itemPage");
+            String productPage = req.getParameter("productPage");
 
             // Validate quantity
             if (quantity < 1) {
                 String errorMsg = URLEncoder.encode("Quantity must be at least 1", StandardCharsets.UTF_8);
-                resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&error=" + errorMsg);
+                String redirectUrl = req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&error=" + errorMsg;
+                if (itemPage != null && !itemPage.isBlank()) {
+                    redirectUrl += "&itemPage=" + URLEncoder.encode(itemPage, StandardCharsets.UTF_8);
+                }
+                if (productPage != null && !productPage.isBlank()) {
+                    redirectUrl += "&productPage=" + URLEncoder.encode(productPage, StandardCharsets.UTF_8);
+                }
+                resp.sendRedirect(redirectUrl);
                 return;
             }
             activityLogService.log(user, "Update order");
@@ -58,15 +67,31 @@ public class UpdateOrderItemQuantityServlet extends HttpServlet {
             orderItemService.updateQuantity(orderId, itemId, quantity);
 
             String successMsg = URLEncoder.encode("Quantity updated successfully", StandardCharsets.UTF_8);
-            resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&success=" + successMsg);
+            String redirectUrl = req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&success=" + successMsg;
+            if (itemPage != null && !itemPage.isBlank()) {
+                redirectUrl += "&itemPage=" + URLEncoder.encode(itemPage, StandardCharsets.UTF_8);
+            }
+            if (productPage != null && !productPage.isBlank()) {
+                redirectUrl += "&productPage=" + URLEncoder.encode(productPage, StandardCharsets.UTF_8);
+            }
+            resp.sendRedirect(redirectUrl);
 
         } catch (NumberFormatException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameters");
         } catch (Exception e) {
             e.printStackTrace();
             Long orderId = Long.parseLong(req.getParameter("orderId"));
+            String itemPage = req.getParameter("itemPage");
+            String productPage = req.getParameter("productPage");
             String errorMsg = URLEncoder.encode("Failed to update quantity: " + e.getMessage(), StandardCharsets.UTF_8);
-            resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&error=" + errorMsg);
+            String redirectUrl = req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&error=" + errorMsg;
+            if (itemPage != null && !itemPage.isBlank()) {
+                redirectUrl += "&itemPage=" + URLEncoder.encode(itemPage, StandardCharsets.UTF_8);
+            }
+            if (productPage != null && !productPage.isBlank()) {
+                redirectUrl += "&productPage=" + URLEncoder.encode(productPage, StandardCharsets.UTF_8);
+            }
+            resp.sendRedirect(redirectUrl);
         }
     }
 }
