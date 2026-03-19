@@ -43,7 +43,14 @@
 
 <main class="main-content">
 
-    <h2 class="mb-4">Import Report</h2>
+    <h2 class="mb-4">
+        <c:choose>
+            <c:when test="${type eq 'import'}">Import Report</c:when>
+            <c:when test="${type eq 'export'}">Export Report</c:when>
+            <c:when test="${type eq 'inventory'}">Inventory Report</c:when>
+            <c:otherwise>Inventory Report</c:otherwise>
+        </c:choose>
+    </h2>
 
     <%--input year--%>
     <form action="${pageContext.request.contextPath}/report" method="get" class="mb-3">
@@ -174,14 +181,14 @@
                 labels: ['January', 'February', 'March', 'April', 'May', 'June',
                     'July', 'August', 'September', 'October', 'November', 'December'],
                 datasets: [{
-                    label: 'Quantity',
+                    label: ' Quantity',
                     data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: '${type eq 'inventory' ? 'rgba(75, 192, 192, 0.2)' : 'rgba(54, 162, 235, 0.2)'}',
+                    borderColor: '${type eq 'inventory' ? 'rgba(75, 192, 192, 1)' : 'rgba(54, 162, 235, 1)'}',
                     borderWidth: 2,
                     fill: true,
                     tension: 0.3,
-                    pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+                    pointBackgroundColor: '${type eq 'inventory' ? 'rgba(75, 192, 192, 1)' : 'rgba(54, 162, 235, 1)'}'
                 }]
             },
             options: {
@@ -197,7 +204,7 @@
                     },
                     title: {
                         display: true,
-                        text: 'Chart of import product in year ${param.year != null ? param.year : year}'
+                        text: 'Chart of ${type} product in year ${year != null ? year : (param.year != null ? param.year : year)}'
                     }
                 }
             }
