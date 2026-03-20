@@ -222,6 +222,8 @@
                                                        class="form-control quantity-input"
                                                        min="1"
                                                        value="${i.quantity}">
+                                                <input type="hidden" name="productId[]" value="${i.productId}">
+
                                             </td>   
 
                                             <td class="unit-cell">

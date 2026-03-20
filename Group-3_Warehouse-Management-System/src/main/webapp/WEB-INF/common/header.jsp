@@ -28,7 +28,7 @@
 
     <body>
 
-        <header class="bg-white shadow-lg">
+        <header class="bg-white shadow-lg sticky-top" style="margin-left: 300px">
 
             <div class="container-fluid d-flex justify-content-end p-2">
 
