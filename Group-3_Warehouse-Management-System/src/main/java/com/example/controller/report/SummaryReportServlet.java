@@ -42,9 +42,15 @@ public class SummaryReportServlet extends HttpServlet {
 
         try {
             if (monthStr != null && !monthStr.isEmpty()) {
-                // monthStr format "yyyy-MM"
+                // Người dùng chọn tháng
                 fromDate = LocalDate.parse(monthStr + "-01"); // đầu tháng
                 toDate = fromDate.withDayOfMonth(fromDate.lengthOfMonth()); // cuối tháng
+            } else {
+                // Không chọn tháng → mặc định tháng hiện tại
+                LocalDate today = LocalDate.now();
+                fromDate = today.withDayOfMonth(1); // đầu tháng hiện tại
+                toDate = today.withDayOfMonth(today.lengthOfMonth()); // cuối tháng hiện tại
+                monthStr = today.getYear() + "-" + String.format("%02d", today.getMonthValue());
             }
         } catch (Exception e) {
             req.setAttribute("error", "Invalid month format!");
@@ -55,7 +61,7 @@ public class SummaryReportServlet extends HttpServlet {
 
         // ===== SET ATTRIBUTE =====
         req.setAttribute("reportList", reportList);
-        req.setAttribute("month", monthStr); // giữ giá trị tháng đã chọn
+        req.setAttribute("month", monthStr); // giữ giá trị tháng đã chọn hoặc tháng hiện tại
 
         // ===== FORWARD =====
         req.getRequestDispatcher("/WEB-INF/manager/summary-report.jsp")
