@@ -101,11 +101,6 @@ public class ReportServlet extends HttpServlet {
     }
 
     private void handleExportReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // basic redirect to jsp for now as export is not implemented in DAO yet
-        request.setAttribute("type", "export");
-        request.getRequestDispatcher("/WEB-INF/report/report.jsp").forward(request, response);
-    private void handleExportReport(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
         String yearStr = request.getParameter("year");
         String quarterStr = request.getParameter("quarter");
         String searchCode = request.getParameter("searchCode");
