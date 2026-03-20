@@ -25,7 +25,11 @@ public class SummaryReportServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
+        User user = (User) req.getSession().getAttribute("user");
+        if (user == null || user.getRole() == null || !"Manager".equalsIgnoreCase(user.getRole().getName())) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Only manager can manage report pages.");
+            return;
+        }
 
 
         // Parse optional date range filters

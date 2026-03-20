@@ -21,7 +21,7 @@ public class DBConfig {
         );
 
         config.setUsername("root");
-        config.setPassword("1234");
+        config.setPassword("1231");
 
         // MySQL Driver
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
