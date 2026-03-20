@@ -15,5 +15,6 @@ public class ExportItemDTO {
     private String productName;
     private int quantity;
     private Double priceAtPurchase;
+    private String unit;
     private List<ExportProductItemDTO> productItems;
 }

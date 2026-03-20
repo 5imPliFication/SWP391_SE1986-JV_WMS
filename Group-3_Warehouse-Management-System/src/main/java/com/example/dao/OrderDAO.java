@@ -1156,7 +1156,7 @@ public class OrderDAO {
 
     public List<ExportItemDTO> getExportOrderItems(Long orderId) {
         String sql = """
-                      select oi.id as item_id, oi.quantity, oi.price_at_purchase, p.name, pi.serial, oi.price_at_purchase, pi.id as product_item_id
+                      select oi.id as item_id, oi.quantity, oi.price_at_purchase, p.name, pi.serial, oi.price_at_purchase, pi.id as product_item_id, u.name as unit
                 from orders o
                 join order_items oi
                 on o.id = oi.order_id
@@ -1166,6 +1166,8 @@ public class OrderDAO {
                 on pi.id = oipi.product_item_id
                 join products p\s
                 on p.id = pi.product_id
+                join units u
+                on u.id = p.unit_id
                 where oi.order_id = ?;
                 """;
         Map<Long, ExportItemDTO> itemMap = new LinkedHashMap<>();
@@ -1186,6 +1188,7 @@ public class OrderDAO {
                         item.setProductName(rs.getString("name"));
                         item.setQuantity(rs.getInt("quantity"));
                         item.setPriceAtPurchase(rs.getDouble("price_at_purchase"));
+                        item.setUnit(rs.getString("unit"));
                         item.setProductItems(new ArrayList<>());
                         itemMap.put(itemId, item);
                     }

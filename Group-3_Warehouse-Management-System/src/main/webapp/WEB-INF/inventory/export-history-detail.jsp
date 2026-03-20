@@ -82,8 +82,8 @@
                         <th style="width: 60px;" class="text-center">No.</th>
                         <th>Product Name / Serial</th>
                         <th style="width: 150px;" class="text-center">Quantity</th>
-                        <th style="width: 200px;" class="text-center">Unit</th>
                         <th style="width: 200px;" class="text-center">Price</th>
+                        <th style="width: 200px;" class="text-center">Unit</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -105,32 +105,39 @@
                                     <td class="text-center align-middle">
                                             ${item.priceAtPurchase}
                                     </td><td class="text-center align-middle">
-                                            Piece
+                                            ${item.unit}
                                     </td>
                                 </tr>
 
                                 <%-- detail rows --%>
                                 <c:forEach items="${item.productItems}" var="productItem" varStatus="productStatus">
                                     <tr class="sub-item item-group-${item.id}" style="display:none;">
-                                        <td class="text-center align-middle">
-                                                ${productStatus.index + 1}
-                                        </td>
-                                        <td>
-                                            <div class="input-group input-group-sm">
-                                                <input type="text" class="form-control" value="${productItem.serial}"
-                                                       readonly>
-                                                <div class="input-group-append">
-                                                    <a class="btn btn-outline-info"
-                                                       href="${pageContext.request.contextPath}/products/items/update?productItemId=${productItem.id}&searchSerial=${productItem.serial}&pageNo=1&isActive=true"
-                                                       title="View Detail">
-                                                        View
-                                                    </a>
+                                        <td colspan="5">
+                                            <div class="d-flex align-items-center">
+
+                                                <!-- STT -->
+                                                <div style="width:60px;" class="text-center">
+                                                        ${productStatus.index + 1}
                                                 </div>
+
+                                                <!-- Serial + button -->
+                                                <div class="flex-grow-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="text" class="form-control"
+                                                               value="${productItem.serial}" readonly>
+
+                                                        <div class="input-group-append">
+                                                            <a class="btn btn-outline-info"
+                                                               href="${pageContext.request.contextPath}/products/items/update?productItemId=${productItem.id}&searchSerial=${productItem.serial}&pageNo=1&isActive=true"
+                                                               title="View Detail">
+                                                                View
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                             </div>
                                         </td>
-                                        <td class="text-center align-middle">-</td>
-                                        <td class="text-center align-middle">-</td>
-                                        <td class="text-center align-middle">-</td>
                                     </tr>
                                 </c:forEach>
                             </c:forEach>
