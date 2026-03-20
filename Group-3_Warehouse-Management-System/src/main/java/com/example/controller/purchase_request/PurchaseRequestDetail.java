@@ -105,8 +105,17 @@ public class PurchaseRequestDetail extends HttpServlet {
             return;
         }
 
-        Long id = Long.valueOf(req.getParameter("id"));
+        String idRaw = req.getParameter("id");
         String action = req.getParameter("action");
+
+        if (idRaw == null || action == null) {
+            resp.sendRedirect(req.getContextPath() + "/purchase-request/list");
+            return;
+        }
+
+        Long id = Long.valueOf(idRaw);
+
+        String redirectUrl = req.getContextPath() + "/purchase-request/list";
 
         switch (action) {
             case "cancel" -> {
@@ -124,9 +133,16 @@ public class PurchaseRequestDetail extends HttpServlet {
             case "complete" -> {
                 pr.complete(id);
                 activityLogService.log(user, "Complete purchase request");
+
+                redirectUrl = req.getContextPath()
+                        + "/inventory/import?purchaseId=" + id + "&action=import";
+            }
+            default -> {
+                resp.sendRedirect(req.getContextPath() + "/purchase-request/list");
+                return;
             }
         }
 
-        resp.sendRedirect(req.getContextPath() + "/purchase-request/list");
+        resp.sendRedirect(redirectUrl);
     }
 }

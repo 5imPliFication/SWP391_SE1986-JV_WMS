@@ -252,7 +252,7 @@
                               and sessionScope.user.role != null
                               and sessionScope.user.role.active
                               and sessionScope.user.role.name eq 'Manager'
-                              and fn:contains(sessionScope.userPermissions, 'VIEW_REPORT')}">
+                              and fn:contains(sessionScope.userPermissions, 'READ_REPORT')}">
 
                       <li>
                           <a href="${pageContext.request.contextPath}/summary_report">
@@ -267,7 +267,7 @@
                               and sessionScope.user.role != null
                               and sessionScope.user.role.active
                               and sessionScope.user.role.name eq 'Manager'
-                              and fn:contains(sessionScope.userPermissions, 'VIEW_REPORT')}">
+                              and fn:contains(sessionScope.userPermissions, 'READ_REPORT')}">
 
                     <li>
                         <a href="${pageContext.request.contextPath}/report">
