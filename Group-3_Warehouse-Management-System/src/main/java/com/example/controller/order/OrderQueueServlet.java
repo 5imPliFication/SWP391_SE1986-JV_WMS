@@ -45,6 +45,7 @@ public class OrderQueueServlet extends HttpServlet {
             if (pageParam != null && !pageParam.isEmpty()) {
                 try {
                     pageNo = Integer.parseInt(pageParam);
+                    if (pageNo < 1) pageNo = 1;
                 } catch (NumberFormatException e) {
                     pageNo = 1;
                 }
@@ -70,15 +71,24 @@ public class OrderQueueServlet extends HttpServlet {
             }
 
             // Get total count
-            OrderService orderService = new OrderService();
-            int totalOrders = orderService.countOrders(status, searchCode);
+            int totalOrders = orderService.countOrdersByRole(null, user.getRole().getName(), status, searchCode);
 
             // Calculate total pages
             int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
+            if (totalPages == 0) totalPages = 1;
 
             // Get paginated data
             int offset = (pageNo - 1) * pageSize;
-            List<Order> orders = orderService.getOrders(status, searchCode, sortBy, sortDir, offset, pageSize);
+            List<Order> orders = orderService.searchOrdersByRole(
+                    null,
+                    user.getRole().getName(),
+                    status,
+                    searchCode,
+                    sortBy,
+                    sortDir,
+                    offset,
+                    pageSize
+            );
 
             // Set attributes
             req.setAttribute("orders", orders);

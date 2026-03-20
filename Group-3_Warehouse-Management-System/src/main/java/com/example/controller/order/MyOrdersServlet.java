@@ -72,7 +72,7 @@ public class MyOrdersServlet extends HttpServlet {
             }
 
             // 4. Get total count for this salesman
-            int totalOrders = orderService.countOrdersBySalesman(user.getId(), status, searchCode);
+            int totalOrders = orderService.countOrdersByRole(user.getId(), user.getRole().getName(), status, searchCode);
 
             // 5. Calculate total pages
             int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
@@ -82,7 +82,16 @@ public class MyOrdersServlet extends HttpServlet {
             int offset = (pageNo - 1) * pageSize;
 
             // 7. Get paginated orders for this salesman
-            List<Order> orders = orderService.getOrdersBySalesman(user.getId(), status, searchCode, sortBy, sortDir, offset, pageSize);
+            List<Order> orders = orderService.searchOrdersByRole(
+                    user.getId(),
+                    user.getRole().getName(),
+                    status,
+                    searchCode,
+                    sortBy,
+                    sortDir,
+                    offset,
+                    pageSize
+            );
 
             // ===== SET ATTRIBUTES =====
             req.setAttribute("orders", orders);

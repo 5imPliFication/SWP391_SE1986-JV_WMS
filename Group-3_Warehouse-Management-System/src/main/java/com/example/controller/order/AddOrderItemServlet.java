@@ -40,31 +40,41 @@ public class AddOrderItemServlet extends HttpServlet {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
             Long productId = Long.parseLong(req.getParameter("productId"));
             String quantityRaw = req.getParameter("quantity");
+            String itemPage = req.getParameter("itemPage");
+            String productPage = req.getParameter("productPage");
 
             int quantity;
             try {
                 quantity = Integer.parseInt(quantityRaw);
             } catch (NumberFormatException e) {
                 redirectWithQuantityError(req, resp, orderId, productId, quantityRaw,
-                        "Quantity must be a valid number");
+                        "Quantity must be a valid number", itemPage, productPage);
                 return;
             }
 
             if (quantity <= 0) {
                 redirectWithQuantityError(req, resp, orderId, productId, String.valueOf(quantity),
-                        "Quantity must be greater than 0");
+                        "Quantity must be greater than 0", itemPage, productPage);
                 return;
             }
 
             // Check if item already exists and update quantity instead
             String error = orderService.addOrUpdateOrderItem(orderId, productId, quantity);
             if (error != null && !error.isBlank()) {
-                redirectWithQuantityError(req, resp, orderId, productId, String.valueOf(quantity), error);
+                redirectWithQuantityError(req, resp, orderId, productId, String.valueOf(quantity), error, itemPage, productPage);
                 return;
             }
             activityLogService.log(user, "Add item into order");
 
-            resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId);
+            String redirectUrl = req.getContextPath() + "/salesman/order/detail?id=" + orderId;
+            if (itemPage != null && !itemPage.isBlank()) {
+                redirectUrl += "&itemPage=" + URLEncoder.encode(itemPage, StandardCharsets.UTF_8);
+            }
+            if (productPage != null && !productPage.isBlank()) {
+                redirectUrl += "&productPage=" + URLEncoder.encode(productPage, StandardCharsets.UTF_8);
+                redirectUrl += "&openProductModal=1";
+            }
+            resp.sendRedirect(redirectUrl);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -78,11 +88,22 @@ public class AddOrderItemServlet extends HttpServlet {
             Long orderId,
             Long productId,
             String quantity,
-            String message) throws IOException {
+            String message,
+            String itemPage,
+            String productPage) throws IOException {
         String redirectUrl = req.getContextPath() + "/salesman/order/detail?id=" + orderId
                 + "&productItemId=" + productId
                 + "&quantity=" + URLEncoder.encode(quantity == null ? "" : quantity, StandardCharsets.UTF_8)
                 + "&quantityError=" + URLEncoder.encode(message, StandardCharsets.UTF_8);
+
+        if (itemPage != null && !itemPage.isBlank()) {
+            redirectUrl += "&itemPage=" + URLEncoder.encode(itemPage, StandardCharsets.UTF_8);
+        }
+        if (productPage != null && !productPage.isBlank()) {
+            redirectUrl += "&productPage=" + URLEncoder.encode(productPage, StandardCharsets.UTF_8);
+            redirectUrl += "&openProductModal=1";
+        }
+
         resp.sendRedirect(redirectUrl);
     }
 }

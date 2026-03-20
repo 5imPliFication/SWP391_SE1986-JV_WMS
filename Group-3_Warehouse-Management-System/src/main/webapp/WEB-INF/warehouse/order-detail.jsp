@@ -183,7 +183,7 @@
                 <div class="card-header bg-dark text-white">
                     <h5 class="mb-0">
                         <i class="fas fa-boxes mr-2"></i>Items to Fulfill
-                        <span class="badge badge-light text-dark ml-2">${items.size()} items</span>
+                        <span class="badge badge-light text-dark ml-2">${totalItemCount} items</span>
                     </h5>
                 </div>
                 <div class="card-body p-0">
@@ -205,7 +205,7 @@
                                 <c:set var="subtotal" value="${item.priceAtPurchase * item.quantity}"/>
                                 <c:set var="total" value="${total + subtotal}"/>
                                 <tr>
-                                    <td class="px-4 align-middle text-muted">${status.index + 1}</td>
+                                    <td class="px-4 align-middle text-muted">${(itemPage - 1) * itemPageSize + status.index + 1}</td>
                                     <td class="px-4 align-middle">
                                             <%-- Product name from Product entity --%>
                                         <div class="font-weight-bold">${item.product.name}</div>
@@ -249,6 +249,36 @@
                         </table>
                     </div>
                 </div>
+
+                <c:if test="${totalItemPages > 1}">
+                    <nav class="p-3 border-top" aria-label="Order items pagination">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            <li class="page-item ${itemPage == 1 ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/warehouse/order/detail?id=${order.id}&itemPage=${itemPage - 1}"
+                                   aria-label="Previous">&laquo;</a>
+                            </li>
+
+                            <c:forEach begin="1" end="${totalItemPages}" var="i">
+                                <c:if test="${i == 1 || i == totalItemPages || (i >= itemPage - 2 && i <= itemPage + 2)}">
+                                    <li class="page-item ${i == itemPage ? 'active' : ''}">
+                                        <a class="page-link"
+                                           href="${pageContext.request.contextPath}/warehouse/order/detail?id=${order.id}&itemPage=${i}">${i}</a>
+                                    </li>
+                                </c:if>
+                                <c:if test="${i == itemPage - 3 || i == itemPage + 3}">
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                </c:if>
+                            </c:forEach>
+
+                            <li class="page-item ${itemPage == totalItemPages ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/warehouse/order/detail?id=${order.id}&itemPage=${itemPage + 1}"
+                                   aria-label="Next">&raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </c:if>
             </div>
         </div>
 
@@ -266,49 +296,9 @@
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Subtotal:</span>
                         <span class="font-weight-bold">
-                            ${currency:format(total)} VND
+                            ${currency:format(order.total)} VND
                         </span>
                     </div>
-
-                    <!-- Coupon Info -->
-                    <c:if test="${order.coupon != null}">
-                        <div class="alert alert-success p-2 mb-2" role="alert">
-                            <small>
-                                <i class="fas fa-tag mr-1"></i>
-                                <strong>${order.coupon.code}</strong>
-                                <br>${order.coupon.description}
-                            </small>
-                        </div>
-
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-success">Discount:</span>
-                            <span class="text-success font-weight-bold">
-                                <c:choose>
-                                    <c:when test="${order.coupon.discountType == 'PERCENTAGE'}">
-                                        -${order.coupon.discountValue}%
-                                    </c:when>
-                                    <c:otherwise>
-                                        -${currency:format(order.coupon.discountValue)} VND
-                                    </c:otherwise>
-                                </c:choose>
-                            </span>
-                        </div>
-
-                        <%-- Calculate discount amount --%>
-                        <c:choose>
-                            <c:when test="${order.coupon.discountType == 'PERCENTAGE'}">
-                                <c:set var="discountAmount" value="${total * (order.coupon.discountValue / 100)}"/>
-                            </c:when>
-                            <c:otherwise>
-                                <c:set var="discountAmount" value="${order.coupon.discountValue}"/>
-                            </c:otherwise>
-                        </c:choose>
-                        <c:set var="finalTotal" value="${total - discountAmount}"/>
-                    </c:if>
-
-                    <c:if test="${order.coupon == null}">
-                        <c:set var="finalTotal" value="${total}"/>
-                    </c:if>
 
                     <hr class="my-3">
 
@@ -316,16 +306,10 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="h5 mb-0 font-weight-bold">Total:</span>
                         <span class="h4 mb-0 text-primary font-weight-bold">
-                            ${currency:format(finalTotal)} VND
+                            ${currency:format(order.total)} VND
                         </span>
                     </div>
 
-                    <c:if test="${order.coupon != null}">
-                        <small class="text-success d-block mt-2 text-right">
-                            <i class="fas fa-piggy-bank mr-1"></i>
-                            You saved ${currency:format(discountAmount)} VND!
-                        </small>
-                    </c:if>
                 </div>
             </div>
 

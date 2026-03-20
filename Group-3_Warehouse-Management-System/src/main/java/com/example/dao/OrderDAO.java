@@ -1,7 +1,6 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
-import com.example.model.Coupon;
 import com.example.model.Order;
 import com.example.model.User;
 import com.example.util.AppConstants;
@@ -22,23 +21,6 @@ import com.example.dto.ExportItemDTO;
 import com.example.dto.ExportProductItemDTO;
 
 public class OrderDAO {
-
-    private Coupon mapResultSetToCoupon(ResultSet rs) throws SQLException {
-        Coupon coupon = new Coupon();
-        coupon.setId(rs.getLong("id"));
-        coupon.setCode(rs.getString("code"));
-        coupon.setDescription(rs.getString("description"));
-        coupon.setDiscountType(rs.getString("discount_type"));
-        coupon.setDiscountValue(rs.getBigDecimal("discount_value"));
-        coupon.setMinOrderAmount(rs.getBigDecimal("min_order_amount"));
-        coupon.setValidFrom(rs.getTimestamp("valid_from"));
-        coupon.setValidUntil(rs.getTimestamp("valid_until"));
-        coupon.setUsageLimit(rs.getObject("usage_limit") != null ? rs.getInt("usage_limit") : null);
-        coupon.setUsedCount(rs.getInt("used_count"));
-        coupon.setIsActive(rs.getBoolean("is_active"));
-        coupon.setCreatedAt(rs.getTimestamp("created_at"));
-        return coupon;
-    }
 
     public Map<String, Integer> getStatistics() {
         String sql = """
@@ -86,16 +68,6 @@ public class OrderDAO {
         Timestamp processedAt = rs.getTimestamp("processed_at");
         if (processedAt != null) {
             order.setProcessedAt(processedAt);
-        }
-
-        // ---- coupon (nullable) ----
-        long couponId = rs.getLong("coupon_id");
-        if (!rs.wasNull()) {
-            Coupon coupon = new Coupon();
-            coupon.setId(couponId);
-            coupon.setCode(rs.getString("coupon_code"));
-            coupon.setDiscountValue(rs.getBigDecimal("discount_value"));
-            order.setCoupon(coupon);
         }
 
         return order;
@@ -159,23 +131,15 @@ public class OrderDAO {
                         o.total_price as total,
                         o.order_date,
                         o.processed_at,
-                        o.discount_amount,
-                        o.final_total,
                 
                         cu.id           AS created_user_id,
                         cu.fullname     AS created_user_name,
                 
                         pu.id           AS processed_user_id,
-                        pu.fullname     AS processed_user_name,
-                
-                        c.id            AS coupon_id,
-                        c.code          AS coupon_code,
-                        c.discount_type,
-                        c.discount_value
+                        pu.fullname     AS processed_user_name
                     FROM orders o
                     JOIN users cu ON o.created_by = cu.id
                     LEFT JOIN users pu ON o.processed_by = pu.id
-                    LEFT JOIN coupons c ON o.coupon_id = c.id
                     WHERE o.id = ?
                 """;
 
@@ -198,10 +162,6 @@ public class OrderDAO {
                 order.setNote(rs.getString("note"));
                 order.setStatus(rs.getString("status"));
                 order.setTotal(rs.getBigDecimal("total"));
-                order.setDiscountAmount(rs.getBigDecimal("discount_amount") != null ?
-                        rs.getBigDecimal("discount_amount") : BigDecimal.ZERO);
-                order.setFinalTotal(rs.getBigDecimal("final_total") != null ?
-                        rs.getBigDecimal("final_total") : order.getTotal());
 
                 // ----- createdBy -----
                 User createdBy = new User();
@@ -228,17 +188,6 @@ public class OrderDAO {
                     order.setProcessedAt(processedAt);
                 }
 
-                // ----- coupon (nullable) -----
-                Long couponId = rs.getLong("coupon_id");
-                if (!rs.wasNull()) {
-                    Coupon coupon = new Coupon();
-                    coupon.setId(couponId);
-                    coupon.setCode(rs.getString("coupon_code"));
-                    coupon.setDiscountType(rs.getString("discount_type"));
-                    coupon.setDiscountValue(rs.getBigDecimal("discount_value"));
-                    order.setCoupon(coupon);
-                }
-
                 return order;
             }
 
@@ -261,15 +210,9 @@ public class OrderDAO {
                 "    o.processed_at,\n" +
                 "\n" +
                 "    u.id            AS created_user_id,\n" +
-                "    u.fullname      AS created_user_name,\n" +
-                "\n" +
-                "    c.id            AS coupon_id,\n" +
-                "    c.code          AS coupon_code,\n" +
-                "    c.discount_type,\n" +
-                "    c.discount_value\n" +
+                "    u.fullname      AS created_user_name\n" +
                 "FROM orders o\n" +
                 "JOIN users u ON o.created_by = u.id\n" +
-                "LEFT JOIN coupons c ON o.coupon_id = c.id\n" +
                 "WHERE o.status not like 'DRAFT' " +
                 "ORDER BY o.order_date DESC\n";
 
@@ -304,15 +247,9 @@ public class OrderDAO {
                         o.processed_at,
                 
                         u.id AS created_user_id,
-                        u.fullname AS created_user_name,
-                
-                        c.id AS coupon_id,
-                        c.code AS coupon_code,
-                        c.discount_type,
-                        c.discount_value
+                        u.fullname AS created_user_name
                     FROM orders o
                     JOIN users u ON o.created_by = u.id
-                    LEFT JOIN coupons c ON o.coupon_id = c.id
                     WHERE o.created_by = ?
                     ORDER BY o.order_date DESC
                 """;
@@ -348,15 +285,9 @@ public class OrderDAO {
                         o.processed_at,
                 
                         u.id AS created_user_id,
-                        u.fullname AS created_user_name,
-                
-                        c.id AS coupon_id,
-                        c.code AS coupon_code,
-                        c.discount_type,
-                        c.discount_value
+                        u.fullname AS created_user_name
                     FROM orders o
                     JOIN users u ON o.created_by = u.id
-                    LEFT JOIN coupons c ON o.coupon_id = c.id
                     WHERE o.status = ?
                     ORDER BY o.order_date ASC
                 """;
@@ -435,135 +366,15 @@ public class OrderDAO {
         }
     }
 
-    private BigDecimal calculateDiscountAmount(Coupon coupon, BigDecimal subtotal) {
-        if ("PERCENTAGE".equals(coupon.getDiscountType())) {
-            // Percentage discount: subtotal * (discountValue / 100)
-            BigDecimal percentage = coupon.getDiscountValue().divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
-            return subtotal.multiply(percentage).setScale(2, RoundingMode.HALF_UP);
-        } else {
-            // Fixed amount discount
-            BigDecimal fixedDiscount = coupon.getDiscountValue();
-
-            // Don't let discount exceed subtotal
-            if (fixedDiscount.compareTo(subtotal) > 0) {
-                return subtotal;
-            }
-
-            return fixedDiscount;
-        }
-    }
-
     /**
-     * Apply coupon to order
+     * Recalculate order totals after item changes.
      */
-    public void applyCoupon(Long orderId, Long couponId){
-        String selectOrderSql = """
-                SELECT SUM(oi.quantity * oi.price_at_purchase) as subtotal
-                FROM order_items oi
-                WHERE oi.order_id = ?
-                """;
-
-        String selectCouponSql = "SELECT * FROM coupons WHERE id = ?";
-
-        String updateOrderSql = "UPDATE orders SET coupon_id = ?, discount_amount = ?, final_total = ? WHERE id = ?";
-
-        String incrementUsageSql = "UPDATE coupons SET used_count = used_count + 1 WHERE id = ?";
-
-        try (Connection con = DBConfig.getDataSource().getConnection()) {
-
-            // Start transaction
-            con.setAutoCommit(false);
-
-            try {
-                // 1. Calculate order subtotal
-                BigDecimal subtotal = BigDecimal.ZERO;
-                try (PreparedStatement ps = con.prepareStatement(selectOrderSql)) {
-                    ps.setLong(1, orderId);
-                    ResultSet rs = ps.executeQuery();
-
-                    if (rs.next()) {
-                        subtotal = rs.getBigDecimal("subtotal");
-                        if (subtotal == null) {
-                            subtotal = BigDecimal.ZERO;
-                        }
-                    }
-                }
-
-                if (subtotal.compareTo(BigDecimal.ZERO) <= 0) {
-                    throw new IllegalStateException("Cannot apply coupon to empty order");
-                }
-
-                // 2. Get coupon details
-                Coupon coupon = null;
-                try (PreparedStatement ps = con.prepareStatement(selectCouponSql)) {
-                    ps.setLong(1, couponId);
-                    ResultSet rs = ps.executeQuery();
-
-                    if (rs.next()) {
-                        coupon = mapResultSetToCoupon(rs);
-                    } else {
-                        throw new IllegalArgumentException("Coupon not found");
-                    }
-                }
-
-                // 3. Calculate discount amount
-                BigDecimal discountAmount = calculateDiscountAmount(coupon, subtotal);
-
-                // 4. Calculate final total
-                BigDecimal finalTotal = subtotal.subtract(discountAmount);
-
-                // Ensure final total is not negative
-                if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
-                    finalTotal = BigDecimal.ZERO;
-                }
-
-                // 5. Update order with coupon, discount, and final total
-                try (PreparedStatement ps = con.prepareStatement(updateOrderSql)) {
-                    ps.setLong(1, couponId);
-                    ps.setBigDecimal(2, discountAmount);
-                    ps.setBigDecimal(3, finalTotal);
-                    ps.setLong(4, orderId);
-
-                    int affected = ps.executeUpdate();
-
-                    if (affected == 0) {
-                        throw new SQLException("Order not found with ID: " + orderId);
-                    }
-                }
-
-                // 6. Increment coupon usage count
-                try (PreparedStatement ps = con.prepareStatement(incrementUsageSql)) {
-                    ps.setLong(1, couponId);
-                    ps.executeUpdate();
-                }
-
-                // Commit transaction
-                con.commit();
-
-            } catch (SQLException sqlException){
-                throw new RuntimeException("Failed to apply coupon to order", sqlException);
-            }
-            catch (Exception e) {
-                throw e;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to apply coupon to order", e);
-        }
-    }
-
     public void refreshOrderFinalTotal(Long orderId) {
         String subtotalSql = "SELECT COALESCE(SUM(quantity * price_at_purchase), 0) AS subtotal FROM order_items WHERE order_id = ?";
-        String couponSql = """
-                SELECT c.id, c.discount_type, c.discount_value
-                FROM orders o
-                LEFT JOIN coupons c ON o.coupon_id = c.id
-                WHERE o.id = ?
-                """;
-        String updateSql = "UPDATE orders SET total_price = ?, discount_amount = ?, final_total = ? WHERE id = ?";
+        String updateSql = "UPDATE orders SET total_price = ?, final_total = ? WHERE id = ?";
 
         try (Connection con = DBConfig.getDataSource().getConnection()) {
             BigDecimal subtotal = BigDecimal.ZERO;
-            Coupon coupon = null;
 
             try (PreparedStatement ps = con.prepareStatement(subtotalSql)) {
                 ps.setLong(1, orderId);
@@ -574,37 +385,12 @@ public class OrderDAO {
                 }
             }
 
-            try (PreparedStatement ps = con.prepareStatement(couponSql)) {
-                ps.setLong(1, orderId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next() && rs.getObject("id") != null) {
-                        coupon = new Coupon();
-                        coupon.setId(rs.getLong("id"));
-                        coupon.setDiscountType(rs.getString("discount_type"));
-                        coupon.setDiscountValue(rs.getBigDecimal("discount_value"));
-                    }
-                }
-            }
-
-            BigDecimal discountAmount = BigDecimal.ZERO;
-            if (coupon != null) {
-                discountAmount = calculateDiscountAmount(coupon, subtotal);
-            }
-
-            BigDecimal finalTotal = subtotal.subtract(discountAmount);
-            if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
-                finalTotal = BigDecimal.ZERO;
-            }
-
             subtotal = subtotal.setScale(2, RoundingMode.HALF_UP);
-            discountAmount = discountAmount.setScale(2, RoundingMode.HALF_UP);
-            finalTotal = finalTotal.setScale(2, RoundingMode.HALF_UP);
 
             try (PreparedStatement ps = con.prepareStatement(updateSql)) {
                 ps.setBigDecimal(1, subtotal);
-                ps.setBigDecimal(2, discountAmount);
-                ps.setBigDecimal(3, finalTotal);
-                ps.setLong(4, orderId);
+                ps.setBigDecimal(2, subtotal);
+                ps.setLong(3, orderId);
 
                 int affected = ps.executeUpdate();
                 if (affected == 0) {
@@ -617,78 +403,6 @@ public class OrderDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to refresh order final total", e);
-        }
-    }
-
-    public void removeCoupon(Long orderId) {
-        String selectOrderSql = """
-                SELECT SUM(oi.quantity * oi.price_at_purchase) as subtotal, o.coupon_id
-                FROM order_items oi
-                JOIN orders o ON o.id = oi.order_id
-                WHERE oi.order_id = ?
-                GROUP BY o.coupon_id
-                """;
-
-        String updateOrderSql = "UPDATE orders SET coupon_id = NULL, discount_amount = 0, final_total = ? WHERE id = ?";
-
-        String decrementUsageSql = "UPDATE coupons SET used_count = used_count - 1 WHERE id = ? AND used_count > 0";
-
-        try (Connection con = DBConfig.getDataSource().getConnection()) {
-
-            // Start transaction
-            con.setAutoCommit(false);
-
-            try {
-                // 1. Get current order subtotal and coupon ID
-                BigDecimal subtotal = BigDecimal.ZERO;
-                Long couponId = null;
-
-                try (PreparedStatement ps = con.prepareStatement(selectOrderSql)) {
-                    ps.setLong(1, orderId);
-                    ResultSet rs = ps.executeQuery();
-
-                    if (rs.next()) {
-                        subtotal = rs.getBigDecimal("subtotal");
-                        if (subtotal == null) {
-                            subtotal = BigDecimal.ZERO;
-                        }
-                        couponId = rs.getObject("coupon_id") != null ? rs.getLong("coupon_id") : null;
-                    }
-                }
-
-                // 2. Update order - remove coupon and set final_total to subtotal
-                try (PreparedStatement ps = con.prepareStatement(updateOrderSql)) {
-                    ps.setBigDecimal(1, subtotal); // final_total = subtotal (no discount)
-                    ps.setLong(2, orderId);
-
-                    int affected = ps.executeUpdate();
-
-                    if (affected == 0) {
-                        throw new SQLException("Order not found with ID: " + orderId);
-                    }
-                }
-
-                // 3. Decrement coupon usage count if there was a coupon
-                if (couponId != null) {
-                    try (PreparedStatement ps = con.prepareStatement(decrementUsageSql)) {
-                        ps.setLong(1, couponId);
-                        ps.executeUpdate();
-                    }
-                }
-
-                // Commit transaction
-                con.commit();
-
-            } catch (Exception e) {
-                // Rollback on error
-                con.rollback();
-                throw e;
-            } finally {
-                con.setAutoCommit(true);
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to remove coupon from order", e);
         }
     }
 
@@ -711,6 +425,162 @@ public class OrderDAO {
             return affected > 0;
         } catch (SQLException e) {
             throw new RuntimeException("Failed to update order status", e);
+        }
+    }
+
+    public int countOrdersByRole(Long userId, String roleName, String status, String searchKeyword) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders o WHERE 1=1");
+
+        if ("Salesman".equalsIgnoreCase(roleName)) {
+            sql.append(" AND o.created_by = ?");
+        } else {
+            sql.append(" AND o.status <> 'DRAFT'");
+        }
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND o.status = ?");
+        }
+
+        if (searchKeyword != null && !searchKeyword.isEmpty()) {
+            sql.append(" AND (o.order_code LIKE ? OR o.customer_name LIKE ? OR o.customer_phone LIKE ?)");
+        }
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+
+            if ("Salesman".equalsIgnoreCase(roleName)) {
+                if (userId == null) {
+                    return 0;
+                }
+                ps.setLong(paramIndex++, userId);
+            }
+
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+
+            if (searchKeyword != null && !searchKeyword.isEmpty()) {
+                String keyword = "%" + searchKeyword.trim() + "%";
+                ps.setString(paramIndex++, keyword);
+                ps.setString(paramIndex++, keyword);
+                ps.setString(paramIndex++, keyword);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+
+            return 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to count orders by role", e);
+        }
+    }
+
+    public List<Order> searchOrdersByRole(Long userId, String roleName, String status, String searchKeyword,
+                                          String sortBy, String sortDir, int offset, int limit) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT o.*, u.fullname " +
+                        "FROM orders o " +
+                        "LEFT JOIN users u ON o.created_by = u.id " +
+                        "WHERE 1=1"
+        );
+
+        if ("Salesman".equalsIgnoreCase(roleName)) {
+            sql.append(" AND o.created_by = ?");
+        } else {
+            sql.append(" AND o.status <> 'DRAFT'");
+        }
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND o.status = ?");
+        }
+
+        if (searchKeyword != null && !searchKeyword.isEmpty()) {
+            sql.append(" AND (o.order_code LIKE ? OR o.customer_name LIKE ? OR o.customer_phone LIKE ?)");
+        }
+
+        String orderBy = "o.order_date";
+        if (sortBy != null && !sortBy.isEmpty()) {
+            switch (sortBy) {
+                case "orderCode":
+                    orderBy = "o.order_code";
+                    break;
+                case "customerName":
+                    orderBy = "o.customer_name";
+                    break;
+                case "status":
+                    orderBy = "o.status";
+                    break;
+                case "createdAt":
+                    orderBy = "o.order_date";
+                    break;
+                default:
+                    orderBy = "o.order_date";
+            }
+        }
+
+        String direction = "DESC";
+        if (sortDir != null && sortDir.equalsIgnoreCase("asc")) {
+            direction = "ASC";
+        }
+
+        sql.append(" ORDER BY ").append(orderBy).append(" ").append(direction).append(" LIMIT ? OFFSET ?");
+
+        List<Order> orders = new ArrayList<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+
+            if ("Salesman".equalsIgnoreCase(roleName)) {
+                if (userId == null) {
+                    return orders;
+                }
+                ps.setLong(paramIndex++, userId);
+            }
+
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+
+            if (searchKeyword != null && !searchKeyword.isEmpty()) {
+                String keyword = "%" + searchKeyword.trim() + "%";
+                ps.setString(paramIndex++, keyword);
+                ps.setString(paramIndex++, keyword);
+                ps.setString(paramIndex++, keyword);
+            }
+
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex++, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order();
+                    order.setId(rs.getLong("id"));
+                    order.setOrderCode(rs.getString("order_code"));
+                    order.setCustomerName(rs.getString("customer_name"));
+                    order.setCustomerPhone(rs.getString("customer_phone"));
+                    order.setStatus(rs.getString("status"));
+                    order.setNote(rs.getString("note"));
+                    order.setCreatedAt(rs.getTimestamp("order_date"));
+
+                    User creator = new User();
+                    creator.setId(rs.getLong("created_by"));
+                    creator.setFullName(rs.getString("fullname"));
+                    order.setCreatedBy(creator);
+
+                    orders.add(order);
+                }
+            }
+
+            return orders;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to search orders by role", e);
         }
     }
 
@@ -1026,15 +896,9 @@ public class OrderDAO {
                     o.processed_at,
                 
                     u.id AS created_user_id,
-                    u.fullname AS created_user_name,
-                
-                    c.id AS coupon_id,
-                    c.code AS coupon_code,
-                    c.discount_type,
-                    c.discount_value
+                    u.fullname AS created_user_name
                 FROM orders o
                 JOIN users u ON o.created_by = u.id
-                LEFT JOIN coupons c ON o.coupon_id = c.id
                 WHERE o.created_by = ? AND o.order_date BETWEEN ? AND ?
                 ORDER BY o.order_date DESC
                 """;
@@ -1069,15 +933,9 @@ public class OrderDAO {
                     o.processed_at,
                 
                     u.id AS created_user_id,
-                    u.fullname AS created_user_name,
-                
-                    c.id AS coupon_id,
-                    c.code AS coupon_code,
-                    c.discount_type,
-                    c.discount_value
+                    u.fullname AS created_user_name
                 FROM orders o
                 JOIN users u ON o.created_by = u.id
-                LEFT JOIN coupons c ON o.coupon_id = c.id
                 WHERE o.created_by = ? AND o.order_date >= ?
                 ORDER BY o.order_date DESC LIMIT ?
                 """;
@@ -1107,20 +965,14 @@ public class OrderDAO {
                     o.customer_phone,
                     o.note,
                     o.status,
+                    o.processed_at,
                     o.total_price as total,
                     o.order_date,
-                    o.processed_at,
                 
                     u.id AS created_user_id,
-                    u.fullname AS created_user_name,
-                
-                    c.id AS coupon_id,
-                    c.code AS coupon_code,
-                    c.discount_type,
-                    c.discount_value
+                    u.fullname AS created_user_name
                 FROM orders o
                 LEFT JOIN users u ON o.created_by = u.id
-                LEFT JOIN coupons c ON o.coupon_id = c.id
                 ORDER BY o.order_date DESC LIMIT ?
                 """;
         List<Order> orders = new ArrayList<>();

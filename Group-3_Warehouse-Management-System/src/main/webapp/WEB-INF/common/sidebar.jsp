@@ -129,21 +129,6 @@
                 </c:if>
 
 
-                <!-- Coupons -->
-                <c:if test="${sessionScope.user != null
-                              and sessionScope.user.role.name eq 'Manager'
-                              and sessionScope.user.role.active
-                              and fn:contains(sessionScope.userPermissions, 'READ_COUPON')}">
-
-                      <li>
-                          <a href="${pageContext.request.contextPath}/coupons">
-                              <span>Coupons</span>
-                          </a>
-                      </li>
-
-                </c:if>
-
-
                 <!-- Password Reset -->
                 <c:if test="${sessionScope.user != null
                               and sessionScope.user.role != null
@@ -212,7 +197,7 @@
                               and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
 
                       <li>
-                          <a href="${pageContext.request.contextPath}/inventory/import/history">
+                          <a href="${pageContext.request.contextPath}/inventory/import-history">
                               <span>Import History</span>
                           </a>
                       </li>
@@ -266,7 +251,8 @@
                 <c:if test="${sessionScope.user != null
                               and sessionScope.user.role != null
                               and sessionScope.user.role.active
-                              and fn:contains(sessionScope.userPermissions, 'READ_REPORT')}">
+                              and sessionScope.user.role.name eq 'Manager'
+                              and fn:contains(sessionScope.userPermissions, 'VIEW_REPORT')}">
 
                       <li>
                           <a href="${pageContext.request.contextPath}/summary_report">
@@ -274,6 +260,20 @@
                           </a>
                       </li>
 
+                </c:if>
+
+                <!-- Summary Report -->
+                <c:if test="${sessionScope.user != null
+                              and sessionScope.user.role != null
+                              and sessionScope.user.role.active
+                              and sessionScope.user.role.name eq 'Manager'
+                              and fn:contains(sessionScope.userPermissions, 'VIEW_REPORT')}">
+
+                    <li>
+                        <a href="${pageContext.request.contextPath}/report">
+                            <span>Report</span>
+                        </a>
+                    </li>
                 </c:if>
 
             </ul>

@@ -17,7 +17,6 @@ public class OrderService {
     private final OrderItemDAO orderItemDAO;
     private final ProductItemDAO productItemDAO;
     private final ProductDAO productDAO;
-    private final CouponDAO couponDAO;
     private final UserDAO userDAO;
     private final StockMovementDAO stockMovementDAO;
 
@@ -26,7 +25,6 @@ public class OrderService {
         orderItemDAO = new OrderItemDAO();
         productItemDAO = new ProductItemDAO();
         productDAO = new ProductDAO();
-        couponDAO = new CouponDAO();
         userDAO = new UserDAO();
         stockMovementDAO = new StockMovementDAO();
     }
@@ -84,11 +82,6 @@ public class OrderService {
             userDAO.findUserById(order.getCreatedBy().getId());
         }
 
-        // Load coupon if applied
-        if (order.getCoupon() != null) {
-            couponDAO.findById(order.getCoupon().getId());
-        }
-
         return order;
     }
 
@@ -96,13 +89,6 @@ public class OrderService {
     public void loadCreator(Order order) {
         if (order.getCreatedBy() != null) {
             userDAO.findUserById(order.getCreatedBy().getId());
-        }
-    }
-
-    // Load coupon info for a single order (when needed)
-    public void loadCoupon(Order order) {
-        if (order.getCoupon() != null) {
-            couponDAO.findById(order.getCoupon().getId());
         }
     }
 
@@ -263,7 +249,6 @@ public class OrderService {
 
         // Update status and note
         orderDAO.updateStatus(orderId, "CANCELLED", userId, note);
-        couponDAO.decrementUsageCount(orderId);
 
         if (note != null && !note.trim().isEmpty()) {
             orderDAO.updateNote(orderId, "CANCELLED: " + note);
@@ -364,98 +349,9 @@ public class OrderService {
         return calculateOrderTotal(orderId);
     }
 
-    public BigDecimal calculateDiscountAmount(Long orderId) {
-        Order order = orderDAO.findById(orderId);
-        if (order == null || order.getCoupon() == null) {
-            return BigDecimal.ZERO;
-        }
-
-        BigDecimal subtotal = calculateOrderTotal(orderId);
-        return calculateDiscount(order.getCoupon(), subtotal);
-    }
-
     public BigDecimal calculateFinalTotal(Long orderId) {
         BigDecimal subtotal = calculateOrderTotal(orderId);
-        BigDecimal discount = calculateDiscountAmount(orderId);
-
-        return subtotal.subtract(discount).setScale(2, RoundingMode.HALF_UP);
-    }
-
-    public BigDecimal calculateDiscount(Coupon coupon, BigDecimal orderTotal) {
-        if ("PERCENTAGE".equals(coupon.getDiscountType())) {
-            BigDecimal percentage = coupon.getDiscountValue()
-                    .divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
-            return orderTotal.multiply(percentage).setScale(2, RoundingMode.HALF_UP);
-        } else {
-            BigDecimal discount = coupon.getDiscountValue();
-            return discount.min(orderTotal);
-        }
-    }
-
-    public void applyCouponToOrder(Long orderId, Long couponId, Long userId) {
-        Order order = orderDAO.findById(orderId);
-        if (order == null) {
-            throw new IllegalArgumentException("Order not found");
-        }
-
-        if (!"DRAFT".equals(order.getStatus())) {
-            throw new IllegalStateException("Can only apply coupons to draft orders");
-        }
-
-        Coupon coupon = couponDAO.findById(couponId);
-        if (coupon == null) {
-            throw new IllegalArgumentException("Coupon not found");
-        }
-
-        if (!coupon.isValid()) {
-            throw new IllegalStateException("Coupon is no longer valid");
-        }
-
-        // Check if customer has already used this coupon (per-customer restriction)
-        if (couponDAO.hasCustomerUsedCoupon(order.getCustomerName(), couponId)) {
-            throw new IllegalStateException("This customer has already used this coupon");
-        }
-
-        BigDecimal orderTotal = calculateOrderTotal(orderId);
-
-        if (coupon.getMinOrderAmount() != null &&
-                orderTotal.compareTo(coupon.getMinOrderAmount()) < 0) {
-            throw new IllegalArgumentException(
-                    String.format("Order total must be at least %s VND to use this coupon",
-                            coupon.getMinOrderAmount().toPlainString())
-            );
-        }
-
-        // Check if order already has a coupon and remove its usage tracking
-        if (order.getCoupon() != null) {
-            couponDAO.removeCustomerCouponUsage(order.getCustomerName(), order.getCoupon().getId());
-            couponDAO.decrementUsageCount(order.getCoupon().getId());
-        }
-
-        // Apply new coupon
-        orderDAO.applyCoupon(orderId, couponId);
-        
-        // Record that this customer has used this coupon
-        couponDAO.recordCustomerCouponUsage(order.getCustomerName(), couponId);
-    }
-
-    public void removeCouponFromOrder(Long orderId, Long userId) {
-        Order order = orderDAO.findById(orderId);
-        if (order == null) {
-            throw new IllegalArgumentException("Order not found");
-        }
-
-        if (!"DRAFT".equals(order.getStatus())) {
-            throw new IllegalStateException("Can only remove coupons from draft orders");
-        }
-
-        // Only remove if order has a coupon
-        if (order.getCoupon() != null) {
-            // Remove customer usage tracking
-            couponDAO.removeCustomerCouponUsage(order.getCustomerName(), order.getCoupon().getId());
-        }
-
-        orderDAO.removeCoupon(orderId);
+        return subtotal.setScale(2, RoundingMode.HALF_UP);
     }
 
     public void submitOrder(Long orderId, Long userId) {
@@ -478,10 +374,6 @@ public class OrderService {
             throw new IllegalStateException("Cannot submit empty order");
         }
 
-        if (order.getCoupon() != null && order.getCoupon().getId() != null) {
-            couponDAO.incrementUsageCount(order.getCoupon().getId());
-        }
-
         orderDAO.updateStatus(orderId, "SUBMITTED", userId, null);
     }
 
@@ -495,6 +387,15 @@ public class OrderService {
 
     public boolean updateStatusOrder(OrderDTO orderDTO) {
         return orderDAO.updateStatus(orderDTO.getCode(), orderDTO.getStatus());
+    }
+
+    public int countOrdersByRole(Long userId, String roleName, String status, String searchKeyword) {
+        return orderDAO.countOrdersByRole(userId, roleName, status, searchKeyword);
+    }
+
+    public List<Order> searchOrdersByRole(Long userId, String roleName, String status, String searchKeyword,
+                                          String sortBy, String sortDir, int offset, int pageSize) {
+        return orderDAO.searchOrdersByRole(userId, roleName, status, searchKeyword, sortBy, sortDir, offset, pageSize);
     }
 
     public int countOrders(String status, String searchCode) {
