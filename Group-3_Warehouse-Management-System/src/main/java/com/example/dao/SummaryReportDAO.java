@@ -9,76 +9,100 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SummaryReportDAO {
 
     /**
-     * Get summary report filtered by optional date range.
-     * If fromDate/toDate are null, returns all-time totals.
+     * Get summary report filtered by optional date range. If fromDate/toDate
+     * are null, returns all-time totals.
      */
-    public SummaryReportDTO getSummaryReport(LocalDate fromDate, LocalDate toDate) {
-        SummaryReportDTO dto = new SummaryReportDTO();
+    public List<SummaryReportDTO> getInventoryReport(LocalDate fromDate, LocalDate toDate) {
 
-        try (Connection conn = DBConfig.getDataSource().getConnection()) {
+        List<SummaryReportDTO> list = new ArrayList<>();
 
-            // 1. Total imports (sum of actual quantity from goods_receipts)
-            StringBuilder importSql = new StringBuilder(
-                "SELECT COALESCE(SUM(quantity),0) AS total\n" +
-                        "FROM stock_movements\n" +
-                        "WHERE type = 'IMPORT'"
-            );
-            if (fromDate != null) importSql.append(" AND DATE(created_at) >= ?");
-            if (toDate != null)   importSql.append(" AND DATE(created_at) <= ?");
+        // ✅ set default dates nếu null
+        LocalDate from = (fromDate != null) ? fromDate : LocalDate.of(2000, 1, 1);
+        LocalDate to = (toDate != null) ? toDate : LocalDate.now();
 
-            try (PreparedStatement ps = conn.prepareStatement(importSql.toString())) {
-                int idx = 1;
-                if (fromDate != null) ps.setDate(idx++, Date.valueOf(fromDate));
-                if (toDate != null)   ps.setDate(idx, Date.valueOf(toDate));
-                ResultSet rs = ps.executeQuery();
-                if (rs.next()) {
-                    dto.setTotalImport(rs.getLong("total"));
-                }
-            }
+        String sql = """
+        SELECT 
+            p.name AS product_name,
 
-            // 2. Total exports (count of orders excluding DRAFT)
-            StringBuilder exportSql = new StringBuilder(
-                "SELECT COALESCE(SUM(quantity),0) AS total\n" +
-                        "FROM stock_movements\n" +
-                        "WHERE type = 'EXPORT'"
-            );
-            if (fromDate != null) exportSql.append(" AND DATE(created_at) >= ?");
-            if (toDate != null)   exportSql.append(" AND DATE(created_at) <= ?");
+            -- tồn đầu
+            COALESCE(SUM(
+                CASE 
+                    WHEN sm.created_at < ? THEN
+                        CASE 
+                            WHEN sm.type = 'IMPORT' THEN sm.quantity
+                            WHEN sm.type = 'EXPORT' THEN -sm.quantity
+                        END
+                END
+            ),0) AS opening_stock,
 
-            try (PreparedStatement ps = conn.prepareStatement(exportSql.toString())) {
-                int idx = 1;
-                if (fromDate != null) ps.setDate(idx++, Date.valueOf(fromDate));
-                if (toDate != null)   ps.setDate(idx, Date.valueOf(toDate));
-                ResultSet rs = ps.executeQuery();
-                if (rs.next()) {
-                    dto.setTotalExport(rs.getLong("total"));
-                }
-            }
+            -- nhập
+            COALESCE(SUM(
+                CASE 
+                    WHEN sm.type = 'IMPORT'
+                    AND sm.created_at BETWEEN ? AND ? THEN sm.quantity
+                END
+            ),0) AS total_import,
 
-            // 3. Current inventory (sum of total_quantity from active products)
-            // Inventory is always current snapshot, not filtered by date
-            String inventorySql = "SELECT COALESCE(SUM(\n" +
-                    "    CASE \n" +
-                    "        WHEN type = 'IMPORT' THEN quantity\n" +
-                    "        WHEN type = 'EXPORT' THEN -quantity\n" +
-                    "    END\n" +
-                    "),0) AS total\n" +
-                    "FROM stock_movements";
-            try (PreparedStatement ps = conn.prepareStatement(inventorySql);
-                 ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    dto.setTotalInStock(rs.getLong("total"));
-                }
+            -- xuất
+            COALESCE(SUM(
+                CASE 
+                    WHEN sm.type = 'EXPORT'
+                    AND sm.created_at BETWEEN ? AND ? THEN sm.quantity
+                END
+            ),0) AS total_export,
+
+            -- tồn cuối
+            COALESCE(SUM(
+                CASE 
+                    WHEN sm.created_at <= ? THEN
+                        CASE 
+                            WHEN sm.type = 'IMPORT' THEN sm.quantity
+                            WHEN sm.type = 'EXPORT' THEN -sm.quantity
+                        END
+                END
+            ),0) AS closing_stock
+
+        FROM products p
+        LEFT JOIN stock_movements sm 
+            ON p.id = sm.product_id
+            AND sm.type IN ('IMPORT','EXPORT')
+
+        GROUP BY p.id, p.name
+        """;
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            // ✅ set param với from/to đã đảm bảo không null
+            ps.setDate(1, Date.valueOf(from)); // opening stock
+            ps.setDate(2, Date.valueOf(from)); // total_import start
+            ps.setDate(3, Date.valueOf(to));   // total_import end
+            ps.setDate(4, Date.valueOf(from)); // total_export start
+            ps.setDate(5, Date.valueOf(to));   // total_export end
+            ps.setDate(6, Date.valueOf(to));   // closing stock
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                SummaryReportDTO dto = new SummaryReportDTO();
+                dto.setProductName(rs.getString("product_name"));
+                dto.setOpeningStock(rs.getLong("opening_stock"));
+                dto.setTotalImport(rs.getLong("total_import"));
+                dto.setTotalExport(rs.getLong("total_export"));
+                dto.setClosingStock(rs.getLong("closing_stock"));
+
+                list.add(dto);
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to get summary report", e);
+            throw new RuntimeException("Error getting inventory report", e);
         }
 
-        return dto;
+        return list;
     }
 }

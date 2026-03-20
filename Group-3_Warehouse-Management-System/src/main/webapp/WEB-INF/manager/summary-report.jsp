@@ -1,219 +1,146 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-  <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-    <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-      <!DOCTYPE html>
-      <html>
+<%@ page import="com.example.dto.SummaryReportDTO, java.util.List" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-      <head>
+
+<!DOCTYPE html>
+<html>
+    <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Summary Report - Warehouse Management</title>
+        <title>Inventory Report</title>
+
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
         <style>
-          .filter-card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 20px 24px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-            border: 1px solid #f0f0f0;
-            margin-bottom: 24px;
-          }
+            .stat-card {
+                background: #fff;
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+                margin-bottom: 20px;
+            }
 
-          .filter-card .form-group {
-            margin-bottom: 0;
-          }
+            .stat-title {
+                font-size: 14px;
+                color: #777;
+            }
+            .stat-value {
+                font-size: 28px;
+                font-weight: bold;
+            }
 
-          .filter-card label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #555;
-            margin-bottom: 4px;
-          }
-
-          .filter-card input[type="date"] {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 14px;
-          }
-
-          .filter-card .btn-filter {
-            background: #3b82f6;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 24px;
-            font-weight: 600;
-            font-size: 14px;
-            transition: background 0.2s;
-          }
-
-          .filter-card .btn-filter:hover {
-            background: #2563eb;
-          }
-
-          .filter-card .btn-reset {
-            background: #f1f5f9;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 8px 20px;
-            font-weight: 600;
-            font-size: 14px;
-            transition: background 0.2s;
-          }
-
-          .filter-card .btn-reset:hover {
-            background: #e2e8f0;
-          }
-
-          .stat-card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 28px 24px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid #f0f0f0;
-          }
-
-          .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
-          }
-
-          .stat-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            margin-bottom: 16px;
-          }
-
-          .stat-icon.import-icon {
-            background: #e8f5e9;
-            color: #2e7d32;
-          }
-
-          .stat-icon.export-icon {
-            background: #fff3e0;
-            color: #e65100;
-          }
-
-          .stat-icon.stock-icon {
-            background: #e3f2fd;
-            color: #1565c0;
-          }
-
-          .stat-label {
-            font-size: 14px;
-            color: #888;
-            font-weight: 500;
-            margin-bottom: 8px;
-          }
-
-          .stat-value {
-            font-size: 36px;
-            font-weight: 700;
-            color: #1a1a2e;
-            line-height: 1;
-          }
+            .table thead {
+                background: #f5f5f5;
+            }
+            .total-row {
+                font-weight: bold;
+                background: #e9ecef;
+            }
         </style>
-      </head>
+    </head>
 
-      <body>
-        <jsp:include page="/WEB-INF/common/sidebar.jsp" />
-        <main class="main-content">
+    <body>
+        <div class="container mt-4">
 
-          <div class="container">
-            <%-- Page Header --%>
-              <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="font-weight-bold text-dark">
-                  <i class="fas fa-chart-bar mr-2"></i>Summary Report
-                </h2>
-              </div>
+            <h2 class="mb-4">📊 Inventory Report</h2>
 
-              <%-- Date Filter --%>
-                <div class="filter-card">
-                  <form method="get" action="${pageContext.request.contextPath}/summary_report">
-                    <div class="row align-items-end">
-                      <div class="col-md-4">
-                        <div class="form-group">
-                          <label for="fromDate"><i class="fas fa-calendar-alt mr-1"></i>From Date</label>
-                          <input type="date" class="form-control" id="fromDate" name="fromDate" value="${fromDate}">
-                        </div>
-                      </div>
-                      <div class="col-md-4">
-                        <div class="form-group">
-                          <label for="toDate"><i class="fas fa-calendar-alt mr-1"></i>To Date</label>
-                          <input type="date" class="form-control" id="toDate" name="toDate" value="${toDate}">
-                        </div>
-                      </div>
-                      <div class="col-md-4">
-                        <div class="d-flex" style="gap: 8px;">
-                          <button type="submit" class="btn btn-filter">
-                            <i class="fas fa-search mr-1"></i>Filter
-                          </button>
-                          <a href="${pageContext.request.contextPath}/summary_report" class="btn btn-reset">
-                            <i class="fas fa-redo mr-1"></i>Reset
-                          </a>
-                        </div>
-                      </div>
+            <!-- 🔥 FILTER THEO THÁNG -->
+            <form method="get" action="${pageContext.request.contextPath}/summary_report" class="mb-4">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label>Month</label>
+                        <input type="month" name="month" value="${month}" class="form-control">
                     </div>
-                  </form>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-primary mr-2">Filter</button>
+                        <a href="${pageContext.request.contextPath}/summary_report" class="btn btn-secondary">Reset</a>
+                    </div>
                 </div>
+            </form>
 
-                <%-- Stat Cards Row --%>
-                  <div class="row">
-                    <%-- Import Card --%>
-                      <a class="col-md-4 mb-3" href="${pageContext.request.contextPath}/inventory/import-history">
+            <!-- 🔥 STAT CARDS TỔNG HỢP -->
+            <c:if test="${not empty reportList}">
+                <%
+                    long totalImport = 0;
+                    long totalExport = 0;
+                    long totalClosing = 0;
+                    for (SummaryReportDTO r : (java.util.List<SummaryReportDTO>)request.getAttribute("reportList")) {
+                        totalImport += r.getTotalImport();
+                        totalExport += r.getTotalExport();
+                        totalClosing += r.getClosingStock();
+                    }
+                %>
 
-
-                          <div class="stat-card">
-                            <div class="stat-icon import-icon">
-                              <i class="fas fa-arrow-circle-down"></i>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="stat-card text-center">
+                            <div class="stat-title">Total Import</div>
+                            <div class="stat-value text-success">
+                                <fmt:formatNumber value="<%=totalImport%>" pattern="#,##0"/>
                             </div>
-                            <div class="stat-label">Total Imports</div>
-                            <div class="stat-value">
-                            <fmt:formatNumber value="${report.totalImport}" pattern="#,##0" />
-                            </div>
-                          </div>
-
-                      </a>
-                      <%-- Export Card --%>
-                        <div class="col-md-4 mb-3">
-                          <div class="stat-card">
-                            <div class="stat-icon export-icon">
-                              <i class="fas fa-arrow-circle-up"></i>
-                            </div>
-                            <div class="stat-label">Total Exports</div>
-                            <div class="stat-value">
-                              <fmt:formatNumber value="${report.totalExport}" pattern="#,##0" />
-                            </div>
-                          </div>
                         </div>
+                    </div>
 
-                        <%-- In Stock Card --%>
-                      <a class="col-md-4 mb-3" href="${pageContext.request.contextPath}/stock-history">
-
-                            <div class="stat-card">
-                              <div class="stat-icon stock-icon">
-                                <i class="fas fa-warehouse"></i>
-                              </div>
-                              <div class="stat-label">Current In Stock</div>
-                              <div class="stat-value">
-                                <fmt:formatNumber value="${report.totalInStock}" pattern="#,##0" />
-                              </div>
+                    <div class="col-md-4">
+                        <div class="stat-card text-center">
+                            <div class="stat-title">Total Export</div>
+                            <div class="stat-value text-danger">
+                                <fmt:formatNumber value="<%=totalExport%>" pattern="#,##0"/>
                             </div>
-                      </a>
-                  </div>
-          </div>
+                        </div>
+                    </div>
 
-          <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
-        </main>
-      </body>
+                    <div class="col-md-4">
+                        <div class="stat-card text-center">
+                            <div class="stat-title">Current Stock</div>
+                            <div class="stat-value text-primary">
+                                <fmt:formatNumber value="<%=totalClosing%>" pattern="#,##0"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </c:if>
 
-      </html>
+            <!-- 🔥 TABLE -->
+            <c:if test="${not empty reportList}">
+                <div class="card mt-4">
+                    <div class="card-header"><b>Inventory Detail</b></div>
+                    <div class="card-body p-0">
+                        <table class="table table-bordered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Opening</th>
+                                    <th>Import</th>
+                                    <th>Export</th>
+                                    <th>Closing</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="r" items="${reportList}">
+                                    <tr>
+                                        <td>${r.productName}</td>
+                                        <td><fmt:formatNumber value="${r.openingStock}" pattern="#,##0"/></td>
+                                        <td><fmt:formatNumber value="${r.totalImport}" pattern="#,##0"/></td>
+                                        <td><fmt:formatNumber value="${r.totalExport}" pattern="#,##0"/></td>
+                                        <td><fmt:formatNumber value="${r.closingStock}" pattern="#,##0"/></td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </c:if>
+
+            <!-- 🔥 ERROR -->
+            <c:if test="${not empty error}">
+                <div class="alert alert-danger mt-3">
+                    ${error}
+                </div>
+            </c:if>
+
+        </div>
+    </body>
+</html>

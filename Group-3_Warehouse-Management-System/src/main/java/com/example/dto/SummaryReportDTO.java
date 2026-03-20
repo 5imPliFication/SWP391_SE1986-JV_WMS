@@ -8,7 +8,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SummaryReportDTO {
+
+    private String productName;
+    private long openingStock;
     private long totalImport;
     private long totalExport;
-    private long totalInStock;
+    private long closingStock;
 }
