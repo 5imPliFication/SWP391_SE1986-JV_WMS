@@ -138,10 +138,9 @@ public class ProductService {
         return productDAO.findItemById(productItemId);
     }
 
-    public boolean updateProductItem(long productItemId, double currentPrice, Boolean isActive) {
+    public boolean updateProductItem(long productItemId, Boolean isActive) {
         ProductItem productItem = new ProductItem();
         productItem.setId(productItemId);
-        productItem.setCurrentPrice(currentPrice);
         productItem.setIsActive(isActive);
 
         return productDAO.updateItem(productItem);
@@ -180,5 +179,9 @@ public class ProductService {
     // Get low stock products
     public List<Product> getLowStockProducts(int threshold) {
         return productDAO.findLowStock(threshold);
+    }
+
+    public boolean updateCurrentPriceByProductId(long productId, double newPrice) {
+        return productDAO.updateCurrentPriceByProductId(productId, newPrice);
     }
 }

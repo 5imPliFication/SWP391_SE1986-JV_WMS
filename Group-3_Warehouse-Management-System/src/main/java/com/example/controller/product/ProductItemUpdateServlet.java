@@ -45,7 +45,7 @@ public class ProductItemUpdateServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         long productItemId = Long.parseLong(request.getParameter("productItemId"));
-        double productItemCurrentPrice = Double.parseDouble(request.getParameter("productItemCurrentPrice"));
+//        double productItemCurrentPrice = Double.parseDouble(request.getParameter("productItemCurrentPrice"));
         boolean productItemIsActive = Boolean.parseBoolean(request.getParameter("productItemIsActive"));
 
         HttpSession session = request.getSession();
@@ -55,7 +55,7 @@ public class ProductItemUpdateServlet extends HttpServlet {
         String searchSerial = request.getParameter("searchSerial");
         String isActive = request.getParameter("isActive");
 
-        if (productService.updateProductItem(productItemId, productItemCurrentPrice, productItemIsActive)) {
+        if (productService.updateProductItem(productItemId, productItemIsActive)) {
             activityLogService.log(user, "Update product item");
             request.getSession().setAttribute("successMessage", "Product item updated successfully");
         } else {

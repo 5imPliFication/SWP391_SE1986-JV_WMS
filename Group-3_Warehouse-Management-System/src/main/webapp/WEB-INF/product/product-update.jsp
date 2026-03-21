@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -58,7 +59,7 @@
                                    id="imageInput"
                                    class="form-control"
                                    accept="image/*"
-                                   required>
+                            >
                             <%--Image preview--%>
                             <img id="preview" src="${product.imgUrl}"
                                  style="margin-top:10px; width:120px; display:block; border-radius:6px;">
@@ -175,6 +176,18 @@
                                     </option>
                                 </c:forEach>
                             </select>
+                        </div>
+
+                        <!-- Current Price -->
+                        <div class="mb-3">
+                            <label class="form-label">Selling Price</label>
+                            <%--format to avoid 1.5E8 (150,000,000) when display in input field--%>
+                            <fmt:formatNumber value="${product.currentPrice}" groupingUsed="false" var="priceRaw"/>
+                            <input type="number"
+                                   name="productCurrentPrice"
+                                   class="form-control"
+                                   value="${priceRaw}"
+                                   required>
                         </div>
 
                         <%--Status--%>

@@ -28,6 +28,9 @@ public class Product {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    // Not exist in database, just for display
+    private Double currentPrice;
+
     private List<ProductItem> productItems;
 
     public Product(Long id, String name, String description) {

@@ -78,7 +78,7 @@
         <tr>
             <th>Serial Number</th>
             <th>Imported Price</th>
-            <th>Current Price</th>
+            <th>Selling Price</th>
             <th>Imported At</th>
             <th>Updated At</th>
             <th>Status</th>

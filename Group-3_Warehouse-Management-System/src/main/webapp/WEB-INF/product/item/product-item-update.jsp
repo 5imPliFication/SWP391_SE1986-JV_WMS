@@ -55,12 +55,12 @@
                                 <!-- Current Price -->
                                 <div class="mb-3">
                                     <label class="form-label">Current Price</label>
-                                    <input type="number"
+                                    <input type="text"
                                            name="productItemCurrentPrice"
                                            class="form-control"
                                            value="<fmt:formatNumber value='${productItem.currentPrice}' type='number' groupingUsed='true' /> đ"
-                                           placeholder="Input current price"
-                                           required>
+                                           style="background-color: #adb5bd;"
+                                           readonly>
                                 </div>
 
                                 <%--Status--%>
