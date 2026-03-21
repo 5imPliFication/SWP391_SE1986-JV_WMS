@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -158,6 +159,7 @@
             <th>Ram</th>
             <th>Storage</th>
             <th>Screen</th>
+            <th>Selling Price</th>
             <th>Total Quantity</th>
             <th>Unit</th>
             <th>Status</th>
@@ -190,6 +192,7 @@
                 <td>${p.ram.size}</td>
                 <td>${p.storage.size}</td>
                 <td>${p.size.size}</td>
+                <td><fmt:formatNumber value="${p.currentPrice}" type="number" groupingUsed="true"/> đ</td>
                 <td>${p.totalQuantity}</td>
                 <td>${p.unit.name}</td>
                 <td>

@@ -93,11 +93,12 @@ public class ProductUpdateServlet extends HttpServlet {
         long sizeId = Long.parseLong(request.getParameter("sizeId"));
         long unitId = Long.parseLong(request.getParameter("unitId"));
         boolean productIsActive = Boolean.parseBoolean(request.getParameter("productIsActive"));
+        double currentPrice = Double.parseDouble(request.getParameter("productCurrentPrice"));
 
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
-        if (productService.updateProduct(productDescription, imgUrl, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId, unitId, productIsActive, productId)) {
+        if (productService.updateProduct(productDescription, imgUrl, brandId, categoryId, modelId, chipId, ramId, storageId, sizeId, unitId, productIsActive, productId) && productService.updateCurrentPriceByProductId(productId, currentPrice)) {
             activityLogService.log(user, "Update product");
             request.getSession().setAttribute("successMessage", "Product updated successfully");
         } else {
