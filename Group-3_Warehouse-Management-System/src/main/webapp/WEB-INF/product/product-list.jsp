@@ -190,7 +190,7 @@
                 <td>${p.ram.size}</td>
                 <td>${p.storage.size}</td>
                 <td>${p.size.size}</td>
-                <td>${p.totalQuantity} item</td>
+                <td>${p.totalQuantity}</td>
                 <td>${p.unit.name}</td>
                 <td>
                     <jsp:include page="/WEB-INF/common/statusBadge.jsp">
