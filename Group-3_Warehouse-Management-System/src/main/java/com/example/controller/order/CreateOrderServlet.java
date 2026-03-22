@@ -38,8 +38,9 @@ public class CreateOrderServlet extends HttpServlet {
             return;
         }
 
-        // Forward to the create order JSP page
-        req.getRequestDispatcher("/WEB-INF/salesman/create-order.jsp").forward(req, resp);
+        int orderId = orderService.createDraftOrder("Sample name", "", "", user.getId());
+        activityLogService.log(user, "Create order");
+        resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId);
     }
 
     @Override
@@ -47,6 +48,11 @@ public class CreateOrderServlet extends HttpServlet {
             throws IOException {
 
         User user = (User) req.getSession().getAttribute("user");
+
+        if (user == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
 
         if (!"Salesman".equals(user.getRole().getName())) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -56,7 +62,11 @@ public class CreateOrderServlet extends HttpServlet {
         String customerName = req.getParameter("customerName");
         String customerPhone = req.getParameter("customerPhone");
         String note = req.getParameter("note");
-        System.out.println(customerName + " || " + customerPhone + " || " + note);
+
+        if (customerName == null || customerName.trim().isEmpty()) {
+            customerName = "Walk-in Customer";
+        }
+
         int orderId = orderService.createDraftOrder(customerName, customerPhone, note, user.getId());
         activityLogService.log(user, "Create order");
 

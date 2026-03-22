@@ -162,7 +162,8 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <p class="text-muted mb-1">Customer</p>
-                    <h5 class="font-weight-bold">${order.customerName}</h5>
+                    <h5 class="font-weight-bold">${not empty order.customerName ? order.customerName : 'Not set yet'}</h5>
+                    <p class="mb-0 text-muted">${not empty order.customerPhone ? order.customerPhone : 'No phone number'}</p>
                 </div>
                 <div class="col-md-4 mb-3">
                     <p class="text-muted mb-1">Status</p>
@@ -199,19 +200,68 @@
                 </div>
             </div>
 
-            <div class="mt-2">
-                <p class="text-muted mb-2">Order Description</p>
-                <div class="order-description-block">
-                    <c:choose>
-                        <c:when test="${not empty order.note}">
-                            ${order.note}
-                        </c:when>
-                        <c:otherwise>
-                            No description provided.
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </div>
+            <c:choose>
+                <c:when test="${order.status == 'DRAFT'}">
+                    <div class="mt-2 border rounded p-3 bg-light">
+                        <h6 class="mb-3"><i class="fas fa-user-edit mr-2"></i>Customer And Note</h6>
+                        <form action="${pageContext.request.contextPath}/salesman/order/customer/update" method="post">
+                            <input type="hidden" name="orderId" value="${order.id}"/>
+                            <input type="hidden" name="itemPage" value="${itemPage}"/>
+                            <input type="hidden" name="productPage" value="${productPage}"/>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="customerName" class="font-weight-bold">Customer Name</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="customerName"
+                                           name="customerName"
+                                           value="${order.customerName}"
+                                           placeholder="Enter customer full name"
+                                           required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="customerPhone" class="font-weight-bold">Customer Phone</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="customerPhone"
+                                           name="customerPhone"
+                                           value="${order.customerPhone}"
+                                           placeholder="Enter customer phone number">
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="note" class="font-weight-bold">Order Description</label>
+                                <textarea class="form-control"
+                                          id="note"
+                                          name="note"
+                                          rows="3"
+                                          placeholder="Enter order note">${order.note}</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="fas fa-save mr-1"></i>Save Order Information
+                            </button>
+                        </form>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div class="mt-2">
+                        <p class="text-muted mb-2">Order Description</p>
+                        <div class="order-description-block">
+                            <c:choose>
+                                <c:when test="${not empty order.note}">
+                                    ${order.note}
+                                </c:when>
+                                <c:otherwise>
+                                    No description provided.
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
+                </c:otherwise>
+            </c:choose>
         </div>
     </div>
 
@@ -255,10 +305,10 @@
                             </td>
                             <td class="px-4 align-middle">
                                 ${currency:format(i.priceAtPurchase)} VND
-                                <c:if test="${i.priceAtPurchase != i.productItem.currentPrice}">
+                                <c:if test="${i.priceAtPurchase != i.productItem.importedPrice}">
                                     <br><small class="text-warning">
                                     <i class="fas fa-exclamation-triangle"></i>
-                                    Current: ${currency:format(i.productItem.currentPrice)} VND
+                                    Imported: ${currency:format(i.productItem.importedPrice)} VND
                                 </small>
                                 </c:if>
                             </td>

@@ -118,6 +118,28 @@ public class OrderDAO {
         }
     }
 
+    public boolean updateDraftCustomerInfo(Long orderId, Long salesmanId, String customerName, String customerPhone, String note) {
+        String sql = """
+                    UPDATE orders
+                    SET customer_name = ?, customer_phone = ?, note = ?
+                    WHERE id = ? AND created_by = ? AND status = 'DRAFT'
+                """;
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, customerName);
+            ps.setString(2, customerPhone);
+            ps.setString(3, note);
+            ps.setLong(4, orderId);
+            ps.setLong(5, salesmanId);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update draft order customer info", e);
+        }
+    }
+
 
     public Order findById(Long orderId) {
         String sql = """

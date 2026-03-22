@@ -48,6 +48,21 @@ public class OrderService {
         return orderDAO.create(order);
     }
 
+    public void updateDraftCustomerInfo(Long orderId, Long salesmanId, String customerName, String customerPhone, String note) {
+        String normalizedName = customerName == null ? "" : customerName.trim();
+        String normalizedPhone = customerPhone == null ? "" : customerPhone.trim();
+        String normalizedNote = note == null ? "" : note.trim();
+
+        if (normalizedName.isEmpty()) {
+            throw new IllegalArgumentException("Customer name is required");
+        }
+
+        boolean updated = orderDAO.updateDraftCustomerInfo(orderId, salesmanId, normalizedName, normalizedPhone, normalizedNote);
+        if (!updated) {
+            throw new IllegalStateException("Order is not editable or does not belong to you");
+        }
+    }
+
     public void removeItem(Long orderId, Long orderItemId) {
         Order order = orderDAO.findById(orderId);
         if (order == null)

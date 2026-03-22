@@ -219,11 +219,10 @@
                                     </td>
                                     <td class="px-4 align-middle text-right">
                                         ${currency:format(item.priceAtPurchase)} VND
-                                            <%-- Current price from ProductItem.currentPrice --%>
-                                        <c:if test="${item.priceAtPurchase != item.productItem.currentPrice}">
+                                        <c:if test="${item.priceAtPurchase != item.productItem.importedPrice}">
                                             <br><small class="text-warning">
-                                            <i class="fas fa-info-circle"></i> Current:
-                                            ${currency:format(item.productItem.currentPrice)} VND
+                                            <i class="fas fa-info-circle"></i> Imported:
+                                            ${currency:format(item.productItem.importedPrice)} VND
                                         </small>
                                         </c:if>
                                     </td>

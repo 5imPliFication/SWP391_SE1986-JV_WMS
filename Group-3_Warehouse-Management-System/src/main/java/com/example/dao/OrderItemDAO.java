@@ -20,7 +20,7 @@ import java.util.Map;
 public class OrderItemDAO {
 
     public void addItem(OrderItem item) {
-        String selectAvailableItemsSql = "SELECT id, current_price, serial FROM product_items " +
+        String selectAvailableItemsSql = "SELECT id, imported_price, serial FROM product_items " +
                 "WHERE product_id = ? AND is_active = 1 ORDER BY id LIMIT ?";
         String insertOrderItemSql = "INSERT INTO order_items (order_id, quantity, price_at_purchase) VALUES (?, ?, ?)";
         String insertLinkSql = "INSERT INTO order_item_product_items (order_item_id, product_item_id) VALUES (?, ?)";
@@ -49,11 +49,11 @@ public class OrderItemDAO {
                             ProductItem productItem = new ProductItem();
                             productItem.setId(rs.getLong("id"));
                             productItem.setProductId(productId);
-                            productItem.setCurrentPrice(rs.getDouble("current_price"));
+                            productItem.setImportedPrice(rs.getDouble("imported_price"));
                             productItem.setSerial(rs.getString("serial"));
                             selectedProductItems.add(productItem);
                             if (priceAtPurchase == null) {
-                                priceAtPurchase = rs.getBigDecimal("current_price");
+                                priceAtPurchase = rs.getBigDecimal("imported_price");
                             }
                         }
                     }
@@ -109,7 +109,7 @@ public class OrderItemDAO {
     public List<OrderItem> findByOrderId(Long orderId) {
         String sql = """
                     SELECT oi.id, oi.quantity, oi.price_at_purchase,
-                           pi.id AS product_item_id, pi.current_price, pi.serial AS product_item_serial,
+                      pi.id AS product_item_id, pi.imported_price, pi.serial AS product_item_serial,
                            p.id AS product_id, p.name AS product_name, p.description
                     FROM order_items oi
                     JOIN order_item_product_items oipi ON oi.id = oipi.order_item_id
@@ -149,7 +149,7 @@ public class OrderItemDAO {
                     ProductItem linkedProductItem = new ProductItem();
                     linkedProductItem.setId(rs.getLong("product_item_id"));
                     linkedProductItem.setSerial(rs.getString("product_item_serial"));
-                    linkedProductItem.setCurrentPrice(rs.getDouble("current_price"));
+                    linkedProductItem.setImportedPrice(rs.getDouble("imported_price"));
                     linkedProductItem.setProductId(rs.getLong("product_id"));
 
                     item.getProductItems().add(linkedProductItem);
@@ -208,7 +208,7 @@ public class OrderItemDAO {
 
         StringBuilder detailSql = new StringBuilder(
                 "SELECT oi.id, oi.quantity, oi.price_at_purchase, " +
-                        "pi.id AS product_item_id, pi.current_price, pi.serial AS product_item_serial, " +
+                "pi.id AS product_item_id, pi.imported_price, pi.serial AS product_item_serial, " +
                         "p.id AS product_id, p.name AS product_name, p.description " +
                         "FROM order_items oi " +
                         "JOIN order_item_product_items oipi ON oi.id = oipi.order_item_id " +
@@ -259,7 +259,7 @@ public class OrderItemDAO {
                     ProductItem linkedProductItem = new ProductItem();
                     linkedProductItem.setId(rs.getLong("product_item_id"));
                     linkedProductItem.setSerial(rs.getString("product_item_serial"));
-                    linkedProductItem.setCurrentPrice(rs.getDouble("current_price"));
+                    linkedProductItem.setImportedPrice(rs.getDouble("imported_price"));
                     linkedProductItem.setProductId(rs.getLong("product_id"));
 
                     item.getProductItems().add(linkedProductItem);
