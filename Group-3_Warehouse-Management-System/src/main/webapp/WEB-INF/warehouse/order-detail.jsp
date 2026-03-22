@@ -476,14 +476,10 @@
 
                         <%-- PROCESSING: Can complete or cancel --%>
                         <c:when test="${order.status == 'PROCESSING'}">
-                            <form action="${pageContext.request.contextPath}/warehouse/order/complete"
-                                  method="post"
-                                  onsubmit="return confirm('Mark this order as completed?');">
-                                <input type="hidden" name="orderId" value="${order.id}"/>
-                                <button type="submit" class="btn btn-success btn-lg btn-block mb-3">
-                                    <i class="fas fa-check-circle mr-2"></i>Mark as Completed
-                                </button>
-                            </form>
+                            <a href="${pageContext.request.contextPath}/export?orderId=${order.id}"
+                               class="btn btn-success btn-lg btn-block mb-3">
+                                <i class="fas fa-barcode mr-2"></i>Assign Serial Numbers
+                            </a>
 
                             <div class="card border-danger">
                                 <div class="card-body p-3">
