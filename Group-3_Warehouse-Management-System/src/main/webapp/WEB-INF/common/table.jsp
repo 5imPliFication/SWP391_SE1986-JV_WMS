@@ -1,86 +1,82 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-
 <style>
-    body{
-        font-family: Arial, sans-serif;
-        background:#f5f6fa;
+    /* Wrapper */
+    .table-container {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 24px;
+        overflow: hidden;
     }
 
-    /* card */
-    .table-card{
-        width:100%;
-        background:white;
-        border-radius:12px;
-        overflow:hidden;
-        box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    /* Table */
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     }
 
-    /* scroll */
-    .table-scroll{
-        max-height:500px;
-        overflow-y:auto;
-    }
-
-    /* table */
-    .modern-table{
-        width:100%;
-        border-collapse:collapse;
-    }
-
-    /* header */
-    .modern-table thead{
-        background:linear-gradient(90deg,#6670c9,#6f79d8);
-        color:white;
-    }
-    .modern-table thead th{
+    /* Header */
+    .modern-table thead th {
         position: sticky;
         top: 0;
-        z-index: 10;
-        background: linear-gradient(90deg,#6670c9,#6f79d8); /* cần có lại background */
+        z-index: 5;
+
+        background: #1e293b; /* Distinct Dark Header */
+        color: #ffffff;
+
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        padding: 14px 16px;
+        border: 1px solid #cbd5e1;
+
+        text-align: left !important; /* Guaranteed alignment */
     }
 
-    .modern-table th{
-        text-align:left;
-        padding:18px 22px;
-        font-weight:600;
-        font-size:16px;
+    /* Body */
+    .modern-table tbody td {
+        padding: 14px 16px;
+        border: 1px solid #e5e7eb;
+        font-size: 14px;
+        color: #111827;
+
+        text-align: left !important; /* Guaranteed alignment */
     }
 
-    /* body */
-    .modern-table td{
-        padding:18px 22px;
-        color:#5d6b7c;
+    /* Zebra Striping */
+    .modern-table tbody tr:nth-child(odd) {
+        background: #ffffff;
     }
 
-    /* zebra rows */
-    .modern-table tbody tr:nth-child(odd){
-        background:#f1f2f7;
+    .modern-table tbody tr:nth-child(even) {
+        background: #f8fafc;
     }
 
-    .modern-table tbody tr:nth-child(even){
-        background:#e9e9ef;
+    /* Hover Effect */
+    .modern-table tbody tr:hover td {
+        background: #e2e8f0;
+        transition: background 0.15s ease;
     }
 
-    /* hover */
-    .modern-table tbody tr:hover{
-        background:#dde2ff;
-        transition:0.2s;
+    /* Ensure no double bottom border on last row due to wrapper */
+    .modern-table tbody tr:last-child td {
+        border-bottom: none;
     }
-
-
-
 </style>
 
-<div class="table-scroll">
-
+<div class="table-container">
     <table class="modern-table">
-        <thead class="table-primary text-center border">
+        <thead>
             ${requestScope.tableHeader}
         </thead>
-
-        <tbody  id="${tbodyId}" class="text-left">
+        <tbody id="${tbodyId}">
             ${requestScope.tableBody}
         </tbody>
     </table>
 </div>
+

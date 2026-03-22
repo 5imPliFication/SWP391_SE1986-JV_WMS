@@ -28,9 +28,9 @@
 
     <body>
 
-        <header class="bg-white shadow-lg sticky-top" style="margin-left: 300px">
+        <header class="bg-white sticky-top" style="margin-left: 260px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); z-index: 1000;">
 
-            <div class="container-fluid d-flex justify-content-end p-2">
+            <div class="container-fluid d-flex justify-content-end p-3 align-items-center">
 
                 <div class="dropdown d-flex align-items-center">
 
