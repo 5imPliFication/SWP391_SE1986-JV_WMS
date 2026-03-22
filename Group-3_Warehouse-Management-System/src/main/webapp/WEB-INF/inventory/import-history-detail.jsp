@@ -102,41 +102,36 @@
                                         <span id="icon-${item.id}">&#9658;</span>
                                             ${item.productName}
                                     </td>
-                                    <td class="text-center align-middle">${item.unitName}</td>
                                     <td class="text-center align-middle">
                                             ${item.expectedQuantity}
                                     </td>
                                     <td class="text-center align-middle">
                                             ${item.actualQuantity}
                                     </td>
+                                    <td class="text-center align-middle">${item.unitName}</td>
                                 </tr>
 
                                 <%-- detail rows --%>
                                 <c:forEach items="${item.productItems}"
                                            var="productItem" varStatus="productStatus">
-                                    <tr class="sub-item item-group-${item.id}"
-                                        style="display:none;">
-                                        <td class="text-center align-middle">
-                                                ${productStatus.index + 1}
-                                        </td>
-                                        <td>
-                                            <div class="input-group input-group-sm">
-                                                <input type="text" class="form-control" value="${productItem.serial}" readonly>
-                                                <div class="input-group-append">
-                                                    <a class="btn btn-outline-info" href="${pageContext.request.contextPath}/products/items/update?productItemId=${productItem.id}&searchSerial=${prodItem.serial}&pageNo=1&isActive=true" title="View Detail">
-                                                        View
-                                                    </a>
+                                    <tr class="sub-item item-group-${item.id}" style="display:none;">
+                                        <td colspan="5">
+                                            <div class="d-flex align-items-center gap-2">
+            <span style="width:50px;" class="text-center">
+                    ${productStatus.index + 1}
+            </span>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="text" class="form-control"
+                                                           value="${productItem.serial}" readonly>
+                                                    <div class="input-group-append">
+                                                        <a class="btn btn-outline-info"
+                                                           href="${pageContext.request.contextPath}/products/items/update?productItemId=${productItem.id}"
+                                                           title="View Detail">
+                                                            View
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </td>
-                                        <td class="text-center align-middle">
-                                            -
-                                        </td>
-                                        <td class="text-center align-middle">
-                                            -
-                                        </td>
-                                        <td class="text-center align-middle">
-                                            -
                                         </td>
                                     </tr>
                                 </c:forEach>

@@ -37,7 +37,13 @@ public class ProductDAO {
                                 r.id AS ram_id, r.size AS ram_size,
                                 s.id AS storage_id, s.size AS storage_size,
                                 sz.id AS screen_id, sz.size AS screen_size,
-                                u.id AS unit_id, u.name AS unit_name
+                                u.id AS unit_id, u.name AS unit_name,
+                                (
+                                    SELECT pi.current_price
+                                    FROM product_items pi
+                                    WHERE pi.product_id = p.id AND pi.is_active = 1
+                                    LIMIT 1
+                                ) AS current_price
                       FROM products p
                       JOIN brands b ON p.brand_id = b.id
                       JOIN categories c ON p.category_id = c.id
@@ -172,6 +178,9 @@ public class ProductDAO {
                 unit.setName(rs.getString("unit_name"));
                 product.setUnit(unit);
 
+                // Because current_price is stored in product_items table -> get by sub query in SQL above
+                product.setCurrentPrice(rs.getDouble("current_price"));
+
                 products.add(product);
             }
 
@@ -300,16 +309,21 @@ public class ProductDAO {
 
     public Product findById(long productId) {
         String sql = """
-                SELECT p.id AS product_id, p.name AS product_name, p.description, p.img_url, p.is_active, p.total_quantity,
+                SELECT p.id AS product_id, p.name AS product_name, p.description, p.img_url, p.is_active, p.total_quantity, p.created_at, p.updated_at,
                             b.name AS brand_name, b.id AS brand_id,
                             c.name AS category_name, c.id AS category_id,
-                              m.name AS model_name, m.id AS model_id,
-                              ch.name AS chip_name, ch.id AS chip_id,
-                              r.size AS ram_size, r.id AS ram_id,
-                              s.size AS storage_size, s.id AS storage_id,
-                              sz.size AS screen_size, sz.id AS size_id,
-                              u.name AS unit_name, u.id AS unit_id,
-                            p.created_at, p.updated_at
+                            m.name AS model_name, m.id AS model_id,
+                            ch.name AS chip_name, ch.id AS chip_id,
+                            r.size AS ram_size, r.id AS ram_id,
+                            s.size AS storage_size, s.id AS storage_id,
+                            sz.size AS screen_size, sz.id AS size_id,
+                            u.name AS unit_name, u.id AS unit_id,
+                            (
+                                SELECT pi.current_price
+                                FROM product_items pi
+                                WHERE pi.product_id = p.id AND pi.is_active = 1
+                                LIMIT 1
+                            ) AS current_price
                   FROM products p
                   JOIN brands b ON p.brand_id = b.id
                   JOIN categories c ON p.category_id = c.id
@@ -381,6 +395,9 @@ public class ProductDAO {
                 // SAFE timestamp
                 product.setCreatedAt(getLocalDateTime(rs, "created_at"));
                 product.setUpdatedAt(getLocalDateTime(rs, "updated_at"));
+
+                // Because current_price is stored in product_items table -> get by sub query in SQL above
+                product.setCurrentPrice(rs.getDouble("current_price"));
             }
 
             return product;
@@ -576,8 +593,7 @@ public class ProductDAO {
     public boolean updateItem(ProductItem productItem) {
         String sql = """
                 UPDATE product_items
-                SET current_price = ?,
-                    is_active = ?,
+                SET is_active = ?,
                     updated_at = NOW()
                 WHERE id = ?
                 """;
@@ -585,9 +601,8 @@ public class ProductDAO {
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setDouble(1, productItem.getCurrentPrice());
-            ps.setBoolean(2, productItem.getIsActive());
-            ps.setLong(3, productItem.getId());
+            ps.setBoolean(1, productItem.getIsActive());
+            ps.setLong(2, productItem.getId());
 
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
@@ -838,6 +853,21 @@ public class ProductDAO {
             ResultSet rs = ps.executeQuery();
 
             return rs.next();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Update the current price of all items for a product
+    public boolean updateCurrentPriceByProductId(Long productId, double newPrice) {
+        String sql = "UPDATE product_items SET current_price = ?, updated_at = NOW() WHERE product_id = ? AND is_active = 1";
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setDouble(1, newPrice);
+            ps.setLong(2, productId);
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
