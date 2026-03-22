@@ -63,6 +63,18 @@ public class OrderItemDAO {
                     throw new IllegalStateException("Insufficient stock. Available: " + selectedProductItems.size());
                 }
 
+                // Reserve stock immediately when item is added to order.
+                List<Long> selectedProductItemIds = selectedProductItems.stream()
+                        .map(ProductItem::getId)
+                        .toList();
+                setProductItemsActiveState(
+                        con,
+                        selectedProductItemIds,
+                        false,
+                        true,
+                        "Insufficient stock. Some items were already reserved by another order."
+                );
+
                 Long orderItemId;
                 try (PreparedStatement ps = con.prepareStatement(insertOrderItemSql, Statement.RETURN_GENERATED_KEYS)) {
                     ps.setLong(1, item.getOrder().getId());
@@ -282,6 +294,10 @@ public class OrderItemDAO {
         try (Connection con = DBConfig.getDataSource().getConnection()) {
             con.setAutoCommit(false);
             try {
+                // Release reserved stock for this order item.
+                List<Long> linkedItemIds = findLinkedProductItemIdsByOrderItem(con, orderId, orderItemId);
+                setProductItemsActiveState(con, linkedItemIds, true, false, null);
+
                 try (PreparedStatement ps = con.prepareStatement(deleteLinksSql)) {
                     ps.setLong(1, orderItemId);
                     ps.executeUpdate();
@@ -393,6 +409,14 @@ public class OrderItemDAO {
                         throw new IllegalStateException("Insufficient stock. Available to add: " + additionalProductItemIds.size());
                     }
 
+                    setProductItemsActiveState(
+                            con,
+                            additionalProductItemIds,
+                            false,
+                            true,
+                            "Insufficient stock. Some items were already reserved by another order."
+                    );
+
                     try (PreparedStatement ps = con.prepareStatement(insertLinkSql)) {
                         for (Long productItemId : additionalProductItemIds) {
                             ps.setLong(1, itemId);
@@ -427,6 +451,9 @@ public class OrderItemDAO {
                         }
                         ps.executeBatch();
                     }
+
+                    // Release stock back to available pool when quantity decreases.
+                    setProductItemsActiveState(con, removableLinkIds, true, false, null);
                 }
 
                 try (PreparedStatement ps = con.prepareStatement(updateQuantitySql)) {
@@ -456,6 +483,9 @@ public class OrderItemDAO {
         try (Connection con = DBConfig.getDataSource().getConnection()) {
             con.setAutoCommit(false);
             try {
+                List<Long> linkedItemIds = findLinkedProductItemIdsByOrder(con, orderId);
+                setProductItemsActiveState(con, linkedItemIds, true, false, null);
+
                 try (PreparedStatement ps = con.prepareStatement(deleteLinksSql)) {
                     ps.setLong(1, orderId);
                     ps.executeUpdate();
@@ -507,5 +537,85 @@ public class OrderItemDAO {
             throw new RuntimeException("Failed to find order item DTOs", e);
         }
         return items;
+    }
+
+    public void activateReservedItemsByOrderId(Long orderId) {
+        try (Connection con = DBConfig.getDataSource().getConnection()) {
+            con.setAutoCommit(false);
+            try {
+                List<Long> linkedItemIds = findLinkedProductItemIdsByOrder(con, orderId);
+                setProductItemsActiveState(con, linkedItemIds, true, false, null);
+
+                con.commit();
+            } catch (Exception e) {
+                con.rollback();
+                throw e;
+            } finally {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to release reserved product items for order ID: " + orderId, e);
+        }
+    }
+
+    private List<Long> findLinkedProductItemIdsByOrderItem(Connection con, Long orderId, Long orderItemId) throws SQLException {
+        String sql = "SELECT oipi.product_item_id FROM order_item_product_items oipi " +
+                "JOIN order_items oi ON oi.id = oipi.order_item_id WHERE oi.order_id = ? AND oi.id = ?";
+
+        List<Long> linkedItemIds = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, orderId);
+            ps.setLong(2, orderItemId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    linkedItemIds.add(rs.getLong("product_item_id"));
+                }
+            }
+        }
+        return linkedItemIds;
+    }
+
+    private List<Long> findLinkedProductItemIdsByOrder(Connection con, Long orderId) throws SQLException {
+        String sql = "SELECT oipi.product_item_id FROM order_item_product_items oipi " +
+                "JOIN order_items oi ON oi.id = oipi.order_item_id WHERE oi.order_id = ?";
+
+        List<Long> linkedItemIds = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    linkedItemIds.add(rs.getLong("product_item_id"));
+                }
+            }
+        }
+        return linkedItemIds;
+    }
+
+    private void setProductItemsActiveState(Connection con,
+                                            List<Long> itemIds,
+                                            boolean active,
+                                            boolean strictCount,
+                                            String strictCountErrorMessage) throws SQLException {
+        if (itemIds == null || itemIds.isEmpty()) {
+            return;
+        }
+
+        String sql = active
+                ? "UPDATE product_items SET is_active = 1, updated_at = NOW() WHERE id = ? AND is_active = 0"
+                : "UPDATE product_items SET is_active = 0, updated_at = NOW() WHERE id = ? AND is_active = 1";
+
+        int updated = 0;
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            for (Long itemId : itemIds) {
+                ps.setLong(1, itemId);
+                updated += ps.executeUpdate();
+            }
+        }
+
+        if (strictCount && updated < itemIds.size()) {
+            throw new IllegalStateException(strictCountErrorMessage != null
+                    ? strictCountErrorMessage
+                    : "Failed to update product item state");
+        }
     }
 }

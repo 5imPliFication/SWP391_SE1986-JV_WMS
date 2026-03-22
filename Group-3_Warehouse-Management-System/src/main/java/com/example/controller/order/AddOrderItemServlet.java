@@ -77,7 +77,6 @@ public class AddOrderItemServlet extends HttpServlet {
             resp.sendRedirect(redirectUrl);
 
         } catch (Exception e) {
-            e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Failed to add item: " + e.getMessage());
         }

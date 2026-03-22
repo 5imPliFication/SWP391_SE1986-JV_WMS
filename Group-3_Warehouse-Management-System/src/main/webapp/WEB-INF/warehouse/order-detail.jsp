@@ -209,11 +209,11 @@
                                     <td class="px-4 align-middle">
                                             <%-- Product name from Product entity --%>
                                         <div class="font-weight-bold">${item.product.name}</div>
-                                        <%-- Show inventory status based on order state --%>
-                                        <c:if test="${order.status == 'PROCESSING' || order.status == 'COMPLETED'}">
+                                        <%-- Linked product items are reserved when salesman adds them to the order. --%>
+                                        <c:if test="${order.status == 'SUBMITTED' || order.status == 'PROCESSING' || order.status == 'COMPLETED'}">
                                             <br><small class="text-warning">
                                             <i class="fas fa-exclamation-triangle mr-1"></i>
-                                            Stock Reduced (${item.quantity} units consumed)
+                                            Stock Reserved (${item.quantity} units linked)
                                         </small>
                                         </c:if>
                                     </td>
@@ -320,7 +320,7 @@
                     </h6>
                     <small>
                         <strong>Warehouse inventory NOT yet consumed.</strong>
-                        <br>Product quantities will be automatically reduced when you move this order to "PROCESSING" status.
+                        <br>Product items were reserved when they were added to this order.
                     </small>
                 </div>
             </c:if>
@@ -436,7 +436,7 @@
                         <c:when test="${order.status == 'SUBMITTED'}">
                             <form action="${pageContext.request.contextPath}/warehouse/order/process"
                                   method="post"
-                                  onsubmit="return confirm('Start processing this order? Product item quantities will be reduced.');">
+                                  onsubmit="return confirm('Start processing this order? Reserved stock remains linked to this order.');">
                                 <input type="hidden" name="orderId" value="${order.id}"/>
                                 <button type="submit" class="btn btn-primary btn-lg btn-block mb-3">
                                     <i class="fas fa-play-circle mr-2"></i>Start Processing

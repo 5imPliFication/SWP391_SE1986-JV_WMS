@@ -63,7 +63,6 @@ public class SubmitOrderServlet extends HttpServlet {
             req.getRequestDispatcher("/WEB-INF/views/error/error.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
             req.setAttribute("error", "Failed to submit order: " + e.getMessage());
             req.setAttribute("code", "500");
             req.getRequestDispatcher("/WEB-INF/views/error/error.jsp").forward(req, resp);

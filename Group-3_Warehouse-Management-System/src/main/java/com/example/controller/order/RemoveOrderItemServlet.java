@@ -78,7 +78,6 @@ public class RemoveOrderItemServlet extends HttpServlet {
             }
             resp.sendRedirect(redirectUrl);
         } catch (Exception e) {
-            e.printStackTrace();
             req.setAttribute("error", "Failed to remove item: " + e.getMessage());
             req.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(req, resp);
         }

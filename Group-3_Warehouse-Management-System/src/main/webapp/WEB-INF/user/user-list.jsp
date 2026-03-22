@@ -82,6 +82,8 @@
                 </div>
             </form>
 
+            <c:set var="canEditUser" value="${fn:contains(sessionScope.userPermissions, 'UPDATE_USER')}"/>
+
             <!-- HEADER -->
             <c:set var="tableHeader" scope="request">
                 <tr>
@@ -89,7 +91,9 @@
                     <th>Full Name</th>
                     <th>Email</th>
                     <th>Role</th>
-                    <th>Details</th>
+                    <c:if test="${canEditUser}">
+                        <th>Details</th>
+                    </c:if>
                 </tr>
             </c:set>
 
@@ -102,18 +106,20 @@
                         <td>${u.fullName}</td>
                         <td>${u.email}</td>
                         <td>${u.role.name}</td>
-                        <td>
-                            <a href="${pageContext.request.contextPath}/user?id=${u.id}"
-                               class="btn btn-info btn-sm">
-                                Detail
-                            </a>
-                        </td>
+                        <c:if test="${canEditUser}">
+                            <td>
+                                <a href="${pageContext.request.contextPath}/user?id=${u.id}"
+                                   class="btn btn-info btn-sm">
+                                    Detail
+                                </a>
+                            </td>
+                        </c:if>
                     </tr>
                 </c:forEach>
 
                 <c:if test="${empty userList}">
                     <tr>
-                        <td colspan="5" class="text-center text-muted">No data</td>
+                        <td colspan="${canEditUser ? 5 : 4}" class="text-center text-muted">No data</td>
                     </tr>
                 </c:if>
 

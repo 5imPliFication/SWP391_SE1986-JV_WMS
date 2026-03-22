@@ -71,7 +71,6 @@ public class WarehouseOrderDetailServlet extends HttpServlet {
             req.setAttribute("itemPageSize", itemPageSize);
             req.setAttribute("totalItemPages", totalItemPages);
             req.setAttribute("totalItemCount", totalItemCount);
-            System.out.println(order.getCreatedBy().getFullName());
 
             req.getRequestDispatcher("/WEB-INF/warehouse/order-detail.jsp")
                     .forward(req, resp);
@@ -80,7 +79,6 @@ public class WarehouseOrderDetailServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid order ID");
         } catch (Exception e) {
-            e.printStackTrace();
             req.setAttribute("error", "Failed to load order: " + e.getMessage());
             req.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(req, resp);
         }

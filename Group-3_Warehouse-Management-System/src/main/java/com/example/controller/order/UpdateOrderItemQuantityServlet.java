@@ -79,7 +79,6 @@ public class UpdateOrderItemQuantityServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameters");
         } catch (Exception e) {
-            e.printStackTrace();
             Long orderId = Long.parseLong(req.getParameter("orderId"));
             String itemPage = req.getParameter("itemPage");
             String productPage = req.getParameter("productPage");

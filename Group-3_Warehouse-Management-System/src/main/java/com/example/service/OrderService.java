@@ -43,8 +43,6 @@ public class OrderService {
         order.setStatus("DRAFT");
         order.setNote(note);
         order.setCreatedBy(userDAO.findUserById(salesmanId));
-        System.out.println("Service layer ----------");
-        System.out.println(order.getOrderCode() + " ++ " + order.getStatus() + " ++ " + order.getCreatedBy());
         return orderDAO.create(order);
     }
 
@@ -119,8 +117,8 @@ public class OrderService {
     }
 
     /**
-     * Start processing order and update inventory
-     * This is when stock quantity actually decreases
+     * Start processing order.
+     * Stock is reserved earlier when items are added to the order.
      */
     public void startProcessing(Long orderId, Long warehouseKeeperId) {
         Order order = orderDAO.findById(orderId);
@@ -128,51 +126,9 @@ public class OrderService {
         if (!order.getStatus().equals("SUBMITTED"))
             throw new IllegalStateException("Order is not in queue");
 
-        // Get order items
-        List<OrderItem> items = orderItemDAO.findByOrderId(orderId);
-        List<Long> deactivatedItemIds = new ArrayList<>();
-
-        try {
-            // Reduce stock for each linked product item
-            for (OrderItem item : items) {
-                List<ProductItem> linkedItems = item.getProductItems();
-                if (linkedItems == null || linkedItems.isEmpty()) {
-                    throw new IllegalStateException("No linked product items found for order item ID: " + item.getId());
-                }
-
-                if (linkedItems.size() < item.getQuantity()) {
-                    throw new IllegalStateException("Linked item count does not match quantity for order item ID: " + item.getId());
-                }
-
-                // Decrease exactly the ordered quantity, even if more linked items are present.
-                List<Long> linkedIds = linkedItems.stream()
-                        .limit(item.getQuantity())
-                        .map(ProductItem::getId)
-                        .toList();
-
-                int deactivated = productItemDAO.deactivateItemsByIds(linkedIds);
-                if (deactivated < linkedIds.size()) {
-                    String productName = item.getProduct() != null ? item.getProduct().getName() : ("order item " + item.getId());
-                    throw new IllegalStateException("Insufficient active stock for " + productName);
-                }
-
-                deactivatedItemIds.addAll(linkedIds);
-            }
-
-            // Update order status
-            boolean updated = orderDAO.updateStatus(orderId, "PROCESSING", warehouseKeeperId, null);
-            if (!updated) {
-                throw new IllegalStateException("Failed to update order status to PROCESSING");
-            }
-        } catch (RuntimeException e) {
-            if (!deactivatedItemIds.isEmpty()) {
-                try {
-                    productItemDAO.activateItemsByIds(deactivatedItemIds);
-                } catch (RuntimeException rollbackEx) {
-                    throw new IllegalStateException("Failed during processing and failed to rollback stock changes", rollbackEx);
-                }
-            }
-            throw e;
+        boolean updated = orderDAO.updateStatus(orderId, "PROCESSING", warehouseKeeperId, null);
+        if (!updated) {
+            throw new IllegalStateException("Failed to update order status to PROCESSING");
         }
     }
 
@@ -238,29 +194,12 @@ public class OrderService {
                 throw new IllegalArgumentException("Cancellation reason is required");
             }
 
-            // If order is PROCESSING, restore inventory by linked product item IDs
-            if ("PROCESSING".equals(order.getStatus())) {
-                List<OrderItem> items = orderItemDAO.findByOrderId(orderId);
-                for (OrderItem item : items) {
-                    List<ProductItem> linkedItems = item.getProductItems();
-                    if (linkedItems == null || linkedItems.isEmpty()) {
-                        continue;
-                    }
-
-                    // Restore exactly the ordered quantity that was deactivated when processing started.
-                    List<Long> linkedIds = linkedItems.stream()
-                            .limit(item.getQuantity())
-                            .map(ProductItem::getId)
-                            .toList();
-                    int restored = productItemDAO.activateItemsByIds(linkedIds);
-                    if (restored < linkedIds.size()) {
-                        throw new IllegalStateException("Failed to restore stock for order item ID: " + item.getId());
-                    }
-                }
-            }
         } else {
             throw new SecurityException("You don't have permission to cancel orders");
         }
+
+        // Release all reserved stock linked to this order before cancellation.
+        orderItemDAO.activateReservedItemsByOrderId(orderId);
 
         // Update status and note
         orderDAO.updateStatus(orderId, "CANCELLED", userId, note);
@@ -310,12 +249,6 @@ public class OrderService {
                 // Update quantity
                 int newQuantity = existing.getQuantity() + quantity;
 
-                // Verify total quantity doesn't exceed available
-                if (newQuantity > totalAvailable) {
-                    return "Cannot add " + quantity + " more. Maximum available: " +
-                            (totalAvailable - existing.getQuantity());
-                }
-
                 orderItemDAO.updateQuantity(existing.getId(), newQuantity);
             } else {
                 // Add new item
@@ -332,7 +265,6 @@ public class OrderService {
             return null; // Success - no error
 
         } catch (Exception e) {
-            e.printStackTrace();
             return "Failed to add item: " + e.getMessage();
         }
     }

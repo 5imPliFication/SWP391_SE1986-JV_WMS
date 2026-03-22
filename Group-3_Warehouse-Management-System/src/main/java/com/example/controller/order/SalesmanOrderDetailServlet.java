@@ -101,7 +101,6 @@ public class SalesmanOrderDetailServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid order ID");
         } catch (Exception e) {
-            e.printStackTrace();
             req.setAttribute("error", "Failed to load order: " + e.getMessage());
             req.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(req, resp);
         }
