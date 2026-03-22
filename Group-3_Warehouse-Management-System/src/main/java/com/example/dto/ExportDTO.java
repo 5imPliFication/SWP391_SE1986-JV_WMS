@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExportDTO {
+    private Long id;
     private String orderCode;
     private String customerName;
     private Double total;
