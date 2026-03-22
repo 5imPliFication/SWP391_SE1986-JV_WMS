@@ -181,6 +181,7 @@ public class ProductService {
         return productDAO.findLowStock(threshold);
     }
 
+    // update current price of product by product id
     public boolean updateCurrentPriceByProductId(long productId, double newPrice) {
         return productDAO.updateCurrentPriceByProductId(productId, newPrice);
     }
