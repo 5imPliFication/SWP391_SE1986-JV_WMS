@@ -1,8 +1,13 @@
 package com.example.service;
 
 import com.example.dao.InventoryDAO;
+import com.example.dao.StockMovementDAO;
+import com.example.dto.ExportDTO;
+import com.example.dto.ExportItemDTO;
 import com.example.dto.OrderDTO;
 import com.example.dto.ProductItemDTO;
+import com.example.enums.MovementType;
+import com.example.enums.ReferenceType;
 import com.example.util.AppConstants;
 import com.example.validator.ImportProductItemValidator;
 import jakarta.servlet.http.Part;
@@ -192,5 +197,47 @@ public class InventoryService {
 
     public int getTotalOrders(String name, LocalDate fromDate, LocalDate toDate, String status) {
         return inventoryDAO.countExportOrders(name, fromDate, toDate, status);
+    }
+
+    public ExportDTO getExportOrder(Long orderId) {
+        return inventoryDAO.getPendingOrder(orderId);
+    }
+
+//    public void completeExportOrder(Long orderId, Long warehouseId) {
+//        // 1. Mark order as completed
+//        inventoryDAO.completeExportOrder(orderId, warehouseId);
+//
+//        // 2. Record stock movement for EXPORT
+//        Map<Long, Long> quantityByProduct = inventoryDAO.getProductQuantityMapForOrder(orderId);
+//
+//        if (!quantityByProduct.isEmpty()) {
+//            new StockMovementDAO().insertStockMovements(
+//                    quantityByProduct,
+//                    MovementType.EXPORT,
+//                    ReferenceType.ORDER,
+//                    orderId
+//            );
+//        }
+//    }
+
+
+    public void assignSerialForExportProduct(ExportDTO exportOrder, String[] serials) {
+        // Map serials to order items
+        int serialIndex = 0;
+        Map<Long, List<String>> orderItemSerialsMap = new HashMap<>();
+        
+        for (ExportItemDTO item : exportOrder.getItems()) {
+            List<String> assignedSerials = new ArrayList<>();
+            for (int i = 0; i < item.getQuantity(); i++) {
+                // get serial from list serials
+                String serial = serials[serialIndex++];
+                // save serial to list assigned for item
+                assignedSerials.add(serial);
+            }
+            orderItemSerialsMap.put(item.getId(), assignedSerials);
+        }
+
+        // Validate and Save inside DAO
+        inventoryDAO.assignSerialsToOrderItems(orderItemSerialsMap);
     }
 }

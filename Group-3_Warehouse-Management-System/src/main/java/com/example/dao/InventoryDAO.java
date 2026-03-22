@@ -1,6 +1,8 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
+import com.example.dto.ExportDTO;
+import com.example.dto.ExportItemDTO;
 import com.example.dto.OrderDTO;
 import com.example.dto.ProductItemDTO;
 import com.example.util.AppConstants;
@@ -349,5 +351,136 @@ public class InventoryDAO {
             throw new RuntimeException("Count fail", e);
         }
         return 0;
+    }
+
+    // get information of pending export order by order id
+    public ExportDTO getPendingOrder(Long orderId) {
+        String sql = """
+                  select o.id, o.order_code, o.customer_name, o.total_price, o.note, o.order_date,
+                  o.processed_at, creater.fullname as salesman_name
+                  from orders o
+                  join users creater on creater.id = o.created_by
+                  where o.id = ?;
+                """;
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    ExportDTO dto = new ExportDTO();
+                    dto.setId(rs.getLong("id"));
+                    dto.setOrderCode(rs.getString("order_code"));
+                    dto.setCustomerName(rs.getString("customer_name"));
+                    dto.setTotal(rs.getDouble("total_price"));
+                    dto.setSalesmanName(rs.getString("salesman_name"));
+                    dto.setCreatedAt(rs.getTimestamp("order_date").toLocalDateTime());
+                    dto.setNote(rs.getString("note"));
+
+                    // get list item of export order
+                    dto.setItems(getPendingExportItems(orderId));
+                    return dto;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get pending export order for order ID: " + orderId, e);
+        }
+        return null;
+    }
+
+    // get list item of pending export order by order id
+    public List<ExportItemDTO> getPendingExportItems(Long orderId) {
+        String sql = """
+                select oi.id as item_id, oi.quantity, p.name, u.name as unit
+                from order_items oi
+                join products p on p.id = oi.product_id
+                left join units u on u.id = p.unit_id
+                where oi.order_id = ?;
+                """;
+        List<ExportItemDTO> list = new ArrayList<>();
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ExportItemDTO item = new ExportItemDTO();
+                    item.setId(rs.getLong("item_id"));
+                    item.setProductName(rs.getString("name"));
+                    item.setQuantity(rs.getInt("quantity"));
+                    item.setUnit(rs.getString("unit"));
+                    list.add(item);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get pending export items for order ID: " + orderId, e);
+        }
+        return list;
+    }
+
+//    public void completeExportOrder(Long orderId, Long warehouseKeeperId) {
+//        String sql = "UPDATE orders SET status = 'COMPLETED', processed_by = ?, processed_at = NOW() WHERE id = ? AND status = 'PROCESSING'";
+//        try (Connection con = DBConfig.getDataSource().getConnection();
+//             PreparedStatement ps = con.prepareStatement(sql)) {
+//            ps.setLong(1, warehouseKeeperId);
+//            ps.setLong(2, orderId);
+//            int updated = ps.executeUpdate();
+//            if (updated == 0) {
+//                throw new IllegalStateException("Order not found or not in PROCESSING status");
+//            }
+//        } catch (SQLException e) {
+//            throw new RuntimeException("Failed to complete export order", e);
+//        }
+//    }
+
+
+    // assign order item correspond serial and check validate serial
+    public void assignSerialsToOrderItems(Map<Long, List<String>> orderItemSerialsMap) {
+        String checkSql = "SELECT id FROM product_items WHERE serial = ? AND is_active = 1";
+        String insertSql = "INSERT INTO order_item_product_items (order_item_id, product_item_id) VALUES (?, ?)";
+
+        try (Connection con = DBConfig.getDataSource().getConnection()) {
+            // 1 transaction false -> roll back all
+            con.setAutoCommit(false);
+
+            try (PreparedStatement checkPs = con.prepareStatement(checkSql);
+                 PreparedStatement insertPs = con.prepareStatement(insertSql)) {
+
+                // iterate any order item (key: orderItemId, value: list serials) to check and insert
+                for (Map.Entry<Long, List<String>> entry : orderItemSerialsMap.entrySet()) {
+                    // get id of order item
+                    Long orderItemId = entry.getKey();
+                    // get serial of this order item
+                    for (String serial : entry.getValue()) {
+                        // set value for query to check serial exist
+                        checkPs.setString(1, serial);
+                        // check
+                        try (ResultSet rs = checkPs.executeQuery()) {
+                            // if exist -> get id of product item
+                            if (rs.next()) {
+                                Long productItemId = rs.getLong("id");
+
+                                // Batch insert mapping
+                                insertPs.setLong(1, orderItemId);
+                                insertPs.setLong(2, productItemId);
+                                insertPs.addBatch();
+                            } else {
+                                con.rollback();
+                                throw new IllegalArgumentException("Serial " + serial + " does not exist or is not active in inventory.");
+                            }
+                        }
+                    }
+                }
+
+                // Execute all insertions
+                insertPs.executeBatch();
+                con.commit();
+            } catch (SQLException | IllegalArgumentException e) {
+                con.rollback();
+                throw e;
+            } finally {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error during serial assignment", e);
+        }
     }
 }
