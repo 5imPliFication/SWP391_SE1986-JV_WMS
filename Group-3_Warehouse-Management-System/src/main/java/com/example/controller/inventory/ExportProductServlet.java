@@ -65,7 +65,7 @@ public class ExportProductServlet extends HttpServlet {
             // Assign serials to order items (validates and maps them)
             inventoryService.assignSerialForExportProduct(exportOrder, serials);
 
-            response.sendRedirect(request.getContextPath() + "/warehouse/orders?assigned=true");
+            response.sendRedirect(request.getContextPath() + "/warehouse/order/detail?id=" + orderId);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/WEB-INF/inventory/export-product.jsp").forward(request, response);
