@@ -209,7 +209,7 @@
                                     <td class="px-4 align-middle">
                                             <%-- Product name from Product entity --%>
                                         <div class="font-weight-bold">${item.product.name}</div>
-                                        <%-- Show inventory status based on order state --%>
+                                            <%-- Show inventory status based on order state --%>
                                         <c:if test="${order.status == 'PROCESSING' || order.status == 'COMPLETED'}">
                                             <br><small class="text-warning">
                                             <i class="fas fa-exclamation-triangle mr-1"></i>
@@ -218,12 +218,12 @@
                                         </c:if>
                                     </td>
                                     <td class="px-4 align-middle text-right">
-                                        ${currency:format(item.priceAtPurchase)} VND
+                                            ${currency:format(item.priceAtPurchase)} VND
                                             <%-- Current price from ProductItem.currentPrice --%>
                                         <c:if test="${item.priceAtPurchase != item.productItem.currentPrice}">
                                             <br><small class="text-warning">
                                             <i class="fas fa-info-circle"></i> Current:
-                                            ${currency:format(item.productItem.currentPrice)} VND
+                                                ${currency:format(item.productItem.currentPrice)} VND
                                         </small>
                                         </c:if>
                                     </td>
@@ -321,7 +321,8 @@
                     </h6>
                     <small>
                         <strong>Warehouse inventory NOT yet consumed.</strong>
-                        <br>Product quantities will be automatically reduced when you move this order to "PROCESSING" status.
+                        <br>Product quantities will be automatically reduced when you move this order to "PROCESSING"
+                        status.
                     </small>
                 </div>
             </c:if>
@@ -359,7 +360,8 @@
                 <div class="card-body">
                     <div class="pl-3">
                         <div class="pb-3">
-                            <c:set var="step1Active" value="${order.status == 'SUBMITTED' || order.status == 'PROCESSING' || order.status == 'COMPLETED'}"/>
+                            <c:set var="step1Active"
+                                   value="${order.status == 'SUBMITTED' || order.status == 'PROCESSING' || order.status == 'COMPLETED'}"/>
                             <div class="d-flex align-items-center mb-2">
                                 <div class="mr-3">
                                     <c:choose>
@@ -380,7 +382,8 @@
                         </div>
 
                         <div class="pb-3">
-                            <c:set var="step2Active" value="${order.status == 'PROCESSING' || order.status == 'COMPLETED'}"/>
+                            <c:set var="step2Active"
+                                   value="${order.status == 'PROCESSING' || order.status == 'COMPLETED'}"/>
                             <div class="d-flex align-items-center mb-2">
                                 <div class="mr-3">
                                     <c:choose>
@@ -435,14 +438,10 @@
                     <c:choose>
                         <%-- SUBMITTED: Can start processing or cancel --%>
                         <c:when test="${order.status == 'SUBMITTED'}">
-                            <form action="${pageContext.request.contextPath}/warehouse/order/process"
-                                  method="post"
-                                  onsubmit="return confirm('Start processing this order? Product item quantities will be reduced.');">
-                                <input type="hidden" name="orderId" value="${order.id}"/>
-                                <button type="submit" class="btn btn-primary btn-lg btn-block mb-3">
-                                    <i class="fas fa-play-circle mr-2"></i>Start Processing
-                                </button>
-                            </form>
+                            <a href="${pageContext.request.contextPath}/export?orderId=${order.id}"
+                               class="btn btn-success btn-lg btn-block mb-3">
+                                <i class="fas fa-barcode mr-2"></i>Assign Serial Numbers
+                            </a>
 
                             <div class="card border-danger">
                                 <div class="card-body p-3">
@@ -476,10 +475,6 @@
 
                         <%-- PROCESSING: Can complete or cancel --%>
                         <c:when test="${order.status == 'PROCESSING'}">
-                            <a href="${pageContext.request.contextPath}/export?orderId=${order.id}"
-                               class="btn btn-success btn-lg btn-block mb-3">
-                                <i class="fas fa-barcode mr-2"></i>Assign Serial Numbers
-                            </a>
 
                             <div class="card border-danger">
                                 <div class="card-body p-3">
@@ -488,7 +483,7 @@
                                     </h6>
                                     <p class="small text-muted mb-3">
                                         <i class="fas fa-undo mr-1"></i>
-                                        Product item quantities will be restored if cancelled.
+                                        Product item quantities will be restored if canceled.
                                     </p>
                                     <form action="${pageContext.request.contextPath}/warehouse/order/cancel"
                                           method="post"
@@ -556,7 +551,7 @@
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
 <script>
     // Auto-dismiss alerts after 5 seconds
-    setTimeout(function() {
+    setTimeout(function () {
         $('.alert-dismissible').fadeOut('slow');
     }, 5000);
 </script>
