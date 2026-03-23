@@ -8,6 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Export History Detail</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
 </head>
 

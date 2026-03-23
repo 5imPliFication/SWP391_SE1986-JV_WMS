@@ -1,15 +1,9 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: Admin
-  Date: 1/28/2026
-  Time: 11:55 PM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
     <head>
         <title>Order Queue</title>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     </head>

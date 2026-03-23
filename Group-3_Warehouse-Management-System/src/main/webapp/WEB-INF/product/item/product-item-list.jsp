@@ -6,6 +6,7 @@
 <html>
 <head>
     <title>Product Item List</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -38,12 +39,8 @@
 
     <h2>Product Item List</h2>
 
-    <%--Product Name (Readonly)--%>
-    <div class="col-auto">
-        <label>
-            <input type="text" class="form-control" name="productName" placeholder="Product Name"
-                   value="${product.name}" readonly>
-        </label>
+    <div class="fs-5 fw-semibold text-dark">
+        ${product.name}
     </div>
     <br>
     <%--form submit for search and sort--%>
@@ -101,21 +98,21 @@
                 </td>
                 <td>
                         <%--Convert LocalDateTime to Date for JSTL formatting--%>
-                        <fmt:parseDate value="${pi.importedAt}"
-                                       pattern="yyyy-MM-dd'T'HH:mm"
-                                       var="parsedImportedDate"
-                                       type="both"/>
-                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
-                                        value="${parsedImportedDate}"/>
+                    <fmt:parseDate value="${pi.importedAt}"
+                                   pattern="yyyy-MM-dd'T'HH:mm"
+                                   var="parsedImportedDate"
+                                   type="both"/>
+                    <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                    value="${parsedImportedDate}"/>
                 </td>
                 <td>
                         <%--Convert LocalDateTime to Date for JSTL formatting--%>
-                        <fmt:parseDate value="${pi.updatedAt}"
-                                       pattern="yyyy-MM-dd'T'HH:mm"
-                                       var="parsedUpdatedDate"
-                                       type="both"/>
-                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
-                                        value="${parsedUpdatedDate}"/>
+                    <fmt:parseDate value="${pi.updatedAt}"
+                                   pattern="yyyy-MM-dd'T'HH:mm"
+                                   var="parsedUpdatedDate"
+                                   type="both"/>
+                    <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                    value="${parsedUpdatedDate}"/>
                 </td>
                 <td>${(pi.isActive == true) ? 'Available' : 'Unavailable'}</td>
                 <td>
@@ -123,18 +120,28 @@
                                               and sessionScope.user.role != null
                                               and sessionScope.user.role.active
                                               and fn:contains(sessionScope.userPermissions, 'UPDATE_PRODUCT_ITEM')}">
-                        <form method="get" action="${pageContext.request.contextPath}/products/items/update">
+
+                        <form method="post" action="${pageContext.request.contextPath}/products/items/update">
                             <input type="hidden" name="productItemId" value="${pi.id}">
+                                <%--Use for redirect exactly--%>
                             <input type="hidden" name="productId" value="${pi.productId}">
                             <input type="hidden" name="pageNo" value="${param.pageNo}">
                             <input type="hidden" name="searchSerial" value="${param.searchSerial}">
                             <input type="hidden" name="isActive" value="${param.isActive}">
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                Edit
-                            </button>
+                            <c:if test="${pi.isActive == true }">
+                                <button class="btn-warning" type="submit" name="btnChangeStatus" value="unavailable"
+                                        class="btn btn-sm btn-primary">
+                                    Mark Unavailable
+                                </button>
+                            </c:if>
+                            <c:if test="${pi.isActive == false }">
+                                <button class="btn-success" type="submit" name="btnChangeStatus" value="available"
+                                        class="btn btn-sm btn-primary">
+                                    Mark Available
+                                </button>
+                            </c:if>
                         </form>
                     </c:if>
-
                 </td>
 
             </tr>

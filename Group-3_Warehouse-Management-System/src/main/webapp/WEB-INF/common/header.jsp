@@ -20,6 +20,8 @@
 
         <title>Header</title>
 
+        <!-- Design System CSS -->
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
         <!-- Bootstrap CSS -->
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">

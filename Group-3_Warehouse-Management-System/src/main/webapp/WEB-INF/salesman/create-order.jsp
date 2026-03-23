@@ -9,6 +9,7 @@
 <html>
 <head>
     <title>Create Order</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
 </head>
 <body>

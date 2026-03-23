@@ -7,6 +7,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Import History</title>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
     </head>
 

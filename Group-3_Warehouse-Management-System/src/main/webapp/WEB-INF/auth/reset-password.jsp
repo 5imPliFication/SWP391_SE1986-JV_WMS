@@ -11,6 +11,7 @@
 <html>
 <head>
     <title>Reset Password</title>
+    <link rel="stylesheet" href="${pageContext.request.getContextPath()}/static/css/design-system.css">
     <link rel="stylesheet" href="${pageContext.request.getContextPath()}/static/css/login.css">
 </head>
 <body>

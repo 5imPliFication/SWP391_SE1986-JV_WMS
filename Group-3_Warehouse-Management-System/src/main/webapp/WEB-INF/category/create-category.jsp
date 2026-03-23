@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html>
 
-
     <head>
         <title>Create New Category</title>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
         <link rel="stylesheet"
               href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">

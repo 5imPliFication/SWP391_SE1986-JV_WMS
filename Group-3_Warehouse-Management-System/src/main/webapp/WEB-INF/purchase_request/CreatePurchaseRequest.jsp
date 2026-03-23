@@ -5,7 +5,7 @@
 <html>
     <head>
         <title>Create Purchase Request</title>
-
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
               rel="stylesheet">
         <style>

@@ -96,6 +96,6 @@ public class ProductAddServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.getSession().setAttribute("errorMessage", e.getMessage());
         }
-        response.sendRedirect("/products/add");
+        response.sendRedirect("/products");
     }
 }

@@ -1,5 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
+</head>
+<body>
+<jsp:include page="/WEB-INF/common/sidebar.jsp"/>
 <style>
 
     .table-fixed{

@@ -1,4 +1,4 @@
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@page contentType="html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
@@ -7,6 +7,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/home.css">
 

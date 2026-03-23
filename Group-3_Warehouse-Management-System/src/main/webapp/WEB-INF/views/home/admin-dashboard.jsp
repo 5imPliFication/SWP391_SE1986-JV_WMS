@@ -3,6 +3,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/dashboard.css">
         <title>JSP Page</title>
     </head>

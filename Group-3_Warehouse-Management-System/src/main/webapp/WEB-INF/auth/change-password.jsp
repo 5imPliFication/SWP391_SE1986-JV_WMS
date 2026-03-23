@@ -3,6 +3,7 @@
 <html>
 <head>
     <title>Change Password</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
     <link rel="stylesheet" href="<c:url value='/static/css/change-password.css'/>">
     <link rel="stylesheet" href="<c:url value='/static/css/bootstrap.css'/>">
     <link rel="stylesheet" href="<c:url value='/static/css/bootstrap-grid.css'/>">

@@ -7,6 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Create New Audit</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/design-system.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
 </head>
 
@@ -137,8 +138,7 @@
 
 
     <%--table list product search--%>
-    <table class="table table-bordered table-hover">
-        <thead class="thead-dark">
+    <c:set var="tableHeader" scope="request">
         <tr>
             <th>ID</th>
             <th>Name</th>
@@ -152,8 +152,9 @@
             <th>Screen</th>
             <th></th>
         </tr>
-        </thead>
-        <tbody>
+    </c:set>
+
+    <c:set var="tableBody" scope="request">
         <c:forEach items="${products}" var="product">
             <tr>
                 <td>${product.id}</td>
@@ -179,8 +180,10 @@
                 </td>
             </tr>
         </c:forEach>
-        </tbody>
-    </table>
+    </c:set>
+
+    <%--Render table with header and body from request attributes--%>
+    <jsp:include page="/WEB-INF/common/table.jsp"/>
 
     <c:if test="${empty products}">
         <tr>
@@ -235,8 +238,7 @@
     <form method="post" action="${pageContext.request.contextPath}/inventory-audits/add">
         <div>
             <div class="table-responsive">
-                <table class="table table-bordered table-hover table-sm">
-                    <thead class="thead-dark text-center">
+                <c:set var="tableHeader" scope="request">
                     <tr>
                         <th>No.</th>
                         <th>Product</th>
@@ -249,8 +251,9 @@
                         <th>Screen</th>
                         <th></th>
                     </tr>
-                    </thead>
-                    <tbody>
+                </c:set>
+
+                <c:set var="tableBody" scope="request">
                     <c:forEach items="${tmpInventoryAuditItems}" var="item" varStatus="status">
                         <tr>
                             <td class="text-center align-middle">
@@ -275,8 +278,11 @@
                             </td>
                         </tr>
                     </c:forEach>
-                    </tbody>
-                </table>
+                </c:set>
+
+                <%--Render table with header and body from request attributes--%>
+                <jsp:include page="/WEB-INF/common/table.jsp"/>
+
                 <c:if test="${empty tmpInventoryAuditItems}">
                     <tr>
                         <td colspan="10">No data</td>

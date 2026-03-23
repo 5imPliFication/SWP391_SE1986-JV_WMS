@@ -10,6 +10,7 @@
 <html>
 <head>
     <title>Forget Password</title>
+    <link rel="stylesheet" href="${pageContext.request.getContextPath()}/static/css/design-system.css">
     <link rel="stylesheet" href="${pageContext.request.getContextPath()}/static/css/forget-password.css">
 </head>
 <body>
