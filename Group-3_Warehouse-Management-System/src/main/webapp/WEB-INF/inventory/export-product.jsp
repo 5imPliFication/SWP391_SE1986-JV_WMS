@@ -51,8 +51,7 @@
 
             <div class="col-md-6">
                 <label class="font-weight-bold mb-1 d-block">Order Code</label>
-                <input type="text"
-                       class="form-control form-control-sm bg-light d-inline-block"
+                <input type="text" class="form-control form-control-sm bg-light d-inline-block"
                        value="${order.orderCode}" readonly>
             </div>
 
@@ -86,8 +85,7 @@
             <div class="col-md-6">
                 <label class="font-weight-bold mb-1">Note</label>
                 <input type="text" class="form-control form-control-sm bg-light"
-                       value="${order.note}"
-                       readonly>
+                       value="${order.note}" readonly>
             </div>
 
         </div>
@@ -134,8 +132,7 @@
 
                         <c:forEach items="${order.items}" var="item">
                             <!-- Group Header for the Order Item -->
-                            <tr class="group-header"
-                                style="cursor:pointer;background:#f8f9fa;"
+                            <tr class="group-header" style="cursor:pointer;background:#f8f9fa;"
                                 onclick="toggleGroup('${item.id}')">
 
                                 <td colspan="2" class="font-weight-bold align-middle">
@@ -154,7 +151,8 @@
 
                             <!-- Detail Rows for Serial Input -->
                             <c:forEach begin="1" end="${item.quantity}" var="i">
-                                <tr class="sub-item item-group-${item.id}" style="display:none;">
+                                <tr class="sub-item item-group-${item.id}"
+                                    style="display:none;">
 
                                     <td class="text-center align-middle text-muted">
                                             ${displayIndex}
@@ -163,8 +161,8 @@
 
                                     <td>
                                         <input type="text" name="serial"
-                                               class="form-control form-control-sm" placeholder="Input Serial / IMEI"
-                                               required>
+                                               class="form-control form-control-sm serial-input"
+                                               placeholder="Input Serial / IMEI" required>
                                     </td>
 
                                     <td class="text-center align-middle">
@@ -186,6 +184,7 @@
 </main>
 
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 <script>
     function toggleGroup(itemId) {
         let items = document.querySelectorAll('.item-group-' + itemId);
@@ -200,6 +199,63 @@
         } else {
             items.forEach(item => item.style.display = 'none');
             if (icon) icon.innerHTML = '&#9658;'; // right triangle
+        }
+    }
+
+    let html5QrCode;
+    let currentInput = null;
+
+    // Bắt sự kiện focus vào input
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".serial-input").forEach(input => {
+            input.addEventListener("focus", function () {
+                currentInput = this;
+            });
+        });
+    });
+
+    function startScan() {
+        if (!currentInput) {
+            alert("Hãy click vào ô cần nhập trước!");
+            return;
+        }
+
+        const reader = document.getElementById("reader");
+        reader.style.display = "block";
+
+        html5QrCode = new Html5Qrcode("reader");
+
+        html5QrCode.start(
+            {facingMode: "environment"},
+            {
+                fps: 10,
+                qrbox: 250
+            },
+            onScanSuccess
+        );
+    }
+
+    function onScanSuccess(decodedText) {
+        // Fill vào input đang chọn
+        if (currentInput) {
+            currentInput.value = decodedText;
+        }
+
+        // Dừng camera
+        html5QrCode.stop().then(() => {
+            document.getElementById("reader").style.display = "none";
+        });
+
+        // 👉 Auto focus sang ô tiếp theo (xịn hơn)
+        moveToNextInput();
+    }
+
+    function moveToNextInput() {
+        const inputs = Array.from(document.querySelectorAll(".serial-input"));
+        const index = inputs.indexOf(currentInput);
+
+        if (index !== -1 && index < inputs.length - 1) {
+            inputs[index + 1].focus();
         }
     }
 </script>
