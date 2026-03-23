@@ -18,7 +18,7 @@
 
     /* scroll */
     .table-scroll{
-        max-height:500px;
+        max-height: calc(100vh - 20rem);
         overflow-y:auto;
     }
 

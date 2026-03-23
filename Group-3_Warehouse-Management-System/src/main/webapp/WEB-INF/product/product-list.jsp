@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -200,8 +200,24 @@
                         <jsp:param name="active" value="${p.isActive}"/>
                     </jsp:include>
                 </td>
-                <td>${p.createdAt}</td>
-                <td>${p.updatedAt}</td>
+                <td>
+                        <%--Convert LocalDateTime to Date for JSTL formatting--%>
+                        <fmt:parseDate value="${p.createdAt}"
+                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                       var="parsedCreatedDate"
+                                       type="both"/>
+                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                        value="${parsedCreatedDate}"/>
+                </td>
+                <td>
+                        <%--Convert LocalDateTime to Date for JSTL formatting--%>
+                        <fmt:parseDate value="${p.updatedAt}"
+                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                       var="parsedUpdatedDate"
+                                       type="both"/>
+                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                        value="${parsedUpdatedDate}"/>
+                </td>
                 <td>
                     <c:if test="${sessionScope.user != null
                                           and sessionScope.user.role != null
