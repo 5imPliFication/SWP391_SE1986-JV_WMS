@@ -2,7 +2,7 @@ package com.example.dao;
 
 import com.example.config.DBConfig;
 import com.example.dto.ExportDTO;
-import com.example.dto.ExportItemDTO;
+import com.example.dto.ExportProductDTO;
 import com.example.dto.OrderDTO;
 import com.example.dto.ProductItemDTO;
 import com.example.util.AppConstants;
@@ -388,7 +388,7 @@ public class InventoryDAO {
     }
 
     // get list item of pending export order by order id
-    public List<ExportItemDTO> getPendingExportItems(Long orderId) {
+    public List<ExportProductDTO> getPendingExportItems(Long orderId) {
         String sql = """
                 select oi.id as item_id, oi.quantity, p.name, u.name as unit
                 from order_items oi
@@ -396,13 +396,13 @@ public class InventoryDAO {
                 left join units u on u.id = p.unit_id
                 where oi.order_id = ?;
                 """;
-        List<ExportItemDTO> list = new ArrayList<>();
+        List<ExportProductDTO> list = new ArrayList<>();
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, orderId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    ExportItemDTO item = new ExportItemDTO();
+                    ExportProductDTO item = new ExportProductDTO();
                     item.setId(rs.getLong("item_id"));
                     item.setProductName(rs.getString("name"));
                     item.setQuantity(rs.getInt("quantity"));
@@ -434,53 +434,65 @@ public class InventoryDAO {
 
     // assign order item correspond serial and check validate serial
     public void assignSerialsToOrderItems(Map<Long, List<String>> orderItemSerialsMap) {
-        String checkSql = "SELECT id FROM product_items WHERE serial = ? AND is_active = 1";
-        String insertSql = "INSERT INTO order_item_product_items (order_item_id, product_item_id) VALUES (?, ?)";
 
         try (Connection con = DBConfig.getDataSource().getConnection()) {
-            // 1 transaction false -> roll back all
             con.setAutoCommit(false);
-
-            try (PreparedStatement checkPs = con.prepareStatement(checkSql);
-                 PreparedStatement insertPs = con.prepareStatement(insertSql)) {
-
-                // iterate any order item (key: orderItemId, value: list serials) to check and insert
+            try {
                 for (Map.Entry<Long, List<String>> entry : orderItemSerialsMap.entrySet()) {
-                    // get id of order item
+                    // get order item id
                     Long orderItemId = entry.getKey();
-                    // get serial of this order item
                     for (String serial : entry.getValue()) {
-                        // set value for query to check serial exist
-                        checkPs.setString(1, serial);
-                        // check
-                        try (ResultSet rs = checkPs.executeQuery()) {
-                            // if exist -> get id of product item
-                            if (rs.next()) {
-                                Long productItemId = rs.getLong("id");
-
-                                // Batch insert mapping
-                                insertPs.setLong(1, orderItemId);
-                                insertPs.setLong(2, productItemId);
-                                insertPs.addBatch();
-                            } else {
-                                con.rollback();
-                                throw new IllegalArgumentException("Serial " + serial + " does not exist or is not active in inventory.");
-                            }
+                        // get product item id by serial and check validate of serial
+                        Long productItemId = getProductItemIdBySerial(serial);
+                        if (productItemId == null) {
+                            con.rollback();
+                            throw new IllegalArgumentException(
+                                    "Serial " + serial + " does not exist or inactive");
                         }
+                        insertOrderItemProductItem(orderItemId, productItemId);
                     }
                 }
-
-                // Execute all insertions
-                insertPs.executeBatch();
                 con.commit();
-            } catch (SQLException | IllegalArgumentException e) {
+            } catch (Exception e) {
                 con.rollback();
                 throw e;
             } finally {
                 con.setAutoCommit(true);
             }
+
         } catch (SQLException e) {
             throw new RuntimeException("Database error during serial assignment", e);
+        }
+    }
+
+    // get product item id by serial
+    public Long getProductItemIdBySerial(String serial) throws SQLException {
+        String sql = "SELECT id FROM product_items WHERE serial = ? AND is_active = 1";
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, serial);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("id");
+                }
+            }
+        }
+        return null;
+    }
+
+    // insert data to table order_item_product_items to assign product item correspond order item
+    public void insertOrderItemProductItem(Long orderItemId, Long productItemId)
+            throws SQLException {
+
+        String sql = "INSERT INTO order_item_product_items (order_item_id, product_item_id) VALUES (?, ?)";
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, orderItemId);
+            ps.setLong(2, productItemId);
+            ps.executeUpdate();
         }
     }
 }

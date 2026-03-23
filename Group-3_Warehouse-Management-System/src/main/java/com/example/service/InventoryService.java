@@ -1,13 +1,10 @@
 package com.example.service;
 
 import com.example.dao.InventoryDAO;
-import com.example.dao.StockMovementDAO;
 import com.example.dto.ExportDTO;
-import com.example.dto.ExportItemDTO;
+import com.example.dto.ExportProductDTO;
 import com.example.dto.OrderDTO;
 import com.example.dto.ProductItemDTO;
-import com.example.enums.MovementType;
-import com.example.enums.ReferenceType;
 import com.example.util.AppConstants;
 import com.example.validator.ImportProductItemValidator;
 import jakarta.servlet.http.Part;
@@ -18,8 +15,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -222,22 +217,17 @@ public class InventoryService {
 
 
     public void assignSerialForExportProduct(ExportDTO exportOrder, String[] serials) {
-        // Map serials to order items
         int serialIndex = 0;
+        // product item id -> list serials assigned to this item
         Map<Long, List<String>> orderItemSerialsMap = new HashMap<>();
-        
-        for (ExportItemDTO item : exportOrder.getItems()) {
+        for (ExportProductDTO item : exportOrder.getItems()) {
             List<String> assignedSerials = new ArrayList<>();
             for (int i = 0; i < item.getQuantity(); i++) {
-                // get serial from list serials
                 String serial = serials[serialIndex++];
-                // save serial to list assigned for item
                 assignedSerials.add(serial);
             }
             orderItemSerialsMap.put(item.getId(), assignedSerials);
         }
-
-        // Validate and Save inside DAO
         inventoryDAO.assignSerialsToOrderItems(orderItemSerialsMap);
     }
 }

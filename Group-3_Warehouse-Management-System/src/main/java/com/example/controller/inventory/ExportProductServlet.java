@@ -1,10 +1,7 @@
 package com.example.controller.inventory;
 
 import com.example.dto.ExportDTO;
-import com.example.dto.ExportItemDTO;
-import com.example.model.User;
 import com.example.service.InventoryService;
-import com.example.service.ActivityLogService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -34,6 +31,7 @@ public class ExportProductServlet extends HttpServlet {
             Long orderId = Long.parseLong(request.getParameter("orderId"));
 
             // get order information
+            // order store information of order and list item in order to display in JSP
             ExportDTO order = inventoryService.getExportOrder(orderId);
 
             // set information for order and forward to JSP
@@ -50,8 +48,6 @@ public class ExportProductServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        User user = (User) request.getSession().getAttribute("user");
 
         try {
             Long orderId = Long.parseLong(request.getParameter("orderId"));

@@ -86,7 +86,7 @@
             <div class="col-md-6">
                 <label class="font-weight-bold mb-1">Note</label>
                 <input type="text" class="form-control form-control-sm bg-light"
-                       value="${order.note != null && !order.note.isEmpty() ? order.note : 'None'}"
+                       value="${order.note}"
                        readonly>
             </div>
 
