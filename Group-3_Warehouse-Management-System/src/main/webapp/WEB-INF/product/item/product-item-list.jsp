@@ -125,6 +125,7 @@
     </tbody>
     </table>
 
+    <br>
     <a href="${pageContext.request.contextPath}/products">Back to product list</a>
 
     <%-- pagination--%>
