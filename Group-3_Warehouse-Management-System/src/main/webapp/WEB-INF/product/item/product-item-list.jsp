@@ -38,12 +38,8 @@
 
     <h2>Product Item List</h2>
 
-    <%--Product Name (Readonly)--%>
-    <div class="col-auto">
-        <label>
-            <input type="text" class="form-control" name="productName" placeholder="Product Name"
-                   value="${product.name}" readonly>
-        </label>
+    <div class="fs-5 fw-semibold text-dark">
+        ${product.name}
     </div>
     <br>
     <%--form submit for search and sort--%>
@@ -123,18 +119,26 @@
                                               and sessionScope.user.role != null
                                               and sessionScope.user.role.active
                                               and fn:contains(sessionScope.userPermissions, 'UPDATE_PRODUCT_ITEM')}">
-                        <form method="get" action="${pageContext.request.contextPath}/products/items/update">
+
+                        <form method="post" action="${pageContext.request.contextPath}/products/items/update">
                             <input type="hidden" name="productItemId" value="${pi.id}">
+                                <%--Use for redirect exactly--%>
                             <input type="hidden" name="productId" value="${pi.productId}">
                             <input type="hidden" name="pageNo" value="${param.pageNo}">
                             <input type="hidden" name="searchSerial" value="${param.searchSerial}">
                             <input type="hidden" name="isActive" value="${param.isActive}">
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                Edit
-                            </button>
+                            <c:if test="${pi.isActive == true }">
+                                <button class="btn-warning" type="submit" name="btnChangeStatus" value="unavailable">
+                                    Mark Unavailable
+                                </button>
+                            </c:if>
+                            <c:if test="${pi.isActive == false }">
+                                <button class="btn-success" type="submit" name="btnChangeStatus" value="available">
+                                    Mark Available
+                                </button>
+                            </c:if>
                         </form>
                     </c:if>
-
                 </td>
 
             </tr>

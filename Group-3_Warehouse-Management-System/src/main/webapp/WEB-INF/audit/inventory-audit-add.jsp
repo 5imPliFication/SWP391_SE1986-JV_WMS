@@ -137,10 +137,8 @@
 
 
     <%--table list product search--%>
-    <table class="table table-bordered table-hover">
-        <thead class="thead-dark">
+    <c:set var="tableHeader" scope="request">
         <tr>
-            <th>ID</th>
             <th>Name</th>
             <th>Description</th>
             <th>Brand</th>
@@ -152,11 +150,11 @@
             <th>Screen</th>
             <th></th>
         </tr>
-        </thead>
-        <tbody>
+    </c:set>
+
+    <c:set var="tableBody" scope="request">
         <c:forEach items="${products}" var="product">
             <tr>
-                <td>${product.id}</td>
                 <td>${product.name}</td>
                 <td>${product.description}</td>
                 <td>${product.brand.name}</td>
@@ -179,12 +177,14 @@
                 </td>
             </tr>
         </c:forEach>
-        </tbody>
-    </table>
+    </c:set>
+
+    <%--Render table with header and body from request attributes--%>
+    <jsp:include page="/WEB-INF/common/table.jsp"/>
 
     <c:if test="${empty products}">
         <tr>
-            <td colspan="11">No data</td>
+            <td colspan="10">No data</td>
         </tr>
     </c:if>
 
@@ -203,7 +203,7 @@
                     <%-- previous page --%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory-audits/add?pageNo=${pageNo - 1}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&modelName=${param.modelName}&chipName=${param.chipName}&ramSize=${param.ramSize}&storageSize=${param.storageSize}&screenSize=${param.screenSize}&isActive=${param.isActive}">
+                       href="${pageContext.request.contextPath}/inventory-audits/add?pageNo=${pageNo - 1}&searchName=${param.searchName}&brandId=${param.brandId}&categoryId=${param.categoryId}&modelId=${param.modelId}&chipId=${param.chipId}&ramId=${param.ramId}&storageId=${param.storageId}&sizeId=${param.sizeId}&isActive=${param.isActive}">
                         Previous
                     </a>
                 </li>
@@ -212,7 +212,7 @@
                 <c:forEach begin="1" end="${totalPages}" var="i">
                     <li class="page-item ${i == pageNo ? 'active' : ''}">
                         <a class="page-link"
-                           href="${pageContext.request.contextPath}/inventory-audits/add?pageNo=${i}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&modelName=${param.modelName}&chipName=${param.chipName}&ramSize=${param.ramSize}&storageSize=${param.storageSize}&screenSize=${param.screenSize}&isActive=${param.isActive}">
+                           href="${pageContext.request.contextPath}/inventory-audits/add?pageNo=${i}&searchName=${param.searchName}&brandId=${param.brandId}&categoryId=${param.categoryId}&modelId=${param.modelId}&chipId=${param.chipId}&ramId=${param.ramId}&storageId=${param.storageId}&sizeId=${param.sizeId}&isActive=${param.isActive}">
                                 ${i}
                         </a>
                     </li>
@@ -221,7 +221,7 @@
                     <%-- next page--%>
                 <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory-audits/add?pageNo=${pageNo + 1}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&modelName=${param.modelName}&chipName=${param.chipName}&ramSize=${param.ramSize}&storageSize=${param.storageSize}&screenSize=${param.screenSize}&isActive=${param.isActive}">
+                       href="${pageContext.request.contextPath}/inventory-audits/add?pageNo=${pageNo + 1}&searchName=${param.searchName}&brandId=${param.brandId}&categoryId=${param.categoryId}&modelId=${param.modelId}&chipId=${param.chipId}&ramId=${param.ramId}&storageId=${param.storageId}&sizeId=${param.sizeId}&isActive=${param.isActive}">
                         Next
                     </a>
                 </li>
@@ -235,8 +235,7 @@
     <form method="post" action="${pageContext.request.contextPath}/inventory-audits/add">
         <div>
             <div class="table-responsive">
-                <table class="table table-bordered table-hover table-sm">
-                    <thead class="thead-dark text-center">
+                <c:set var="tableHeader" scope="request">
                     <tr>
                         <th>No.</th>
                         <th>Product</th>
@@ -249,8 +248,9 @@
                         <th>Screen</th>
                         <th></th>
                     </tr>
-                    </thead>
-                    <tbody>
+                </c:set>
+
+                <c:set var="tableBody" scope="request">
                     <c:forEach items="${tmpInventoryAuditItems}" var="item" varStatus="status">
                         <tr>
                             <td class="text-center align-middle">
@@ -275,8 +275,11 @@
                             </td>
                         </tr>
                     </c:forEach>
-                    </tbody>
-                </table>
+                </c:set>
+
+                <%--Render table with header and body from request attributes--%>
+                <jsp:include page="/WEB-INF/common/table.jsp"/>
+
                 <c:if test="${empty tmpInventoryAuditItems}">
                     <tr>
                         <td colspan="10">No data</td>
