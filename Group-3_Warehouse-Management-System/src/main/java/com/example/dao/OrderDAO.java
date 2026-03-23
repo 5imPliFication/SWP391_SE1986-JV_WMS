@@ -1055,8 +1055,8 @@ public class OrderDAO {
         StringBuilder sql = new StringBuilder(
                 "SELECT o.*, u.fullname AS created_user_name, pu.fullname AS processed_user_name " +
                         "FROM orders o " +
-                        "LEFT JOIN users u ON o.created_by = u.id " +
-                        "LEFT JOIN users pu ON o.processed_by = pu.id " +
+                        "JOIN users u ON o.created_by = u.id " +
+                        "JOIN users pu ON o.processed_by = pu.id " +
                         "WHERE o.status = 'COMPLETED'"
         );
 

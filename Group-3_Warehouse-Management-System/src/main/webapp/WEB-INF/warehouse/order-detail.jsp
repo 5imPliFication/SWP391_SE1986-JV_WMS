@@ -440,7 +440,7 @@
                         <c:when test="${order.status == 'SUBMITTED'}">
                             <a href="${pageContext.request.contextPath}/export?orderId=${order.id}"
                                class="btn btn-success btn-lg btn-block mb-3">
-                                <i class="fas fa-barcode mr-2"></i>Assign Serial Numbers
+                                <i class="fas fa-barcode mr-2"></i>Start Processing
                             </a>
 
                             <div class="card border-danger">

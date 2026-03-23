@@ -416,20 +416,17 @@ public class InventoryDAO {
         return list;
     }
 
-//    public void completeExportOrder(Long orderId, Long warehouseKeeperId) {
-//        String sql = "UPDATE orders SET status = 'COMPLETED', processed_by = ?, processed_at = NOW() WHERE id = ? AND status = 'PROCESSING'";
-//        try (Connection con = DBConfig.getDataSource().getConnection();
-//             PreparedStatement ps = con.prepareStatement(sql)) {
-//            ps.setLong(1, warehouseKeeperId);
-//            ps.setLong(2, orderId);
-//            int updated = ps.executeUpdate();
-//            if (updated == 0) {
-//                throw new IllegalStateException("Order not found or not in PROCESSING status");
-//            }
-//        } catch (SQLException e) {
-//            throw new RuntimeException("Failed to complete export order", e);
-//        }
-//    }
+    public void updateOrderStatus(Long orderId, Long warehouseKeeperId) {
+        String sql = "UPDATE orders SET status = 'COMPLETED', processed_by = ?, processed_at = NOW() WHERE id = ?";
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, warehouseKeeperId);
+            ps.setLong(2, orderId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to complete export order", e);
+        }
+    }
 
 
     // assign order item correspond serial and check validate serial
@@ -493,6 +490,23 @@ public class InventoryDAO {
             ps.setLong(1, orderItemId);
             ps.setLong(2, productItemId);
             ps.executeUpdate();
+        }
+    }
+
+    public void subtractInventory(Map<Long, List<String>> orderItemSerialsMap) {
+        String sql = "UPDATE product_items SET is_active = 0, updated_at = NOW() WHERE id = ?";
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            for (List<String> serials : orderItemSerialsMap.values()) {
+                for (String serial : serials) {
+                    Long productItemId = getProductItemIdBySerial(serial);
+                    ps.setLong(1, productItemId);
+                    ps.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }

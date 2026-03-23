@@ -98,7 +98,7 @@
                 <button type="submit" form="assignForm"
                         class="btn btn-success btn-sm"
                 ${empty order.items ? 'disabled' : '' }>
-                    Save
+                    Export
                 </button>
             </div>
         </div>

@@ -1,6 +1,7 @@
 package com.example.controller.inventory;
 
 import com.example.dto.ExportDTO;
+import com.example.model.User;
 import com.example.service.InventoryService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -49,17 +50,20 @@ public class ExportProductServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+
         try {
             Long orderId = Long.parseLong(request.getParameter("orderId"));
 
             // get export order details to process serials
-            HttpSession session = request.getSession();
             ExportDTO exportOrder = (ExportDTO) session.getAttribute("order");
 
             String[] serials = request.getParameterValues("serial");
             
-            // Assign serials to order items (validates and maps them)
-            inventoryService.assignSerialForExportProduct(exportOrder, serials);
+            // assign serials to order items and subtract quantity from inventory
+            inventoryService.handleExport(user, exportOrder, serials);
+
 
             response.sendRedirect(request.getContextPath() + "/warehouse/order/detail?id=" + orderId);
         } catch (IllegalArgumentException e) {

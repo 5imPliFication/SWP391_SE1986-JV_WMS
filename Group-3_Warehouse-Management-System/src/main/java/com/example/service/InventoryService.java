@@ -5,6 +5,7 @@ import com.example.dto.ExportDTO;
 import com.example.dto.ExportProductDTO;
 import com.example.dto.OrderDTO;
 import com.example.dto.ProductItemDTO;
+import com.example.model.User;
 import com.example.util.AppConstants;
 import com.example.validator.ImportProductItemValidator;
 import jakarta.servlet.http.Part;
@@ -216,7 +217,7 @@ public class InventoryService {
 //    }
 
 
-    public void assignSerialForExportProduct(ExportDTO exportOrder, String[] serials) {
+    public void handleExport(User user, ExportDTO exportOrder, String[] serials) {
         int serialIndex = 0;
         // product item id -> list serials assigned to this item
         Map<Long, List<String>> orderItemSerialsMap = new HashMap<>();
@@ -228,6 +229,14 @@ public class InventoryService {
             }
             orderItemSerialsMap.put(item.getId(), assignedSerials);
         }
+
+        // assign serials to order items
         inventoryDAO.assignSerialsToOrderItems(orderItemSerialsMap);
+
+        // subtract quantity from inventory
+        inventoryDAO.subtractInventory(orderItemSerialsMap);
+
+        // update order status to complete
+        inventoryDAO.updateOrderStatus(exportOrder.getId(), user.getId());
     }
 }
