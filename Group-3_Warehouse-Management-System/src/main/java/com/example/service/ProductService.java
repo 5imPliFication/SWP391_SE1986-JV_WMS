@@ -88,40 +88,12 @@ public class ProductService {
         return productDAO.findById(productId);
     }
 
-    public boolean updateProduct(String productDescription, String imgUrl, long brandId, long categoryId, long modelId,
-                                 long chipId, long ramId, long storageId, long sizeId, long unitId, boolean isActive, long productId) {
-        Brand brand = brandDAO.findById(brandId);
-        Category category = categoryDAO.findById(categoryId);
-        Model model = modelDAO.getById(modelId);
-        Chip chip = chipDAO.getById(chipId);
-        Ram ram = ramDAO.getById(ramId);
-        Storage storage = storageDAO.getById(storageId);
-        Size size = sizeDAO.getById(sizeId);
-        Unit unit = unitDAO.getById(unitId);
-
-        // Generate product name based on the attributes
-        String productName = String.format("%s %s %s %s %s %s",
-                brand.getName(),
-                model.getName(),
-                chip.getName(),
-                ram.getSize(),
-                storage.getSize(),
-                size.getSize());
-
+    public boolean updateProduct(String productDescription, String imgUrl, boolean isActive, long productId) {
         Product product = new Product();
         product.setId(productId);
-        product.setName(productName);
         product.setDescription(productDescription);
         product.setImgUrl(imgUrl);
         product.setIsActive(isActive);
-        product.setBrand(brand);
-        product.setCategory(category);
-        product.setModel(model);
-        product.setChip(chip);
-        product.setRam(ram);
-        product.setStorage(storage);
-        product.setSize(size);
-        product.setUnit(unit);
 
         return productDAO.update(product);
     }

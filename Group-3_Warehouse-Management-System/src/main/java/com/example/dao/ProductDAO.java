@@ -410,17 +410,8 @@ public class ProductDAO {
     public boolean update(Product product) {
         String sql = """
                 UPDATE products
-                SET name = ?,
-                    description = ?,
+                SET description = ?,
                     img_url = ?,
-                    brand_id = ?,
-                    category_id = ?,
-                    model_id = ?,
-                    chip_id = ?,
-                    ram_id = ?,
-                    storage_id = ?,
-                    size_id = ?,
-                    unit_id = ?,
                     is_active = ?,
                     updated_at = NOW()
                 WHERE id = ?
@@ -429,19 +420,10 @@ public class ProductDAO {
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, product.getName());
-            ps.setString(2, product.getDescription());
-            ps.setString(3, product.getImgUrl());
-            ps.setLong(4, product.getBrand().getId());
-            ps.setLong(5, product.getCategory().getId());
-            ps.setLong(6, product.getModel().getId());
-            ps.setLong(7, product.getChip().getId());
-            ps.setLong(8, product.getRam().getId());
-            ps.setLong(9, product.getStorage().getId());
-            ps.setLong(10, product.getSize().getId());
-            ps.setLong(11, product.getUnit().getId());
-            ps.setBoolean(12, product.getIsActive());
-            ps.setLong(13, product.getId());
+            ps.setString(1, product.getDescription());
+            ps.setString(2, product.getImgUrl());
+            ps.setBoolean(3, product.getIsActive());
+            ps.setLong(4, product.getId());
 
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;

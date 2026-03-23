@@ -26,6 +26,7 @@
                             <form action="${pageContext.request.contextPath}/products/items/update" method="post">
 
                                 <input type="hidden" name="productItemId" value="${productItem.id}">
+                                <input type="hidden" name="productId" value="${productItem.productId}">
                                 <input type="hidden" name="pageNo" value="${param.pageNo}">
                                 <input type="hidden" name="searchSerial" value="${param.searchSerial}">
                                 <input type="hidden" name="isActive" value="${param.isActive}">
@@ -37,7 +38,6 @@
                                            name="productItemSerial"
                                            class="form-control"
                                            value="${productItem.serial}"
-                                           style="background-color: #adb5bd;"
                                            readonly>
                                 </div>
 
@@ -48,18 +48,16 @@
                                            name="productItemImportedPrice"
                                            class="form-control"
                                            value="<fmt:formatNumber value='${productItem.importedPrice}' type='number' groupingUsed='true' /> đ"
-                                           style="background-color: #adb5bd;"
                                            readonly>
                                 </div>
 
                                 <!-- Current Price -->
                                 <div class="mb-3">
-                                    <label class="form-label">Current Price</label>
+                                    <label class="form-label">Selling Price</label>
                                     <input type="text"
                                            name="productItemCurrentPrice"
                                            class="form-control"
                                            value="<fmt:formatNumber value='${productItem.currentPrice}' type='number' groupingUsed='true' /> đ"
-                                           style="background-color: #adb5bd;"
                                            readonly>
                                 </div>
 
@@ -86,20 +84,20 @@
                                     </button>
                                 </div>
 
-                                <div>
-                                    <c:if test="${not empty sessionScope.successMessage}">
-                                        <div class="alert alert-success">
-                                            ${sessionScope.successMessage}
-                                        </div>
-                                        <c:remove var="successMessage" scope="session"/>
-                                    </c:if>
-                                    <c:if test="${not empty sessionScope.errorMessage}">
-                                        <div class="alert alert-danger">
-                                            ${sessionScope.errorMessage}
-                                        </div>
-                                        <c:remove var="errorMessage" scope="session"/>
-                                    </c:if>
-                                </div>
+<%--                                <div>--%>
+<%--                                    <c:if test="${not empty sessionScope.successMessage}">--%>
+<%--                                        <div class="alert alert-success">--%>
+<%--                                            ${sessionScope.successMessage}--%>
+<%--                                        </div>--%>
+<%--                                        <c:remove var="successMessage" scope="session"/>--%>
+<%--                                    </c:if>--%>
+<%--                                    <c:if test="${not empty sessionScope.errorMessage}">--%>
+<%--                                        <div class="alert alert-danger">--%>
+<%--                                            ${sessionScope.errorMessage}--%>
+<%--                                        </div>--%>
+<%--                                        <c:remove var="errorMessage" scope="session"/>--%>
+<%--                                    </c:if>--%>
+<%--                                </div>--%>
 
                             </form>
                         </div>

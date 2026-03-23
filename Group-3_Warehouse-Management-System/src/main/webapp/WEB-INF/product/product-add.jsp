@@ -25,39 +25,6 @@
                     <form action="${pageContext.request.contextPath}/products/add" method="post"
                           enctype="multipart/form-data">
 
-                        <!-- Product Name -->
-                        <div class="mb-3">
-                            <label class="form-label">Product Name</label>
-                            <input type="text"
-                                   name="productName"
-                                   class="form-control"
-                                   placeholder="Automatically generated with format: [Brand] [Model] [Chip] [Ram] [Storage] [Screen]"
-                                   readonly>
-                        </div>
-
-                        <!-- Description -->
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <input type="text"
-                                   name="productDescription"
-                                   class="form-control"
-                                   placeholder="Enter description"
-                                   required>
-                        </div>
-
-                        <!-- Upload Image-->
-                        <div class="mb-3">
-                            <label class="form-label">Image</label>
-                            <input type="file"
-                                   name="imageFile"
-                                   id="imageInput"
-                                   class="form-control"
-                                   accept="image/*"
-                                   required>
-                            <%--Image preview--%>
-                            <img id="preview" style="margin-top:10px; width:120px; display:none; border-radius:6px;">
-                        </div>
-
                         <!-- Category -->
                         <div class="mb-3">
                             <label class="form-label">Category</label>
@@ -146,6 +113,39 @@
                                     <option value="${c.id}">${c.name}</option>
                                 </c:forEach>
                             </select>
+                        </div>
+
+                        <!-- Product Name -->
+                        <div class="mb-3">
+                            <label class="form-label">Product Name</label>
+                            <input type="text"
+                                   name="productName"
+                                   class="form-control"
+                                   placeholder="Automatically generated with format: [Brand] [Model] [Chip] [Ram] [Storage] [Screen]"
+                                   readonly>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <input type="text"
+                                   name="productDescription"
+                                   class="form-control"
+                                   placeholder="Enter description"
+                                   required>
+                        </div>
+
+                        <!-- Upload Image-->
+                        <div class="mb-3">
+                            <label class="form-label">Image</label>
+                            <input type="file"
+                                   name="imageFile"
+                                   id="imageInput"
+                                   class="form-control"
+                                   accept="image/*"
+                                   required>
+                            <%--Image preview--%>
+                            <img id="preview" style="margin-top:10px; width:120px; display:none; border-radius:6px;">
                         </div>
 
                         <!-- Buttons -->

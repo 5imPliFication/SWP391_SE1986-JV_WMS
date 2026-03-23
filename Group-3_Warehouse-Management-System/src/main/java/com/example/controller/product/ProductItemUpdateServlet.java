@@ -51,7 +51,8 @@ public class ProductItemUpdateServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
-        int pageNo = Integer.parseInt(request.getParameter("pageNo"));
+        String productId = request.getParameter("productId");
+        String pageNo = request.getParameter("pageNo");
         String searchSerial = request.getParameter("searchSerial");
         String isActive = request.getParameter("isActive");
 
@@ -61,6 +62,6 @@ public class ProductItemUpdateServlet extends HttpServlet {
         } else {
             request.getSession().setAttribute("errorMessage", "Product item update failed");
         }
-        response.sendRedirect("/products/items/update?productItemId=" + productItemId + "&pageNo=" + pageNo + "&searchSerial=" + searchSerial + "&isActive=" + isActive);
+        response.sendRedirect("/products/items?productId=" + productId + "&pageNo=" + pageNo + "&searchSerial=" + searchSerial + "&isActive=" + isActive);
     }
 }
