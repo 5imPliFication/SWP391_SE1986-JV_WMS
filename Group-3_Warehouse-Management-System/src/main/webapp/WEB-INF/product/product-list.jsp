@@ -208,10 +208,20 @@
                                           and sessionScope.user.role.active
                                           and fn:contains(sessionScope.userPermissions, 'UPDATE_PRODUCT')}">
 
-                        <a href="${pageContext.request.contextPath}/products/update?productId=${p.id}&pageNo=${pageNo}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&modelName=${param.modelName}&chipName=${param.chipName}&ramSize=${param.ramSize}&storageSize=${param.storageSize}&screenSize=${param.screenSize}&isActive=${param.isActive}"
-                           class="btn btn-warning btn-sm">
-                            Edit
-                        </a>
+                        <form method="get" action="${pageContext.request.contextPath}/products/update">
+                                <input type="hidden" name="productId" value="${p.id}">
+                                <input type="hidden" name="pageNo" value="${param.pageNo}">
+                                <input type="hidden" name="searchName" value="${param.searchName}">
+                                <input type="hidden" name="brandId" value="${param.brandId}">
+                                <input type="hidden" name="categoryId" value="${param.categoryId}">
+                                <input type="hidden" name="modelId" value="${param.modelId}">
+                                <input type="hidden" name="chipId" value="${param.chipId}">
+                                <input type="hidden" name="ramId" value="${param.ramId}">
+                                <input type="hidden" name="storageId" value="${param.storageId}">
+                                <input type="hidden" name="sizeId" value="${param.sizeId}">
+                                <input type="hidden" name="isActive" value="${param.isActive}">
+                            <button type="submit" class="btn btn-sm btn-primary">Edit</button>
+                        </form>
 
                     </c:if>
                 </td>

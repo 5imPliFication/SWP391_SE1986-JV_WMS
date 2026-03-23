@@ -104,9 +104,16 @@
                                               and sessionScope.user.role != null
                                               and sessionScope.user.role.active
                                               and fn:contains(sessionScope.userPermissions, 'UPDATE_PRODUCT_ITEM')}">
-                        <a href="${pageContext.request.contextPath}/products/items/update?productItemId=${pi.id}&pageNo=${pageNo}&searchSerial=${param.searchSerial}&isActive=${param.isActive}">
-                            EDIT
-                        </a>
+                        <form method="get" action="${pageContext.request.contextPath}/products/items/update">
+                            <input type="hidden" name="productItemId" value="${pi.id}">
+                            <input type="hidden" name="productId" value="${pi.productId}">
+                            <input type="hidden" name="pageNo" value="${param.pageNo}">
+                            <input type="hidden" name="searchSerial" value="${param.searchSerial}">
+                            <input type="hidden" name="isActive" value="${param.isActive}">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                Edit
+                            </button>
+                        </form>
                     </c:if>
 
                 </td>
