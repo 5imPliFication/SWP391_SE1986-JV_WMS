@@ -54,7 +54,7 @@
 
                                 <!-- Current Price -->
                                 <div class="mb-3">
-                                    <label class="form-label">Current Price</label>
+                                    <label class="form-label">Selling Price</label>
                                     <input type="text"
                                            name="productItemCurrentPrice"
                                            class="form-control"
