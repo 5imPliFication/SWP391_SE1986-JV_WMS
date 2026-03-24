@@ -95,6 +95,7 @@
             <div class="col-md-12 d-flex justify-content-end">
                 <button type="submit" form="assignForm"
                         class="btn btn-success btn-sm"
+                        onclick="allowSubmit()"
                 ${empty order.items ? 'disabled' : '' }>
                     Export
                 </button>
@@ -208,8 +209,17 @@
     // Bắt sự kiện focus vào input
     document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll(".serial-input").forEach(input => {
+            // Lưu input đang chọn
             input.addEventListener("focus", function () {
                 currentInput = this;
+            });
+
+            // CHẶN ENTER TỪ MÁY QUÉT/BÀN PHÍM
+            input.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault(); // Chặn submit form ngay lập tức
+                    moveToNextInput();  // Ép nó nhảy sang ô tiếp theo thay vì submit
+                }
             });
         });
     });
@@ -236,27 +246,47 @@
     }
 
     function onScanSuccess(decodedText) {
-        // Fill vào input đang chọn
         if (currentInput) {
             currentInput.value = decodedText;
         }
 
         // Dừng camera
-        html5QrCode.stop().then(() => {
-            document.getElementById("reader").style.display = "none";
-        });
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                document.getElementById("reader").style.display = "none";
+            }).catch(err => console.error(err));
+        }
 
-        // 👉 Auto focus sang ô tiếp theo (xịn hơn)
+        // Tự động nhảy ô (Logic này đã được tối ưu ở bước 2)
         moveToNextInput();
     }
 
+    // SỬA LẠI HÀM NÀY:
     function moveToNextInput() {
         const inputs = Array.from(document.querySelectorAll(".serial-input"));
+        if (!currentInput) return; // Bảo vệ nếu chưa chọn ô nào
+
         const index = inputs.indexOf(currentInput);
 
         if (index !== -1 && index < inputs.length - 1) {
+            // Nếu chưa phải ô cuối, nhảy tới ô tiếp theo
             inputs[index + 1].focus();
+        } else {
+            // Nếu ĐÃ LÀ Ô CUỐI CÙNG
+            currentInput.blur();
+            console.log("Đã hoàn thành quét tất cả các ô.");
+            // Bạn có thể hiện thông báo nhỏ ở đây: alert("Đã quét xong!");
         }
+    }
+
+    document.getElementById("assignForm").addEventListener("submit", function (e) {
+        if (!window.manualSubmit) {
+            e.preventDefault();
+        }
+    });
+
+    function allowSubmit() {
+        window.manualSubmit = true;
     }
 </script>
 </body>
