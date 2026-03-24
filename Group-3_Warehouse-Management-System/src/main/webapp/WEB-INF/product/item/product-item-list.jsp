@@ -38,9 +38,8 @@
 
     <h2>Product Item List</h2>
 
-    <%--Product Name (Readonly)--%>
-    <div class="col-auto">
-        <p>Product Name: ${product.name}</p>
+    <div class="fs-5 fw-semibold text-dark">
+        ${product.name}
     </div>
     <br>
     <%--form submit for search and sort--%>
@@ -96,19 +95,50 @@
                 <td>
                     <fmt:formatNumber value="${pi.currentPrice}" type="number" groupingUsed="true"/> đ
                 </td>
-                <td>${pi.importedAt}</td>
-                <td>${pi.updatedAt}</td>
+                <td>
+                        <%--Convert LocalDateTime to Date for JSTL formatting--%>
+                        <fmt:parseDate value="${pi.importedAt}"
+                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                       var="parsedImportedDate"
+                                       type="both"/>
+                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                        value="${parsedImportedDate}"/>
+                </td>
+                <td>
+                        <%--Convert LocalDateTime to Date for JSTL formatting--%>
+                        <fmt:parseDate value="${pi.updatedAt}"
+                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                       var="parsedUpdatedDate"
+                                       type="both"/>
+                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                        value="${parsedUpdatedDate}"/>
+                </td>
                 <td>${(pi.isActive == true) ? 'Available' : 'Unavailable'}</td>
                 <td>
                     <c:if test="${sessionScope.user != null
                                               and sessionScope.user.role != null
                                               and sessionScope.user.role.active
                                               and fn:contains(sessionScope.userPermissions, 'UPDATE_PRODUCT_ITEM')}">
-                        <a href="${pageContext.request.contextPath}/products/items/update?productItemId=${pi.id}&pageNo=${pageNo}&searchSerial=${param.searchSerial}&isActive=${param.isActive}">
-                            EDIT
-                        </a>
-                    </c:if>
 
+                        <form method="post" action="${pageContext.request.contextPath}/products/items/update">
+                            <input type="hidden" name="productItemId" value="${pi.id}">
+                                <%--Use for redirect exactly--%>
+                            <input type="hidden" name="productId" value="${pi.productId}">
+                            <input type="hidden" name="pageNo" value="${param.pageNo}">
+                            <input type="hidden" name="searchSerial" value="${param.searchSerial}">
+                            <input type="hidden" name="isActive" value="${param.isActive}">
+                            <c:if test="${pi.isActive == true }">
+                                <button class="btn-warning" type="submit" name="btnChangeStatus" value="unavailable">
+                                    Mark Unavailable
+                                </button>
+                            </c:if>
+                            <c:if test="${pi.isActive == false }">
+                                <button class="btn-success" type="submit" name="btnChangeStatus" value="available">
+                                    Mark Available
+                                </button>
+                            </c:if>
+                        </form>
+                    </c:if>
                 </td>
 
             </tr>
@@ -125,6 +155,7 @@
     </tbody>
     </table>
 
+    <br>
     <a href="${pageContext.request.contextPath}/products">Back to product list</a>
 
     <%-- pagination--%>

@@ -11,8 +11,34 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/home.css">
 
         <style>
+
+            .sidebar{
+                width:300px;
+                height:100vh;
+                position:fixed;
+                left:0;
+                top:0;
+
+                overflow-y:auto;
+                overflow-x:hidden;
+
+                scrollbar-width:none;
+            }
+
             a{
                 text-decoration: none
+            }
+            .sidebar::-webkit-scrollbar{
+                display:none;
+            }
+
+            .main-header{
+                margin-left:300px;
+            }
+
+            .main-content{
+                margin-left:300px;
+                padding:20px;
             }
             .bootstrap-select .dropdown-menu{
                 z-index:9999 !important;

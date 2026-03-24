@@ -1,8 +1,11 @@
 package com.example.service;
 
 import com.example.dao.InventoryDAO;
+import com.example.dto.ExportDTO;
+import com.example.dto.ExportProductDTO;
 import com.example.dto.OrderDTO;
 import com.example.dto.ProductItemDTO;
+import com.example.model.User;
 import com.example.util.AppConstants;
 import com.example.validator.ImportProductItemValidator;
 import jakarta.servlet.http.Part;
@@ -13,8 +16,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -192,5 +193,50 @@ public class InventoryService {
 
     public int getTotalOrders(String name, LocalDate fromDate, LocalDate toDate, String status) {
         return inventoryDAO.countExportOrders(name, fromDate, toDate, status);
+    }
+
+    public ExportDTO getExportOrder(Long orderId) {
+        return inventoryDAO.getPendingOrder(orderId);
+    }
+
+//    public void completeExportOrder(Long orderId, Long warehouseId) {
+//        // 1. Mark order as completed
+//        inventoryDAO.completeExportOrder(orderId, warehouseId);
+//
+//        // 2. Record stock movement for EXPORT
+//        Map<Long, Long> quantityByProduct = inventoryDAO.getProductQuantityMapForOrder(orderId);
+//
+//        if (!quantityByProduct.isEmpty()) {
+//            new StockMovementDAO().insertStockMovements(
+//                    quantityByProduct,
+//                    MovementType.EXPORT,
+//                    ReferenceType.ORDER,
+//                    orderId
+//            );
+//        }
+//    }
+
+
+    public void handleExport(User user, ExportDTO exportOrder, String[] serials) {
+        int serialIndex = 0;
+        // product item id -> list serials assigned to this item
+        Map<Long, List<String>> orderItemSerialsMap = new HashMap<>();
+        for (ExportProductDTO item : exportOrder.getItems()) {
+            List<String> assignedSerials = new ArrayList<>();
+            for (int i = 0; i < item.getQuantity(); i++) {
+                String serial = serials[serialIndex++];
+                assignedSerials.add(serial);
+            }
+            orderItemSerialsMap.put(item.getId(), assignedSerials);
+        }
+
+        // assign serials to order items
+        inventoryDAO.assignSerialsToOrderItems(orderItemSerialsMap);
+
+        // subtract quantity from inventory
+        inventoryDAO.subtractInventory(orderItemSerialsMap);
+
+        // update order status to complete
+        inventoryDAO.updateOrderStatus(exportOrder.getId(), user.getId());
     }
 }

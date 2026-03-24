@@ -33,34 +33,24 @@ public class ProductItemUpdateServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        // Get product item
-        long productItemId = Long.parseLong(request.getParameter("productItemId"));
-        ProductItem productItem = productService.findProductItemById(productItemId);
-
-        request.setAttribute("productItem", productItem);
-        request.getRequestDispatcher("/WEB-INF/product/item/product-item-update.jsp").forward(request, response);
-    }
-
-    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         long productItemId = Long.parseLong(request.getParameter("productItemId"));
-//        double productItemCurrentPrice = Double.parseDouble(request.getParameter("productItemCurrentPrice"));
-        boolean productItemIsActive = Boolean.parseBoolean(request.getParameter("productItemIsActive"));
+        String btnAction = request.getParameter("btnChangeStatus");
+        if("unavailable".equals(btnAction)) {
+            productService.updateProductItem(productItemId, false);
+        } else if ("available".equals(btnAction)) {
+            productService.updateProductItem(productItemId, true);
+        }
 
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
-        int pageNo = Integer.parseInt(request.getParameter("pageNo"));
+        String productId = request.getParameter("productId");
+        String pageNo = request.getParameter("pageNo");
         String searchSerial = request.getParameter("searchSerial");
         String isActive = request.getParameter("isActive");
 
-        if (productService.updateProductItem(productItemId, productItemIsActive)) {
-            activityLogService.log(user, "Update product item");
-            request.getSession().setAttribute("successMessage", "Product item updated successfully");
-        } else {
-            request.getSession().setAttribute("errorMessage", "Product item update failed");
-        }
-        response.sendRedirect("/products/items/update?productItemId=" + productItemId + "&pageNo=" + pageNo + "&searchSerial=" + searchSerial + "&isActive=" + isActive);
+        activityLogService.log(user, "Update product item");
+        response.sendRedirect("/products/items?productId=" + productId + "&pageNo=" + pageNo + "&searchSerial=" + searchSerial + "&isActive=" + isActive);
     }
 }

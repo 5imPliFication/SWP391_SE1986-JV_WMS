@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.example.dto.ExportDTO;
-import com.example.dto.ExportItemDTO;
+import com.example.dto.ExportProductDTO;
 import com.example.dto.ExportProductItemDTO;
 
 public class OrderDAO {
@@ -1077,8 +1077,8 @@ public class OrderDAO {
         StringBuilder sql = new StringBuilder(
                 "SELECT o.*, u.fullname AS created_user_name, pu.fullname AS processed_user_name " +
                         "FROM orders o " +
-                        "LEFT JOIN users u ON o.created_by = u.id " +
-                        "LEFT JOIN users pu ON o.processed_by = pu.id " +
+                        "JOIN users u ON o.created_by = u.id " +
+                        "JOIN users pu ON o.processed_by = pu.id " +
                         "WHERE o.status = 'COMPLETED'"
         );
 
@@ -1176,7 +1176,7 @@ public class OrderDAO {
         return null;
     }
 
-    public List<ExportItemDTO> getExportOrderItems(Long orderId) {
+    public List<ExportProductDTO> getExportOrderItems(Long orderId) {
         String sql = """
                       select oi.id as item_id, oi.quantity, oi.price_at_purchase, p.name, pi.serial, oi.price_at_purchase, pi.id as product_item_id, u.name as unit
                 from orders o
@@ -1192,7 +1192,7 @@ public class OrderDAO {
                 on u.id = p.unit_id
                 where oi.order_id = ?;
                 """;
-        Map<Long, ExportItemDTO> itemMap = new LinkedHashMap<>();
+        Map<Long, ExportProductDTO> itemMap = new LinkedHashMap<>();
         // key: id of order item
         // value: info of order item and list of product items
         try (Connection con = DBConfig.getDataSource().getConnection();
@@ -1202,10 +1202,10 @@ public class OrderDAO {
                 while (rs.next()) {
                     // get id of order item
                     Long itemId = rs.getLong("item_id");
-                    ExportItemDTO item = itemMap.get(itemId);
+                    ExportProductDTO item = itemMap.get(itemId);
                     // check if order item already exist in maps
                     if (item == null) {
-                        item = new ExportItemDTO();
+                        item = new ExportProductDTO();
                         item.setId(itemId);
                         item.setProductName(rs.getString("name"));
                         item.setQuantity(rs.getInt("quantity"));

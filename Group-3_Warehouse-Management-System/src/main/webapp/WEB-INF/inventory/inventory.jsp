@@ -15,25 +15,36 @@
 
         <main class="main-content">
 
-            <h2 class="mb-4 text-danger">Out Of Stock Alert</h2>
+            <h2 class="mb-4">Inventory</h2>
 
             <div class="d-flex align-items-center mb-3">
                 <%-- search product by name --%>
-                <form class="form-inline" action="${pageContext.request.contextPath}" method="get">
+                <form class="form-inline" action="${pageContext.request.contextPath}/inventory" method="get">
+
                     <input type="text" name="name" class="form-control mr-2"
                            placeholder="Search name product" value="${param.name}">
+
+                    <%-- SORT BY QUANTITY --%>
+                    <select name="sort" class="form-control mr-2">
+                        <option value="">Sort by quantity</option>
+                        <option value="asc" ${param.sort == 'asc' ? 'selected' : ''}>Low → High</option>
+                        <option value="desc" ${param.sort == 'desc' ? 'selected' : ''}>High → Low</option>
+                    </select>
+
                     <button type="submit" class="btn btn-primary mr-2" name="action" value="search">
                         Search
                     </button>
                 </form>
             </div>
+
+
             <div class="mt-4">
                 <!-- HEADER -->
                 <c:set var="tableHeader" scope="request">
                     <tr>
                         <th>No</th>
                         <th>Name</th>
-                        <th>Stock</th>
+                        <th>Quantity</th>
                         <th>Status</th>
                         <th>Details</th>
                     </tr>
@@ -61,7 +72,7 @@
                                         <c:choose>
 
                                             <c:when test="${product.totalQuantity == 0}">
-                                                <span class="badge bg-danger">
+                                                <span class="badge bg-danger text-white">
                                                     Out of Stock
                                                 </span>
                                             </c:when>
@@ -122,7 +133,7 @@
                         <%-- previous page--%>
                         <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                             <a class="page-link"
-                               href="${pageContext.request.contextPath}/inventory/alert?name=${param.name}&pageNo=${pageNo - 1}">
+                               href="${pageContext.request.contextPath}/inventory?name=${param.name}&sort=${param.sort}&pageNo=${pageNo - 1}">
                                 Previous
                             </a>
                         </li>
@@ -136,7 +147,7 @@
                                 <c:when test="${i == 1}">
                                     <li class="page-item ${i == pageNo ? 'active' : ''}">
                                         <a class="page-link"
-                                           href="${pageContext.request.contextPath}/inventory/alert?name=${param.name}&pageNo=${i}">
+                                           href="${pageContext.request.contextPath}/inventory?name=${param.name}&sort=${param.sort}&pageNo=${i}">
                                             ${i}
                                         </a>
                                     </li>
@@ -145,7 +156,7 @@
                                 <c:when test="${i == totalPages}">
                                     <li class="page-item ${i == pageNo ? 'active' : ''}">
                                         <a class="page-link"
-                                           href="${pageContext.request.contextPath}/inventory/alert?name=${param.name}&pageNo=${i}">
+                                           href="${pageContext.request.contextPath}/inventory?name=${param.name}&sort=${param.sort}&pageNo=${i}">
                                             ${i}
                                         </a>
                                     </li>
@@ -155,7 +166,7 @@
                                     <li
                                         class="page-item ${i == pageNo ? 'active' : ''}">
                                         <a class="page-link"
-                                           href="${pageContext.request.contextPath}/inventory/alert?name=${param.name}&pageNo=${i}">
+                                           href="${pageContext.request.contextPath}/inventory?name=${param.name}&sort=${param.sort}&pageNo=${i}">
                                             ${i}
                                         </a>
                                     </li>
@@ -172,7 +183,7 @@
                         <%--next page--%>
                         <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                             <a class="page-link"
-                               href="${pageContext.request.contextPath}/inventory/alert?name=${param.name}&pageNo=${pageNo + 1}">
+                               href="${pageContext.request.contextPath}/inventory?name=${param.name}&sort=${param.sort}&pageNo=${pageNo + 1}">
                                 Next
                             </a>
                         </li>
