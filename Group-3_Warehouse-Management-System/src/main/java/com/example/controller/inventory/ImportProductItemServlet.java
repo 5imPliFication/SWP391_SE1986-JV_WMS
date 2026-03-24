@@ -119,7 +119,7 @@ public class ImportProductItemServlet extends HttpServlet {
         if ("save".equals(action)) {
             handleSave(session, request, response);
         } else if ("file".equals(action)) {
-            handleFile(session, request, response);
+//            handleFile(session, request, response);
         } else if ("delete".equals(action)) {
             handleDelete(session, request, response);
         }
@@ -164,17 +164,17 @@ public class ImportProductItemServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 
-    private void handleFile(HttpSession session, HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        // get file excel import
-        Part filePart = request.getPart("excelFile");
-
-        // call to service to handle data from Excel
-        List<ProductItemDTO> importProductItemDTOs = inventoryService.readProductItemsFromExcel(filePart);
-        // set session
-        session.setAttribute("importItems", importProductItemDTOs);
-        response.sendRedirect(request.getContextPath() + "/inventory/import");
-    }
+//    private void handleFile(HttpSession session, HttpServletRequest request, HttpServletResponse response)
+//            throws IOException, ServletException {
+//        // get file excel import
+//        Part filePart = request.getPart("excelFile");
+//
+//        // call to service to handle data from Excel
+//        List<ProductItemDTO> importProductItemDTOs = inventoryService.readProductItemsFromExcel(filePart);
+//        // set session
+//        session.setAttribute("importItems", importProductItemDTOs);
+//        response.sendRedirect(request.getContextPath() + "/inventory/import");
+//    }
 
     // save purchase request and others information relative
     private void handleSave(HttpSession session, HttpServletRequest request, HttpServletResponse response)
