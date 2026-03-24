@@ -14,7 +14,7 @@ import java.util.Map;
 import com.example.dto.ProductDTO;
 import com.example.service.ProductService;
 
-@WebServlet("/inventory/alert")
+@WebServlet("/inventory")
 public class OutOfStockAlertServlet extends HttpServlet {
 
     private final ProductService productService = new ProductService();
@@ -34,7 +34,7 @@ public class OutOfStockAlertServlet extends HttpServlet {
             handleSearch(request);
         }
 
-        request.getRequestDispatcher("/WEB-INF/inventory/out-of-stock-alert.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/inventory/inventory.jsp").forward(request, response);
     }
 
     private void handleSearch(HttpServletRequest request) {
