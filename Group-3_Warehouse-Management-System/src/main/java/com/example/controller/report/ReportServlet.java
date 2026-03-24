@@ -86,7 +86,7 @@ public class ReportServlet extends HttpServlet {
         } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
-            request.getRequestDispatcher("/WEB-INF/report/report.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/report/inventory-report.jsp").forward(request, response);
             return;
         }
 
@@ -97,7 +97,7 @@ public class ReportServlet extends HttpServlet {
         request.setAttribute("type", "inventory");
         request.setAttribute("year", year);
         request.setAttribute("month", month);
-        request.getRequestDispatcher("/WEB-INF/report/report.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/report/inventory-report.jsp").forward(request, response);
     }
 
     private void handleExportReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -165,7 +165,7 @@ public class ReportServlet extends HttpServlet {
         request.setAttribute("fromDate", fromDate.toString());
         request.setAttribute("toDate", toDate.toString());
 
-        request.getRequestDispatcher("/WEB-INF/report/report.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/report/export-report.jsp").forward(request, response);
     }
 
     private void handleImportReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -184,7 +184,7 @@ public class ReportServlet extends HttpServlet {
         } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
-            request.getRequestDispatcher("/WEB-INF/report/report.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/report/import-report.jsp").forward(request, response);
             return;
         }
 
@@ -196,7 +196,7 @@ public class ReportServlet extends HttpServlet {
         request.setAttribute("type", "import");
         request.setAttribute("year", year);
         request.setAttribute("month", month);
-        request.getRequestDispatcher("/WEB-INF/report/report.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/report/import-report.jsp").forward(request, response);
     }
 
     private int getCurrentQuarter() {
