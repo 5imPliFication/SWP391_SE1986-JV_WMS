@@ -28,7 +28,7 @@ public class InventoryAuditService {
             conn.setAutoCommit(false); // Bắt đầu Transaction
 
             // Create InventoryAudit
-            String auditCode = AuditCodeGenerator.generateDailyCode();
+            String auditCode = AuditCodeGenerator.generateAuditCode();
             String status = String.valueOf(InventoryAuditStatus.PENDING);
             InventoryAudit inventoryAudit = new InventoryAudit();
             User user = new User();
