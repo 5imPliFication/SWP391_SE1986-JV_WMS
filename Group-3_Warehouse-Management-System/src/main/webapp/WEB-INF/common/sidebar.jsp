@@ -224,8 +224,8 @@
                               and fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
 
                       <li>
-                          <a href="${pageContext.request.contextPath}/inventory/alert">
-                              <span>Out of stock alert</span>
+                          <a href="${pageContext.request.contextPath}/inventory">
+                              <span>Inventory</span>
                           </a>
                       </li>
 

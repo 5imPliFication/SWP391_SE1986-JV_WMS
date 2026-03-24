@@ -8,14 +8,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
-import com.example.dto.ProductDTO;
 import com.example.service.ProductService;
 
-@WebServlet("/inventory/alert")
-public class OutOfStockAlertServlet extends HttpServlet {
+@WebServlet("/inventory")
+public class InventoryServlet extends HttpServlet {
 
     private final ProductService productService = new ProductService();
 
@@ -34,11 +32,12 @@ public class OutOfStockAlertServlet extends HttpServlet {
             handleSearch(request);
         }
 
-        request.getRequestDispatcher("/WEB-INF/inventory/out-of-stock-alert.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/inventory/inventory.jsp").forward(request, response);
     }
 
     private void handleSearch(HttpServletRequest request) {
         String name = request.getParameter("name");
+        String sort = request.getParameter("sort");
         String pageStr = request.getParameter("pageNo");
 
         int pageNo = AppConstants.DEFAULT_PAGE_NO;
@@ -50,9 +49,10 @@ public class OutOfStockAlertServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             pageNo = AppConstants.DEFAULT_PAGE_NO;
         }
-        Map<String, Object> result = productService.getOutOfStockAlertProducts(name, pageNo);
+        Map<String, Object> result = productService.getQuantity(name, sort, pageNo);
 
         request.setAttribute("name", name);
+        request.setAttribute("sort", sort);
         request.setAttribute("products", result.get("products"));
         request.setAttribute("totalPages", result.get("totalPages"));
         request.setAttribute("pageNo", pageNo);

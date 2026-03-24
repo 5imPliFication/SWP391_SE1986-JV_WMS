@@ -23,8 +23,7 @@ public class ProductDAO {
     }
 
     public List<Product> getAll(String searchName, Long brandId, Long categoryId, Long modelId, Long chipId,
-                                Long ramId, Long storageId, Long sizeId, Boolean isActive, int pageNo)
-    {
+                                Long ramId, Long storageId, Long sizeId, Boolean isActive, int pageNo) {
 
         List<Product> products = new ArrayList<>();
 
@@ -594,17 +593,21 @@ public class ProductDAO {
         }
     }
 
-    public List<ProductDTO> getLowStockProducts(String name, int offset) {
+    public List<ProductDTO> getQuantityOfProduct(String name, String sort, int offset) {
         List<ProductDTO> products = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("select * from products where total_quantity < 10 ");
+        StringBuilder sql = new StringBuilder("select * from products where 1 = 1 ");
 
         if (name != null && !name.trim().isEmpty()) {
             sql.append(" and name like ? ");
         }
 
-        // pagination
-        sql.append(" ORDER BY total_quantity asc LIMIT ? OFFSET ?");
+        if ("asc".equalsIgnoreCase(sort)) {
+            sql.append(" order by total_quantity asc ");
+        } else if ("desc".equalsIgnoreCase(sort)) {
+            sql.append(" order by total_quantity desc ");
+        }
 
+        sql.append(" limit ? offset ? ");
         int index = 1;
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
