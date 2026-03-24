@@ -118,12 +118,12 @@ public class ProductService {
         return productDAO.updateItem(productItem);
     }
 
-    public Map<String, Object> getOutOfStockAlertProducts(String name, int pageNo) {
+    public Map<String, Object> getQuantity(String name, String sort, int pageNo) {
 
         Map<String, Object> results = new HashMap<>();
 
         int offset = (pageNo - 1) * AppConstants.PAGE_SIZE;
-        List<ProductDTO> products = productDAO.getLowStockProducts(name, offset);
+        List<ProductDTO> products = productDAO.getQuantityOfProduct(name, sort, offset);
 
         // handle pagination
         int totalProducts = getTotalProducts(name);
