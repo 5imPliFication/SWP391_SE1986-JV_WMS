@@ -97,7 +97,7 @@ public class InventoryDAO {
                 ps.addBatch();
             }
 
-            ps.executeUpdate();
+            ps.executeBatch();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
