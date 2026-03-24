@@ -125,7 +125,7 @@
                                                            value="${productItem.serial}" readonly>
                                                     <div class="input-group-append">
                                                         <a class="btn btn-outline-info"
-                                                           href="${pageContext.request.contextPath}/products/items/update?productItemId=${productItem.id}"
+                                                           href="${pageContext.request.contextPath}/products/items?productId=${productItem.productId}&searchSerial=${productItem.serial}"
                                                            title="View Detail">
                                                             View
                                                         </a>
