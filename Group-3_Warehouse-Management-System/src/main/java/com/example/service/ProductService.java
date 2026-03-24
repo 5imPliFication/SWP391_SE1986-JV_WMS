@@ -88,40 +88,12 @@ public class ProductService {
         return productDAO.findById(productId);
     }
 
-    public boolean updateProduct(String productDescription, String imgUrl, long brandId, long categoryId, long modelId,
-                                 long chipId, long ramId, long storageId, long sizeId, long unitId, boolean isActive, long productId) {
-        Brand brand = brandDAO.findById(brandId);
-        Category category = categoryDAO.findById(categoryId);
-        Model model = modelDAO.getById(modelId);
-        Chip chip = chipDAO.getById(chipId);
-        Ram ram = ramDAO.getById(ramId);
-        Storage storage = storageDAO.getById(storageId);
-        Size size = sizeDAO.getById(sizeId);
-        Unit unit = unitDAO.getById(unitId);
-
-        // Generate product name based on the attributes
-        String productName = String.format("%s %s %s %s %s %s",
-                brand.getName(),
-                model.getName(),
-                chip.getName(),
-                ram.getSize(),
-                storage.getSize(),
-                size.getSize());
-
+    public boolean updateProduct(String productDescription, String imgUrl, boolean isActive, long productId) {
         Product product = new Product();
         product.setId(productId);
-        product.setName(productName);
         product.setDescription(productDescription);
         product.setImgUrl(imgUrl);
         product.setIsActive(isActive);
-        product.setBrand(brand);
-        product.setCategory(category);
-        product.setModel(model);
-        product.setChip(chip);
-        product.setRam(ram);
-        product.setStorage(storage);
-        product.setSize(size);
-        product.setUnit(unit);
 
         return productDAO.update(product);
     }
@@ -138,21 +110,20 @@ public class ProductService {
         return productDAO.findItemById(productItemId);
     }
 
-    public boolean updateProductItem(long productItemId, double currentPrice, Boolean isActive) {
+    public boolean updateProductItem(long productItemId, Boolean isActive) {
         ProductItem productItem = new ProductItem();
         productItem.setId(productItemId);
-        productItem.setCurrentPrice(currentPrice);
         productItem.setIsActive(isActive);
 
         return productDAO.updateItem(productItem);
     }
 
-    public Map<String, Object> getOutOfStockAlertProducts(String name, int pageNo) {
+    public Map<String, Object> getQuantity(String name, String sort, int pageNo) {
 
         Map<String, Object> results = new HashMap<>();
 
         int offset = (pageNo - 1) * AppConstants.PAGE_SIZE;
-        List<ProductDTO> products = productDAO.getLowStockProducts(name, offset);
+        List<ProductDTO> products = productDAO.getQuantityOfProduct(name, sort, offset);
 
         // handle pagination
         int totalProducts = getTotalProducts(name);
@@ -180,5 +151,10 @@ public class ProductService {
     // Get low stock products
     public List<Product> getLowStockProducts(int threshold) {
         return productDAO.findLowStock(threshold);
+    }
+
+    // update current price of product by product id
+    public boolean updateCurrentPriceByProductId(long productId, double newPrice) {
+        return productDAO.updateCurrentPriceByProductId(productId, newPrice);
     }
 }

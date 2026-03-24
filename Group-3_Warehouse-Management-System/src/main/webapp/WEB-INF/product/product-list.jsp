@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -158,6 +159,7 @@
             <th>Ram</th>
             <th>Storage</th>
             <th>Screen</th>
+            <th>Selling Price</th>
             <th>Total Quantity</th>
             <th>Unit</th>
             <th>Status</th>
@@ -190,25 +192,52 @@
                 <td>${p.ram.size}</td>
                 <td>${p.storage.size}</td>
                 <td>${p.size.size}</td>
-                <td>${p.totalQuantity} item</td>
+                <td><fmt:formatNumber value="${p.currentPrice}" type="number" groupingUsed="true"/> đ</td>
+                <td>${p.totalQuantity}</td>
                 <td>${p.unit.name}</td>
                 <td>
                     <jsp:include page="/WEB-INF/common/statusBadge.jsp">
                         <jsp:param name="active" value="${p.isActive}"/>
                     </jsp:include>
                 </td>
-                <td>${p.createdAt}</td>
-                <td>${p.updatedAt}</td>
+                <td>
+                        <%--Convert LocalDateTime to Date for JSTL formatting--%>
+                        <fmt:parseDate value="${p.createdAt}"
+                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                       var="parsedCreatedDate"
+                                       type="both"/>
+                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                        value="${parsedCreatedDate}"/>
+                </td>
+                <td>
+                        <%--Convert LocalDateTime to Date for JSTL formatting--%>
+                        <fmt:parseDate value="${p.updatedAt}"
+                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                       var="parsedUpdatedDate"
+                                       type="both"/>
+                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                        value="${parsedUpdatedDate}"/>
+                </td>
                 <td>
                     <c:if test="${sessionScope.user != null
                                           and sessionScope.user.role != null
                                           and sessionScope.user.role.active
                                           and fn:contains(sessionScope.userPermissions, 'UPDATE_PRODUCT')}">
 
-                        <a href="${pageContext.request.contextPath}/products/update?productId=${p.id}&pageNo=${pageNo}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&modelName=${param.modelName}&chipName=${param.chipName}&ramSize=${param.ramSize}&storageSize=${param.storageSize}&screenSize=${param.screenSize}&isActive=${param.isActive}"
-                           class="btn btn-warning btn-sm">
-                            Edit
-                        </a>
+                        <form method="get" action="${pageContext.request.contextPath}/products/update">
+                                <input type="hidden" name="productId" value="${p.id}">
+                                <input type="hidden" name="pageNo" value="${param.pageNo}">
+                                <input type="hidden" name="searchName" value="${param.searchName}">
+                                <input type="hidden" name="brandId" value="${param.brandId}">
+                                <input type="hidden" name="categoryId" value="${param.categoryId}">
+                                <input type="hidden" name="modelId" value="${param.modelId}">
+                                <input type="hidden" name="chipId" value="${param.chipId}">
+                                <input type="hidden" name="ramId" value="${param.ramId}">
+                                <input type="hidden" name="storageId" value="${param.storageId}">
+                                <input type="hidden" name="sizeId" value="${param.sizeId}">
+                                <input type="hidden" name="isActive" value="${param.isActive}">
+                            <button type="submit" class="btn btn-sm btn-primary">Edit</button>
+                        </form>
 
                     </c:if>
                 </td>

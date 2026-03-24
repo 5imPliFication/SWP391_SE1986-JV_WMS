@@ -6,6 +6,7 @@ import com.example.model.PurchaseRequestItem;
 import com.example.model.User;
 import com.example.service.ActivityLogService;
 import com.example.service.InventoryService;
+import com.example.service.ProductService;
 import com.example.service.PurchaseRequestService;
 import com.example.util.AppConstants;
 import jakarta.servlet.ServletException;
@@ -28,12 +29,14 @@ public class ImportProductItemServlet extends HttpServlet {
     private InventoryService inventoryService;
     private PurchaseRequestService purchaseRequestService;
     private ActivityLogService activityLogService;
+    private ProductService productService;
 
     @Override
     public void init() throws ServletException {
         inventoryService = new InventoryService();
         purchaseRequestService = new PurchaseRequestService();
         activityLogService = new ActivityLogService();
+        productService = new ProductService();
     }
 
     @Override
@@ -116,7 +119,7 @@ public class ImportProductItemServlet extends HttpServlet {
         if ("save".equals(action)) {
             handleSave(session, request, response);
         } else if ("file".equals(action)) {
-            handleFile(session, request, response);
+//            handleFile(session, request, response);
         } else if ("delete".equals(action)) {
             handleDelete(session, request, response);
         }
@@ -161,17 +164,17 @@ public class ImportProductItemServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 
-    private void handleFile(HttpSession session, HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        // get file excel import
-        Part filePart = request.getPart("excelFile");
-
-        // call to service to handle data from Excel
-        List<ProductItemDTO> importProductItemDTOs = inventoryService.readProductItemsFromExcel(filePart);
-        // set session
-        session.setAttribute("importItems", importProductItemDTOs);
-        response.sendRedirect(request.getContextPath() + "/inventory/import");
-    }
+//    private void handleFile(HttpSession session, HttpServletRequest request, HttpServletResponse response)
+//            throws IOException, ServletException {
+//        // get file excel import
+//        Part filePart = request.getPart("excelFile");
+//
+//        // call to service to handle data from Excel
+//        List<ProductItemDTO> importProductItemDTOs = inventoryService.readProductItemsFromExcel(filePart);
+//        // set session
+//        session.setAttribute("importItems", importProductItemDTOs);
+//        response.sendRedirect(request.getContextPath() + "/inventory/import");
+//    }
 
     // save purchase request and others information relative
     private void handleSave(HttpSession session, HttpServletRequest request, HttpServletResponse response)
@@ -207,6 +210,16 @@ public class ImportProductItemServlet extends HttpServlet {
 
         // call service to handle import
         String resultSave = inventoryService.importProductItems(purchaseId, user.getId(), productIds, serials, prices);
+
+        // update current price for product in inventory after import success
+        if (resultSave == null) {
+            for (int i = 0; i < productIds.length; i++) {
+                long productId = Long.parseLong(productIds[i]);
+                double price = Double.parseDouble(prices[i]);
+                productService.updateCurrentPriceByProductId(productId, price);
+            }
+        }
+
         // message
         if (resultSave == null) {
             session.setAttribute("message", "Product item saved successfully");

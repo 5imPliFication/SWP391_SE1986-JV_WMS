@@ -94,7 +94,7 @@
                     <th>Serial / IMEI</th>
                     <th style="width: 100px;" class="text-center">Quantity</th>
                     <th style="width: 100px;" class="text-center">Unit</th>
-                    <th style="width: 160px;" class="text-center">Price</th>
+                    <th style="width: 160px;" class="text-center">Import Price</th>
                     <th style="width: 90px;" class="text-center">Action</th>
                 </tr>
                 </thead>
@@ -157,7 +157,7 @@
                                         <input type="number"
                                                class="form-control form-control-sm text-right master-price-input"
                                                value="${item.importPrice}"
-                                               oninput="updateGroupPrice('${item.productId}', this.value)">
+                                               oninput="updateGroupPrice('${item.productId}', this.value)" required>
                                     </td>
 
                                     <td></td>
@@ -182,7 +182,7 @@
                                 <td>
                                     <input type="text" name="serial"
                                            class="form-control form-control-sm"
-                                           value="${item.serial}">
+                                           value="${item.serial}" required>
                                 </td>
 
                                 <td class="text-center align-middle">

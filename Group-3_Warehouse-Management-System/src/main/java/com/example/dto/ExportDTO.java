@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExportDTO {
+    private Long id;
     private String orderCode;
     private String customerName;
     private Double total;
@@ -21,5 +20,5 @@ public class ExportDTO {
     private String warehouseStaffName;
     private LocalDateTime processedAt;
     private String note;
-    private List<ExportItemDTO> items;
+    private List<ExportProductDTO> items;
 }
