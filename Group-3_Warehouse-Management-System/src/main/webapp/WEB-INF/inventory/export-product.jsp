@@ -51,8 +51,7 @@
 
             <div class="col-md-6">
                 <label class="font-weight-bold mb-1 d-block">Order Code</label>
-                <input type="text"
-                       class="form-control form-control-sm bg-light d-inline-block"
+                <input type="text" class="form-control form-control-sm bg-light d-inline-block"
                        value="${order.orderCode}" readonly>
             </div>
 
@@ -86,8 +85,7 @@
             <div class="col-md-6">
                 <label class="font-weight-bold mb-1">Note</label>
                 <input type="text" class="form-control form-control-sm bg-light"
-                       value="${order.note}"
-                       readonly>
+                       value="${order.note}" readonly>
             </div>
 
         </div>
@@ -97,6 +95,7 @@
             <div class="col-md-12 d-flex justify-content-end">
                 <button type="submit" form="assignForm"
                         class="btn btn-success btn-sm"
+                        onclick="allowSubmit()"
                 ${empty order.items ? 'disabled' : '' }>
                     Export
                 </button>
@@ -134,8 +133,7 @@
 
                         <c:forEach items="${order.items}" var="item">
                             <!-- Group Header for the Order Item -->
-                            <tr class="group-header"
-                                style="cursor:pointer;background:#f8f9fa;"
+                            <tr class="group-header" style="cursor:pointer;background:#f8f9fa;"
                                 onclick="toggleGroup('${item.id}')">
 
                                 <td colspan="2" class="font-weight-bold align-middle">
@@ -154,7 +152,8 @@
 
                             <!-- Detail Rows for Serial Input -->
                             <c:forEach begin="1" end="${item.quantity}" var="i">
-                                <tr class="sub-item item-group-${item.id}" style="display:none;">
+                                <tr class="sub-item item-group-${item.id}"
+                                    style="display:none;">
 
                                     <td class="text-center align-middle text-muted">
                                             ${displayIndex}
@@ -163,8 +162,8 @@
 
                                     <td>
                                         <input type="text" name="serial"
-                                               class="form-control form-control-sm" placeholder="Input Serial / IMEI"
-                                               required>
+                                               class="form-control form-control-sm serial-input"
+                                               placeholder="Input Serial / IMEI" required>
                                     </td>
 
                                     <td class="text-center align-middle">
@@ -186,6 +185,7 @@
 </main>
 
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 <script>
     function toggleGroup(itemId) {
         let items = document.querySelectorAll('.item-group-' + itemId);
@@ -201,6 +201,92 @@
             items.forEach(item => item.style.display = 'none');
             if (icon) icon.innerHTML = '&#9658;'; // right triangle
         }
+    }
+
+    let html5QrCode;
+    let currentInput = null;
+
+    // Bắt sự kiện focus vào input
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".serial-input").forEach(input => {
+            // Lưu input đang chọn
+            input.addEventListener("focus", function () {
+                currentInput = this;
+            });
+
+            // CHẶN ENTER TỪ MÁY QUÉT/BÀN PHÍM
+            input.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault(); // Chặn submit form ngay lập tức
+                    moveToNextInput();  // Ép nó nhảy sang ô tiếp theo thay vì submit
+                }
+            });
+        });
+    });
+
+    function startScan() {
+        if (!currentInput) {
+            alert("Hãy click vào ô cần nhập trước!");
+            return;
+        }
+
+        const reader = document.getElementById("reader");
+        reader.style.display = "block";
+
+        html5QrCode = new Html5Qrcode("reader");
+
+        html5QrCode.start(
+            {facingMode: "environment"},
+            {
+                fps: 10,
+                qrbox: 250
+            },
+            onScanSuccess
+        );
+    }
+
+    function onScanSuccess(decodedText) {
+        if (currentInput) {
+            currentInput.value = decodedText;
+        }
+
+        // Dừng camera
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                document.getElementById("reader").style.display = "none";
+            }).catch(err => console.error(err));
+        }
+
+        // Tự động nhảy ô (Logic này đã được tối ưu ở bước 2)
+        moveToNextInput();
+    }
+
+    // SỬA LẠI HÀM NÀY:
+    function moveToNextInput() {
+        const inputs = Array.from(document.querySelectorAll(".serial-input"));
+        if (!currentInput) return; // Bảo vệ nếu chưa chọn ô nào
+
+        const index = inputs.indexOf(currentInput);
+
+        if (index !== -1 && index < inputs.length - 1) {
+            // Nếu chưa phải ô cuối, nhảy tới ô tiếp theo
+            inputs[index + 1].focus();
+        } else {
+            // Nếu ĐÃ LÀ Ô CUỐI CÙNG
+            currentInput.blur();
+            console.log("Đã hoàn thành quét tất cả các ô.");
+            // Bạn có thể hiện thông báo nhỏ ở đây: alert("Đã quét xong!");
+        }
+    }
+
+    document.getElementById("assignForm").addEventListener("submit", function (e) {
+        if (!window.manualSubmit) {
+            e.preventDefault();
+        }
+    });
+
+    function allowSubmit() {
+        window.manualSubmit = true;
     }
 </script>
 </body>
