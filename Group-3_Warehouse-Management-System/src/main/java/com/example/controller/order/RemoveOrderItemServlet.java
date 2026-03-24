@@ -44,6 +44,7 @@ public class RemoveOrderItemServlet extends HttpServlet {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
             String itemPage = req.getParameter("itemPage");
             String productPage = req.getParameter("productPage");
+            String returnTo = req.getParameter("returnTo");
 
             // Now get orderItemId instead of productItemId
             Long orderItemId = Long.parseLong(req.getParameter("orderItemId"));
@@ -53,7 +54,10 @@ public class RemoveOrderItemServlet extends HttpServlet {
             activityLogService.log(user, "Remove item from order");
 
             String successMsg = URLEncoder.encode("Item removed successfully", StandardCharsets.UTF_8);
-            String redirectUrl = req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&success=" + successMsg;
+            String redirectBase = "create".equalsIgnoreCase(returnTo)
+                    ? "/salesman/order/create?id="
+                    : "/salesman/order/detail?id=";
+            String redirectUrl = req.getContextPath() + redirectBase + orderId + "&success=" + successMsg;
             if (itemPage != null && !itemPage.isBlank()) {
                 redirectUrl += "&itemPage=" + URLEncoder.encode(itemPage, StandardCharsets.UTF_8);
             }
@@ -69,7 +73,11 @@ public class RemoveOrderItemServlet extends HttpServlet {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
             String itemPage = req.getParameter("itemPage");
             String productPage = req.getParameter("productPage");
-            String redirectUrl = req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&error=" + errorMsg;
+            String returnTo = req.getParameter("returnTo");
+            String redirectBase = "create".equalsIgnoreCase(returnTo)
+                    ? "/salesman/order/create?id="
+                    : "/salesman/order/detail?id=";
+            String redirectUrl = req.getContextPath() + redirectBase + orderId + "&error=" + errorMsg;
             if (itemPage != null && !itemPage.isBlank()) {
                 redirectUrl += "&itemPage=" + URLEncoder.encode(itemPage, StandardCharsets.UTF_8);
             }

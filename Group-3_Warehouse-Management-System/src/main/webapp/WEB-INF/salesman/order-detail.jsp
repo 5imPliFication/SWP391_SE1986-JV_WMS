@@ -149,6 +149,11 @@
         </a>
     </div>
 
+    <div class="alert alert-light border shadow-sm mb-4" role="alert">
+        <i class="fas fa-info-circle text-primary mr-2"></i>
+        Use this page to review the order and manage order items before submitting.
+    </div>
+
     <!-- Order Info Card -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-primary text-white">
@@ -208,6 +213,7 @@
                             <input type="hidden" name="orderId" value="${order.id}"/>
                             <input type="hidden" name="itemPage" value="${itemPage}"/>
                             <input type="hidden" name="productPage" value="${productPage}"/>
+                            <input type="hidden" name="returnTo" value="${returnTo}"/>
 
                             <div class="form-row">
                                 <div class="form-group col-md-6">
@@ -302,6 +308,15 @@
                             <td class="px-4 align-middle">${(itemPage - 1) * itemPageSize + status.index + 1}</td>
                             <td class="px-4 align-middle">
                                 <div class="font-weight-bold">${i.product.name}</div>
+                                <div class="small text-muted mt-1">
+                                    <c:forEach items="${i.productItems}" var="pi">
+                                        <div>
+                                            <span class="mr-2"><i class="fas fa-barcode mr-1"></i>${pi.serial}</span>
+                                            <span class="mr-2"><i class="fas fa-tag mr-1"></i>${currency:format(pi.importedPrice)} VND</span>
+                                            <span><i class="fas fa-calendar-alt mr-1"></i>${pi.importedAt != null ? pi.importedAt : 'N/A'}</span>
+                                        </div>
+                                    </c:forEach>
+                                </div>
                             </td>
                             <td class="px-4 align-middle">
                                 ${currency:format(i.priceAtPurchase)} VND
@@ -440,6 +455,7 @@
                                 <form action="${pageContext.request.contextPath}/salesman/order/submit" method="post"
                                       onsubmit="return confirm('Submit this order?');">
                                     <input type="hidden" name="orderId" value="${order.id}"/>
+                                    <input type="hidden" name="returnTo" value="${returnTo}"/>
                                     <button type="submit" class="btn btn-primary btn-lg btn-block">
                                         <i class="fas fa-paper-plane mr-2"></i>Submit Order
                                     </button>
@@ -464,6 +480,7 @@
                         <form action="${pageContext.request.contextPath}/salesman/order/cancel" method="post"
                               onsubmit="return confirm('Cancel this order? This cannot be undone!');">
                             <input type="hidden" name="orderId" value="${order.id}"/>
+                            <input type="hidden" name="returnTo" value="${returnTo}"/>
                             <button type="submit" class="btn btn-danger btn-lg btn-block">
                                 <i class="fas fa-times-circle mr-2"></i>Cancel Order
                             </button>
@@ -585,7 +602,7 @@
                         <ul class="pagination justify-content-center mb-0">
                             <li class="page-item ${productPage == 1 ? 'disabled' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage}&productPage=${productPage - 1}&openProductModal=1"
+                                href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage}&productPage=${productPage - 1}&openProductModal=1"
                                    aria-label="Previous">&laquo;</a>
                             </li>
 
@@ -603,7 +620,7 @@
 
                             <li class="page-item ${productPage == totalProductPages ? 'disabled' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage}&productPage=${productPage + 1}&openProductModal=1"
+                                href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage}&productPage=${productPage + 1}&openProductModal=1"
                                    aria-label="Next">&raquo;</a>
                             </li>
                         </ul>
@@ -623,6 +640,7 @@
     }, 5000);
 
     const urlParams = new URLSearchParams(window.location.search);
+    const returnTo = '${returnTo}';
     if (urlParams.get('openProductModal') === '1') {
         $('#productModal').modal('show');
     }
@@ -662,6 +680,7 @@
         form.append($('<input>', { type: 'hidden', name: 'quantity', value: quantity }));
         form.append($('<input>', { type: 'hidden', name: 'itemPage', value: itemPage }));
         form.append($('<input>', { type: 'hidden', name: 'productPage', value: productPage }));
+        form.append($('<input>', { type: 'hidden', name: 'returnTo', value: returnTo }));
 
         $('body').append(form);
         form.submit();
@@ -688,6 +707,7 @@
             form.append($('<input>', { type: 'hidden', name: 'quantity', value: newQuantity }));
             form.append($('<input>', { type: 'hidden', name: 'itemPage', value: itemPage }));
             form.append($('<input>', { type: 'hidden', name: 'productPage', value: productPage }));
+            form.append($('<input>', { type: 'hidden', name: 'returnTo', value: returnTo }));
 
             $('body').append(form);
             form.submit();
@@ -709,6 +729,7 @@
             form.append($('<input>', { type: 'hidden', name: 'orderItemId', value: orderItemId }));
             form.append($('<input>', { type: 'hidden', name: 'itemPage', value: itemPage }));
             form.append($('<input>', { type: 'hidden', name: 'productPage', value: productPage }));
+            form.append($('<input>', { type: 'hidden', name: 'returnTo', value: returnTo }));
 
             $('body').append(form);
             form.submit();

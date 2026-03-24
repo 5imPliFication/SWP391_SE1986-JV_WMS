@@ -121,7 +121,7 @@ public class OrderItemDAO {
     public List<OrderItem> findByOrderId(Long orderId) {
         String sql = """
                     SELECT oi.id, oi.quantity, oi.price_at_purchase,
-                      pi.id AS product_item_id, pi.imported_price, pi.serial AS product_item_serial,
+                      pi.id AS product_item_id, pi.imported_price, pi.imported_at, pi.serial AS product_item_serial,
                            p.id AS product_id, p.name AS product_name, p.description
                     FROM order_items oi
                     JOIN order_item_product_items oipi ON oi.id = oipi.order_item_id
@@ -162,6 +162,10 @@ public class OrderItemDAO {
                     linkedProductItem.setId(rs.getLong("product_item_id"));
                     linkedProductItem.setSerial(rs.getString("product_item_serial"));
                     linkedProductItem.setImportedPrice(rs.getDouble("imported_price"));
+                    java.sql.Timestamp importedAtTs = rs.getTimestamp("imported_at");
+                    if (importedAtTs != null) {
+                        linkedProductItem.setImportedAt(importedAtTs.toLocalDateTime());
+                    }
                     linkedProductItem.setProductId(rs.getLong("product_id"));
 
                     item.getProductItems().add(linkedProductItem);
@@ -220,7 +224,7 @@ public class OrderItemDAO {
 
         StringBuilder detailSql = new StringBuilder(
                 "SELECT oi.id, oi.quantity, oi.price_at_purchase, " +
-                "pi.id AS product_item_id, pi.imported_price, pi.serial AS product_item_serial, " +
+                "pi.id AS product_item_id, pi.imported_price, pi.imported_at, pi.serial AS product_item_serial, " +
                         "p.id AS product_id, p.name AS product_name, p.description " +
                         "FROM order_items oi " +
                         "JOIN order_item_product_items oipi ON oi.id = oipi.order_item_id " +
@@ -272,6 +276,10 @@ public class OrderItemDAO {
                     linkedProductItem.setId(rs.getLong("product_item_id"));
                     linkedProductItem.setSerial(rs.getString("product_item_serial"));
                     linkedProductItem.setImportedPrice(rs.getDouble("imported_price"));
+                    java.sql.Timestamp importedAtTs = rs.getTimestamp("imported_at");
+                    if (importedAtTs != null) {
+                        linkedProductItem.setImportedAt(importedAtTs.toLocalDateTime());
+                    }
                     linkedProductItem.setProductId(rs.getLong("product_id"));
 
                     item.getProductItems().add(linkedProductItem);

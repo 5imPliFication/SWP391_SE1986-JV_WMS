@@ -42,31 +42,35 @@ public class AddOrderItemServlet extends HttpServlet {
             String quantityRaw = req.getParameter("quantity");
             String itemPage = req.getParameter("itemPage");
             String productPage = req.getParameter("productPage");
+            String returnTo = req.getParameter("returnTo");
 
             int quantity;
             try {
                 quantity = Integer.parseInt(quantityRaw);
             } catch (NumberFormatException e) {
                 redirectWithQuantityError(req, resp, orderId, productId, quantityRaw,
-                        "Quantity must be a valid number", itemPage, productPage);
+                        "Quantity must be a valid number", itemPage, productPage, returnTo);
                 return;
             }
 
             if (quantity <= 0) {
                 redirectWithQuantityError(req, resp, orderId, productId, String.valueOf(quantity),
-                        "Quantity must be greater than 0", itemPage, productPage);
+                        "Quantity must be greater than 0", itemPage, productPage, returnTo);
                 return;
             }
 
             // Check if item already exists and update quantity instead
             String error = orderService.addOrUpdateOrderItem(orderId, productId, quantity);
             if (error != null && !error.isBlank()) {
-                redirectWithQuantityError(req, resp, orderId, productId, String.valueOf(quantity), error, itemPage, productPage);
+                redirectWithQuantityError(req, resp, orderId, productId, String.valueOf(quantity), error, itemPage, productPage, returnTo);
                 return;
             }
             activityLogService.log(user, "Add item into order");
 
-            String redirectUrl = req.getContextPath() + "/salesman/order/detail?id=" + orderId;
+            String redirectBase = "create".equalsIgnoreCase(returnTo)
+                    ? "/salesman/order/create?id="
+                    : "/salesman/order/detail?id=";
+            String redirectUrl = req.getContextPath() + redirectBase + orderId;
             if (itemPage != null && !itemPage.isBlank()) {
                 redirectUrl += "&itemPage=" + URLEncoder.encode(itemPage, StandardCharsets.UTF_8);
             }
@@ -89,8 +93,12 @@ public class AddOrderItemServlet extends HttpServlet {
             String quantity,
             String message,
             String itemPage,
-            String productPage) throws IOException {
-        String redirectUrl = req.getContextPath() + "/salesman/order/detail?id=" + orderId
+            String productPage,
+            String returnTo) throws IOException {
+        String redirectBase = "create".equalsIgnoreCase(returnTo)
+                ? "/salesman/order/create?id="
+                : "/salesman/order/detail?id=";
+        String redirectUrl = req.getContextPath() + redirectBase + orderId
                 + "&productItemId=" + productId
                 + "&quantity=" + URLEncoder.encode(quantity == null ? "" : quantity, StandardCharsets.UTF_8)
                 + "&quantityError=" + URLEncoder.encode(message, StandardCharsets.UTF_8);

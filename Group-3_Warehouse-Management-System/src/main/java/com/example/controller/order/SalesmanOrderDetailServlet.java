@@ -94,6 +94,7 @@ public class SalesmanOrderDetailServlet extends HttpServlet {
             req.setAttribute("productPageSize", productPageSize);
             req.setAttribute("totalProductPages", totalProductPages);
             req.setAttribute("totalProductCount", totalProductCount);
+            req.setAttribute("returnTo", "detail");
 
             req.getRequestDispatcher("/WEB-INF/salesman/order-detail.jsp")
                     .forward(req, resp);

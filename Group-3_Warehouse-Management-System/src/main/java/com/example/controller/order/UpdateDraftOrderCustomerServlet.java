@@ -36,6 +36,10 @@ public class UpdateDraftOrderCustomerServlet extends HttpServlet {
 
         String itemPage = req.getParameter("itemPage");
         String productPage = req.getParameter("productPage");
+        String returnTo = req.getParameter("returnTo");
+        String redirectBase = "create".equalsIgnoreCase(returnTo)
+                ? "/salesman/order/create?id="
+                : "/salesman/order/detail?id=";
 
         try {
             Long orderId = Long.parseLong(req.getParameter("orderId"));
@@ -46,14 +50,14 @@ public class UpdateDraftOrderCustomerServlet extends HttpServlet {
             orderService.updateDraftCustomerInfo(orderId, user.getId(), customerName, customerPhone, note);
 
             String success = URLEncoder.encode("Order information updated", StandardCharsets.UTF_8);
-            resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId
+            resp.sendRedirect(req.getContextPath() + redirectBase + orderId
                     + "&itemPage=" + safePage(itemPage)
                     + "&productPage=" + safePage(productPage)
                     + "&success=" + success);
         } catch (Exception e) {
             String error = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
             String orderId = req.getParameter("orderId");
-            resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId
+            resp.sendRedirect(req.getContextPath() + redirectBase + orderId
                     + "&itemPage=" + safePage(itemPage)
                     + "&productPage=" + safePage(productPage)
                     + "&error=" + error);
