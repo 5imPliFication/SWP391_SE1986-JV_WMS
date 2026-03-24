@@ -13,17 +13,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class OrderItemDAO {
 
     public void addItem(OrderItem item) {
-        String selectAvailableItemsSql = "SELECT id, imported_price, serial FROM product_items " +
-                "WHERE product_id = ? AND is_active = 1 ORDER BY id LIMIT ?";
-        String insertOrderItemSql = "INSERT INTO order_items (order_id, quantity, price_at_purchase) VALUES (?, ?, ?)";
-        String insertLinkSql = "INSERT INTO order_item_product_items (order_item_id, product_item_id) VALUES (?, ?)";
+    String insertOrderItemSql = "INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES (?, ?, ?, ?)";
 
         Long productId = item.getProduct() != null ? item.getProduct().getId() : null;
         if (productId == null && item.getProductItem() != null) {
@@ -34,85 +29,52 @@ public class OrderItemDAO {
             throw new IllegalArgumentException("Product ID is required to add order item");
         }
 
+        if (item.getOrder() == null || item.getOrder().getId() == null) {
+            throw new IllegalArgumentException("Order ID is required to add order item");
+        }
+
+        if (item.getQuantity() == null || item.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than 0");
+        }
+
+        BigDecimal priceAtPurchase = item.getPriceAtPurchase();
+        if (priceAtPurchase == null && item.getProduct() != null && item.getProduct().getCurrentPrice() != null) {
+            priceAtPurchase = BigDecimal.valueOf(item.getProduct().getCurrentPrice());
+        }
+
+        if (priceAtPurchase == null) {
+            throw new IllegalArgumentException("Price at purchase is required to add order item");
+        }
+
         try (Connection con = DBConfig.getDataSource().getConnection()) {
-            con.setAutoCommit(false);
+            Long orderItemId;
+            try (PreparedStatement ps = con.prepareStatement(insertOrderItemSql, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setLong(1, item.getOrder().getId());
+                ps.setLong(2, productId);
+                ps.setInt(3, item.getQuantity());
+                ps.setBigDecimal(4, priceAtPurchase);
+                ps.executeUpdate();
 
-            try {
-                List<ProductItem> selectedProductItems = new ArrayList<>();
-                BigDecimal priceAtPurchase = null;
-
-                try (PreparedStatement ps = con.prepareStatement(selectAvailableItemsSql)) {
-                    ps.setLong(1, productId);
-                    ps.setInt(2, item.getQuantity());
-                    try (ResultSet rs = ps.executeQuery()) {
-                        while (rs.next()) {
-                            ProductItem productItem = new ProductItem();
-                            productItem.setId(rs.getLong("id"));
-                            productItem.setProductId(productId);
-                            productItem.setImportedPrice(rs.getDouble("imported_price"));
-                            productItem.setSerial(rs.getString("serial"));
-                            selectedProductItems.add(productItem);
-                            if (priceAtPurchase == null) {
-                                priceAtPurchase = rs.getBigDecimal("imported_price");
-                            }
-                        }
+                try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                    if (!generatedKeys.next()) {
+                        throw new SQLException("Failed to create order item record");
                     }
+                    orderItemId = generatedKeys.getLong(1);
                 }
-
-                if (selectedProductItems.size() < item.getQuantity()) {
-                    throw new IllegalStateException("Insufficient stock. Available: " + selectedProductItems.size());
-                }
-
-                // Reserve stock immediately when item is added to order.
-                List<Long> selectedProductItemIds = selectedProductItems.stream()
-                        .map(ProductItem::getId)
-                        .toList();
-                setProductItemsActiveState(
-                        con,
-                        selectedProductItemIds,
-                        false,
-                        true,
-                        "Insufficient stock. Some items were already reserved by another order."
-                );
-
-                Long orderItemId;
-                try (PreparedStatement ps = con.prepareStatement(insertOrderItemSql, Statement.RETURN_GENERATED_KEYS)) {
-                    ps.setLong(1, item.getOrder().getId());
-                    ps.setInt(2, item.getQuantity());
-                    ps.setBigDecimal(3, priceAtPurchase);
-                    ps.executeUpdate();
-
-                    try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
-                        if (!generatedKeys.next()) {
-                            throw new SQLException("Failed to create order item record");
-                        }
-                        orderItemId = generatedKeys.getLong(1);
-                    }
-                }
-
-                try (PreparedStatement ps = con.prepareStatement(insertLinkSql)) {
-                    for (ProductItem productItem : selectedProductItems) {
-                        ps.setLong(1, orderItemId);
-                        ps.setLong(2, productItem.getId());
-                        ps.addBatch();
-                    }
-                    ps.executeBatch();
-                }
-
-                item.setId(orderItemId);
-                item.setProductItems(selectedProductItems);
-                if (!selectedProductItems.isEmpty()) {
-                    item.setProductItem(selectedProductItems.get(0));
-                }
-                item.setPriceAtPurchase(priceAtPurchase);
-
-                con.commit();
-            } catch (Exception e) {
-                con.rollback();
-                throw e;
-            } finally {
-                con.setAutoCommit(true);
             }
+
+            item.setId(orderItemId);
+            if (item.getProduct() == null) {
+                Product product = new Product();
+                product.setId(productId);
+                item.setProduct(product);
+            }
+            item.setProductItems(new ArrayList<>());
+            ProductItem displayItem = new ProductItem();
+            displayItem.setProductId(productId);
+            displayItem.setImportedPrice(priceAtPurchase.doubleValue());
+            item.setProductItem(displayItem);
+            item.setPriceAtPurchase(priceAtPurchase);
         } catch (SQLException e) {
             throw new RuntimeException("Add order item failed", e);
         }
@@ -121,65 +83,50 @@ public class OrderItemDAO {
     public List<OrderItem> findByOrderId(Long orderId) {
         String sql = """
                     SELECT oi.id, oi.quantity, oi.price_at_purchase,
-                      pi.id AS product_item_id, pi.imported_price, pi.imported_at, pi.serial AS product_item_serial,
                            p.id AS product_id, p.name AS product_name, p.description
                     FROM order_items oi
-                    JOIN order_item_product_items oipi ON oi.id = oipi.order_item_id
-                    JOIN product_items pi ON oipi.product_item_id = pi.id
-                    JOIN products p ON pi.product_id = p.id
+                    JOIN products p ON oi.product_id = p.id
                     WHERE oi.order_id = ?
-                    ORDER BY oi.id, pi.id
+                    ORDER BY oi.id
                 """;
-
-        Map<Long, OrderItem> itemMap = new LinkedHashMap<>();
 
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setLong(1, orderId);
 
+            List<OrderItem> items = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Long orderItemId = rs.getLong("id");
+                    Product product = new Product();
+                    Long productId = rs.getLong("product_id");
+                    product.setId(productId);
+                    product.setName(rs.getString("product_name"));
+                    product.setDescription(rs.getString("description"));
 
-                    OrderItem item = itemMap.get(orderItemId);
-                    if (item == null) {
-                        Product product = new Product();
-                        product.setId(rs.getLong("product_id"));
-                        product.setName(rs.getString("product_name"));
-                        product.setDescription(rs.getString("description"));
+                    OrderItem item = new OrderItem();
+                    item.setId(rs.getLong("id"));
+                    item.setProduct(product);
+                    item.setQuantity(rs.getInt("quantity"));
+                    item.setPriceAtPurchase(rs.getBigDecimal("price_at_purchase"));
+                    item.setProductItems(new ArrayList<>());
 
-                        item = new OrderItem();
-                        item.setId(orderItemId);
-                        item.setProduct(product);
-                        item.setQuantity(rs.getInt("quantity"));
-                        item.setPriceAtPurchase(rs.getBigDecimal("price_at_purchase"));
-                        item.setProductItems(new ArrayList<>());
-                        itemMap.put(orderItemId, item);
+                    ProductItem displayItem = new ProductItem();
+                    displayItem.setProductId(productId);
+                    if (item.getPriceAtPurchase() != null) {
+                        displayItem.setImportedPrice(item.getPriceAtPurchase().doubleValue());
                     }
+                    item.setProductItem(displayItem);
 
-                    ProductItem linkedProductItem = new ProductItem();
-                    linkedProductItem.setId(rs.getLong("product_item_id"));
-                    linkedProductItem.setSerial(rs.getString("product_item_serial"));
-                    linkedProductItem.setImportedPrice(rs.getDouble("imported_price"));
-                    java.sql.Timestamp importedAtTs = rs.getTimestamp("imported_at");
-                    if (importedAtTs != null) {
-                        linkedProductItem.setImportedAt(importedAtTs.toLocalDateTime());
-                    }
-                    linkedProductItem.setProductId(rs.getLong("product_id"));
-
-                    item.getProductItems().add(linkedProductItem);
-                    if (item.getProductItem() == null) {
-                        item.setProductItem(linkedProductItem);
-                    }
+                    items.add(item);
                 }
             }
+
+            return items;
 
         } catch (SQLException e) {
             throw new RuntimeException("Failed to find order items for order ID: " + orderId, e);
         }
-
-        return new ArrayList<>(itemMap.values());
     }
 
     public int countByOrderId(Long orderId) {
@@ -223,14 +170,11 @@ public class OrderItemDAO {
         }
 
         StringBuilder detailSql = new StringBuilder(
-                "SELECT oi.id, oi.quantity, oi.price_at_purchase, " +
-                "pi.id AS product_item_id, pi.imported_price, pi.imported_at, pi.serial AS product_item_serial, " +
-                        "p.id AS product_id, p.name AS product_name, p.description " +
-                        "FROM order_items oi " +
-                        "JOIN order_item_product_items oipi ON oi.id = oipi.order_item_id " +
-                        "JOIN product_items pi ON oipi.product_item_id = pi.id " +
-                        "JOIN products p ON pi.product_id = p.id " +
-                        "WHERE oi.order_id = ? AND oi.id IN ("
+            "SELECT oi.id, oi.quantity, oi.price_at_purchase, " +
+                "p.id AS product_id, p.name AS product_name, p.description " +
+                "FROM order_items oi " +
+                "JOIN products p ON oi.product_id = p.id " +
+                "WHERE oi.order_id = ? AND oi.id IN ("
         );
 
         for (int i = 0; i < pageItemIds.size(); i++) {
@@ -239,9 +183,7 @@ public class OrderItemDAO {
             }
             detailSql.append("?");
         }
-        detailSql.append(") ORDER BY oi.id, pi.id");
-
-        Map<Long, OrderItem> itemMap = new LinkedHashMap<>();
+        detailSql.append(") ORDER BY oi.id");
 
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(detailSql.toString())) {
@@ -252,87 +194,54 @@ public class OrderItemDAO {
                 ps.setLong(paramIndex++, itemId);
             }
 
+            List<OrderItem> items = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Long orderItemId = rs.getLong("id");
+                    Product product = new Product();
+                    Long productId = rs.getLong("product_id");
+                    product.setId(productId);
+                    product.setName(rs.getString("product_name"));
+                    product.setDescription(rs.getString("description"));
 
-                    OrderItem item = itemMap.get(orderItemId);
-                    if (item == null) {
-                        Product product = new Product();
-                        product.setId(rs.getLong("product_id"));
-                        product.setName(rs.getString("product_name"));
-                        product.setDescription(rs.getString("description"));
+                    OrderItem item = new OrderItem();
+                    item.setId(rs.getLong("id"));
+                    item.setProduct(product);
+                    item.setQuantity(rs.getInt("quantity"));
+                    item.setPriceAtPurchase(rs.getBigDecimal("price_at_purchase"));
+                    item.setProductItems(new ArrayList<>());
 
-                        item = new OrderItem();
-                        item.setId(orderItemId);
-                        item.setProduct(product);
-                        item.setQuantity(rs.getInt("quantity"));
-                        item.setPriceAtPurchase(rs.getBigDecimal("price_at_purchase"));
-                        item.setProductItems(new ArrayList<>());
-                        itemMap.put(orderItemId, item);
+                    ProductItem displayItem = new ProductItem();
+                    displayItem.setProductId(productId);
+                    if (item.getPriceAtPurchase() != null) {
+                        displayItem.setImportedPrice(item.getPriceAtPurchase().doubleValue());
                     }
+                    item.setProductItem(displayItem);
 
-                    ProductItem linkedProductItem = new ProductItem();
-                    linkedProductItem.setId(rs.getLong("product_item_id"));
-                    linkedProductItem.setSerial(rs.getString("product_item_serial"));
-                    linkedProductItem.setImportedPrice(rs.getDouble("imported_price"));
-                    java.sql.Timestamp importedAtTs = rs.getTimestamp("imported_at");
-                    if (importedAtTs != null) {
-                        linkedProductItem.setImportedAt(importedAtTs.toLocalDateTime());
-                    }
-                    linkedProductItem.setProductId(rs.getLong("product_id"));
-
-                    item.getProductItems().add(linkedProductItem);
-                    if (item.getProductItem() == null) {
-                        item.setProductItem(linkedProductItem);
-                    }
+                    items.add(item);
                 }
             }
+
+            return items;
         } catch (SQLException e) {
             throw new RuntimeException("Failed to fetch paged order items for order ID: " + orderId, e);
         }
-
-        return new ArrayList<>(itemMap.values());
     }
 
     public boolean deleteByOrderItemId(Long orderId, Long orderItemId) {
-        String deleteLinksSql = "DELETE FROM order_item_product_items WHERE order_item_id = ?";
         String deleteItemSql = "DELETE FROM order_items WHERE id = ? AND order_id = ?";
 
-        try (Connection con = DBConfig.getDataSource().getConnection()) {
-            con.setAutoCommit(false);
-            try {
-                // Release reserved stock for this order item.
-                List<Long> linkedItemIds = findLinkedProductItemIdsByOrderItem(con, orderId, orderItemId);
-                setProductItemsActiveState(con, linkedItemIds, true, false, null);
-
-                try (PreparedStatement ps = con.prepareStatement(deleteLinksSql)) {
-                    ps.setLong(1, orderItemId);
-                    ps.executeUpdate();
-                }
-
-                int affected;
-                try (PreparedStatement ps = con.prepareStatement(deleteItemSql)) {
-                    ps.setLong(1, orderItemId);
-                    ps.setLong(2, orderId);
-                    affected = ps.executeUpdate();
-                }
-
-                con.commit();
-                return affected > 0;
-            } catch (Exception e) {
-                con.rollback();
-                throw e;
-            } finally {
-                con.setAutoCommit(true);
-            }
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(deleteItemSql)) {
+            ps.setLong(1, orderItemId);
+            ps.setLong(2, orderId);
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new RuntimeException("Delete order item failed", e);
         }
     }
 
     public OrderItem findByIdAndOrderId(Long orderId, Long orderItemId) {
-        String sql = "SELECT id, quantity, price_at_purchase FROM order_items WHERE id = ? AND order_id = ?";
+        String sql = "SELECT id, product_id, quantity, price_at_purchase FROM order_items WHERE id = ? AND order_id = ?";
 
         try (Connection con = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -344,6 +253,9 @@ public class OrderItemDAO {
                 if (rs.next()) {
                     OrderItem item = new OrderItem();
                     item.setId(rs.getLong("id"));
+                    Product product = new Product();
+                    product.setId(rs.getLong("product_id"));
+                    item.setProduct(product);
                     item.setQuantity(rs.getInt("quantity"));
                     item.setPriceAtPurchase(rs.getBigDecimal("price_at_purchase"));
                     return item;
@@ -358,159 +270,56 @@ public class OrderItemDAO {
     }
 
     public void updateQuantity(Long itemId, int quantity) {
-        String selectCurrentSql = """
-                    SELECT oi.quantity, MIN(pi.product_id) AS product_id
-                    FROM order_items oi
-                    JOIN order_item_product_items oipi ON oi.id = oipi.order_item_id
-                    JOIN product_items pi ON oipi.product_item_id = pi.id
-                    WHERE oi.id = ?
-                    GROUP BY oi.quantity
-                """;
-        String selectAdditionalItemsSql = """
-                    SELECT id FROM product_items
-                    WHERE product_id = ? AND is_active = 1
-                      AND id NOT IN (
-                        SELECT product_item_id FROM order_item_product_items WHERE order_item_id = ?
-                      )
-                    ORDER BY id
-                    LIMIT ?
-                """;
-        String selectLinksToRemoveSql = "SELECT product_item_id FROM order_item_product_items WHERE order_item_id = ? ORDER BY product_item_id DESC LIMIT ?";
-        String insertLinkSql = "INSERT INTO order_item_product_items (order_item_id, product_item_id) VALUES (?, ?)";
-        String deleteLinkSql = "DELETE FROM order_item_product_items WHERE order_item_id = ? AND product_item_id = ?";
+        String selectCurrentSql = "SELECT product_id FROM order_items WHERE id = ?";
+        String countAvailableSql = "SELECT COUNT(*) FROM product_items WHERE product_id = ? AND is_active = 1";
         String updateQuantitySql = "UPDATE order_items SET quantity = ? WHERE id = ?";
 
+        if (quantity < 1) {
+            throw new IllegalArgumentException("Quantity must be at least 1");
+        }
+
         try (Connection con = DBConfig.getDataSource().getConnection()) {
-            con.setAutoCommit(false);
-
-            try {
-                int currentQuantity;
-                Long productId;
-
-                try (PreparedStatement ps = con.prepareStatement(selectCurrentSql)) {
-                    ps.setLong(1, itemId);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (!rs.next()) {
-                            throw new IllegalArgumentException("Order item not found with ID: " + itemId);
-                        }
-                        currentQuantity = rs.getInt("quantity");
-                        productId = rs.getLong("product_id");
+            Long productId;
+            try (PreparedStatement ps = con.prepareStatement(selectCurrentSql)) {
+                ps.setLong(1, itemId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        throw new IllegalArgumentException("Order item not found with ID: " + itemId);
                     }
+                    productId = rs.getLong("product_id");
                 }
-
-                if (quantity > currentQuantity) {
-                    int needed = quantity - currentQuantity;
-                    List<Long> additionalProductItemIds = new ArrayList<>();
-
-                    try (PreparedStatement ps = con.prepareStatement(selectAdditionalItemsSql)) {
-                        ps.setLong(1, productId);
-                        ps.setLong(2, itemId);
-                        ps.setInt(3, needed);
-                        try (ResultSet rs = ps.executeQuery()) {
-                            while (rs.next()) {
-                                additionalProductItemIds.add(rs.getLong("id"));
-                            }
-                        }
-                    }
-
-                    if (additionalProductItemIds.size() < needed) {
-                        throw new IllegalStateException("Insufficient stock. Available to add: " + additionalProductItemIds.size());
-                    }
-
-                    setProductItemsActiveState(
-                            con,
-                            additionalProductItemIds,
-                            false,
-                            true,
-                            "Insufficient stock. Some items were already reserved by another order."
-                    );
-
-                    try (PreparedStatement ps = con.prepareStatement(insertLinkSql)) {
-                        for (Long productItemId : additionalProductItemIds) {
-                            ps.setLong(1, itemId);
-                            ps.setLong(2, productItemId);
-                            ps.addBatch();
-                        }
-                        ps.executeBatch();
-                    }
-                } else if (quantity < currentQuantity) {
-                    int toRemove = currentQuantity - quantity;
-                    List<Long> removableLinkIds = new ArrayList<>();
-
-                    try (PreparedStatement ps = con.prepareStatement(selectLinksToRemoveSql)) {
-                        ps.setLong(1, itemId);
-                        ps.setInt(2, toRemove);
-                        try (ResultSet rs = ps.executeQuery()) {
-                            while (rs.next()) {
-                                removableLinkIds.add(rs.getLong("product_item_id"));
-                            }
-                        }
-                    }
-
-                    if (removableLinkIds.size() < toRemove) {
-                        throw new IllegalStateException("Not enough linked product items to reduce quantity");
-                    }
-
-                    try (PreparedStatement ps = con.prepareStatement(deleteLinkSql)) {
-                        for (Long productItemId : removableLinkIds) {
-                            ps.setLong(1, itemId);
-                            ps.setLong(2, productItemId);
-                            ps.addBatch();
-                        }
-                        ps.executeBatch();
-                    }
-
-                    // Release stock back to available pool when quantity decreases.
-                    setProductItemsActiveState(con, removableLinkIds, true, false, null);
-                }
-
-                try (PreparedStatement ps = con.prepareStatement(updateQuantitySql)) {
-                    ps.setInt(1, quantity);
-                    ps.setLong(2, itemId);
-                    ps.executeUpdate();
-                }
-
-                con.commit();
-            } catch (Exception e) {
-                con.rollback();
-                throw e;
-            } finally {
-                con.setAutoCommit(true);
             }
 
+            int available;
+            try (PreparedStatement ps = con.prepareStatement(countAvailableSql)) {
+                ps.setLong(1, productId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    rs.next();
+                    available = rs.getInt(1);
+                }
+            }
+
+            if (quantity > available) {
+                throw new IllegalStateException("Insufficient stock. Available: " + available + ", Requested: " + quantity);
+            }
+
+            try (PreparedStatement ps = con.prepareStatement(updateQuantitySql)) {
+                ps.setInt(1, quantity);
+                ps.setLong(2, itemId);
+                ps.executeUpdate();
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to update quantity", e);
         }
     }
 
     public void deleteByOrderId(Long orderId) {
-        String deleteLinksSql = "DELETE oipi FROM order_item_product_items oipi " +
-                "JOIN order_items oi ON oi.id = oipi.order_item_id WHERE oi.order_id = ?";
         String deleteItemsSql = "DELETE FROM order_items WHERE order_id = ?";
 
-        try (Connection con = DBConfig.getDataSource().getConnection()) {
-            con.setAutoCommit(false);
-            try {
-                List<Long> linkedItemIds = findLinkedProductItemIdsByOrder(con, orderId);
-                setProductItemsActiveState(con, linkedItemIds, true, false, null);
-
-                try (PreparedStatement ps = con.prepareStatement(deleteLinksSql)) {
-                    ps.setLong(1, orderId);
-                    ps.executeUpdate();
-                }
-
-                try (PreparedStatement ps = con.prepareStatement(deleteItemsSql)) {
-                    ps.setLong(1, orderId);
-                    ps.executeUpdate();
-                }
-
-                con.commit();
-            } catch (Exception e) {
-                con.rollback();
-                throw e;
-            } finally {
-                con.setAutoCommit(true);
-            }
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(deleteItemsSql)) {
+            ps.setLong(1, orderId);
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to delete order items", e);
         }
@@ -518,16 +327,10 @@ public class OrderItemDAO {
 
     public List<OrderItemDTO> findOrderItemsByOrderId(Long orderId) {
         String sql = """
-                    SELECT grouped.product_id, SUM(grouped.quantity) AS quantity
-                    FROM (
-                        SELECT oi.id, oi.quantity, MIN(pi.product_id) AS product_id
-                        FROM order_items oi
-                        JOIN order_item_product_items oipi ON oi.id = oipi.order_item_id
-                        JOIN product_items pi ON oipi.product_item_id = pi.id
-                        WHERE oi.order_id = ?
-                        GROUP BY oi.id, oi.quantity
-                    ) grouped
-                    GROUP BY grouped.product_id
+                    SELECT oi.product_id, SUM(oi.quantity) AS quantity
+                    FROM order_items oi
+                    WHERE oi.order_id = ?
+                    GROUP BY oi.product_id
                 """;
         List<OrderItemDTO> items = new ArrayList<>();
 

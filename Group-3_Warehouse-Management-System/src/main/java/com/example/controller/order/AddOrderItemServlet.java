@@ -99,7 +99,7 @@ public class AddOrderItemServlet extends HttpServlet {
                 ? "/salesman/order/create?id="
                 : "/salesman/order/detail?id=";
         String redirectUrl = req.getContextPath() + redirectBase + orderId
-                + "&productItemId=" + productId
+            + "&productId=" + productId
                 + "&quantity=" + URLEncoder.encode(quantity == null ? "" : quantity, StandardCharsets.UTF_8)
                 + "&quantityError=" + URLEncoder.encode(message, StandardCharsets.UTF_8);
 

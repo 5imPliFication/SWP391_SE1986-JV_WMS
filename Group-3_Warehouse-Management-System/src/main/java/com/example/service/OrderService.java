@@ -202,7 +202,7 @@ public class OrderService {
         orderItemDAO.activateReservedItemsByOrderId(orderId);
 
         // Update status and note
-        orderDAO.updateStatus(orderId, "CANCELLED", userId, note);
+        orderDAO.updateStatus(orderId, "CANCELLED", null, note);
 
         if (note != null && !note.trim().isEmpty()) {
             orderDAO.updateNote(orderId, "CANCELLED: " + note);
@@ -321,7 +321,7 @@ public class OrderService {
             throw new IllegalStateException("Cannot submit empty order");
         }
 
-        orderDAO.updateStatus(orderId, "SUBMITTED", userId, null);
+        orderDAO.updateStatus(orderId, "SUBMITTED", null, null);
     }
 
     public List<Order> getOrdersBySalesman(Long salesmanId) {

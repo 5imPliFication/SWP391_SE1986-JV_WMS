@@ -83,7 +83,7 @@ public class CreateOrderServlet extends HttpServlet {
         }
 
         if (selectedItems.isEmpty()) {
-            redirectBackWithError(req, resp, "Please add at least one product item before creating order", customerName, customerPhone, note, orderItemsRaw);
+            redirectBackWithError(req, resp, "Please add at least one product before creating order", customerName, customerPhone, note, orderItemsRaw);
             return;
         }
 
