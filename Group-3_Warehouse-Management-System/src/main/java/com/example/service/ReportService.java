@@ -19,6 +19,10 @@ public class ReportService {
         return reportDAO.getImportChartDataByYear(year);
     }
 
+    public List<Long> getExportChartDataByYear(int year) {
+        return reportDAO.getMovementChartDataByYear(year, MovementType.EXPORT);
+    }
+
     public Map<String, List<Long>> getExportAnnualOverviewByYear(int year) {
         List<Long> imported = reportDAO.getMovementChartDataByYear(year, MovementType.IMPORT);
         List<Long> exported = reportDAO.getMovementChartDataByYear(year, MovementType.EXPORT);
@@ -66,6 +70,13 @@ public class ReportService {
         }
 
         return reportDAO.getImportItems(month, year);
+    }
+
+    public List<ReportItemDTO> getExportItems(int month, int year) {
+        if(month < 1 || month > 12) {
+            throw new IllegalArgumentException("Month must be between 1 and 12");
+        }
+        return reportDAO.getExportItems(month, year);
     }
 
     public List<Long> getInventoryChartDataByYear(int year) {

@@ -102,69 +102,31 @@ public class ReportServlet extends HttpServlet {
 
     private void handleExportReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String yearStr = request.getParameter("year");
-        String quarterStr = request.getParameter("quarter");
-        String searchCode = request.getParameter("searchCode");
-        String pageStr = request.getParameter("pageNo");
+        String monthStr = request.getParameter("month");
 
-        int year = LocalDate.now().getYear();
-        int quarter = getCurrentQuarter();
-        int pageNo = AppConstants.DEFAULT_PAGE_NO;
+        // if year and month are not provided, default to current year and month
+        int year = (yearStr != null && !yearStr.isEmpty()) ? Integer.parseInt(yearStr) : LocalDate.now().getYear();
+        int month = (monthStr != null && !monthStr.isEmpty()) ? Integer.parseInt(monthStr) : LocalDate.now().getMonthValue();
 
-        if (yearStr != null && !yearStr.isEmpty()) {
-            year = Integer.parseInt(yearStr);
-        }
-        if (quarterStr != null && !quarterStr.isEmpty()) {
-            quarter = Integer.parseInt(quarterStr);
-        }
-        if (pageStr != null && !pageStr.isEmpty()) {
-            pageNo = Integer.parseInt(pageStr);
-        }
-
+        List<ReportItemDTO> reportItems;
+        List<Long> chartData;
         try {
-            reportService.validateQuarter(quarter);
+            reportItems = reportService.getExportItems(month, year);
+            chartData = reportService.getExportChartDataByYear(year);
         } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
-            quarter = getCurrentQuarter();
+            request.getRequestDispatcher("/WEB-INF/report/export-report.jsp").forward(request, response);
+            return;
         }
 
-        int startMonth = (quarter - 1) * 3 + 1;
-        LocalDate fromDate = LocalDate.of(year, startMonth, 1);
-        LocalDate toDate = fromDate.plusMonths(3).minusDays(1);
+        String jsonData = gson.toJson(chartData);
 
-        int offset = (pageNo - 1) * AppConstants.PAGE_SIZE;
-        List<Order> orders = orderService.getExportHistoryOrders(searchCode, fromDate, toDate, offset);
-        int totalOrders = orderService.countExportHistory(searchCode, fromDate, toDate);
-        int totalPages = (int) Math.ceil((double) totalOrders / AppConstants.PAGE_SIZE);
-
-        Map<String, List<Long>> annualOverview = reportService.getExportAnnualOverviewByYear(year);
-        Map<String, Object> annualChartPayload = new LinkedHashMap<>();
-        annualChartPayload.put("labels", List.of(
-                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-        ));
-        annualChartPayload.put("inStock", annualOverview.get("inStock"));
-        annualChartPayload.put("exported", annualOverview.get("exported"));
-        annualChartPayload.put("imported", annualOverview.get("imported"));
-
-        String annualChartJson = gson.toJson(annualChartPayload);
-        String quarterTrendJson = gson.toJson(reportService.getExportQuarterTrend(year, quarter));
-
+        request.setAttribute("reportItems", reportItems);
+        request.setAttribute("chartData", jsonData);
         request.setAttribute("type", "export");
         request.setAttribute("year", year);
-        request.setAttribute("quarter", quarter);
-        request.setAttribute("searchCode", searchCode);
-
-        request.setAttribute("annualChartData", annualChartJson);
-        request.setAttribute("quarterTrendData", quarterTrendJson);
-
-        request.setAttribute("orders", orders);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("pageNo", pageNo);
-
-        request.setAttribute("fromDate", fromDate.toString());
-        request.setAttribute("toDate", toDate.toString());
-
+        request.setAttribute("month", month);
         request.getRequestDispatcher("/WEB-INF/report/export-report.jsp").forward(request, response);
     }
 

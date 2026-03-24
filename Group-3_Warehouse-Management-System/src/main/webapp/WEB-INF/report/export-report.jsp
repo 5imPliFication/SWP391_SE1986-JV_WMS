@@ -26,6 +26,7 @@
 <main class="main-content">
     <h2 class="mb-4">Export Report</h2>
 
+    <!-- 1. YEAR SEARCH -->
     <div class="panel">
         <form action="${pageContext.request.contextPath}/report" method="get" class="filter-grid">
             <div>
@@ -36,7 +37,7 @@
         </form>
     </div>
 
-    <!-- OVERALL COMPARE CHART -->
+    <!-- 2. OVERALL COMPARE CHART -->
     <c:if test="${not empty chartSummaryData}">
         <div class="panel">
             <h3 class="panel-title">Annual Overview - Import vs Export</h3>
@@ -46,7 +47,7 @@
         </div>
     </c:if>
 
-    <!-- REPORT TYPE SELECTOR -->
+    <!-- 3. REPORT TYPE SELECTOR -->
     <div class="panel">
         <h3 class="panel-title">Select Report Type</h3>
         <div class="d-flex gap-2">
@@ -68,98 +69,62 @@
         <c:remove var="messageType" scope="session"/>
     </c:if>
 
-    <!-- TREND CHART -->
-    <div class="panel">
-        <h3 class="panel-title">Quarter Export Trend (Q${quarter}/${year})</h3>
-        <div style="position: relative; height: 300px;">
-            <canvas id="trendChart"></canvas>
+    <!-- 4. TREND CHART -->
+    <c:if test="${not empty chartData}">
+        <div class="panel">
+            <h3 class="panel-title">Export Trend by Month (${year})</h3>
+            <div style="position: relative; height: 300px;">
+                <canvas id="trendChart"></canvas>
+            </div>
         </div>
-    </div>
+    </c:if>
 
-    <!-- QUARTER & FILTER -->
+    <!-- 5. MONTH FILTER -->
     <div class="panel">
-        <h3 class="panel-title">Export Filters</h3>
-        <form method="get" action="${pageContext.request.contextPath}/report" class="filter-grid">
+        <form action="${pageContext.request.contextPath}/report" method="get" class="filter-grid">
             <input type="hidden" name="type" value="export"/>
             <input type="hidden" name="year" value="${year}"/>
             <div>
-                <label class="small font-weight-bold text-muted">Quarter</label>
-                <select name="quarter" class="form-control">
-                    <option value="1" ${quarter == 1 ? 'selected' : ''}>Q1 (Jan - Mar)</option>
-                    <option value="2" ${quarter == 2 ? 'selected' : ''}>Q2 (Apr - Jun)</option>
-                    <option value="3" ${quarter == 3 ? 'selected' : ''}>Q3 (Jul - Sep)</option>
-                    <option value="4" ${quarter == 4 ? 'selected' : ''}>Q4 (Oct - Dec)</option>
-                </select>
+                <label class="small font-weight-bold text-muted">Month</label>
+                <input type="number" name="month" class="form-control" style="min-width: 120px;"
+                       placeholder="Input month" value="${month}" min="1" max="12">
             </div>
-            <div>
-                <label class="small font-weight-bold text-muted">Order Code</label>
-                <input type="text" name="searchCode" class="form-control" placeholder="Search order code" value="${searchCode}">
-            </div>
-            <button type="submit" class="btn btn-primary">Apply</button>
-            <a href="${pageContext.request.contextPath}/report?type=export&year=${year}" class="btn btn-outline-secondary">Reset</a>
+            <button type="submit" class="btn btn-primary">Filter</button>
         </form>
     </div>
 
-    <!-- TABLE -->
+    <!-- 6. TABLE -->
     <div class="panel">
-        <h3 class="panel-title">
-            Export History - Q${quarter}/${year} <small class="text-muted">(${fromDate} to ${toDate})</small>
-        </h3>
+        <h3 class="panel-title">Export Details - ${month}/${year}</h3>
         <div class="table-wrap">
             <table class="table table-bordered table-hover mb-0">
                 <thead>
                 <tr>
-                    <th style="width: 70px;">No.</th>
-                    <th>Order Code</th>
-                    <th>Customer</th>
-                    <th style="min-width: 170px;">Processed Date</th>
-                    <th>Warehouse Staff</th>
-                    <th style="width: 110px;" class="text-center">Action</th>
+                    <th style="width: 80px;">No.</th>
+                    <th>Product</th>
+                    <th style="width: 150px;" class="text-center">Quantity</th>
                 </tr>
                 </thead>
                 <tbody>
                 <c:choose>
-                    <c:when test="${not empty orders}">
-                        <c:forEach items="${orders}" var="order" varStatus="loop">
+                    <c:when test="${not empty reportItems}">
+                        <c:forEach items="${reportItems}" var="item" varStatus="loop">
                             <tr>
-                                <td class="text-center">${(pageNo - 1) * 10 + loop.index + 1}</td>
-                                <td class="font-weight-bold">${order.orderCode}</td>
-                                <td>${order.customerName}</td>
-                                <td><fmt:formatDate pattern="dd/MM/yyyy HH:mm" value="${order.processedAt}"/></td>
-                                <td>${order.processedBy != null ? order.processedBy.fullName : '-'}</td>
-                                <td class="text-center">
-                                    <a href="${pageContext.request.contextPath}/inventory/export-history/detail?orderId=${order.id}" class="btn btn-sm btn-info">View</a>
-                                </td>
+                                <td class="text-center">${loop.index + 1}</td>
+                                <td>${item.productName}</td>
+                                <td class="text-center">${item.quantity}</td>
                             </tr>
                         </c:forEach>
                     </c:when>
                     <c:otherwise>
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">No export history found for Q${quarter}/${year}.</td>
+                            <td colspan="3" class="text-center text-muted py-4">No export data found for ${month}/${year}.</td>
                         </tr>
                     </c:otherwise>
                 </c:choose>
                 </tbody>
             </table>
         </div>
-
-        <c:if test="${totalPages > 1}">
-            <nav class="mt-3">
-                <ul class="pagination justify-content-center mb-0">
-                    <li class="page-item ${pageNo <= 1 ? 'disabled' : ''}">
-                        <a class="page-link" href="${pageContext.request.contextPath}/report?type=export&year=${year}&quarter=${quarter}&searchCode=${searchCode}&pageNo=${pageNo - 1}">Previous</a>
-                    </li>
-                    <c:forEach begin="1" end="${totalPages}" var="i">
-                        <li class="page-item ${i == pageNo ? 'active' : ''}">
-                            <a class="page-link" href="${pageContext.request.contextPath}/report?type=export&year=${year}&quarter=${quarter}&searchCode=${searchCode}&pageNo=${i}">${i}</a>
-                        </li>
-                    </c:forEach>
-                    <li class="page-item ${pageNo >= totalPages ? 'disabled' : ''}">
-                        <a class="page-link" href="${pageContext.request.contextPath}/report?type=export&year=${year}&quarter=${quarter}&searchCode=${searchCode}&pageNo=${pageNo + 1}">Next</a>
-                    </li>
-                </ul>
-            </nav>
-        </c:if>
     </div>
 </main>
 
@@ -167,7 +132,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const chartSummaryRaw = '${chartSummaryData}';
-        const quarterTrendRaw = '${quarterTrendData}';
+        const trendChartRaw = '${chartData}';
 
         if (chartSummaryRaw) {
             try {
@@ -197,30 +162,30 @@
             }
         }
 
-        if (quarterTrendRaw) {
+        if (trendChartRaw) {
             try {
-                const quarterTrend = JSON.parse(quarterTrendRaw);
+                const trendData = JSON.parse(trendChartRaw);
                 const trendCanvas = document.getElementById('trendChart');
                 if (trendCanvas) {
                     new Chart(trendCanvas, {
                         type: 'line',
                         data: {
-                            labels: quarterTrend.labels || [],
+                            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
                             datasets: [{
-                                label: 'Exported Items', data: quarterTrend.data || [],
-                                borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.18)',
-                                pointBackgroundColor: '#1d4ed8', pointRadius: 4, borderWidth: 2, fill: true, tension: 0.32
+                                label: 'Exported Quantity', data: trendData,
+                                backgroundColor: 'rgba(239, 68, 68, 0.2)', borderColor: 'rgba(239, 68, 68, 1)',
+                                borderWidth: 2, fill: true, tension: 0.3, pointBackgroundColor: 'rgba(239, 68, 68, 1)', pointRadius: 4
                             }]
                         },
                         options: {
                             responsive: true, maintainAspectRatio: false,
-                            plugins: { legend: {position: 'top'} },
-                            scales: { y: { beginAtZero: true, ticks: {precision: 0} } }
+                            scales: { y: { beginAtZero: true, ticks: {precision: 0} } },
+                            plugins: { legend: {position: 'top'} }
                         }
                     });
                 }
             } catch (e) {
-                console.error('Error parsing quarterTrendRaw:', e);
+                console.error('Error parsing trendChartRaw:', e);
             }
         }
     });

@@ -117,9 +117,9 @@ public class ReportDAO {
         List<ReportItemDTO> items = new ArrayList<>();
         String sql = """
                     select p.name, sum(gri.actual_quantity) as quantity from goods_receipt_items gri
-                  join products p\s
+                  join products p 
                   on gri.product_id = p.id
-                  join goods_receipts gr\s
+                  join goods_receipts gr 
                   on gr.id = gri.goods_receipt_id
                   where year(gr.received_at) = ? and month(gr.received_at) = ?
                   group by (p.name);
@@ -135,6 +135,33 @@ public class ReportDAO {
                 String productName = rs.getString("name");
                 long quantity = rs.getLong("quantity");
                 items.add(new ReportItemDTO(productName, quantity));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return items;
+    }
+
+    // Get list of items for export report
+    public List<ReportItemDTO> getExportItems(int month, int year) {
+        List<ReportItemDTO> items = new ArrayList<>();
+        String sql = """
+                SELECT p.name, SUM(sm.quantity) as quantity FROM stock_movements sm
+                JOIN products p ON sm.product_id = p.id
+                WHERE sm.type = 'EXPORT' AND YEAR(sm.created_at) = ? AND MONTH(sm.created_at) = ?
+                GROUP BY p.name;
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            ps.setInt(2, month);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String productName = rs.getString("name");
+                    long quantity = rs.getLong("quantity");
+                    items.add(new ReportItemDTO(productName, quantity));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
