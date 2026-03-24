@@ -1,5 +1,6 @@
 package com.example.controller.report;
 
+import com.example.enums.MovementType;
 import com.example.model.Order;
 import com.example.model.User;
 import com.example.service.OrderService;
@@ -111,8 +112,8 @@ public class ReportServlet extends HttpServlet {
         List<ReportItemDTO> reportItems;
         List<Long> chartData;
         try {
-            reportItems = reportService.getExportItems(month, year);
-            chartData = reportService.getExportChartDataByYear(year);
+            reportItems = reportService.getItems(month, year, MovementType.EXPORT);
+            chartData = reportService.getChartDataByYear(year, MovementType.EXPORT);
         } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
@@ -141,8 +142,8 @@ public class ReportServlet extends HttpServlet {
         List<ReportItemDTO> reportItems;
         List<Long> chartData;
         try {
-            reportItems = reportService.getItems(month, year);
-            chartData = reportService.getImportChartDataByYear(year);
+            reportItems = reportService.getItems(month, year, MovementType.IMPORT);
+            chartData = reportService.getChartDataByYear(year, MovementType.IMPORT);
         } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
