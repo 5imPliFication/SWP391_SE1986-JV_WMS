@@ -256,6 +256,12 @@ public class OrderService {
                 orderItem.setProduct(product);
                 orderItem.setQuantity(quantity);
 
+                // Set price from product's current price
+                BigDecimal price = (product.getCurrentPrice() != null)
+                        ? BigDecimal.valueOf(product.getCurrentPrice())
+                        : BigDecimal.ZERO;
+                orderItem.setPriceAtPurchase(price);
+
                 orderItemDAO.addItem(orderItem);
             }
 
@@ -264,7 +270,10 @@ public class OrderService {
             return null; // Success - no error
 
         } catch (Exception e) {
-            return "Failed to add item: " + e.getMessage();
+            Throwable root = e;
+            while (root.getCause() != null) root = root.getCause();
+            String detail = root != e ? root.getMessage() : e.getMessage();
+            return "Failed to add item: " + detail;
         }
     }
 

@@ -13,7 +13,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OrderItemDAO {
 
@@ -43,7 +45,7 @@ public class OrderItemDAO {
         }
 
         if (priceAtPurchase == null) {
-            throw new IllegalArgumentException("Price at purchase is required to add order item");
+            priceAtPurchase = BigDecimal.ZERO;
         }
 
         try (Connection con = DBConfig.getDataSource().getConnection()) {
@@ -51,7 +53,7 @@ public class OrderItemDAO {
             try (PreparedStatement ps = con.prepareStatement(insertOrderItemSql, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setLong(1, item.getOrder().getId());
                 ps.setLong(2, productId);
-                ps.setInt(3, item.getQuantity());
+                ps.setLong(3, item.getQuantity());
                 ps.setBigDecimal(4, priceAtPurchase);
                 ps.executeUpdate();
 
@@ -76,7 +78,7 @@ public class OrderItemDAO {
             item.setProductItem(displayItem);
             item.setPriceAtPurchase(priceAtPurchase);
         } catch (SQLException e) {
-            throw new RuntimeException("Add order item failed", e);
+            throw new RuntimeException("Add order item failed: " + e.getMessage(), e);
         }
     }
 
@@ -125,7 +127,8 @@ public class OrderItemDAO {
             return items;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to find order items for order ID: " + orderId, e);
+            // Backward compatibility: if order_items.product_id does not exist yet, load via link table.
+            return findByOrderIdUsingLinkTable(orderId);
         }
     }
 
@@ -223,6 +226,148 @@ public class OrderItemDAO {
 
             return items;
         } catch (SQLException e) {
+            // Backward compatibility: if order_items.product_id does not exist yet, load via link table.
+            return findByOrderIdUsingLinkTable(orderId, pageItemIds);
+        }
+    }
+
+    private List<OrderItem> findByOrderIdUsingLinkTable(Long orderId) {
+        String sql = """
+                    SELECT oi.id, oi.quantity, oi.price_at_purchase,
+                           pi.id AS product_item_id, pi.imported_price, pi.imported_at, pi.serial AS product_item_serial,
+                           p.id AS product_id, p.name AS product_name, p.description
+                    FROM order_items oi
+                    JOIN order_item_product_items oipi ON oi.id = oipi.order_item_id
+                    JOIN product_items pi ON oipi.product_item_id = pi.id
+                    JOIN products p ON pi.product_id = p.id
+                    WHERE oi.order_id = ?
+                    ORDER BY oi.id, pi.id
+                """;
+
+        Map<Long, OrderItem> itemMap = new LinkedHashMap<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, orderId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Long orderItemId = rs.getLong("id");
+
+                    OrderItem item = itemMap.get(orderItemId);
+                    if (item == null) {
+                        Product product = new Product();
+                        product.setId(rs.getLong("product_id"));
+                        product.setName(rs.getString("product_name"));
+                        product.setDescription(rs.getString("description"));
+
+                        item = new OrderItem();
+                        item.setId(orderItemId);
+                        item.setProduct(product);
+                        item.setQuantity(rs.getInt("quantity"));
+                        item.setPriceAtPurchase(rs.getBigDecimal("price_at_purchase"));
+                        item.setProductItems(new ArrayList<>());
+                        itemMap.put(orderItemId, item);
+                    }
+
+                    ProductItem linkedProductItem = new ProductItem();
+                    linkedProductItem.setId(rs.getLong("product_item_id"));
+                    linkedProductItem.setSerial(rs.getString("product_item_serial"));
+                    linkedProductItem.setImportedPrice(rs.getDouble("imported_price"));
+                    java.sql.Timestamp importedAtTs = rs.getTimestamp("imported_at");
+                    if (importedAtTs != null) {
+                        linkedProductItem.setImportedAt(importedAtTs.toLocalDateTime());
+                    }
+                    linkedProductItem.setProductId(rs.getLong("product_id"));
+
+                    item.getProductItems().add(linkedProductItem);
+                    if (item.getProductItem() == null) {
+                        item.setProductItem(linkedProductItem);
+                    }
+                }
+            }
+
+            return new ArrayList<>(itemMap.values());
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to find order items for order ID: " + orderId, e);
+        }
+    }
+
+    private List<OrderItem> findByOrderIdUsingLinkTable(Long orderId, List<Long> pageItemIds) {
+        if (pageItemIds == null || pageItemIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        StringBuilder detailSql = new StringBuilder(
+                "SELECT oi.id, oi.quantity, oi.price_at_purchase, " +
+                        "pi.id AS product_item_id, pi.imported_price, pi.imported_at, pi.serial AS product_item_serial, " +
+                        "p.id AS product_id, p.name AS product_name, p.description " +
+                        "FROM order_items oi " +
+                        "JOIN order_item_product_items oipi ON oi.id = oipi.order_item_id " +
+                        "JOIN product_items pi ON oipi.product_item_id = pi.id " +
+                        "JOIN products p ON pi.product_id = p.id " +
+                        "WHERE oi.order_id = ? AND oi.id IN ("
+        );
+
+        for (int i = 0; i < pageItemIds.size(); i++) {
+            if (i > 0) {
+                detailSql.append(",");
+            }
+            detailSql.append("?");
+        }
+        detailSql.append(") ORDER BY oi.id, pi.id");
+
+        Map<Long, OrderItem> itemMap = new LinkedHashMap<>();
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(detailSql.toString())) {
+
+            int paramIndex = 1;
+            ps.setLong(paramIndex++, orderId);
+            for (Long itemId : pageItemIds) {
+                ps.setLong(paramIndex++, itemId);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Long orderItemId = rs.getLong("id");
+
+                    OrderItem item = itemMap.get(orderItemId);
+                    if (item == null) {
+                        Product product = new Product();
+                        product.setId(rs.getLong("product_id"));
+                        product.setName(rs.getString("product_name"));
+                        product.setDescription(rs.getString("description"));
+
+                        item = new OrderItem();
+                        item.setId(orderItemId);
+                        item.setProduct(product);
+                        item.setQuantity(rs.getInt("quantity"));
+                        item.setPriceAtPurchase(rs.getBigDecimal("price_at_purchase"));
+                        item.setProductItems(new ArrayList<>());
+                        itemMap.put(orderItemId, item);
+                    }
+
+                    ProductItem linkedProductItem = new ProductItem();
+                    linkedProductItem.setId(rs.getLong("product_item_id"));
+                    linkedProductItem.setSerial(rs.getString("product_item_serial"));
+                    linkedProductItem.setImportedPrice(rs.getDouble("imported_price"));
+                    java.sql.Timestamp importedAtTs = rs.getTimestamp("imported_at");
+                    if (importedAtTs != null) {
+                        linkedProductItem.setImportedAt(importedAtTs.toLocalDateTime());
+                    }
+                    linkedProductItem.setProductId(rs.getLong("product_id"));
+
+                    item.getProductItems().add(linkedProductItem);
+                    if (item.getProductItem() == null) {
+                        item.setProductItem(linkedProductItem);
+                    }
+                }
+            }
+
+            return new ArrayList<>(itemMap.values());
+        } catch (SQLException e) {
             throw new RuntimeException("Failed to fetch paged order items for order ID: " + orderId, e);
         }
     }
@@ -270,7 +415,7 @@ public class OrderItemDAO {
     }
 
     public void updateQuantity(Long itemId, int quantity) {
-        String selectCurrentSql = "SELECT product_id FROM order_items WHERE id = ?";
+        String selectCurrentSql = "SELECT product_id, quantity FROM order_items WHERE id = ?";
         String countAvailableSql = "SELECT COUNT(*) FROM product_items WHERE product_id = ? AND is_active = 1";
         String updateQuantitySql = "UPDATE order_items SET quantity = ? WHERE id = ?";
 
@@ -280,6 +425,7 @@ public class OrderItemDAO {
 
         try (Connection con = DBConfig.getDataSource().getConnection()) {
             Long productId;
+            int currentQuantity;
             try (PreparedStatement ps = con.prepareStatement(selectCurrentSql)) {
                 ps.setLong(1, itemId);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -287,20 +433,24 @@ public class OrderItemDAO {
                         throw new IllegalArgumentException("Order item not found with ID: " + itemId);
                     }
                     productId = rs.getLong("product_id");
+                    currentQuantity = rs.getInt("quantity");
                 }
             }
 
-            int available;
-            try (PreparedStatement ps = con.prepareStatement(countAvailableSql)) {
-                ps.setLong(1, productId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    rs.next();
-                    available = rs.getInt(1);
+            // In product-level flow, only block when increasing quantity beyond currently available stock.
+            if (quantity > currentQuantity) {
+                int available;
+                try (PreparedStatement ps = con.prepareStatement(countAvailableSql)) {
+                    ps.setLong(1, productId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        rs.next();
+                        available = rs.getInt(1);
+                    }
                 }
-            }
 
-            if (quantity > available) {
-                throw new IllegalStateException("Insufficient stock. Available: " + available + ", Requested: " + quantity);
+                if (quantity > available) {
+                    throw new IllegalStateException("Insufficient stock. Available: " + available + ", Requested: " + quantity);
+                }
             }
 
             try (PreparedStatement ps = con.prepareStatement(updateQuantitySql)) {

@@ -108,8 +108,10 @@ public class AddOrderItemServlet extends HttpServlet {
         }
         if (productPage != null && !productPage.isBlank()) {
             redirectUrl += "&productPage=" + URLEncoder.encode(productPage, StandardCharsets.UTF_8);
-            redirectUrl += "&openProductModal=1";
         }
+        
+        // Always open modal when there's a quantity error so user can adjust quantity
+        redirectUrl += "&openProductModal=1";
 
         resp.sendRedirect(redirectUrl);
     }
