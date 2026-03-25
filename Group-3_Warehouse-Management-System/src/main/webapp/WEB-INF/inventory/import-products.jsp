@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -26,65 +27,105 @@
         </div>
     </c:if>
 
-    <div class="card p-3 mb-3 shadow-sm">
-        <!-- Row 1 -->
-        <div class="row align-items-center mb-2">
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-3">
 
-            <div class="col-md-2">
-                <label class="font-weight-bold mb-1">Purchase Request</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${sessionScope.purchaseCode}" readonly>
+            <!-- Row 1 -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <small class="text-muted">Purchase Request</small>
+                    <div class="font-weight-bold text-monospace">
+                        ${sessionScope.purchaseCode}
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <small class="text-muted">Created By</small>
+                    <div class="font-weight-bold">${sessionScope.createdBy}</div>
+                </div>
+
+                <div class="col-md-3">
+                    <small class="text-muted">Created At</small>
+                    <div class="font-weight-bold">
+                        <fmt:parseDate value="${sessionScope.createdAt}"
+                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                       var="parsedCreatedAt"
+                                       type="both"/>
+                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                        value="${parsedCreatedAt}"/>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="col-md-3 d-flex justify-content-end align-items-center">
+                    <button type="submit"
+                            form="productItemsForm"
+                            class="btn btn-success btn-sm"
+                            name="action"
+                            value="save"
+                    ${empty importItems ? 'disabled' : ''}>
+                        Save
+                    </button>
+                </div>
             </div>
 
-            <div class="col-md-2">
-                <label class="font-weight-bold mb-1">Created By</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${sessionScope.createdBy}" readonly>
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <small class="text-muted">Note</small>
+                    <div class="p-2 border rounded bg-light"
+                         style="white-space: pre-wrap; min-height: 48px;">
+                        ${sessionScope.purchaseNote}
+                    </div>
+                </div>
             </div>
 
-            <div class="col-md-2">
-                <label class="font-weight-bold mb-1">Created At</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${sessionScope.createdAt}" readonly>
+            <!-- Approval Info -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <small class="text-muted">Approved By</small>
+                    <div class="font-weight-bold">
+                        ${sessionScope.approvedBy}
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <small class="text-muted">Approved At</small>
+                    <div class="font-weight-bold">
+                        <fmt:parseDate value="${sessionScope.approvedAt}"
+                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                       var="parsedApprovedAt"
+                                       type="both"/>
+                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                        value="${parsedApprovedAt}"/>
+                    </div>
+                </div>
             </div>
 
-            <!-- Actions -->
-            <div class="col-md-6 d-flex justify-content-end align-items-end">
-
-<%--                <form action="${pageContext.request.contextPath}/inventory/import" method="post"--%>
-<%--                      enctype="multipart/form-data" class="mb-0">--%>
-
-<%--                    <input type="hidden" name="action" value="file">--%>
-
-<%--                    <label class="btn btn-outline-primary btn-sm mb-0">--%>
-<%--                        Import Excel--%>
-<%--                        <input type="file" name="excelFile" accept=".xls,.xlsx" hidden--%>
-<%--                               onchange="this.form.submit()">--%>
-<%--                    </label>--%>
-
-<%--                </form>--%>
-
-                <button type="submit" form="productItemsForm" class="btn btn-success btn-sm ml-2"
-                        name="action" value="save" ${empty importItems ? 'disabled' : '' }>
-                    Save
-                </button>
-
+            <!-- Handler -->
+            <div class="row">
+                <div class="col-md-3">
+                    <small class="text-muted">Handled By</small>
+                    <div class="font-weight-bold">
+                        ${sessionScope.handleBy}
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <!-- Row 2 -->
-        <div class="row">
-            <div class="col-md-12">
-                <label class="font-weight-bold mb-1">Note</label>
-                <textarea class="form-control form-control-sm bg-light" rows="2" readonly
-                          style="resize:none;">${sessionScope.purchaseNote}</textarea>
-            </div>
         </div>
     </div>
 
     <form id="productItemsForm" method="post"
           action="${pageContext.request.contextPath}/inventory/import">
         <input type="hidden" name="purchaseId" value="${sessionScope.purchaseId}">
+
+        <div class="row">
+            <div class="col-md-2">
+                <label class="font-weight-bold mb-1">Supplier</label>
+                <input type="text" class="form-control form-control-sm" name="supplier" required>
+            </div>
+        </div>
+
+        <br><br>
 
         <div class="table-responsive">
             <table class="table table-bordered">
@@ -95,6 +136,7 @@
                     <th style="width: 100px;" class="text-center">Quantity</th>
                     <th style="width: 100px;" class="text-center">Unit</th>
                     <th style="width: 160px;" class="text-center">Import Price</th>
+                    <th style="width: 160px;" class="text-center">Unit Price</th>
                     <th style="width: 90px;" class="text-center">Action</th>
                 </tr>
                 </thead>
@@ -160,6 +202,7 @@
                                                oninput="updateGroupPrice('${item.productId}', this.value)" required>
                                     </td>
 
+                                    <td class="text-center">VND</td>
                                     <td></td>
                                 </tr>
 
@@ -194,11 +237,12 @@
                                 </td>
 
                                 <td class="text-center text-muted">
-                                    -
-                                    <input type="hidden" name="price"
-                                           class="detail-price price-${item.productId}"
+                                    <input name="price" readonly
+                                           class="detail-price price-${item.productId} text-right bg-light form-control form-control-sm"
                                            value="<c:out value='${item.importPrice}'/>">
                                 </td>
+
+                                <td class="text-center text-muted">VND</td>
 
                                 <td class="text-center align-middle">
                                     <button type="submit" name="delete"

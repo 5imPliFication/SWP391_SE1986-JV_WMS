@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -73,52 +74,37 @@
 
                 <!-- BODY -->
                 <c:set var="tableBody" scope="request">
-
                     <c:choose>
-
                         <c:when test="${not empty goodsReceipts}">
-
                             <c:forEach items="${goodsReceipts}" var="goodsReceipt">
-
                                 <tr>
-
                                     <td class="text-left align-middle fw-bold">
                                         ${goodsReceipt.receiptCode}
                                     </td>
-
                                     <td class="text-center align-middle">
-                                        ${goodsReceipt.receivedAt}
+                                            <fmt:parseDate value="${goodsReceipt.receivedAt}"
+                                                           pattern="yyyy-MM-dd'T'HH:mm" var="parsedReceivedAt"
+                                                           type="both"/>
+                                            <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                                            value="${parsedReceivedAt}"/>
                                     </td>
-
                                     <td class="align-middle">
                                         ${goodsReceipt.warehouseName}
                                     </td>
-
                                     <td class="text-center align-middle">
-
                                         <a href="${pageContext.request.contextPath}/inventory/import-history?action=detail&id=${goodsReceipt.id}"
                                            class="btn btn-info btn-sm">
-
                                             View
-
                                         </a>
-
                                     </td>
-
                                 </tr>
-
                             </c:forEach>
-
                         </c:when>
-
                         <c:otherwise>
-
                             <tr>
                                 <td colspan="4"
                                     class="text-center text-muted py-3">
-
                                     No import history found.
-
                                 </td>
                             </tr>
 
