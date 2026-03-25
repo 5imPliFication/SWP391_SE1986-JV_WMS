@@ -40,7 +40,6 @@ public class ProcessOrderServlet extends HttpServlet {
             activityLogService.log(user, "Processing order");
             resp.sendRedirect(req.getContextPath() + "/warehouse/order/detail?id=" + orderId);
         } catch (Exception e) {
-            e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }

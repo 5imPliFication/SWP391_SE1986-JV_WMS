@@ -107,7 +107,6 @@ public class MyOrdersServlet extends HttpServlet {
                     .forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
             req.setAttribute("error", "Failed to load orders: " + e.getMessage());
             req.getRequestDispatcher("/WEB-INF/views/error/error.jsp").forward(req, resp);
         }

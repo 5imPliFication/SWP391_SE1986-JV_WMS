@@ -238,10 +238,10 @@
     </div>
 
     <!-- Error Details (Optional - only for development) -->
-    <c:if test="${not empty exception || not empty requestScope['javax.servlet.error.exception']}">
+    <c:if test="${not empty exception || not empty requestScope['jakarta.servlet.error.exception'] || not empty requestScope['javax.servlet.error.exception']}">
         <div class="error-details">
             <strong>Technical Details:</strong>
-            <pre><c:out value="${exception != null ? exception : requestScope['javax.servlet.error.exception']}"/></pre>
+            <pre><c:out value="${exception != null ? exception : (requestScope['jakarta.servlet.error.exception'] != null ? requestScope['jakarta.servlet.error.exception'] : requestScope['javax.servlet.error.exception'])}"/></pre>
         </div>
     </c:if>
 

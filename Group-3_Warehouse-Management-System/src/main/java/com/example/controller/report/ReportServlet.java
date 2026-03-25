@@ -75,16 +75,31 @@ public class ReportServlet extends HttpServlet {
     private void handleInventoryReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String yearStr = request.getParameter("year");
         String monthStr = request.getParameter("month");
+        String fromDateStr = request.getParameter("fromDate");
+        String toDateStr = request.getParameter("toDate");
 
         int year = (yearStr != null && !yearStr.isEmpty()) ? Integer.parseInt(yearStr) : LocalDate.now().getYear();
         int month = (monthStr != null && !monthStr.isEmpty()) ? Integer.parseInt(monthStr) : LocalDate.now().getMonthValue();
 
         List<ReportItemDTO> reportItems;
+        List<InventoryMovementRowDTO> movementRows;
         List<Long> chartData;
+
+        LocalDate fromDate;
+        LocalDate toDate;
+        if (fromDateStr != null && !fromDateStr.isBlank() && toDateStr != null && !toDateStr.isBlank()) {
+            fromDate = LocalDate.parse(fromDateStr);
+            toDate = LocalDate.parse(toDateStr);
+        } else {
+            fromDate = LocalDate.of(year, month, 1);
+            toDate = fromDate.plusMonths(1).minusDays(1);
+        }
+
         try {
             reportItems = reportService.getInventoryItems(month, year);
+            movementRows = reportService.getInventoryMovementRows(fromDate, toDate);
             chartData = reportService.getInventoryChartDataByYear(year);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
             request.getRequestDispatcher("/WEB-INF/report/inventory-report.jsp").forward(request, response);
@@ -94,6 +109,7 @@ public class ReportServlet extends HttpServlet {
         String jsonData = gson.toJson(chartData);
 
         request.setAttribute("reportItems", reportItems);
+        request.setAttribute("movementRows", movementRows);
         request.setAttribute("chartData", jsonData);
         request.setAttribute("type", "inventory");
         request.setAttribute("year", year);

@@ -118,6 +118,28 @@ public class OrderDAO {
         }
     }
 
+    public boolean updateDraftCustomerInfo(Long orderId, Long salesmanId, String customerName, String customerPhone, String note) {
+        String sql = """
+                    UPDATE orders
+                    SET customer_name = ?, customer_phone = ?, note = ?
+                    WHERE id = ? AND created_by = ? AND status = 'DRAFT'
+                """;
+
+        try (Connection con = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, customerName);
+            ps.setString(2, customerPhone);
+            ps.setString(3, note);
+            ps.setLong(4, orderId);
+            ps.setLong(5, salesmanId);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update draft order customer info", e);
+        }
+    }
+
 
     public Order findById(Long orderId) {
         String sql = """
@@ -1156,16 +1178,12 @@ public class OrderDAO {
 
     public List<ExportProductDTO> getExportOrderItems(Long orderId) {
         String sql = """
-                      select oi.id as item_id, oi.quantity, oi.price_at_purchase, p.name, pi.serial, oi.price_at_purchase, pi.id as product_item_id, u.name as unit
+                    select oi.id as item_id, oi.quantity, oi.price_at_purchase, p.name, u.name as unit
                 from orders o
                 join order_items oi
                 on o.id = oi.order_id
-                join order_item_product_items oipi
-                on oi.id = oipi.order_item_id
-                join product_items pi
-                on pi.id = oipi.product_item_id
                 join products p\s
-                on p.id = pi.product_id
+                on p.id = oi.product_id
                 join units u
                 on u.id = p.unit_id
                 where oi.order_id = ?;
@@ -1193,11 +1211,6 @@ public class OrderDAO {
                         itemMap.put(itemId, item);
                     }
 
-                    // get product item info and add to order item
-                    ExportProductItemDTO pi = new ExportProductItemDTO();
-                    pi.setId(rs.getLong("product_item_id"));
-                    pi.setSerial(rs.getString("serial"));
-                    item.getProductItems().add(pi);
                 }
             }
         } catch (SQLException e) {
