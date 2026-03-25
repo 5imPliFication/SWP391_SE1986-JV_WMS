@@ -39,7 +39,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <small class="text-muted">Created By</small>
                     <div class="font-weight-bold">${sessionScope.createdBy}</div>
                 </div>
@@ -57,7 +57,7 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="col-md-4 d-flex justify-content-end align-items-center">
+                <div class="col-md-3 d-flex justify-content-end align-items-center">
                     <button type="submit"
                             form="productItemsForm"
                             class="btn btn-success btn-sm"
@@ -237,13 +237,12 @@
                                 </td>
 
                                 <td class="text-center text-muted">
-                                    -
-                                    <input type="hidden" name="price"
-                                           class="detail-price price-${item.productId}"
+                                    <input name="price" readonly
+                                           class="detail-price price-${item.productId} text-right bg-light form-control form-control-sm"
                                            value="<c:out value='${item.importPrice}'/>">
                                 </td>
 
-                                <td class="text-center text-muted">-</td>
+                                <td class="text-center text-muted">VND</td>
 
                                 <td class="text-center align-middle">
                                     <button type="submit" name="delete"
