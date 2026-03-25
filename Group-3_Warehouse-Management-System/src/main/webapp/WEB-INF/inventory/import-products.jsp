@@ -48,21 +48,9 @@
                        value="${sessionScope.createdAt}" readonly>
             </div>
 
+
             <!-- Actions -->
             <div class="col-md-6 d-flex justify-content-end align-items-end">
-
-<%--                <form action="${pageContext.request.contextPath}/inventory/import" method="post"--%>
-<%--                      enctype="multipart/form-data" class="mb-0">--%>
-
-<%--                    <input type="hidden" name="action" value="file">--%>
-
-<%--                    <label class="btn btn-outline-primary btn-sm mb-0">--%>
-<%--                        Import Excel--%>
-<%--                        <input type="file" name="excelFile" accept=".xls,.xlsx" hidden--%>
-<%--                               onchange="this.form.submit()">--%>
-<%--                    </label>--%>
-
-<%--                </form>--%>
 
                 <button type="submit" form="productItemsForm" class="btn btn-success btn-sm ml-2"
                         name="action" value="save" ${empty importItems ? 'disabled' : '' }>
@@ -80,11 +68,40 @@
                           style="resize:none;">${sessionScope.purchaseNote}</textarea>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-md-2">
+                <label class="font-weight-bold mb-1">Approved By</label>
+                <input type="text" class="form-control form-control-sm bg-light"
+                       value="${sessionScope.approvedBy}" readonly>
+            </div>
+
+            <div class="col-md-2">
+                <label class="font-weight-bold mb-1">Approved At</label>
+                <input type="text" class="form-control form-control-sm bg-light"
+                       value="${sessionScope.approvedAt}" readonly>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">
+                <label class="font-weight-bold mb-1">Handle By</label>
+                <input type="text" class="form-control form-control-sm bg-light"
+                       value="${sessionScope.handleBy}" readonly>
+            </div>
+        </div>
     </div>
 
     <form id="productItemsForm" method="post"
           action="${pageContext.request.contextPath}/inventory/import">
         <input type="hidden" name="purchaseId" value="${sessionScope.purchaseId}">
+
+        <div class="row">
+            <div class="col-md-2">
+                <label class="font-weight-bold mb-1">Supplier</label>
+                <input type="text" class="form-control form-control-sm" name="supplier">
+            </div>
+        </div>
 
         <div class="table-responsive">
             <table class="table table-bordered">
@@ -95,6 +112,7 @@
                     <th style="width: 100px;" class="text-center">Quantity</th>
                     <th style="width: 100px;" class="text-center">Unit</th>
                     <th style="width: 160px;" class="text-center">Import Price</th>
+                    <th style="width: 160px;" class="text-center">Unit Price</th>
                     <th style="width: 90px;" class="text-center">Action</th>
                 </tr>
                 </thead>
@@ -160,6 +178,7 @@
                                                oninput="updateGroupPrice('${item.productId}', this.value)" required>
                                     </td>
 
+                                    <td class="text-center">VND</td>
                                     <td></td>
                                 </tr>
 
@@ -199,6 +218,8 @@
                                            class="detail-price price-${item.productId}"
                                            value="<c:out value='${item.importPrice}'/>">
                                 </td>
+
+                                <td class="text-center text-muted">-</td>
 
                                 <td class="text-center align-middle">
                                     <button type="submit" name="delete"
