@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -48,7 +49,7 @@
                     <option value="PENDING"  ${param.status == 'PENDING' ? 'selected' : ''}>PENDING</option>
                     <option value="SUBMITTED" ${param.status == 'SUBMITTED' ? 'selected' : ''}>SUBMITTED</option>
                     <option value="COMPLETED" ${param.status == 'COMPLETED' ? 'selected' : ''}>COMPLETED</option>
-                    <option value="REJECTED" ${param.status == 'REJECTED' ? 'REJECTED' : ''}>REJECTED</option>
+                    <option value="REJECTED" ${param.status == 'REJECTED' ? 'selected' : ''}>REJECTED</option>
                     <option value="CANCELLED" ${param.status == 'CANCELLED' ? 'selected' : ''}>CANCELLED</option>
                 </select>
             </label>
@@ -89,9 +90,25 @@
 
                 <td>${i.status}</td>
 
-                <td>${i.createdAt}</td>
+                <td>
+                        <%--Convert LocalDateTime to Date for JSTL formatting--%>
+                    <fmt:parseDate value="${i.createdAt}"
+                                   pattern="yyyy-MM-dd'T'HH:mm"
+                                   var="parsedCreatedDate"
+                                   type="both"/>
+                    <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                    value="${parsedCreatedDate}"/>
+                </td>
 
-                <td>${i.updatedAt}</td>
+                <td>
+                        <%--Convert LocalDateTime to Date for JSTL formatting--%>
+                    <fmt:parseDate value="${i.updatedAt}"
+                                   pattern="yyyy-MM-dd'T'HH:mm"
+                                   var="parsedUpdatedDate"
+                                   type="both"/>
+                    <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                    value="${parsedUpdatedDate}"/>
+                </td>
 
                 <td>
 
