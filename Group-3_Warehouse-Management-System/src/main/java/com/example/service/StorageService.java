@@ -36,7 +36,14 @@ public class StorageService {
         s.updateStorageStatus(id, is_active);
     }
 
+    public boolean storageExists(String size) {
+        return s.existsBySize(size);
+    }
+
     public boolean CreateStorage(String size, boolean active) {
+        if (s.existsBySize(size)) {
+            return false;
+        }
         return s.createStorage(size, active);
     }
 }

@@ -1,7 +1,6 @@
 package com.example.service;
 
 import com.example.dao.RamDAO;
-import com.example.model.Model;
 import com.example.model.Ram;
 import java.util.List;
 
@@ -33,7 +32,14 @@ public class RamService {
         r.updateRamStatus(id, is_active);
     }
 
+    public boolean ramExists(String size) {
+        return r.existsBySize(size);
+    }
+
     public boolean CreateRam(String size, boolean active) {
+        if (r.existsBySize(size)) {
+            return false;
+        }
         return r.createRam(size, active);
     }
 }

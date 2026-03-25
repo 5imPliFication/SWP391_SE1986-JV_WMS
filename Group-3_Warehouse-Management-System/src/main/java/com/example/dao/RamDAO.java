@@ -1,7 +1,6 @@
 package com.example.dao;
 
 import com.example.config.DBConfig;
-import com.example.model.Chip;
 import com.example.model.Ram;
 
 import java.sql.Connection;
@@ -159,6 +158,24 @@ public class RamDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public boolean existsBySize(String size) {
+        String sql = "SELECT COUNT(*) FROM rams WHERE size = ?";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, size);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return false;
     }
 
     public boolean createRam(String size, boolean active) {

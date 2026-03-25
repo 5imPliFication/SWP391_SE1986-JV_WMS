@@ -8,7 +8,6 @@ import com.example.model.User;
 import com.example.service.ActivityLogService;
 import com.example.service.StorageService;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -43,7 +42,14 @@ public class CreateStorage extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
-        s.CreateStorage(size + "GB", active);
+        String sizeValue = size + "GB";
+        if (s.storageExists(sizeValue)) {
+            session.setAttribute("flashStorageCreateError", "Đã tồn tại");
+            response.sendRedirect(request.getContextPath() + "/specification/storage");
+            return;
+        }
+
+        s.CreateStorage(sizeValue, active);
         activityLogService.log(user, "Create storage");
 
         response.sendRedirect(
