@@ -2,7 +2,6 @@ package com.example.controller.report;
 
 import com.example.dao.SummaryReportDAO;
 import com.example.dto.SummaryReportDTO;
-import com.example.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -25,13 +24,6 @@ public class SummaryReportServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        User user = (User) req.getSession().getAttribute("user");
-        if (user == null || user.getRole() == null || !"Manager".equalsIgnoreCase(user.getRole().getName())) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Only manager can manage report pages.");
-            return;
-        }
-
-
         // Parse optional date range filters
         String fromDateStr = req.getParameter("fromDate");
         String toDateStr = req.getParameter("toDate");

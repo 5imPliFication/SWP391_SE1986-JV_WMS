@@ -1,6 +1,5 @@
 package com.example.controller.report;
 
-import com.example.model.User;
 import com.example.dto.ExportProductOrderDTO;
 import com.example.dto.InventoryMovementRowDTO;
 import com.example.dto.MonthSummaryDTO;
@@ -32,12 +31,6 @@ public class ReportServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        User user = (User) request.getSession().getAttribute("user");
-        if (user == null || user.getRole() == null || !"Manager".equalsIgnoreCase(user.getRole().getName())) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Only manager can manage report pages.");
-            return;
-        }
-
         // get data from request parameters
         String type = request.getParameter("type");
 

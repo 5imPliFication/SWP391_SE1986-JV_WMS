@@ -164,6 +164,31 @@
 
             <ul class="sidebar-menu">
 
+                <c:set var="roleName" value="${sessionScope.user != null and sessionScope.user.role != null ? sessionScope.user.role.name : ''}"/>
+                <c:set var="canReadProduct" value="false"/>
+                <c:set var="canReadOrder" value="false"/>
+                <c:set var="canReadPurchaseRequest" value="false"/>
+                <c:set var="canImportProduct" value="false"/>
+                <c:set var="canExportProduct" value="false"/>
+                <c:set var="canReadAudit" value="false"/>
+                <c:set var="canReadUser" value="false"/>
+                <c:set var="canReadRole" value="false"/>
+                <c:set var="canReadPasswordReset" value="false"/>
+                <c:set var="canReadReport" value="false"/>
+
+                <c:forEach items="${sessionScope.userPermissions}" var="perm">
+                    <c:if test="${perm eq 'READ_PRODUCT'}"><c:set var="canReadProduct" value="true"/></c:if>
+                    <c:if test="${perm eq 'READ_ORDER'}"><c:set var="canReadOrder" value="true"/></c:if>
+                    <c:if test="${perm eq 'READ_PURCHASE_REQUEST'}"><c:set var="canReadPurchaseRequest" value="true"/></c:if>
+                    <c:if test="${perm eq 'IMPORT_PRODUCT'}"><c:set var="canImportProduct" value="true"/></c:if>
+                    <c:if test="${perm eq 'EXPORT_PRODUCT'}"><c:set var="canExportProduct" value="true"/></c:if>
+                    <c:if test="${perm eq 'READ_AUDIT'}"><c:set var="canReadAudit" value="true"/></c:if>
+                    <c:if test="${perm eq 'READ_USER'}"><c:set var="canReadUser" value="true"/></c:if>
+                    <c:if test="${perm eq 'READ_ROLE'}"><c:set var="canReadRole" value="true"/></c:if>
+                    <c:if test="${perm eq 'READ_PASSWORD_RESET_REQUEST'}"><c:set var="canReadPasswordReset" value="true"/></c:if>
+                    <c:if test="${perm eq 'READ_REPORT'}"><c:set var="canReadReport" value="true"/></c:if>
+                </c:forEach>
+
                 <!-- Dashboard -->
                 <li>
                     <a href="${pageContext.request.contextPath}/home" class="nav-link">
@@ -172,7 +197,7 @@
                 </li>
 
                 <!-- Products Group -->
-                <c:if test="${sessionScope.user != null and sessionScope.user.role.active and fn:contains(sessionScope.userPermissions, 'READ_PRODUCT')}">
+                <c:if test="${sessionScope.user != null and canReadProduct}">
                     <li>
                         <a href="#productSubmenu" data-toggle="collapse" data-bs-toggle="collapse" aria-expanded="false" class="menu-toggle d-flex justify-content-between align-items-center">
                             <span>Products Setup</span>
@@ -188,7 +213,7 @@
                 </c:if>
 
                 <!-- Inventory & Orders Group -->
-                <c:if test="${sessionScope.user != null and sessionScope.user.role.active and (fn:contains(sessionScope.userPermissions, 'READ_ORDER') or fn:contains(sessionScope.userPermissions, 'READ_PURCHASE_REQUEST') or fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT') or fn:contains(sessionScope.userPermissions, 'EXPORT_PRODUCT') or fn:contains(sessionScope.userPermissions, 'READ_AUDIT'))}">
+                <c:if test="${sessionScope.user != null and (canReadOrder or canReadPurchaseRequest or canImportProduct or canExportProduct or canReadAudit)}">
                     <li>
                         <a href="#inventorySubmenu" data-toggle="collapse" data-bs-toggle="collapse" aria-expanded="false" class="menu-toggle d-flex justify-content-between align-items-center">
                             <span>Inventory & Orders</span>
@@ -196,31 +221,31 @@
                         </a>
                         <ul class="collapse sidebar-submenu" id="inventorySubmenu" data-parent=".sidebar-menu">
                             <!-- Orders (Salesman) -->
-                            <c:if test="${sessionScope.user.role.name eq 'Salesman' and fn:contains(sessionScope.userPermissions, 'READ_ORDER')}">
+                            <c:if test="${roleName eq 'Salesman' and canReadOrder}">
                                 <li><a href="${pageContext.request.contextPath}/salesman/orders">Salesman Orders</a></li>
                             </c:if>
                             <!-- Orders (Warehouse) -->
-                            <c:if test="${sessionScope.user.role.name eq 'Warehouse' and fn:contains(sessionScope.userPermissions, 'READ_ORDER')}">
+                            <c:if test="${roleName eq 'Warehouse' and canReadOrder}">
                                 <li><a href="${pageContext.request.contextPath}/warehouse/orders">Warehouse Orders</a></li>
                             </c:if>
                             <!-- Purchase Request -->
-                            <c:if test="${fn:contains(sessionScope.userPermissions, 'READ_PURCHASE_REQUEST')}">
+                            <c:if test="${canReadPurchaseRequest}">
                                 <li><a href="${pageContext.request.contextPath}/purchase-request/list">Purchase Request</a></li>
                             </c:if>
                             <!-- Import History -->
-                            <c:if test="${fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
+                            <c:if test="${canImportProduct}">
                                 <li><a href="${pageContext.request.contextPath}/inventory/import-history">Import History</a></li>
                             </c:if>
                             <!-- Export History -->
-                            <c:if test="${fn:contains(sessionScope.userPermissions, 'EXPORT_PRODUCT')}">
+                            <c:if test="${canExportProduct}">
                                 <li><a href="${pageContext.request.contextPath}/inventory/export-history">Export History</a></li>
                             </c:if>
                             <!-- Out Of Stock -->
-                            <c:if test="${fn:contains(sessionScope.userPermissions, 'IMPORT_PRODUCT')}">
+                            <c:if test="${canImportProduct}">
                                 <li><a href="${pageContext.request.contextPath}/inventory/alert">Out of stock alert</a></li>
                             </c:if>
                             <!-- Inventory Audit -->
-                            <c:if test="${fn:contains(sessionScope.userPermissions, 'READ_AUDIT')}">
+                            <c:if test="${canReadAudit}">
                                 <li><a href="${pageContext.request.contextPath}/inventory-audits">Inventory Audit</a></li>
                             </c:if>
                         </ul>
@@ -228,20 +253,20 @@
                 </c:if>
 
                 <!-- Access Control Group -->
-                <c:if test="${sessionScope.user != null and sessionScope.user.role.active and (fn:contains(sessionScope.userPermissions, 'READ_USER') or fn:contains(sessionScope.userPermissions, 'READ_ROLE') or fn:contains(sessionScope.userPermissions, 'READ_PASSWORD_RESET_REQUEST'))}">
+                <c:if test="${sessionScope.user != null and (canReadUser or canReadRole or canReadPasswordReset)}">
                     <li>
                         <a href="#accessSubmenu" data-toggle="collapse" data-bs-toggle="collapse" aria-expanded="false" class="menu-toggle d-flex justify-content-between align-items-center">
                             <span>Access Control</span>
                             <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
                         </a>
                         <ul class="collapse sidebar-submenu" id="accessSubmenu" data-parent=".sidebar-menu">
-                            <c:if test="${fn:contains(sessionScope.userPermissions, 'READ_USER')}">
+                            <c:if test="${canReadUser}">
                                 <li><a href="${pageContext.request.contextPath}/user/list">User</a></li>
                             </c:if>
-                            <c:if test="${fn:contains(sessionScope.userPermissions, 'READ_ROLE')}">
+                            <c:if test="${canReadRole}">
                                 <li><a href="${pageContext.request.contextPath}/roles">Role</a></li>
                             </c:if>
-                            <c:if test="${fn:contains(sessionScope.userPermissions, 'READ_PASSWORD_RESET_REQUEST')}">
+                            <c:if test="${canReadPasswordReset}">
                                 <li><a href="${pageContext.request.contextPath}/admin/password-reset">Password Reset</a></li>
                             </c:if>
                         </ul>
@@ -249,7 +274,7 @@
                 </c:if>
 
                 <!-- Reports Group -->
-                <c:if test="${sessionScope.user != null and sessionScope.user.role.active and sessionScope.user.role.name eq 'Manager' and fn:contains(sessionScope.userPermissions, 'READ_REPORT')}">
+                <c:if test="${sessionScope.user != null and canReadReport}">
                     <li>
                         <a href="#reportSubmenu" data-toggle="collapse" data-bs-toggle="collapse" aria-expanded="false" class="menu-toggle d-flex justify-content-between align-items-center">
                             <span>Reports</span>

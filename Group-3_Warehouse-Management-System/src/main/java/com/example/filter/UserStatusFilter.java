@@ -25,13 +25,16 @@ public class UserStatusFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
+        String contextPath = request.getContextPath();
 
-        // allow path
-        String path = request.getRequestURI();
+        // Normalize URI to servlet path (without context path)
+        String path = request.getRequestURI().substring(contextPath.length());
         if (path.equals("/login")
                 || path.equals("/login.jsp")
                 || path.equals("/forget-password")
-                || path.startsWith("/static/css/")) {
+                || path.equals("/reset-password")
+                || path.equals("/error")
+                || path.startsWith("/static/")) {
 
             chain.doFilter(request, response);
             return;
@@ -39,13 +42,13 @@ public class UserStatusFilter implements Filter {
         // get current session, dont create new session
         HttpSession session = request.getSession(false);
         if (session == null) {
-            response.sendRedirect("/login");
+            response.sendRedirect(contextPath + "/login");
             return;
         }
 
         User userSession = (User) session.getAttribute("user");
         if (userSession == null) {
-            response.sendRedirect("/login");
+            response.sendRedirect(contextPath + "/login");
             return;
         }
 
