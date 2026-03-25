@@ -31,7 +31,7 @@ public class InventoryService {
     private final InventoryDAO inventoryDAO = new InventoryDAO();
 
     public String importProductItems(Long purchaseRequestId, Long warehouseUserId,
-                                     String[] productIds, String[] serials, String[] prices) {
+                                     String[] productIds, String[] serials, String[] prices, String supplier) {
 
         // get information from list import product item
         List<ProductItemDTO> importProductItemDTOs = getImportProductItemDTOs(productIds, serials, prices);
@@ -41,7 +41,7 @@ public class InventoryService {
             return validationMessage;
         }
 
-        return inventoryDAO.saveProductItems(purchaseRequestId, warehouseUserId, importProductItemDTOs)
+        return inventoryDAO.saveProductItems(purchaseRequestId, warehouseUserId, importProductItemDTOs, supplier)
                 ? null
                 : "Import failed";
     }

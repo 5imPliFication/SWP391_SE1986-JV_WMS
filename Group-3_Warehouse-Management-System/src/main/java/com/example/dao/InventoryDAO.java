@@ -48,7 +48,7 @@ public class InventoryDAO {
     }
 
     public boolean saveProductItems(Long purchaseRequestId, Long warehouseUserId,
-                                    List<ProductItemDTO> productItemDTOs) {
+                                    List<ProductItemDTO> productItemDTOs, String supplier) {
 
         // count quantity import product for each product
         Map<Long, Long> quantityByProduct = countQuantityImportByProductId(productItemDTOs);
@@ -58,7 +58,7 @@ public class InventoryDAO {
             completePurchaseRequest(purchaseRequestId);
 
             // save to table goods receipts
-            Long receiptId = insertGoodsReceipt(purchaseRequestId, warehouseUserId);
+            Long receiptId = insertGoodsReceipt(purchaseRequestId, warehouseUserId, supplier);
 
             // save purchase request item to table goods receipt items and get generated ids
             Map<Long, Long> receiptItemIds = insertGoodsReceiptItems(receiptId, quantityByProduct);
@@ -122,10 +122,10 @@ public class InventoryDAO {
         return quantityProduct;
     }
 
-    private Long insertGoodsReceipt(Long purchaseRequestId, Long warehouseUserId)
+    private Long insertGoodsReceipt(Long purchaseRequestId, Long warehouseUserId, String supplier)
             throws SQLException {
         StringBuilder sql = new StringBuilder(
-                "insert into goods_receipts(purchase_request_id, warehouse_id, received_at) values (?, ?, NOW())");
+                "insert into goods_receipts(purchase_request_id, warehouse_id, received_at, supplier) values (?, ?, NOW(), ?)");
         Long receiptId = null;
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
@@ -133,6 +133,7 @@ public class InventoryDAO {
             // set value
             ps.setLong(1, purchaseRequestId);
             ps.setLong(2, warehouseUserId);
+            ps.setString(3, supplier);
             ps.executeUpdate();
 
             // get id of goods receipt
