@@ -51,7 +51,7 @@
                 <div class="col-md-8">
                     <div class="card-body shadow-lg rounded">
 
-                        <h4>Rams</h4>
+                        <h4>Laptop Size</h4>
 
                         <c:set var="tableHeader" scope="request">
                             <tr>
@@ -104,7 +104,7 @@
                     <div class="card shadow-lg">
 
                         <div class="card-header">
-                            <h5>Create Ram</h5>
+                            <h5>Create Laptop Size</h5>
                         </div>
 
                         <div class="card-body">
@@ -120,8 +120,8 @@
                                         type="number"
                                         id="lapSize"
                                         name="size"
-                                        class="form-control">
-
+                                        class="form-control"
+                                        step="any">
                                 </div>
 
 
