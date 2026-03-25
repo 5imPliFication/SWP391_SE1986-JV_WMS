@@ -703,6 +703,7 @@ public class ProductDAO {
                     SELECT p.id
                     FROM products p
                     JOIN product_items pi ON pi.product_id = p.id AND pi.is_active = 1
+                    WHERE p.is_active = 1
                     GROUP BY p.id
                 ) grouped
                 """;
@@ -727,9 +728,11 @@ public class ProductDAO {
                        p.img_url,
                        p.is_active,
                        p.brand_id,
-                       COUNT(pi.id) AS active_item_count
+                       COUNT(pi.id) AS active_item_count,
+                       COALESCE(MAX(pi.current_price), 0) AS current_price
                 FROM products p
                 JOIN product_items pi ON pi.product_id = p.id AND pi.is_active = 1
+                WHERE p.is_active = 1
                 GROUP BY p.id, p.name, p.description, p.img_url, p.is_active, p.brand_id
                 ORDER BY p.name ASC
                 LIMIT ? OFFSET ?
@@ -750,6 +753,7 @@ public class ProductDAO {
                     product.setId(rs.getLong("id"));
                     product.setName(rs.getString("name"));
                     product.setTotalQuantity(rs.getLong("active_item_count"));
+                    product.setCurrentPrice(rs.getDouble("current_price"));
                     product.setIsActive(rs.getBoolean("is_active"));
                     product.setImgUrl(rs.getString("img_url"));
                     Brand brand = new Brand();

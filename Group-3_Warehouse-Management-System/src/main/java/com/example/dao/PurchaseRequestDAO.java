@@ -560,10 +560,12 @@ public class PurchaseRequestDAO {
         }
 
         String sql = """
-                select pr.id, u.fullname, pr.request_code, pr.note, pr.created_at
+                 select pr.id, creater.fullname as creater, pr.request_code, pr.note, pr.created_at, approver.fullname as approver, pr.updated_at
                 from purchase_requests pr
-                join users u
-                on pr.created_by = u.id
+                join users creater
+                on pr.created_by = creater.id
+                join users approver
+                on pr.approved_by = approver.id
                 where pr.id = ?
                 """;
 
@@ -578,8 +580,10 @@ public class PurchaseRequestDAO {
                 purchaseRequestDTO.setPurchaseId(rs.getLong("id"));
                 purchaseRequestDTO.setPurchaseCode(rs.getString("request_code"));
                 purchaseRequestDTO.setNote(rs.getString("note"));
-                purchaseRequestDTO.setCreatedBy(rs.getString("fullname"));
+                purchaseRequestDTO.setCreatedBy(rs.getString("creater"));
                 purchaseRequestDTO.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                purchaseRequestDTO.setApprovedBy(rs.getString("approver"));
+                purchaseRequestDTO.setApprovedAt(rs.getTimestamp("updated_at").toLocalDateTime());
                 return purchaseRequestDTO;
             }
 

@@ -127,18 +127,20 @@ public class GoodsHistoryDAO {
     public GoodsReceiptDTO getGoodsReceiptById(Long id) {
         StringBuilder sql = new StringBuilder(
                 """
-                        select gr.id, pr.request_code, request_users.fullname as requestor_name,\s
-                        warehouse.fullname as warehouse_name, pr.created_at as request_date,\s
-                        gr.received_at, pr.note
-                        from goods_receipts gr
-                        join purchase_requests pr
-                        on gr.purchase_request_id = pr.id
-                        join users request_users
-                        on request_users.id = pr.created_by
-                        join users warehouse
-                        on warehouse.id = gr.warehouse_id
-                        where gr.id = ?
-                       \s""");
+                        select gr.id, pr.request_code, request_users.fullname as requestor_name,
+                         warehouse.fullname as warehouse_name, pr.created_at as request_date,
+                         gr.received_at, pr.note, approver.fullname as approver, gr.supplier
+                         from goods_receipts gr
+                         join purchase_requests pr
+                         on gr.purchase_request_id = pr.id
+                         join users request_users
+                         on request_users.id = pr.created_by
+                         join users warehouse
+                         on warehouse.id = gr.warehouse_id
+                         join users approver
+                         on approver.id = pr.approved_by
+                         where gr.id = ?
+                         """);
         try (Connection conn = DBConfig.getDataSource().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
@@ -156,6 +158,8 @@ public class GoodsHistoryDAO {
                     dto.setNote(rs.getString("note"));
                     dto.setRequestorName(rs.getString("requestor_name"));
                     dto.setRequestDate(rs.getObject("request_date", LocalDateTime.class));
+                    dto.setApprover(rs.getString("approver"));
+                    dto.setSupplier(rs.getString("supplier"));
                     return dto;
                 }
             }

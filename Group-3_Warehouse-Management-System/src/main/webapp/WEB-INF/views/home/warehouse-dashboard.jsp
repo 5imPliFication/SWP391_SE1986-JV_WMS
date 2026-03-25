@@ -133,7 +133,7 @@
                     <i class="fas fa-chart-bar fa-3x text-success mb-3"></i>
                     <h5>Statistics</h5>
                     <p class="text-muted">View fulfillment reports</p>
-                    <a href="${pageContext.request.contextPath}/warehouse/reports" class="btn btn-success">
+                    <a href="${pageContext.request.contextPath}/report?type=inventory" class="btn btn-success">
                         <i class="fas fa-arrow-right mr-1"></i>View Reports
                     </a>
                 </div>

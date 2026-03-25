@@ -209,21 +209,20 @@
                                     <td class="px-4 align-middle">
                                             <%-- Product name from Product entity --%>
                                         <div class="font-weight-bold">${item.product.name}</div>
-                                            <%-- Show inventory status based on order state --%>
-                                        <c:if test="${order.status == 'PROCESSING' || order.status == 'COMPLETED'}">
+                                            <%-- Linked product items are reserved when salesman adds them to the order. --%>
+                                        <c:if test="${order.status == 'SUBMITTED' || order.status == 'PROCESSING' || order.status == 'COMPLETED'}">
                                             <br><small class="text-warning">
                                             <i class="fas fa-exclamation-triangle mr-1"></i>
-                                            Stock Reduced (${item.quantity} units consumed)
+                                            Stock Reserved (${item.quantity} units linked)
                                         </small>
                                         </c:if>
                                     </td>
                                     <td class="px-4 align-middle text-right">
                                             ${currency:format(item.priceAtPurchase)} VND
-                                            <%-- Current price from ProductItem.currentPrice --%>
-                                        <c:if test="${item.priceAtPurchase != item.productItem.currentPrice}">
+                                        <c:if test="${item.priceAtPurchase != item.productItem.importedPrice}">
                                             <br><small class="text-warning">
-                                            <i class="fas fa-info-circle"></i> Current:
-                                                ${currency:format(item.productItem.currentPrice)} VND
+                                            <i class="fas fa-info-circle"></i> Imported:
+                                                ${currency:format(item.productItem.importedPrice)} VND
                                         </small>
                                         </c:if>
                                     </td>
@@ -321,8 +320,7 @@
                     </h6>
                     <small>
                         <strong>Warehouse inventory NOT yet consumed.</strong>
-                        <br>Product quantities will be automatically reduced when you move this order to "PROCESSING"
-                        status.
+                        <br>Product items were reserved when they were added to this order.
                     </small>
                 </div>
             </c:if>
@@ -475,6 +473,14 @@
 
                         <%-- PROCESSING: Can complete or cancel --%>
                         <c:when test="${order.status == 'PROCESSING'}">
+                            <form action="${pageContext.request.contextPath}/warehouse/order/complete"
+                                  method="post"
+                                  onsubmit="return confirm('Mark this order as completed?');">
+                                <input type="hidden" name="orderId" value="${order.id}"/>
+                                <button type="submit" class="btn btn-success btn-lg btn-block mb-3">
+                                    <i class="fas fa-check-circle mr-2"></i>Mark as Completed
+                                </button>
+                            </form>
 
                             <div class="card border-danger">
                                 <div class="card-body p-3">
@@ -483,7 +489,7 @@
                                     </h6>
                                     <p class="small text-muted mb-3">
                                         <i class="fas fa-undo mr-1"></i>
-                                        Product item quantities will be restored if canceled.
+                                        Product item quantities will be restored if cancelled.
                                     </p>
                                     <form action="${pageContext.request.contextPath}/warehouse/order/cancel"
                                           method="post"

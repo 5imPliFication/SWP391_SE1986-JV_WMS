@@ -13,6 +13,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -48,6 +49,15 @@ public class SizeList extends HttpServlet {
         }
         if (pageNo > totalPages) {
             pageNo = totalPages;
+        }
+
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            Object flash = session.getAttribute("flashSizeCreateError");
+            if (flash != null) {
+                request.setAttribute("error", flash);
+                session.removeAttribute("flashSizeCreateError");
+            }
         }
 
         List<Size> sizes = s.getSizeByPage(pageNo, PAGE_SIZE);

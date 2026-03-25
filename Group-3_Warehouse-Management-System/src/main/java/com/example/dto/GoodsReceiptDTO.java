@@ -20,4 +20,6 @@ public class GoodsReceiptDTO {
     private String note;
     private String requestorName;
     private LocalDateTime requestDate;
+    private String approver;
+    private String supplier;
 }

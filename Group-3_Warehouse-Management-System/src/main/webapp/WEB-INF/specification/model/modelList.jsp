@@ -138,6 +138,10 @@
                             <h5>Create Model</h5>
                         </div>
 
+                        <c:if test="${not empty error}">
+                            <div class="alert alert-danger mb-0 rounded-0 border-0" role="alert">${error}</div>
+                        </c:if>
+
                         <div class="card-body">
 
                             <form action="${pageContext.request.contextPath}/create-model" method="post">

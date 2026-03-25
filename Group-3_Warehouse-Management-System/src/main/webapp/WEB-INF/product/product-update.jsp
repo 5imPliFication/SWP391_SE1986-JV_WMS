@@ -172,7 +172,7 @@
                                 <h5 class="section-title">Pricing & Status</h5>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Selling Price (USD)</label>
+                                    <label class="form-label">Selling Price (VND)</label>
                                     <fmt:formatNumber value="${product.currentPrice}" groupingUsed="false"
                                                       var="priceRaw"/>
                                     <input type="number" name="productCurrentPrice" class="form-control fw-bold"

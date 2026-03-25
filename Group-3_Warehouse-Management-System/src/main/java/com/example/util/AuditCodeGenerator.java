@@ -5,12 +5,11 @@ import java.time.format.DateTimeFormatter;
 
 public class AuditCodeGenerator {
 
-    public static String generateDailyCode() {
-        LocalDate today = LocalDate.now();
+    public static String generateAuditCode() {
+//        LocalDate today = LocalDate.now();
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMdd");
+//        String datePart = today.format(formatter);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMdd");
-        String datePart = today.format(formatter);
-
-        return "AUD-" + datePart;
+        return "AUD-" + System.currentTimeMillis();
     }
 }

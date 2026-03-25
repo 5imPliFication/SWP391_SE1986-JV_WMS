@@ -1,5 +1,7 @@
 package com.example.controller.report;
 
+import com.example.dto.InventoryMovementRowDTO;
+import com.example.enums.MovementType;
 import com.example.model.Order;
 import com.example.model.User;
 import com.example.service.OrderService;
@@ -74,19 +76,65 @@ public class ReportServlet extends HttpServlet {
     private void handleInventoryReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String yearStr = request.getParameter("year");
         String monthStr = request.getParameter("month");
+        String fromDateStr = request.getParameter("fromDate");
+        String toDateStr = request.getParameter("toDate");
 
+        int year = (yearStr != null && !yearStr.isEmpty()) ? Integer.parseInt(yearStr) : LocalDate.now().getYear();
+        int month = (monthStr != null && !monthStr.isEmpty()) ? Integer.parseInt(monthStr) : LocalDate.now().getMonthValue();
+
+        List<ReportItemDTO> reportItems;
+        List<InventoryMovementRowDTO> movementRows;
+        List<Long> chartData;
+
+        LocalDate fromDate;
+        LocalDate toDate;
+        if (fromDateStr != null && !fromDateStr.isBlank() && toDateStr != null && !toDateStr.isBlank()) {
+            fromDate = LocalDate.parse(fromDateStr);
+            toDate = LocalDate.parse(toDateStr);
+        } else {
+            fromDate = LocalDate.of(year, month, 1);
+            toDate = fromDate.plusMonths(1).minusDays(1);
+        }
+
+        try {
+            reportItems = reportService.getInventoryItems(month, year);
+            movementRows = reportService.getInventoryMovementRows(fromDate, toDate);
+            chartData = reportService.getInventoryChartDataByYear(year);
+        } catch (Exception e) {
+            request.setAttribute("message", e.getMessage());
+            request.setAttribute("messageType", "danger");
+            request.getRequestDispatcher("/WEB-INF/report/inventory-report.jsp").forward(request, response);
+            return;
+        }
+
+        String jsonData = gson.toJson(chartData);
+
+        request.setAttribute("reportItems", reportItems);
+        request.setAttribute("movementRows", movementRows);
+        request.setAttribute("chartData", jsonData);
+        request.setAttribute("type", "inventory");
+        request.setAttribute("year", year);
+        request.setAttribute("month", month);
+        request.getRequestDispatcher("/WEB-INF/report/inventory-report.jsp").forward(request, response);
+    }
+
+    private void handleExportReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String yearStr = request.getParameter("year");
+        String monthStr = request.getParameter("month");
+
+        // if year and month are not provided, default to current year and month
         int year = (yearStr != null && !yearStr.isEmpty()) ? Integer.parseInt(yearStr) : LocalDate.now().getYear();
         int month = (monthStr != null && !monthStr.isEmpty()) ? Integer.parseInt(monthStr) : LocalDate.now().getMonthValue();
 
         List<ReportItemDTO> reportItems;
         List<Long> chartData;
         try {
-            reportItems = reportService.getInventoryItems(month, year);
-            chartData = reportService.getInventoryChartDataByYear(year);
+            reportItems = reportService.getItems(month, year, MovementType.EXPORT);
+            chartData = reportService.getChartDataByYear(year, MovementType.EXPORT);
         } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
-            request.getRequestDispatcher("/WEB-INF/report/report.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/report/export-report.jsp").forward(request, response);
             return;
         }
 
@@ -94,78 +142,10 @@ public class ReportServlet extends HttpServlet {
 
         request.setAttribute("reportItems", reportItems);
         request.setAttribute("chartData", jsonData);
-        request.setAttribute("type", "inventory");
-        request.setAttribute("year", year);
-        request.setAttribute("month", month);
-        request.getRequestDispatcher("/WEB-INF/report/report.jsp").forward(request, response);
-    }
-
-    private void handleExportReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String yearStr = request.getParameter("year");
-        String quarterStr = request.getParameter("quarter");
-        String searchCode = request.getParameter("searchCode");
-        String pageStr = request.getParameter("pageNo");
-
-        int year = LocalDate.now().getYear();
-        int quarter = getCurrentQuarter();
-        int pageNo = AppConstants.DEFAULT_PAGE_NO;
-
-        if (yearStr != null && !yearStr.isEmpty()) {
-            year = Integer.parseInt(yearStr);
-        }
-        if (quarterStr != null && !quarterStr.isEmpty()) {
-            quarter = Integer.parseInt(quarterStr);
-        }
-        if (pageStr != null && !pageStr.isEmpty()) {
-            pageNo = Integer.parseInt(pageStr);
-        }
-
-        try {
-            reportService.validateQuarter(quarter);
-        } catch (IllegalArgumentException e) {
-            request.setAttribute("message", e.getMessage());
-            request.setAttribute("messageType", "danger");
-            quarter = getCurrentQuarter();
-        }
-
-        int startMonth = (quarter - 1) * 3 + 1;
-        LocalDate fromDate = LocalDate.of(year, startMonth, 1);
-        LocalDate toDate = fromDate.plusMonths(3).minusDays(1);
-
-        int offset = (pageNo - 1) * AppConstants.PAGE_SIZE;
-        List<Order> orders = orderService.getExportHistoryOrders(searchCode, fromDate, toDate, offset);
-        int totalOrders = orderService.countExportHistory(searchCode, fromDate, toDate);
-        int totalPages = (int) Math.ceil((double) totalOrders / AppConstants.PAGE_SIZE);
-
-        Map<String, List<Long>> annualOverview = reportService.getExportAnnualOverviewByYear(year);
-        Map<String, Object> annualChartPayload = new LinkedHashMap<>();
-        annualChartPayload.put("labels", List.of(
-                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-        ));
-        annualChartPayload.put("inStock", annualOverview.get("inStock"));
-        annualChartPayload.put("exported", annualOverview.get("exported"));
-        annualChartPayload.put("imported", annualOverview.get("imported"));
-
-        String annualChartJson = gson.toJson(annualChartPayload);
-        String quarterTrendJson = gson.toJson(reportService.getExportQuarterTrend(year, quarter));
-
         request.setAttribute("type", "export");
         request.setAttribute("year", year);
-        request.setAttribute("quarter", quarter);
-        request.setAttribute("searchCode", searchCode);
-
-        request.setAttribute("annualChartData", annualChartJson);
-        request.setAttribute("quarterTrendData", quarterTrendJson);
-
-        request.setAttribute("orders", orders);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("pageNo", pageNo);
-
-        request.setAttribute("fromDate", fromDate.toString());
-        request.setAttribute("toDate", toDate.toString());
-
-        request.getRequestDispatcher("/WEB-INF/report/report.jsp").forward(request, response);
+        request.setAttribute("month", month);
+        request.getRequestDispatcher("/WEB-INF/report/export-report.jsp").forward(request, response);
     }
 
     private void handleImportReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -179,12 +159,12 @@ public class ReportServlet extends HttpServlet {
         List<ReportItemDTO> reportItems;
         List<Long> chartData;
         try {
-            reportItems = reportService.getItems(month, year);
-            chartData = reportService.getImportChartDataByYear(year);
+            reportItems = reportService.getItems(month, year, MovementType.IMPORT);
+            chartData = reportService.getChartDataByYear(year, MovementType.IMPORT);
         } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
-            request.getRequestDispatcher("/WEB-INF/report/report.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/report/import-report.jsp").forward(request, response);
             return;
         }
 
@@ -196,7 +176,7 @@ public class ReportServlet extends HttpServlet {
         request.setAttribute("type", "import");
         request.setAttribute("year", year);
         request.setAttribute("month", month);
-        request.getRequestDispatcher("/WEB-INF/report/report.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/report/import-report.jsp").forward(request, response);
     }
 
     private int getCurrentQuarter() {

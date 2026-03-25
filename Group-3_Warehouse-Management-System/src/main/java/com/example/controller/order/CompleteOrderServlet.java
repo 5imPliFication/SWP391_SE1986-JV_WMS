@@ -40,7 +40,6 @@ public class CompleteOrderServlet extends HttpServlet {
             activityLogService.log(user, "Completed order");
             resp.sendRedirect(req.getContextPath() + "/warehouse/orders?completed=true");
         } catch (Exception e) {
-            e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }

@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -27,10 +28,29 @@ public class ErrorController extends HttpServlet {
             throws ServletException, IOException {
 
         // Get error attributes
-        Integer statusCode = (Integer) req.getAttribute("javax.servlet.error.status_code");
-        String message = (String) req.getAttribute("javax.servlet.error.message");
-        Throwable exception = (Throwable) req.getAttribute("javax.servlet.error.exception");
-        String requestUri = (String) req.getAttribute("javax.servlet.error.request_uri");
+        Integer statusCode = (Integer) req.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        if (statusCode == null) {
+            statusCode = (Integer) req.getAttribute("javax.servlet.error.status_code");
+        }
+
+        String message = (String) req.getAttribute(RequestDispatcher.ERROR_MESSAGE);
+        if (message == null) {
+            message = (String) req.getAttribute("javax.servlet.error.message");
+        }
+
+        Throwable exception = (Throwable) req.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+        if (exception == null) {
+            exception = (Throwable) req.getAttribute("javax.servlet.error.exception");
+        }
+
+        String requestUri = (String) req.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+        if (requestUri == null) {
+            requestUri = (String) req.getAttribute("javax.servlet.error.request_uri");
+        }
+
+        if ((message == null || message.isBlank()) && statusCode != null && statusCode == 403) {
+            message = "Access Denied";
+        }
 
         // Log the error
         if (exception != null) {

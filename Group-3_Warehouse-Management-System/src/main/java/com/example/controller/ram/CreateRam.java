@@ -38,7 +38,14 @@ public class CreateRam extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
-        r.CreateRam(size + "GB", active);
+        String sizeValue = size + "GB";
+        if (r.ramExists(sizeValue)) {
+            session.setAttribute("flashRamCreateError", "Đã tồn tại");
+            response.sendRedirect(request.getContextPath() + "/specification/ram");
+            return;
+        }
+
+        r.CreateRam(sizeValue, active);
         activityLogService.log(user, "Crete ram");
 
         response.sendRedirect(

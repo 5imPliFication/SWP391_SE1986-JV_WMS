@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        /* Quantity Controls */
         .quantity-controls {
             display: flex;
             align-items: center;
@@ -37,7 +36,6 @@
             font-size: 16px;
         }
 
-        /* Product Modal */
         .product-card {
             transition: all 0.3s ease;
             cursor: pointer;
@@ -62,31 +60,6 @@
             border-radius: 8px;
         }
 
-        .product-stock {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .stock-high {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .stock-medium {
-            background-color: #ffc107;
-            color: black;
-        }
-
-        .stock-low {
-            background-color: #dc3545;
-            color: white;
-        }
-
         .search-box {
             position: sticky;
             top: 0;
@@ -99,11 +72,6 @@
         .modal-body {
             max-height: 60vh;
             overflow-y: auto;
-        }
-
-        .quantity-input-modal {
-            width: 80px;
-            text-align: center;
         }
 
         .order-description-block {
@@ -139,6 +107,16 @@
         </div>
     </c:if>
 
+    <c:if test="${not empty param.quantityError}">
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <strong>Stock Unavailable:</strong> ${param.quantityError}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    </c:if>
+
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="font-weight-bold text-dark">
@@ -147,6 +125,18 @@
         <a href="${pageContext.request.contextPath}/salesman/orders" class="btn btn-secondary">
             <i class="fas fa-arrow-left mr-2"></i>Back to Orders
         </a>
+    </div>
+
+    <div class="alert alert-light border shadow-sm mb-4" role="alert">
+        <i class="fas fa-info-circle text-primary mr-2"></i>
+        <c:choose>
+            <c:when test="${order.status == 'DRAFT'}">
+                Use this page to review the order and manage order items before submitting.
+            </c:when>
+            <c:otherwise>
+                This order has been submitted and is being processed by the warehouse.
+            </c:otherwise>
+        </c:choose>
     </div>
 
     <!-- Order Info Card -->
@@ -162,34 +152,35 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <p class="text-muted mb-1">Customer</p>
-                    <h5 class="font-weight-bold">${order.customerName}</h5>
+                    <h5 class="font-weight-bold">${not empty order.customerName ? order.customerName : 'Not set yet'}</h5>
+                    <p class="mb-0 text-muted">${not empty order.customerPhone ? order.customerPhone : 'No phone number'}</p>
                 </div>
                 <div class="col-md-4 mb-3">
                     <p class="text-muted mb-1">Status</p>
                     <c:choose>
                         <c:when test="${order.status == 'DRAFT'}">
                             <span class="badge badge-secondary badge-pill px-3 py-2">
-                                <i class="fas fa-edit mr-1"></i>${order.status}
+                                <i class="fas fa-file mr-1"></i>DRAFT
                             </span>
                         </c:when>
                         <c:when test="${order.status == 'SUBMITTED'}">
                             <span class="badge badge-warning badge-pill px-3 py-2">
-                                <i class="fas fa-paper-plane mr-1"></i>${order.status}
+                                <i class="fas fa-paper-plane mr-1"></i>SUBMITTED
                             </span>
                         </c:when>
                         <c:when test="${order.status == 'PROCESSING'}">
                             <span class="badge badge-info badge-pill px-3 py-2">
-                                <i class="fas fa-spinner mr-1"></i>${order.status}
+                                <i class="fas fa-cog fa-spin mr-1"></i>PROCESSING
                             </span>
                         </c:when>
                         <c:when test="${order.status == 'COMPLETED'}">
                             <span class="badge badge-success badge-pill px-3 py-2">
-                                <i class="fas fa-check-circle mr-1"></i>${order.status}
+                                <i class="fas fa-check-circle mr-1"></i>COMPLETED
                             </span>
                         </c:when>
                         <c:when test="${order.status == 'CANCELLED'}">
                             <span class="badge badge-danger badge-pill px-3 py-2">
-                                <i class="fas fa-times-circle mr-1"></i>${order.status}
+                                <i class="fas fa-times-circle mr-1"></i>CANCELLED
                             </span>
                         </c:when>
                         <c:otherwise>
@@ -199,19 +190,57 @@
                 </div>
             </div>
 
-            <div class="mt-2">
-                <p class="text-muted mb-2">Order Description</p>
-                <div class="order-description-block">
-                    <c:choose>
-                        <c:when test="${not empty order.note}">
-                            ${order.note}
-                        </c:when>
-                        <c:otherwise>
-                            No description provided.
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </div>
+            <c:choose>
+                <c:when test="${order.status == 'DRAFT'}">
+                    <div class="mt-3 border rounded p-3 bg-light">
+                        <h6 class="mb-3"><i class="fas fa-user-edit mr-2"></i>Customer And Note</h6>
+                        <form action="${pageContext.request.contextPath}/salesman/order/customer/update" method="post">
+                            <input type="hidden" name="orderId" value="${order.id}"/>
+                            <input type="hidden" name="itemPage" value="${itemPage}"/>
+                            <input type="hidden" name="productPage" value="${productPage}"/>
+                            <input type="hidden" name="returnTo" value="detail"/>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="customerName">Customer Name</label>
+                                    <input type="text" class="form-control" id="customerName" name="customerName"
+                                           value="${order.customerName}" placeholder="Enter customer name">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="customerPhone">Customer Phone</label>
+                                    <input type="text" class="form-control" id="customerPhone" name="customerPhone"
+                                           value="${order.customerPhone}" placeholder="Enter customer phone">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="note">Order Description</label>
+                                <textarea class="form-control" id="note" name="note" rows="2"
+                                          placeholder="Enter note">${order.note}</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-save mr-1"></i>Update
+                            </button>
+                        </form>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div class="mt-3">
+                        <p class="text-muted mb-2">Order Description</p>
+                        <div class="order-description-block">
+                            <c:choose>
+                                <c:when test="${not empty order.note}">
+                                    ${order.note}
+                                </c:when>
+                                <c:otherwise>
+                                    No description provided.
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
+                </c:otherwise>
+            </c:choose>
         </div>
     </div>
 
@@ -234,7 +263,7 @@
                     <thead class="thead-light">
                     <tr>
                         <th class="py-3 px-4" width="5%">#</th>
-                        <th class="py-3 px-4" width="35%">Product Name</th>
+                        <th class="py-3 px-4" width="40%">Product Name</th>
                         <th class="py-3 px-4" width="20%">Unit Price</th>
                         <th class="py-3 px-4 text-center" width="20%">Quantity</th>
                         <th class="py-3 px-4 text-right" width="15%">Subtotal</th>
@@ -255,26 +284,20 @@
                             </td>
                             <td class="px-4 align-middle">
                                 ${currency:format(i.priceAtPurchase)} VND
-                                <c:if test="${i.priceAtPurchase != i.productItem.currentPrice}">
-                                    <br><small class="text-warning">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    Current: ${currency:format(i.productItem.currentPrice)} VND
-                                </small>
-                                </c:if>
                             </td>
                             <td class="px-4 align-middle">
                                 <c:choose>
                                     <c:when test="${order.status == 'DRAFT'}">
                                         <!-- Quantity Controls -->
                                         <div class="quantity-controls">
-                                            <button class="btn btn-sm btn-outline-danger quantity-btn"
-                                                    onclick="updateQuantity(${order.id}, ${i.id}, ${i.quantity - 1})"
+                                            <button class="btn btn-sm btn-outline-danger quantity-btn qty-minus"
+                                                    data-order-id="${order.id}" data-item-id="${i.id}" data-quantity="${i.quantity}"
                                                 ${i.quantity <= 1 ? 'disabled' : ''}>
                                                 <i class="fas fa-minus"></i>
                                             </button>
                                             <span class="quantity-display">${i.quantity}</span>
-                                            <button class="btn btn-sm btn-outline-success quantity-btn"
-                                                    onclick="updateQuantity(${order.id}, ${i.id}, ${i.quantity + 1})">
+                                            <button class="btn btn-sm btn-outline-success quantity-btn qty-plus"
+                                                    data-order-id="${order.id}" data-item-id="${i.id}" data-quantity="${i.quantity}">
                                                 <i class="fas fa-plus"></i>
                                             </button>
                                         </div>
@@ -289,8 +312,8 @@
                             </td>
                             <c:if test="${order.status == 'DRAFT'}">
                                 <td class="px-4 align-middle text-center">
-                                    <button class="btn btn-sm btn-outline-danger"
-                                            onclick="removeItem(${order.id}, ${i.id})">
+                                    <button class="btn btn-sm btn-outline-danger btn-remove-item"
+                                            data-order-id="${order.id}" data-item-id="${i.id}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -303,13 +326,8 @@
                         <tr>
                             <td colspan="${order.status == 'DRAFT' ? '6' : '5'}" class="text-center py-5">
                                 <div class="text-muted">
-                                    <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
-                                    <h5>No Items in Order</h5>
-                                    <c:if test="${order.status == 'DRAFT'}">
-                                        <button class="btn btn-primary mt-3" data-toggle="modal" data-target="#productModal">
-                                            <i class="fas fa-plus-circle mr-2"></i>Add Your First Product
-                                        </button>
-                                    </c:if>
+                                    <i class="fas fa-box-open fa-2x mb-3 d-block"></i>
+                                    <h5>No Items</h5>
                                 </div>
                             </td>
                         </tr>
@@ -323,15 +341,18 @@
                     <ul class="pagination pagination-sm justify-content-center mb-0">
                         <li class="page-item ${itemPage == 1 ? 'disabled' : ''}">
                             <a class="page-link"
-                               href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage - 1}&productPage=${productPage}"
-                               aria-label="Previous">&laquo;</a>
+                               href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage - 1}">
+                                &laquo;
+                            </a>
                         </li>
 
                         <c:forEach begin="1" end="${totalItemPages}" var="i">
                             <c:if test="${i == 1 || i == totalItemPages || (i >= itemPage - 2 && i <= itemPage + 2)}">
                                 <li class="page-item ${i == itemPage ? 'active' : ''}">
                                     <a class="page-link"
-                                       href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${i}&productPage=${productPage}">${i}</a>
+                                       href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${i}">
+                                        ${i}
+                                    </a>
                                 </li>
                             </c:if>
                             <c:if test="${i == itemPage - 3 || i == itemPage + 3}">
@@ -341,8 +362,9 @@
 
                         <li class="page-item ${itemPage == totalItemPages ? 'disabled' : ''}">
                             <a class="page-link"
-                               href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage + 1}&productPage=${productPage}"
-                               aria-label="Next">&raquo;</a>
+                               href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage + 1}">
+                                &raquo;
+                            </a>
                         </li>
                     </ul>
                 </nav>
@@ -357,18 +379,14 @@
                 <div class="row">
                     <div class="col-md-8">
                         <h5 class="mb-3"><i class="fas fa-receipt mr-2"></i>Order Summary</h5>
-                        <p class="text-muted mb-0">Export totals are calculated directly from selected items.</p>
+                        <p class="text-muted mb-0">Total amount of items in this order.</p>
                     </div>
 
                     <div class="col-md-4">
                         <div class="card bg-light">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <span class="h5 mb-0">Total:</span>
-                                    <span class="h4 mb-0 text-primary font-weight-bold">
-                                        ${currency:format(order.total)} VND
-                                    </span>
-                                </div>
+                            <div class="card-body text-center">
+                                <p class="text-muted mb-2">Total Amount</p>
+                                <h3 class="text-primary font-weight-bold">${currency:format(total)} VND</h3>
                             </div>
                         </div>
                     </div>
@@ -385,21 +403,21 @@
                     <div class="card-body text-center py-4">
                         <h5 class="mb-3"><i class="fas fa-paper-plane mr-2"></i>Submit Order</h5>
                         <c:choose>
-                            <c:when test="${not empty items}">
-                                <p class="text-muted mb-4">Ready to submit? You won't be able to modify afterwards.</p>
+                            <c:when test="${empty items}">
+                                <p class="text-muted mb-4">Please add at least one product before submitting.</p>
+                                <button class="btn btn-primary btn-lg" disabled>
+                                    <i class="fas fa-paper-plane mr-2"></i>Submit
+                                </button>
+                            </c:when>
+                            <c:otherwise>
+                                <p class="text-muted mb-4">Submit this draft order to the warehouse for processing.</p>
                                 <form action="${pageContext.request.contextPath}/salesman/order/submit" method="post"
-                                      onsubmit="return confirm('Submit this order?');">
+                                      onsubmit="return confirm('Submit this order? You will not be able to modify it afterward.');">
                                     <input type="hidden" name="orderId" value="${order.id}"/>
-                                    <button type="submit" class="btn btn-primary btn-lg btn-block">
+                                    <button type="submit" class="btn btn-primary btn-lg">
                                         <i class="fas fa-paper-plane mr-2"></i>Submit Order
                                     </button>
                                 </form>
-                            </c:when>
-                            <c:otherwise>
-                                <p class="text-danger mb-4">Add at least one item first.</p>
-                                <button class="btn btn-secondary btn-lg btn-block" disabled>
-                                    <i class="fas fa-paper-plane mr-2"></i>Submit Order
-                                </button>
                             </c:otherwise>
                         </c:choose>
                     </div>
@@ -412,9 +430,9 @@
                         <h5 class="mb-3"><i class="fas fa-times-circle mr-2"></i>Cancel Order</h5>
                         <p class="text-muted mb-4">Discard this draft? This cannot be undone.</p>
                         <form action="${pageContext.request.contextPath}/salesman/order/cancel" method="post"
-                              onsubmit="return confirm('Cancel this order? This cannot be undone!');">
+                              onsubmit="return confirm('Cancel this order? This action cannot be undone.');">
                             <input type="hidden" name="orderId" value="${order.id}"/>
-                            <button type="submit" class="btn btn-danger btn-lg btn-block">
+                            <button type="submit" class="btn btn-danger btn-lg">
                                 <i class="fas fa-times-circle mr-2"></i>Cancel Order
                             </button>
                         </form>
@@ -434,7 +452,7 @@
                         This order has been cancelled and cannot be modified.
                     </c:when>
                     <c:otherwise>
-                        This order has been submitted and cannot be modified.
+                        This order has been submitted and cannot be modified. Track its progress in the warehouse.
                     </c:otherwise>
                 </c:choose>
             </p>
@@ -464,59 +482,41 @@
                     <c:forEach items="${availableProducts}" var="p">
                         <div class="col-md-4 mb-3 product-item"
                              data-name="${p.name.toLowerCase()}"
-                             data-id="${p.id}">
-                            <div class="card product-card h-100">
+                             data-product-id="${p.id}"
+                             data-price="${p.currentPrice}"
+                             data-max="${p.totalQuantity}">
+                            <div class="card h-100 border-info ${p.id == param.productId && not empty param.quantityError ? 'border-warning' : ''}">
+                                <c:if test="${p.id == param.productId && not empty param.quantityError}">
+                                    <div class="card-header bg-warning text-dark p-2">
+                                        <small><i class="fas fa-exclamation-triangle mr-1"></i>Adjust quantity below</small>
+                                    </div>
+                                </c:if>
                                 <div class="card-body">
-                                    <div class="mb-3">
-                                        <c:choose>
-                                            <c:when test="${p.totalQuantity > 20 and p.isActive == true}">
-                                                <span class="product-stock stock-high">
-                                                    <i class="fas fa-check-circle"></i> In Stock
-                                                </span>
-                                            </c:when>
-                                            <c:when test="${p.totalQuantity > 0 and p.isActive == true}">
-                                                <span class="product-stock stock-medium">
-                                                    <i class="fas fa-exclamation-triangle"></i> Low Stock
-                                                </span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="product-stock stock-low">
-                                                    <i class="fas fa-times-circle"></i> Out of Stock
-                                                </span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-
                                     <h6 class="font-weight-bold mb-2">${p.name}</h6>
-                                    <p class="text-muted small mb-2">${p.description}</p>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="text-muted small">Available:</span>
-                                        <strong>${p.totalQuantity} units</strong>
+                                    <div class="small text-muted mb-2">Available: ${p.totalQuantity}</div>
+                                    <div class="font-weight-bold text-primary mb-3">
+                                        ${currency:format(p.currentPrice)} VND
                                     </div>
-
-                                    <c:if test="${p.totalQuantity > 0}">
-                                        <div class="input-group mb-2">
-                                            <input type="number"
-                                                   class="form-control quantity-input-modal"
-                                                   value="1"
-                                                   min="1"
-                                                   max="${p.totalQuantity}"
-                                                   id="qty-${p.id}">
-                                            <div class="input-group-append">
-                                                <button class="btn btn-primary"
-                                                        onclick="addProductToOrder(${order.id}, ${p.id})">
-                                                    <i class="fas fa-plus"></i> Add
-                                                </button>
-                                            </div>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" class="form-control text-center" min="1" 
+                                               value="${p.id == param.productId && not empty param.quantity ? param.quantity : '1'}"
+                                               max="${p.totalQuantity}" step="1" id="qty-${p.id}">
+                                        <div class="input-group-append">
+                                            <c:choose>
+                                                <c:when test="${p.totalQuantity <= 0}">
+                                                    <button class="btn btn-info" type="button" disabled>
+                                                        Add
+                                                    </button>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <button class="btn btn-info btn-add-product" type="button"
+                                                            data-order-id="${order.id}" data-product-id="${p.id}">
+                                                        Add
+                                                    </button>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </div>
-                                    </c:if>
-
-                                    <c:if test="${p.totalQuantity == 0}">
-                                        <button class="btn btn-secondary btn-block" disabled>
-                                            <i class="fas fa-ban mr-1"></i> Out of Stock
-                                        </button>
-                                    </c:if>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -535,26 +535,30 @@
                         <ul class="pagination justify-content-center mb-0">
                             <li class="page-item ${productPage == 1 ? 'disabled' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage}&productPage=${productPage - 1}&openProductModal=1"
-                                   aria-label="Previous">&laquo;</a>
+                                   href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&productPage=${productPage - 1}">
+                                    &laquo;
+                                </a>
                             </li>
 
-                            <c:forEach begin="1" end="${totalProductPages}" var="pPage">
-                                <c:if test="${pPage == 1 || pPage == totalProductPages || (pPage >= productPage - 2 && pPage <= productPage + 2)}">
-                                    <li class="page-item ${pPage == productPage ? 'active' : ''}">
+                            <c:forEach begin="1" end="${totalProductPages}" var="i">
+                                <c:if test="${i == 1 || i == totalProductPages || (i >= productPage - 2 && i <= productPage + 2)}">
+                                    <li class="page-item ${i == productPage ? 'active' : ''}">
                                         <a class="page-link"
-                                           href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage}&productPage=${pPage}&openProductModal=1">${pPage}</a>
+                                           href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&productPage=${i}">
+                                            ${i}
+                                        </a>
                                     </li>
                                 </c:if>
-                                <c:if test="${pPage == productPage - 3 || pPage == productPage + 3}">
+                                <c:if test="${i == productPage - 3 || i == productPage + 3}">
                                     <li class="page-item disabled"><span class="page-link">...</span></li>
                                 </c:if>
                             </c:forEach>
 
                             <li class="page-item ${productPage == totalProductPages ? 'disabled' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&itemPage=${itemPage}&productPage=${productPage + 1}&openProductModal=1"
-                                   aria-label="Next">&raquo;</a>
+                                   href="${pageContext.request.contextPath}/salesman/order/detail?id=${order.id}&productPage=${productPage + 1}">
+                                    &raquo;
+                                </a>
                             </li>
                         </ul>
                     </nav>
@@ -573,6 +577,7 @@
     }, 5000);
 
     const urlParams = new URLSearchParams(window.location.search);
+    const returnTo = '${returnTo}';
     if (urlParams.get('openProductModal') === '1') {
         $('#productModal').modal('show');
     }
@@ -588,6 +593,42 @@
                 $(this).hide();
             }
         });
+    });
+
+    // Quantity controls - using data attributes
+    $(document).on('click', '.qty-minus', function() {
+        const orderId = $(this).data('order-id');
+        const itemId = $(this).data('item-id');
+        const currentQty = parseInt($(this).data('quantity'));
+        const newQty = currentQty - 1;
+        if (newQty >= 1) {
+            updateQuantity(orderId, itemId, newQty);
+        }
+    });
+
+    $(document).on('click', '.qty-plus', function() {
+        const orderId = $(this).data('order-id');
+        const itemId = $(this).data('item-id');
+        const currentQty = parseInt($(this).data('quantity'));
+        const newQty = currentQty + 1;
+        updateQuantity(orderId, itemId, newQty);
+    });
+
+    // Remove item button
+    $(document).on('click', '.btn-remove-item', function() {
+        const orderId = $(this).data('order-id');
+        const itemId = $(this).data('item-id');
+        removeItem(orderId, itemId);
+    });
+
+    // Add product button
+    $(document).on('click', '.btn-add-product', function() {
+        const orderId = $(this).data('order-id');
+        const productId = $(this).data('product-id');
+        const qtyInput = $('#qty-' + productId);
+        if (qtyInput.length) {
+            addProductToOrder(orderId, productId);
+        }
     });
 
     // Add product to order
@@ -612,6 +653,7 @@
         form.append($('<input>', { type: 'hidden', name: 'quantity', value: quantity }));
         form.append($('<input>', { type: 'hidden', name: 'itemPage', value: itemPage }));
         form.append($('<input>', { type: 'hidden', name: 'productPage', value: productPage }));
+        form.append($('<input>', { type: 'hidden', name: 'returnTo', value: returnTo }));
 
         $('body').append(form);
         form.submit();
@@ -638,6 +680,7 @@
             form.append($('<input>', { type: 'hidden', name: 'quantity', value: newQuantity }));
             form.append($('<input>', { type: 'hidden', name: 'itemPage', value: itemPage }));
             form.append($('<input>', { type: 'hidden', name: 'productPage', value: productPage }));
+            form.append($('<input>', { type: 'hidden', name: 'returnTo', value: returnTo }));
 
             $('body').append(form);
             form.submit();
@@ -659,6 +702,7 @@
             form.append($('<input>', { type: 'hidden', name: 'orderItemId', value: orderItemId }));
             form.append($('<input>', { type: 'hidden', name: 'itemPage', value: itemPage }));
             form.append($('<input>', { type: 'hidden', name: 'productPage', value: productPage }));
+            form.append($('<input>', { type: 'hidden', name: 'returnTo', value: returnTo }));
 
             $('body').append(form);
             form.submit();

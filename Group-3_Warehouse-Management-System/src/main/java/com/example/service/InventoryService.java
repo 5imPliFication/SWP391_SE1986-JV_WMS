@@ -1,10 +1,13 @@
 package com.example.service;
 
 import com.example.dao.InventoryDAO;
+import com.example.dao.StockMovementDAO;
 import com.example.dto.ExportDTO;
 import com.example.dto.ExportProductDTO;
 import com.example.dto.OrderDTO;
 import com.example.dto.ProductItemDTO;
+import com.example.enums.MovementType;
+import com.example.enums.ReferenceType;
 import com.example.model.User;
 import com.example.util.AppConstants;
 import com.example.validator.ImportProductItemValidator;
@@ -28,7 +31,7 @@ public class InventoryService {
     private final InventoryDAO inventoryDAO = new InventoryDAO();
 
     public String importProductItems(Long purchaseRequestId, Long warehouseUserId,
-                                     String[] productIds, String[] serials, String[] prices) {
+                                     String[] productIds, String[] serials, String[] prices, String supplier) {
 
         // get information from list import product item
         List<ProductItemDTO> importProductItemDTOs = getImportProductItemDTOs(productIds, serials, prices);
@@ -38,7 +41,7 @@ public class InventoryService {
             return validationMessage;
         }
 
-        return inventoryDAO.saveProductItems(purchaseRequestId, warehouseUserId, importProductItemDTOs)
+        return inventoryDAO.saveProductItems(purchaseRequestId, warehouseUserId, importProductItemDTOs, supplier)
                 ? null
                 : "Import failed";
     }
@@ -199,23 +202,6 @@ public class InventoryService {
         return inventoryDAO.getPendingOrder(orderId);
     }
 
-//    public void completeExportOrder(Long orderId, Long warehouseId) {
-//        // 1. Mark order as completed
-//        inventoryDAO.completeExportOrder(orderId, warehouseId);
-//
-//        // 2. Record stock movement for EXPORT
-//        Map<Long, Long> quantityByProduct = inventoryDAO.getProductQuantityMapForOrder(orderId);
-//
-//        if (!quantityByProduct.isEmpty()) {
-//            new StockMovementDAO().insertStockMovements(
-//                    quantityByProduct,
-//                    MovementType.EXPORT,
-//                    ReferenceType.ORDER,
-//                    orderId
-//            );
-//        }
-//    }
-
 
     public void handleExport(User user, ExportDTO exportOrder, String[] serials) {
         int serialIndex = 0;
@@ -235,6 +221,9 @@ public class InventoryService {
 
         // subtract quantity from inventory
         inventoryDAO.subtractInventory(orderItemSerialsMap);
+
+        // save to stock movement
+        inventoryDAO.saveStockMovements(exportOrder.getId(), orderItemSerialsMap);
 
         // update order status to complete
         inventoryDAO.updateOrderStatus(exportOrder.getId(), user.getId());
