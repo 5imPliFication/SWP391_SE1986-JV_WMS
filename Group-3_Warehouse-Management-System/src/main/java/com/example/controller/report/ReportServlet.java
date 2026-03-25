@@ -1,5 +1,6 @@
 package com.example.controller.report;
 
+import com.example.dto.InventoryMovementRowDTO;
 import com.example.enums.MovementType;
 import com.example.model.Order;
 import com.example.model.User;

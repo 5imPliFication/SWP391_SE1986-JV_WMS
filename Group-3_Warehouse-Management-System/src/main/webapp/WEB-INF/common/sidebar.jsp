@@ -11,141 +11,104 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/home.css">
 
         <style>
-
-            .sidebar{
-                width:300px;
-                height:100vh;
-                position:fixed;
-                left:0;
-                top:0;
-
-                overflow-y:auto;
-                overflow-x:hidden;
-
-                scrollbar-width:none;
+            :root {
+                /* Bảng màu Dark Theme mới */
+                --sidebar-bg: #111827;           /* Đen xanh sâu (Rất chuyên nghiệp) */
+                --sidebar-text: #9ca3af;         /* Chữ xám nhạt để không bị chói */
+                --sidebar-hover-bg: #1f2937;      /* Màu nền khi di chuột qua */
+                --sidebar-hover-text: #ffffff;    /* Chữ trắng sáng khi di chuột */
+                --sidebar-active-bg: #3b82f6;     /* Màu xanh làm điểm nhấn cho mục đang chọn */
+                --sidebar-active-text: #ffffff;   /* Chữ trắng cho mục đang chọn */
+                --sidebar-border: #1f2937;       /* Đường kẻ chia tách tối màu */
             }
 
-            a{
-                text-decoration: none
-            }
-            .sidebar::-webkit-scrollbar{
-                display:none;
-            }
-
-            .main-header{
-                margin-left:300px;
-            }
-
-            .main-content{
-                margin-left:300px;
-                padding:20px;
-            }
-            .bootstrap-select .dropdown-menu{
-                z-index:9999 !important;
-            }
-
-            /* Sidebar Container */
             .sidebar {
-                width: 260px;
-                background-color: #0f172a; /* Nền tối sang trọng */
-                color: #94a3b8;
-                min-height: 100vh;
-                box-shadow: 2px 0 8px rgba(0,0,0,0.1);
-                display: flex;
-                flex-direction: column;
-            }
-
-            /* Sidebar Header */
-            .sidebar-header {
-                padding: 24px 20px;
-                border-bottom: 1px solid #1e293b;
-                color: #f8fafc;
-            }
-            .sidebar-header h1 {
-                font-size: 1.5rem;
-                margin-bottom: 4px;
-            }
-            .sidebar-header p {
-                font-size: 0.85rem;
-                color: #64748b;
-                margin: 0;
-            }
-
-            /* Sidebar Menu */
-            .sidebar-menu {
-                list-style: none;
-                padding: 16px 0;
-                margin: 0;
-                flex-grow: 1;
+                width: 250px;
+                height: 100vh;
+                position: fixed;
+                left: 0;
+                top: 0;
+                background: var(--sidebar-bg);
+                color: var(--sidebar-text);
                 overflow-y: auto;
+                overflow-x: hidden;
+                scrollbar-width: none;
+                border-right: 1px solid var(--sidebar-border);
+                transition: all 0.3s ease;
+                font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+                z-index: 1000;
             }
 
-            .sidebar-menu li {
-                margin-bottom: 4px;
+            .sidebar::-webkit-scrollbar {
+                display: none;
             }
 
-            .sidebar-menu li a {
-                display: flex;
-                align-items: center;
-                padding: 12px 24px;
-                color: #cbd5e1;
-                font-size: 0.95rem;
-                font-weight: 500;
-                transition: all 0.2s ease;
-                border-left: 4px solid transparent; /* Dành cho trạng thái active */
+            .sidebar-header {
+                padding: 24px 20px 16px;
+                border-bottom: 1px solid var(--sidebar-border);
+                margin-bottom: 16px;
             }
 
-            /* UX: Hiệu ứng Hover và Active */
-            .sidebar-menu li a:hover {
-                background-color: #1e293b;
-                color: #ffffff;
-                text-decoration: none;
+            .sidebar-header h1 {
+                font-size: 1.4rem;
+                font-weight: 700;
+                color: #ffffff; /* Tiêu đề chính trắng hoàn toàn */
+                margin: 0;
             }
 
-            .sidebar-menu li a.active {
-                background-color: #1e293b;
-                color: #38bdf8; /* Xanh ngọc nổi bật */
-                border-left: 4px solid #38bdf8;
+            .sidebar-header p {
+                font-size: 0.75rem;
+                color: #6366f1; /* Màu tím xanh làm điểm nhấn nhẹ */
+                margin: 4px 0 0 0;
+                text-transform: uppercase;
+                letter-spacing: 1px;
                 font-weight: 600;
             }
 
-            /* Khoảng cách cho icon */
-            .sidebar-icon {
-                margin-right: 12px;
-                font-size: 1.1rem;
-                width: 24px;
-                text-align: center;
+            .sidebar-category {
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                font-weight: 700;
+                color: #4b5563; /* Màu phân loại tối hơn một chút */
+                margin: 24px 20px 8px 20px;
+                letter-spacing: 1px;
             }
 
-            /* Submenu styles */
-            .sidebar-submenu {
+            .sidebar-menu {
                 list-style: none;
                 padding: 0;
-                background-color: #0b1120; /* Tối hơn một chút để phân biệt */
+                margin: 0;
+                padding-bottom: 40px;
             }
-            .sidebar-submenu li a {
-                padding: 10px 24px 10px 48px;
+
+            .sidebar a {
+                text-decoration: none;
+                color: var(--sidebar-text);
+                display: flex;
+                align-items: center;
+                padding: 12px 20px;
+                margin: 4px 12px;
+                border-radius: 8px;
+                transition: all 0.2s ease;
                 font-size: 0.9rem;
-                border-left: none;
-                color: #94a3b8;
+                font-weight: 500;
             }
-            .sidebar-submenu li a:hover {
-                color: #ffffff;
-                background-color: #1e293b;
+
+            .sidebar a:hover {
+                background: var(--sidebar-hover-bg);
+                color: var(--sidebar-hover-text);
             }
-            .sidebar-submenu li a.active {
-                color: #38bdf8;
-                border-left: none;
-                background-color: transparent;
+
+            .sidebar a.active {
+                background: var(--sidebar-active-bg);
+                color: var(--sidebar-active-text);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+                font-weight: 600;
             }
-            /* Chevron rotation */
-            .menu-toggle[aria-expanded="true"] .fa-chevron-down {
-                transform: rotate(180deg);
-                transition: transform 0.2s ease;
-            }
-            .menu-toggle .fa-chevron-down {
-                transform: rotate(0deg);
-                transition: transform 0.2s ease;
+
+            /* Đảm bảo nội dung chính không bị đè lên */
+            .main-header, .main-content {
+                margin-left: 250px;
             }
         </style>
 
@@ -155,156 +118,182 @@
 
     <body>
 
+        <c:set var="userRole" value="${sessionScope.user.role}" />
+        <c:set var="permissions" value="${sessionScope.userPermissions}" />
+        <c:set var="hasAccess" value="${sessionScope.user != null and userRole != null and userRole.active}" />
+
+        <c:set var="showAccountAccess" value="${hasAccess and (fn:contains(permissions, 'READ_USER') or fn:contains(permissions, 'READ_ROLE') or fn:contains(permissions, 'READ_PASSWORD_RESET_REQUEST'))}" />
+        <c:set var="showCatalog" value="${hasAccess and fn:contains(permissions, 'READ_PRODUCT')}" />
+        <c:set var="showTransactions" value="${hasAccess and ((userRole.name eq 'Salesman' and fn:contains(permissions, 'READ_ORDER')) or (userRole.name eq 'Warehouse' and fn:contains(permissions, 'READ_ORDER')) or fn:contains(permissions, 'READ_PURCHASE_REQUEST'))}" />
+        <c:set var="showInventory" value="${hasAccess and (fn:contains(permissions, 'IMPORT_PRODUCT') or fn:contains(permissions, 'EXPORT_PRODUCT') or fn:contains(permissions, 'READ_AUDIT'))}" />
+        <c:set var="showReports" value="${hasAccess and userRole.name eq 'Manager' and fn:contains(permissions, 'READ_REPORT')}" />
+
         <aside class="sidebar">
 
-            <div class="sidebar-header pt-4">
-                <h1 style="font-weight: 800; letter-spacing: -1px;">📦 WMS</h1>
-                <p>Laptop Warehouse</p>
+            <div class="sidebar-header">
+                <h1>Warehouse</h1>
+                <p>Management System</p>
             </div>
 
             <ul class="sidebar-menu">
 
-                <c:set var="roleName" value="${sessionScope.user != null and sessionScope.user.role != null ? sessionScope.user.role.name : ''}"/>
-                <c:set var="canReadProduct" value="false"/>
-                <c:set var="canReadOrder" value="false"/>
-                <c:set var="canReadPurchaseRequest" value="false"/>
-                <c:set var="canImportProduct" value="false"/>
-                <c:set var="canExportProduct" value="false"/>
-                <c:set var="canReadAudit" value="false"/>
-                <c:set var="canReadUser" value="false"/>
-                <c:set var="canReadRole" value="false"/>
-                <c:set var="canReadPasswordReset" value="false"/>
-                <c:set var="canReadReport" value="false"/>
-
-                <c:forEach items="${sessionScope.userPermissions}" var="perm">
-                    <c:if test="${perm eq 'READ_PRODUCT'}"><c:set var="canReadProduct" value="true"/></c:if>
-                    <c:if test="${perm eq 'READ_ORDER'}"><c:set var="canReadOrder" value="true"/></c:if>
-                    <c:if test="${perm eq 'READ_PURCHASE_REQUEST'}"><c:set var="canReadPurchaseRequest" value="true"/></c:if>
-                    <c:if test="${perm eq 'IMPORT_PRODUCT'}"><c:set var="canImportProduct" value="true"/></c:if>
-                    <c:if test="${perm eq 'EXPORT_PRODUCT'}"><c:set var="canExportProduct" value="true"/></c:if>
-                    <c:if test="${perm eq 'READ_AUDIT'}"><c:set var="canReadAudit" value="true"/></c:if>
-                    <c:if test="${perm eq 'READ_USER'}"><c:set var="canReadUser" value="true"/></c:if>
-                    <c:if test="${perm eq 'READ_ROLE'}"><c:set var="canReadRole" value="true"/></c:if>
-                    <c:if test="${perm eq 'READ_PASSWORD_RESET_REQUEST'}"><c:set var="canReadPasswordReset" value="true"/></c:if>
-                    <c:if test="${perm eq 'READ_REPORT'}"><c:set var="canReadReport" value="true"/></c:if>
-                </c:forEach>
-
-                <!-- Dashboard -->
+                <!-- MAIN -->
+                <div class="sidebar-category">Main</div>
                 <li>
                     <a href="${pageContext.request.contextPath}/home" class="nav-link">
                         <span>Dashboard</span>
                     </a>
                 </li>
 
-                <!-- Products Group -->
-                <c:if test="${sessionScope.user != null and canReadProduct}">
+                <!-- CATALOG -->
+                <c:if test="${showCatalog}">
+                    <div class="sidebar-category">Catalog</div>
                     <li>
-                        <a href="#productSubmenu" data-toggle="collapse" data-bs-toggle="collapse" aria-expanded="false" class="menu-toggle d-flex justify-content-between align-items-center">
-                            <span>Products Setup</span>
-                            <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
+                        <a href="${pageContext.request.contextPath}/products">
+                            <span>Products</span>
                         </a>
-                        <ul class="collapse sidebar-submenu" id="productSubmenu" data-parent=".sidebar-menu">
-                            <li><a href="${pageContext.request.contextPath}/products">Products</a></li>
-                            <li><a href="${pageContext.request.contextPath}/brands">Brands</a></li>
-                            <li><a href="${pageContext.request.contextPath}/categories">Categories</a></li>
-                            <li><a href="${pageContext.request.contextPath}/specification/model">Specification</a></li>
-                        </ul>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/brands">
+                            <span>Brands</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/categories">
+                            <span>Categories</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/specification/model">
+                            <span>Specification</span>
+                        </a>
                     </li>
                 </c:if>
 
-                <!-- Inventory & Orders Group -->
-                <c:if test="${sessionScope.user != null and (canReadOrder or canReadPurchaseRequest or canImportProduct or canExportProduct or canReadAudit)}">
+                <!-- TRANSACTIONS -->
+                <c:if test="${showTransactions}">
+                    <div class="sidebar-category">Transactions</div>
+                    
+                    <c:if test="${userRole.name eq 'Salesman' and fn:contains(permissions, 'READ_ORDER')}">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/salesman/orders">
+                                <span>Orders</span>
+                            </a>
+                        </li>
+                    </c:if>
+
+                    <c:if test="${userRole.name eq 'Warehouse' and fn:contains(permissions, 'READ_ORDER')}">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/warehouse/orders">
+                                <span>Orders</span>
+                            </a>
+                        </li>
+                    </c:if>
+
+                    <c:if test="${fn:contains(permissions, 'READ_PURCHASE_REQUEST')}">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/purchase-request/list">
+                                <span>Purchase Request</span>
+                            </a>
+                        </li>
+                    </c:if>
+                </c:if>
+
+                <!-- INVENTORY -->
+                <c:if test="${showInventory}">
+                    <div class="sidebar-category">Inventory Management</div>
+
+                    <c:if test="${fn:contains(permissions, 'IMPORT_PRODUCT')}">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/inventory/import-history">
+                                <span>Import History</span>
+                            </a>
+                        </li>
+                    </c:if>
+
+                    <c:if test="${fn:contains(permissions, 'EXPORT_PRODUCT')}">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/inventory/export-history">
+                                <span>Export History</span>
+                            </a>
+                        </li>
+                    </c:if>
+
+                    <c:if test="${fn:contains(permissions, 'IMPORT_PRODUCT')}">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/inventory">
+                                <span>Inventory</span>
+                            </a>
+                        </li>
+                    </c:if>
+
+                    <c:if test="${fn:contains(permissions, 'READ_AUDIT')}">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/inventory-audits">
+                                <span>Inventory Audit</span>
+                            </a>
+                        </li>
+                    </c:if>
+                </c:if>
+
+                <!-- REPORTS -->
+                <c:if test="${showReports}">
+                    <div class="sidebar-category">Reports</div>
+
                     <li>
-                        <a href="#inventorySubmenu" data-toggle="collapse" data-bs-toggle="collapse" aria-expanded="false" class="menu-toggle d-flex justify-content-between align-items-center">
-                            <span>Inventory & Orders</span>
-                            <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
+                        <a href="${pageContext.request.contextPath}/summary_report">
+                            <span>Summary Report</span>
                         </a>
-                        <ul class="collapse sidebar-submenu" id="inventorySubmenu" data-parent=".sidebar-menu">
-                            <!-- Orders (Salesman) -->
-                            <c:if test="${roleName eq 'Salesman' and canReadOrder}">
-                                <li><a href="${pageContext.request.contextPath}/salesman/orders">Salesman Orders</a></li>
-                            </c:if>
-                            <!-- Orders (Warehouse) -->
-                            <c:if test="${roleName eq 'Warehouse' and canReadOrder}">
-                                <li><a href="${pageContext.request.contextPath}/warehouse/orders">Warehouse Orders</a></li>
-                            </c:if>
-                            <!-- Purchase Request -->
-                            <c:if test="${canReadPurchaseRequest}">
-                                <li><a href="${pageContext.request.contextPath}/purchase-request/list">Purchase Request</a></li>
-                            </c:if>
-                            <!-- Import History -->
-                            <c:if test="${canImportProduct}">
-                                <li><a href="${pageContext.request.contextPath}/inventory/import-history">Import History</a></li>
-                            </c:if>
-                            <!-- Export History -->
-                            <c:if test="${canExportProduct}">
-                                <li><a href="${pageContext.request.contextPath}/inventory/export-history">Export History</a></li>
-                            </c:if>
-                            <!-- Out Of Stock -->
-                            <c:if test="${canImportProduct}">
-                                <li><a href="${pageContext.request.contextPath}/inventory/alert">Out of stock alert</a></li>
-                            </c:if>
-                            <!-- Inventory Audit -->
-                            <c:if test="${canReadAudit}">
-                                <li><a href="${pageContext.request.contextPath}/inventory-audits">Inventory Audit</a></li>
-                            </c:if>
-                        </ul>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/report">
+                            <span>Detailed Report</span>
+                        </a>
                     </li>
                 </c:if>
 
-                <!-- Access Control Group -->
-                <c:if test="${sessionScope.user != null and (canReadUser or canReadRole or canReadPasswordReset)}">
-                    <li>
-                        <a href="#accessSubmenu" data-toggle="collapse" data-bs-toggle="collapse" aria-expanded="false" class="menu-toggle d-flex justify-content-between align-items-center">
-                            <span>Access Control</span>
-                            <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
-                        </a>
-                        <ul class="collapse sidebar-submenu" id="accessSubmenu" data-parent=".sidebar-menu">
-                            <c:if test="${canReadUser}">
-                                <li><a href="${pageContext.request.contextPath}/user/list">User</a></li>
-                            </c:if>
-                            <c:if test="${canReadRole}">
-                                <li><a href="${pageContext.request.contextPath}/roles">Role</a></li>
-                            </c:if>
-                            <c:if test="${canReadPasswordReset}">
-                                <li><a href="${pageContext.request.contextPath}/admin/password-reset">Password Reset</a></li>
-                            </c:if>
-                        </ul>
-                    </li>
-                </c:if>
+                <!-- ACCOUNT & ACCESS -->
+                <c:if test="${showAccountAccess}">
+                    <div class="sidebar-category">Account & Access</div>
 
-                <!-- Reports Group -->
-                <c:if test="${sessionScope.user != null and canReadReport}">
-                    <li>
-                        <a href="#reportSubmenu" data-toggle="collapse" data-bs-toggle="collapse" aria-expanded="false" class="menu-toggle d-flex justify-content-between align-items-center">
-                            <span>Reports</span>
-                            <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
-                        </a>
-                        <ul class="collapse sidebar-submenu" id="reportSubmenu" data-parent=".sidebar-menu">
-                            <li><a href="${pageContext.request.contextPath}/summary_report">Summary Report</a></li>
-                            <li><a href="${pageContext.request.contextPath}/report">Detailed Report</a></li>
-                        </ul>
-                    </li>
+                    <c:if test="${fn:contains(permissions, 'READ_USER')}">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/user/list">
+                                <span>Users</span>
+                            </a>
+                        </li>
+                    </c:if>
+
+                    <c:if test="${fn:contains(permissions, 'READ_ROLE')}">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/roles">
+                                <span>Roles</span>
+                            </a>
+                        </li>
+                    </c:if>
+
+                    <c:if test="${fn:contains(permissions, 'READ_PASSWORD_RESET_REQUEST')}">
+                        <li>
+                            <a href="${pageContext.request.contextPath}/admin/password-reset">
+                                <span>Password Resets</span>
+                            </a>
+                        </li>
+                    </c:if>
                 </c:if>
 
             </ul>
 
         </aside>
 
-
         <jsp:include page="/WEB-INF/common/header.jsp"/>
 
-
         <script>
-
             document.addEventListener("DOMContentLoaded", function () {
-
                 const currentPath = window.location.pathname;
                 let bestMatch = null;
                 let bestLength = 0;
 
                 document.querySelectorAll(".sidebar-menu a").forEach(function (link) {
-
                     const linkPath = new URL(link.href).pathname;
 
                     // Dashboard
@@ -319,24 +308,18 @@
                         return;
                     }
 
-                    // Logic cũ
+                    // Match logic
                     if (currentPath.startsWith(linkPath) && linkPath.length > bestLength) {
                         bestMatch = link;
                         bestLength = linkPath.length;
                     }
-
                 });
 
                 if (bestMatch) {
                     bestMatch.classList.add("active");
                 }
-
             });
-
-
-
         </script>
-
 
     </body>
 </html>
