@@ -2,8 +2,6 @@ package com.example.service;
 
 import com.example.dao.ChipDAO;
 import com.example.model.Chip;
-import com.example.model.Model;
-
 import java.util.List;
 
 public class ChipService {
@@ -34,7 +32,14 @@ public class ChipService {
         c.updateChipStatus(id, is_active);
     }
 
+    public boolean chipExists(String name) {
+        return c.existsByName(name);
+    }
+
     public boolean CreateChip(String name, boolean active) {
+        if (c.existsByName(name)) {
+            return false;
+        }
         return c.createChip(name, active);
     }
 }

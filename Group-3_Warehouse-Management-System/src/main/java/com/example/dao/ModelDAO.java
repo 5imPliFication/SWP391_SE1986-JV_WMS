@@ -207,6 +207,25 @@ public class ModelDAO {
         }
     }
 
+    public boolean existsByNameAndBrand(String name, long brandId) {
+        String sql = "SELECT COUNT(*) FROM models WHERE brand_id = ? AND name = ?";
+
+        try (Connection conn = DBConfig.getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, brandId);
+            ps.setString(2, name);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return false;
+    }
+
     public boolean createModel(String name, long brandId, boolean active) {
 
         String sql = """

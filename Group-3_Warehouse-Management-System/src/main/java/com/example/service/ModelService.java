@@ -32,7 +32,14 @@ public class ModelService {
         m.updateModelStatus(id, is_active);
     }
 
+    public boolean modelExists(String name, long brandId) {
+        return m.existsByNameAndBrand(name, brandId);
+    }
+
     public boolean CreateModel(String name, long BrandID, boolean active) {
+        if (m.existsByNameAndBrand(name, BrandID)) {
+            return false;
+        }
         return m.createModel(name, BrandID, active);
     }
 }

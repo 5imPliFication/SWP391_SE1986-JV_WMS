@@ -8,7 +8,6 @@ import com.example.model.User;
 import com.example.service.ActivityLogService;
 import com.example.service.SizeService;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -44,7 +43,14 @@ public class CreateSize extends HttpServlet {
                 request.getParameter("active")
         );
 
-        s.CreateSize(size + " inch", active);
+        String sizeValue = size + " inch";
+        if (s.sizeExists(sizeValue)) {
+            session.setAttribute("flashSizeCreateError", "Đã tồn tại");
+            response.sendRedirect(request.getContextPath() + "/specification/size");
+            return;
+        }
+
+        s.CreateSize(sizeValue, active);
         activityLogService.log(user, "Create size");
 
         response.sendRedirect(
