@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -26,69 +27,90 @@
         </div>
     </c:if>
 
-    <div class="card p-3 mb-3 shadow-sm">
-        <!-- Row 1 -->
-        <div class="row align-items-center mb-2">
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-3">
 
-            <div class="col-md-2">
-                <label class="font-weight-bold mb-1">Purchase Request</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${sessionScope.purchaseCode}" readonly>
+            <!-- Row 1 -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <small class="text-muted">Purchase Request</small>
+                    <div class="font-weight-bold text-monospace">
+                        ${sessionScope.purchaseCode}
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <small class="text-muted">Created By</small>
+                    <div class="font-weight-bold">${sessionScope.createdBy}</div>
+                </div>
+
+                <div class="col-md-3">
+                    <small class="text-muted">Created At</small>
+                    <div class="font-weight-bold">
+                        <fmt:parseDate value="${sessionScope.createdAt}"
+                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                       var="parsedCreatedAt"
+                                       type="both"/>
+                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                        value="${parsedCreatedAt}"/>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="col-md-4 d-flex justify-content-end align-items-center">
+                    <button type="submit"
+                            form="productItemsForm"
+                            class="btn btn-success btn-sm"
+                            name="action"
+                            value="save"
+                    ${empty importItems ? 'disabled' : ''}>
+                        Save
+                    </button>
+                </div>
             </div>
 
-            <div class="col-md-2">
-                <label class="font-weight-bold mb-1">Created By</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${sessionScope.createdBy}" readonly>
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <small class="text-muted">Note</small>
+                    <div class="p-2 border rounded bg-light"
+                         style="white-space: pre-wrap; min-height: 48px;">
+                        ${sessionScope.purchaseNote}
+                    </div>
+                </div>
             </div>
 
-            <div class="col-md-2">
-                <label class="font-weight-bold mb-1">Created At</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${sessionScope.createdAt}" readonly>
+            <!-- Approval Info -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <small class="text-muted">Approved By</small>
+                    <div class="font-weight-bold">
+                        ${sessionScope.approvedBy}
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <small class="text-muted">Approved At</small>
+                    <div class="font-weight-bold">
+                        <fmt:parseDate value="${sessionScope.approvedAt}"
+                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                       var="parsedApprovedAt"
+                                       type="both"/>
+                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                        value="${parsedApprovedAt}"/>
+                    </div>
+                </div>
             </div>
 
-
-            <!-- Actions -->
-            <div class="col-md-6 d-flex justify-content-end align-items-end">
-
-                <button type="submit" form="productItemsForm" class="btn btn-success btn-sm ml-2"
-                        name="action" value="save" ${empty importItems ? 'disabled' : '' }>
-                    Save
-                </button>
-
-            </div>
-        </div>
-
-        <!-- Row 2 -->
-        <div class="row">
-            <div class="col-md-12">
-                <label class="font-weight-bold mb-1">Note</label>
-                <textarea class="form-control form-control-sm bg-light" rows="2" readonly
-                          style="resize:none;">${sessionScope.purchaseNote}</textarea>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-2">
-                <label class="font-weight-bold mb-1">Approved By</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${sessionScope.approvedBy}" readonly>
+            <!-- Handler -->
+            <div class="row">
+                <div class="col-md-3">
+                    <small class="text-muted">Handled By</small>
+                    <div class="font-weight-bold">
+                        ${sessionScope.handleBy}
+                    </div>
+                </div>
             </div>
 
-            <div class="col-md-2">
-                <label class="font-weight-bold mb-1">Approved At</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${sessionScope.approvedAt}" readonly>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-2">
-                <label class="font-weight-bold mb-1">Handle By</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${sessionScope.handleBy}" readonly>
-            </div>
         </div>
     </div>
 
@@ -99,9 +121,11 @@
         <div class="row">
             <div class="col-md-2">
                 <label class="font-weight-bold mb-1">Supplier</label>
-                <input type="text" class="form-control form-control-sm" name="supplier">
+                <input type="text" class="form-control form-control-sm" name="supplier" required>
             </div>
         </div>
+
+        <br><br>
 
         <div class="table-responsive">
             <table class="table table-bordered">

@@ -53,9 +53,13 @@
                         </div>
                     </div>
 
+                    <div>
+                        <p><strong>Approved By:</strong> ${goodsReceipt.approver}</p>
+                    </div>
+
                     <div class="row mb-2">
                         <div class="col-md-6">
-                            <p><strong>Warehouse:</strong> ${goodsReceipt.warehouseName}</p>
+                            <p><strong>Import By:</strong> ${goodsReceipt.warehouseName}</p>
                         </div>
                         <div class="col-md-6">
                             <p><strong>Received Date:</strong>
@@ -71,6 +75,12 @@
                     <div class="row">
                         <div class="col-12">
                             <p><strong>Note:</strong> ${goodsReceipt.note}</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <p><strong>Supplier:</strong> ${goodsReceipt.supplier}</p>
                         </div>
                     </div>
                 </div>
