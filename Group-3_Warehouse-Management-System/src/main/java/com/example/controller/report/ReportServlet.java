@@ -1,14 +1,12 @@
 package com.example.controller.report;
 
 import com.example.dto.InventoryMovementRowDTO;
+import com.example.dto.ExportProductOrderDTO;
 import com.example.enums.MovementType;
-import com.example.model.Order;
 import com.example.model.User;
-import com.example.service.OrderService;
 import com.example.dto.MonthSummaryDTO;
 import com.example.dto.ReportItemDTO;
 import com.example.service.ReportService;
-import com.example.util.AppConstants;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,21 +16,17 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @WebServlet("/report")
 public class ReportServlet extends HttpServlet {
 
     private ReportService reportService;
-    private OrderService orderService;
     private Gson gson;
 
     @Override
     public void init() {
         reportService = new ReportService();
-        orderService = new OrderService();
         gson = new Gson();
     }
 
@@ -47,9 +41,9 @@ public class ReportServlet extends HttpServlet {
         // get data from request parameters
         String type = request.getParameter("type");
 
-        // default: import report for current month
+        // default: inventory report for current month
         if (type == null || type.isEmpty()) {
-            type = "import";
+            type = "inventory";
         }
 
         // Use for total compare chart
@@ -115,6 +109,8 @@ public class ReportServlet extends HttpServlet {
         request.setAttribute("type", "inventory");
         request.setAttribute("year", year);
         request.setAttribute("month", month);
+        request.setAttribute("fromDate", fromDate);
+        request.setAttribute("toDate", toDate);
         request.getRequestDispatcher("/WEB-INF/report/inventory-report.jsp").forward(request, response);
     }
 
@@ -131,6 +127,33 @@ public class ReportServlet extends HttpServlet {
         try {
             reportItems = reportService.getItems(month, year, MovementType.EXPORT);
             chartData = reportService.getChartDataByYear(year, MovementType.EXPORT);
+
+            Long productId = parsePositiveLong(request.getParameter("productId"));
+            if (productId != null) {
+                int productPageNo = parsePositiveInt(request.getParameter("productPage"), 1);
+                int productOrderPageSize = 10;
+
+                int totalProductOrders = reportService.countExportOrdersByProduct(productId, month, year);
+                int totalProductOrderPages = Math.max(1, (int) Math.ceil((double) totalProductOrders / productOrderPageSize));
+                productPageNo = Math.min(productPageNo, totalProductOrderPages);
+
+                List<ExportProductOrderDTO> productOrders = reportService.getExportOrdersByProduct(
+                        productId, month, year, productPageNo, productOrderPageSize
+                );
+
+                String selectedProductName = reportItems.stream()
+                        .filter(item -> productId.equals(item.getProductId()))
+                        .map(ReportItemDTO::getProductName)
+                        .findFirst()
+                        .orElse("Selected Product");
+
+                request.setAttribute("selectedProductId", productId);
+                request.setAttribute("selectedProductName", selectedProductName);
+                request.setAttribute("productOrders", productOrders);
+                request.setAttribute("productPageNo", productPageNo);
+                request.setAttribute("productOrderPageSize", productOrderPageSize);
+                request.setAttribute("totalProductOrderPages", totalProductOrderPages);
+            }
         } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
@@ -179,9 +202,27 @@ public class ReportServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/report/import-report.jsp").forward(request, response);
     }
 
-    private int getCurrentQuarter() {
-        int month = LocalDate.now().getMonthValue();
-        return ((month - 1) / 3) + 1;
+    private int parsePositiveInt(String rawValue, int defaultValue) {
+        if (rawValue == null || rawValue.isBlank()) {
+            return defaultValue;
+        }
+        try {
+            return Math.max(Integer.parseInt(rawValue), 1);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    private Long parsePositiveLong(String rawValue) {
+        if (rawValue == null || rawValue.isBlank()) {
+            return null;
+        }
+        try {
+            long value = Long.parseLong(rawValue);
+            return value > 0 ? value : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }
 
