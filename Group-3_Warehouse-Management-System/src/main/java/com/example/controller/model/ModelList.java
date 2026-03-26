@@ -67,6 +67,7 @@ public class ModelList extends HttpServlet {
 
         request.setAttribute("models", models);
         request.setAttribute("pageNo", pageNo);
+        request.setAttribute("pageSize", PAGE_SIZE);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("brands", b.getActiveBrands());
 

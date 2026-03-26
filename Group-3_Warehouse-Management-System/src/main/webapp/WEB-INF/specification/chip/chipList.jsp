@@ -66,7 +66,7 @@
                         <c:set var="tableBody" scope="request">
                             <c:forEach var="c" items="${chips}" varStatus="s">
                                 <tr>
-                                    <td>${(pageNo - 1) * 2 + s.index + 1}</td>
+                                    <td>${(pageNo - 1) * pageSize + s.index + 1}</td>
                                     <td>${c.name}</td>
                                     <td >
                                         <jsp:include page="/WEB-INF/common/statusBadge.jsp">

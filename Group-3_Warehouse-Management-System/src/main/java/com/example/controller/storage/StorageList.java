@@ -59,7 +59,8 @@ public class StorageList extends HttpServlet {
         List<Storage> storages = s.getStorageByPage(pageNo, PAGE_SIZE);
 
         request.setAttribute("storages", storages);
-        request.setAttribute("pageNo", pageNo);
+        request.setAttribute("pageNo", pageNo); 
+        request.setAttribute("pageSize", PAGE_SIZE);
         request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher("/WEB-INF/specification/storage/storageList.jsp")
