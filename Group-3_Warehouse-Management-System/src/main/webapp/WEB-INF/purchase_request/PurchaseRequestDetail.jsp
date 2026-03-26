@@ -108,7 +108,7 @@
                     <c:if test="${isWarehouse}">
                         <%--đặt tên prList nhưng có giá trị là purchaseDetail ?--%>
                         <c:if test="${prList.status eq 'APPROVED'}">
-                            <a href="${pageContext.request.contextPath}/inventory/import?purchaseId=${prList.id}&action=import"
+                            <a href="${pageContext.request.contextPath}/import?purchaseId=${prList.id}&action=import"
                                class="btn btn-primary">
                                 Import Product
                             </a>

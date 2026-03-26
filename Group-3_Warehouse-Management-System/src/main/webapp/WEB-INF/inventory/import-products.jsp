@@ -112,7 +112,7 @@
     </div>
 
     <form id="productItemsForm" method="post"
-          action="${pageContext.request.contextPath}/inventory/import">
+          action="${pageContext.request.contextPath}/import">
         <input type="hidden" name="purchaseId" value="${sessionScope.purchaseId}">
 
         <div class="row">
@@ -242,7 +242,7 @@
                                     <button type="submit" name="delete"
                                             value="${status.index}"
                                             class="btn btn-outline-danger btn-sm"
-                                            formaction="${pageContext.request.contextPath}/inventory/import?action=delete">
+                                            formaction="${pageContext.request.contextPath}/import?action=delete">
                                         Delete
                                     </button>
                                 </td>
