@@ -1178,7 +1178,8 @@ public class OrderDAO {
 
     public List<ExportProductDTO> getExportOrderItems(Long orderId) {
         String sql = """
-                      select oi.id as item_id, oi.quantity, oi.price_at_purchase, p.name, pi.serial, oi.price_at_purchase, pi.id as product_item_id, u.name as unit
+                      select oi.id as item_id, oi.quantity, oi.price_at_purchase, 
+                    p.name, pi.serial, oi.price_at_purchase, pi.id as product_item_id, u.name as unit, p.id as product_id
                 from orders o
                 join order_items oi
                 on o.id = oi.order_id
@@ -1219,6 +1220,7 @@ public class OrderDAO {
                     ExportProductItemDTO pi = new ExportProductItemDTO();
                     pi.setId(rs.getLong("product_item_id"));
                     pi.setSerial(rs.getString("serial"));
+                    pi.setProductId(rs.getLong("product_id"));
                     item.getProductItems().add(pi);
                 }
             }
