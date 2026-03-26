@@ -43,7 +43,7 @@
 
                         <div class="col-md-3">
                             <label for="status" class="form-label">Status</label>
-                            <select id="status" name="status" class="form-select">
+                            <select id="status" name="status" class="form-control">
                                 <option value="">All</option>
                                 <option value="SUBMITTED" ${param.status == 'SUBMITTED' ? 'selected' : ''}>SUBMITTED</option>
                                 <option value="PROCESSING" ${param.status == 'PROCESSING' ? 'selected' : ''}>PROCESSING</option>
