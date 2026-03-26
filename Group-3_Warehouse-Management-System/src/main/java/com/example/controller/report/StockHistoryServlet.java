@@ -25,25 +25,48 @@ public class StockHistoryServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String from = request.getParameter("fromDate");
-        String to = request.getParameter("toDate");
+        String yearParam = request.getParameter("year");
+        String monthParam = request.getParameter("month");
         String typeParam = request.getParameter("type");
-        String refTypeParam = request.getParameter("referenceType");
         String staffName = request.getParameter("staffName");
+        String productName = request.getParameter("productName");
         String pageParam = request.getParameter("page");
 
-        LocalDate fromDate = (from != null && !from.isEmpty())
-                ? LocalDate.parse(from) : null;
+        // First load or reset: no parameters at all
+        boolean isInitialLoad = (yearParam == null && monthParam == null && typeParam == null && staffName == null && productName == null);
+        if (isInitialLoad) {
+            LocalDate now = LocalDate.now();
+            yearParam = String.valueOf(now.getYear());
+            monthParam = String.valueOf(now.getMonthValue());
+        }
 
-        LocalDate toDate = (to != null && !to.isEmpty())
-                ? LocalDate.parse(to) : null;
+        // Normalize parameters
+        if (yearParam == null) yearParam = "";
+        if (monthParam == null) monthParam = "";
+
+        LocalDate fromDate = null;
+        LocalDate toDate = null;
+
+        if (!yearParam.isEmpty() && !yearParam.equals("all")) {
+            int year = Integer.parseInt(yearParam);
+            if (!monthParam.isEmpty() && !monthParam.equals("all")) {
+                int month = Integer.parseInt(monthParam);
+                fromDate = LocalDate.of(year, month, 1);
+                toDate = fromDate.withDayOfMonth(fromDate.lengthOfMonth());
+            } else {
+                // All months for this year
+                fromDate = LocalDate.of(year, 1, 1);
+                toDate = LocalDate.of(year, 12, 31);
+                monthParam = "all"; // Ensure consistency for UI
+            }
+        } else {
+            // All time
+            yearParam = "all";
+            monthParam = "all";
+        }
 
         MovementType type = (typeParam != null && !typeParam.isEmpty())
                 ? MovementType.valueOf(typeParam)
-                : null;
-
-        ReferenceType referenceType = (refTypeParam != null && !refTypeParam.isEmpty())
-                ? ReferenceType.valueOf(refTypeParam)
                 : null;
 
         int page = 1;
@@ -57,23 +80,22 @@ public class StockHistoryServlet extends HttpServlet {
 
         int limit = AppConstants.PAGE_SIZE;
         int offset = (page - 1) * limit;
-        if (limit <= 0) {
-            throw new IllegalArgumentException("limit must be > 0");
-        }
-        int totalCount = dao.getTotalCount(fromDate, toDate, type, referenceType, staffName);
+        int totalCount = dao.getTotalCount(fromDate, toDate, type, null, staffName, productName);
         int totalPages = (int) Math.ceil((double) totalCount / limit);
 
         List<StockMovement> list =
-                dao.getStockHistory(fromDate, toDate, type, referenceType, staffName, limit, offset);
+                dao.getStockHistory(fromDate, toDate, type, null, staffName, productName, limit, offset);
 
         request.setAttribute("list", list);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
-        request.setAttribute("fromDate", from);
-        request.setAttribute("toDate", to);
+        // Pass current year for the year dropdown
+        request.setAttribute("currentYear", LocalDate.now().getYear());
+        request.setAttribute("year", yearParam);
+        request.setAttribute("month", monthParam);
         request.setAttribute("type", typeParam);
-        request.setAttribute("referenceType", refTypeParam);
         request.setAttribute("staffName", staffName);
+        request.setAttribute("productName", productName);
 
         request.getRequestDispatcher("/WEB-INF/manager/stock-history.jsp")
                 .forward(request, response);

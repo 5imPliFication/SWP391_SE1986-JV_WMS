@@ -18,6 +18,7 @@ public class StockMovementDAO {
             MovementType type,
             ReferenceType referenceType,
             String staffName,
+            String productName,
             int limit,
             int offset) {
 
@@ -51,6 +52,9 @@ public class StockMovementDAO {
         if (staffName != null && !staffName.isEmpty())
             sql.append(" AND COALESCE(u_import.fullname, u_export.fullname, 'System/Unknown') LIKE ?");
 
+        if (productName != null && !productName.isEmpty())
+            sql.append(" AND p.name LIKE ?");
+
         sql.append(" ORDER BY sm.created_at DESC");
         sql.append(" LIMIT ? OFFSET ?");
 
@@ -73,6 +77,9 @@ public class StockMovementDAO {
 
             if (staffName != null && !staffName.isEmpty())
                 ps.setString(index++, "%" + staffName + "%");
+
+            if (productName != null && !productName.isEmpty())
+                ps.setString(index++, "%" + productName + "%");
 
             ps.setInt(index++, limit);
             ps.setInt(index++, offset);
@@ -104,7 +111,7 @@ public class StockMovementDAO {
         return list;
     }
 
-    public int getTotalCount(LocalDate fromDate, LocalDate toDate, MovementType type, ReferenceType referenceType, String staffName) {
+    public int getTotalCount(LocalDate fromDate, LocalDate toDate, MovementType type, ReferenceType referenceType, String staffName, String productName) {
         StringBuilder sql = new StringBuilder("""
                 SELECT COUNT(*) FROM (
                     SELECT sm.id,
@@ -133,6 +140,9 @@ public class StockMovementDAO {
         if (staffName != null && !staffName.isEmpty())
             sql.append(" AND COALESCE(u_import.fullname, u_export.fullname, 'System/Unknown') LIKE ?");
 
+        if (productName != null && !productName.isEmpty())
+            sql.append(" AND p.name LIKE ?");
+
         sql.append(") AS filtered");
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
@@ -154,6 +164,9 @@ public class StockMovementDAO {
 
             if (staffName != null && !staffName.isEmpty())
                 ps.setString(index++, "%" + staffName + "%");
+
+            if (productName != null && !productName.isEmpty())
+                ps.setString(index++, "%" + productName + "%");
 
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
