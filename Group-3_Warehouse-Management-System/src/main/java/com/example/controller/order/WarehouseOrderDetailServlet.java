@@ -36,7 +36,8 @@ public class WarehouseOrderDetailServlet extends HttpServlet {
             return;
         }
 
-        if (!"Warehouse".equals(user.getRole().getName())) {
+        String role = user.getRole().getName();
+        if (!"Warehouse".equals(role) && !"Manager".equals(role)) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -56,14 +57,14 @@ public class WarehouseOrderDetailServlet extends HttpServlet {
 
             int itemPageSize = 8;
 
-            Order order = orderService.getOrderDetail(orderId, user.getId(), "Warehouse");
+            Order order = orderService.getOrderDetail(orderId, user.getId(), role);
 
-            int totalItemCount = orderItemService.countItemsByOrder(orderId, user.getId(), "Warehouse");
+            int totalItemCount = orderItemService.countItemsByOrder(orderId, user.getId(), role);
             int totalItemPages = (int) Math.ceil((double) totalItemCount / itemPageSize);
             if (totalItemPages == 0) totalItemPages = 1;
             if (itemPage > totalItemPages) itemPage = totalItemPages;
             int itemOffset = (itemPage - 1) * itemPageSize;
-            List<OrderItem> items = orderItemService.getItemsByOrder(orderId, user.getId(), "Warehouse", itemOffset, itemPageSize);
+            List<OrderItem> items = orderItemService.getItemsByOrder(orderId, user.getId(), role, itemOffset, itemPageSize);
 
             req.setAttribute("order", order);
             req.setAttribute("items", items);
