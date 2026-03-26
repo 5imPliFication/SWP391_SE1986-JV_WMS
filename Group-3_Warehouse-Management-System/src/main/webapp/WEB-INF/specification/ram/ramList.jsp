@@ -64,7 +64,7 @@
                         <c:set var="tableBody" scope="request">
                             <c:forEach var="r" items="${rams}" varStatus="s">
                                 <tr>
-                                    <td>${(pageNo - 1) * 2 + s.index + 1}</td>
+                                    <td>${(pageNo - 1) * pageSize + s.index + 1}</td>
                                     <td>${r.size}</td>
                                     <td >
                                         <jsp:include page="/WEB-INF/common/statusBadge.jsp">

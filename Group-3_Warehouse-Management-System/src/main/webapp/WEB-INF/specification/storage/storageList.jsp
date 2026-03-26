@@ -65,7 +65,7 @@
                         <c:set var="tableBody" scope="request">
                             <c:forEach var="s" items="${storages}" varStatus="a">
                                 <tr>
-                                    <td>${(pageNo - 1) * 2 + a.index + 1}</td>
+                                    <td>${(pageNo - 1) * pageSize + a.index + 1}</td>
                                     <td>${s.size}</td>
                                     <td >
                                         <jsp:include page="/WEB-INF/common/statusBadge.jsp">
@@ -95,7 +95,7 @@
                         <jsp:include page="/WEB-INF/common/pagination.jsp">
                             <jsp:param name="pageNo" value="${pageNo}" />
                             <jsp:param name="totalPages" value="${totalPages}" />
-                            <jsp:param name="baseUrl" value="${pageContext.request.contextPath}/storage" />
+                            <jsp:param name="baseUrl" value="${pageContext.request.contextPath}/specification/storage" />
                         </jsp:include>
                     </div>
                 </div>

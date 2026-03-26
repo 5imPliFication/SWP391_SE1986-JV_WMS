@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-
 package com.example.controller.ram;
 
 import com.example.model.Ram;
@@ -21,9 +20,9 @@ import java.util.List;
  *
  * @author PC
  */
-@WebServlet(name="RamList", urlPatterns={"/specification/ram"})
+@WebServlet(name = "RamList", urlPatterns = {"/specification/ram"})
 public class RamList extends HttpServlet {
-   
+
     private RamService r;
     private static final int PAGE_SIZE = 5;
 
@@ -31,12 +30,10 @@ public class RamList extends HttpServlet {
     public void init() {
         r = new RamService();
     }
-  
-   
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         int pageNo = 1;
 
         try {
@@ -67,13 +64,11 @@ public class RamList extends HttpServlet {
 
         request.setAttribute("rams", rams);
         request.setAttribute("pageNo", pageNo);
+        request.setAttribute("pageSize", PAGE_SIZE);
         request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher("/WEB-INF/specification/ram/ramList.jsp")
                 .forward(request, response);
-    } 
-
- 
-   
+    }
 
 }

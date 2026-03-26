@@ -64,6 +64,7 @@ public class SizeList extends HttpServlet {
 
         request.setAttribute("sizes", sizes);
         request.setAttribute("pageNo", pageNo);
+        request.setAttribute("pageSize", PAGE_SIZE);
         request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher("/WEB-INF/specification/size/sizeList.jsp")

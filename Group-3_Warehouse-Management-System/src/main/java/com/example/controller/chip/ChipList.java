@@ -59,6 +59,7 @@ public class ChipList extends HttpServlet {
 
         request.setAttribute("chips", chips);
         request.setAttribute("pageNo", pageNo);
+        request.setAttribute("pageSize", PAGE_SIZE);
         request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher("/WEB-INF/specification/chip/chipList.jsp")
