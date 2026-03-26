@@ -36,8 +36,7 @@ public class DBConfig {
         dataSource = new HikariDataSource(config);
     }
 
-    private DBConfig() {
-    }
+    private DBConfig() {}
 
     public static DataSource getDataSource() {
         return dataSource;
