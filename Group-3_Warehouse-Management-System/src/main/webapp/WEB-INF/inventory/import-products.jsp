@@ -56,24 +56,21 @@
                     </div>
                 </div>
 
-                <!-- Actions -->
-                <div class="col-md-3 d-flex justify-content-end align-items-center">
-                    <button type="submit"
-                            form="productItemsForm"
-                            class="btn btn-success btn-sm"
-                            name="action"
-                            value="save"
-                    ${empty importItems ? 'disabled' : ''}>
-                        Save
-                    </button>
-                </div>
+                <button type="submit"
+                        form="productItemsForm"
+                        class="btn btn-success"
+                        style="height: 45px; padding: 0 20px; font-size: 16px;"
+                        name="action"
+                        value="save"
+                ${empty importItems ? 'disabled' : ''}>
+                    Save
+                </button>
             </div>
 
             <div class="row mb-3">
                 <div class="col-md-12">
                     <small class="text-muted">Note</small>
-                    <div class="pt-2 pl-2 border rounded bg-light"
-                         style="min-height: 48px;">
+                    <div class="font-weight-bold">
                         ${sessionScope.purchaseNote}
                     </div>
                 </div>
