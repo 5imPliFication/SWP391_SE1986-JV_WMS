@@ -66,7 +66,7 @@
                         <c:set var="tableBody" scope="request">
                             <c:forEach var="c" items="${chips}" varStatus="s">
                                 <tr>
-                                    <td>${(pageNo - 1) * 2 + s.index + 1}</td>
+                                    <td>${(pageNo - 1) * pageSize + s.index + 1}</td>
                                     <td>${c.name}</td>
                                     <td >
                                         <jsp:include page="/WEB-INF/common/statusBadge.jsp">
@@ -106,6 +106,10 @@
                         <div class="card-header">
                             <h5>Create Chip</h5>
                         </div>
+
+                        <c:if test="${not empty error}">
+                            <div class="alert alert-danger mb-0 rounded-0 border-0" role="alert">${error}</div>
+                        </c:if>
 
                         <div class="card-body">
 

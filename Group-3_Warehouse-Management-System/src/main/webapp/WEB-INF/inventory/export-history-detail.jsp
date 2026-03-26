@@ -128,7 +128,7 @@
 
                                                         <div class="input-group-append">
                                                             <a class="btn btn-outline-info"
-                                                               href="${pageContext.request.contextPath}/products/items/update?productItemId=${productItem.id}&searchSerial=${productItem.serial}&pageNo=1&isActive=true"
+                                                               href="${pageContext.request.contextPath}/products/items?productId=${productItem.productId}&searchSerial=${productItem.serial}"
                                                                title="View Detail">
                                                                 View
                                                             </a>

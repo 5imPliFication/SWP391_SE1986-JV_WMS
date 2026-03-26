@@ -46,6 +46,12 @@ public class CreateModel extends HttpServlet {
                 request.getParameter("active")
         );
 
+        if (m.modelExists(name, brandId)) {
+            session.setAttribute("flashModelCreateError", "Đã tồn tại");
+            response.sendRedirect(request.getContextPath() + "/specification/model");
+            return;
+        }
+
         m.CreateModel(name, brandId, active);
         activityLogService.log(user, "Crete model");
 

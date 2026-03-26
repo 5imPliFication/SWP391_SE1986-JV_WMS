@@ -13,6 +13,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 @WebServlet(name = "StorageList", urlPatterns = {"/specification/storage"})
@@ -46,10 +47,20 @@ public class StorageList extends HttpServlet {
             pageNo = totalPages;
         }
 
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            Object flash = session.getAttribute("flashStorageCreateError");
+            if (flash != null) {
+                request.setAttribute("error", flash);
+                session.removeAttribute("flashStorageCreateError");
+            }
+        }
+
         List<Storage> storages = s.getStorageByPage(pageNo, PAGE_SIZE);
 
         request.setAttribute("storages", storages);
-        request.setAttribute("pageNo", pageNo);
+        request.setAttribute("pageNo", pageNo); 
+        request.setAttribute("pageSize", PAGE_SIZE);
         request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher("/WEB-INF/specification/storage/storageList.jsp")

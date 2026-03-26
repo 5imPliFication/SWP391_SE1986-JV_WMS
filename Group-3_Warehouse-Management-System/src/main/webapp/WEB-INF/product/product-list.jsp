@@ -160,6 +160,7 @@
             <th>Storage</th>
             <th>Screen</th>
             <th>Selling Price</th>
+            <th>Unit Price</th>
             <th>Total Quantity</th>
             <th>Unit</th>
             <th>Status</th>
@@ -192,7 +193,8 @@
                 <td>${p.ram.size}</td>
                 <td>${p.storage.size}</td>
                 <td>${p.size.size}</td>
-                <td><fmt:formatNumber value="${p.currentPrice}" type="number" groupingUsed="true"/> đ</td>
+                <td><fmt:formatNumber value="${p.currentPrice}" type="number" groupingUsed="true"/></td>
+                <td>VND</td>
                 <td>${p.totalQuantity}</td>
                 <td>${p.unit.name}</td>
                 <td>
@@ -246,7 +248,7 @@
 
         <c:if test="${empty products}">
             <tr>
-                <td colspan="16" class="text-center text-muted">No data</td>
+                <td colspan="17" class="text-center text-muted">No data</td>
             </tr>
         </c:if>
 

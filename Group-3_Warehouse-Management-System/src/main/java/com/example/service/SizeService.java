@@ -5,7 +5,6 @@
 package com.example.service;
 
 import com.example.dao.SizeDAO;
-import com.example.model.Model;
 import com.example.model.Size;
 import java.util.List;
 
@@ -41,7 +40,14 @@ public class SizeService {
         s.updateSizeStatus(id, is_active);
     }
 
+    public boolean sizeExists(String size) {
+        return s.existsBySize(size);
+    }
+
     public boolean CreateSize(String size, boolean active) {
+        if (s.existsBySize(size)) {
+            return false;
+        }
         return s.createSize(size, active);
     }
 }

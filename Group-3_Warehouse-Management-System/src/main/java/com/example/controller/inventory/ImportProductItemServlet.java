@@ -70,6 +70,8 @@ public class ImportProductItemServlet extends HttpServlet {
     // handle import product
     private void handleImport(HttpSession session, HttpServletRequest request) {
 
+        User user = (User) session.getAttribute("user");
+
         // get purchaseId from purchase request detail
         String purchaseIdStr = request.getParameter("purchaseId");
 
@@ -88,6 +90,9 @@ public class ImportProductItemServlet extends HttpServlet {
         session.setAttribute("purchaseNote", purchaseRequestDTO.getNote());
         session.setAttribute("createdBy", purchaseRequestDTO.getCreatedBy());
         session.setAttribute("createdAt", purchaseRequestDTO.getCreatedAt());
+        session.setAttribute("approvedBy", purchaseRequestDTO.getApprovedBy());
+        session.setAttribute("approvedAt", purchaseRequestDTO.getApprovedAt());
+        session.setAttribute("handleBy", user.getFullName());
 
         // get purchase request items
         List<PurchaseRequestItem> purchaseRequestItems = purchaseRequestService.getItems(purchaseId);
@@ -164,18 +169,6 @@ public class ImportProductItemServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/inventory/import");
     }
 
-//    private void handleFile(HttpSession session, HttpServletRequest request, HttpServletResponse response)
-//            throws IOException, ServletException {
-//        // get file excel import
-//        Part filePart = request.getPart("excelFile");
-//
-//        // call to service to handle data from Excel
-//        List<ProductItemDTO> importProductItemDTOs = inventoryService.readProductItemsFromExcel(filePart);
-//        // set session
-//        session.setAttribute("importItems", importProductItemDTOs);
-//        response.sendRedirect(request.getContextPath() + "/inventory/import");
-//    }
-
     // save purchase request and others information relative
     private void handleSave(HttpSession session, HttpServletRequest request, HttpServletResponse response)
             throws IOException {
@@ -197,6 +190,7 @@ public class ImportProductItemServlet extends HttpServlet {
         }
 
         // read arrays directly from form submission
+        String supplier = request.getParameter("supplier");
         String[] productIds = request.getParameterValues("productId");
         String[] serials = request.getParameterValues("serial");
         String[] prices = request.getParameterValues("price");
@@ -209,7 +203,7 @@ public class ImportProductItemServlet extends HttpServlet {
         }
 
         // call service to handle import
-        String resultSave = inventoryService.importProductItems(purchaseId, user.getId(), productIds, serials, prices);
+        String resultSave = inventoryService.importProductItems(purchaseId, user.getId(), productIds, serials, prices, supplier);
 
         // update current price for product in inventory after import success
         if (resultSave == null) {

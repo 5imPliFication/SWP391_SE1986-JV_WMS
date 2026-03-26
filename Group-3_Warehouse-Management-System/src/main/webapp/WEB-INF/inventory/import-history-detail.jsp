@@ -25,54 +25,88 @@
             </a>
         </div>
 
-        <%--header--%>
         <c:if test="${not empty goodsReceipt}">
-            <div class="card mb-4">
+            <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-dark text-white">
                     <h5 class="mb-0">Receipt Information</h5>
                 </div>
+
                 <div class="card-body">
-                    <div class="row mb-2">
-                        <div class="col-12">
-                            <p><strong>Receipt Code:</strong> ${goodsReceipt.receiptCode}</p>
+
+                    <!-- Receipt Code -->
+                    <div class="mb-3">
+                        <div class="d-flex">
+                            <strong class="me-2" style="min-width: 140px;">Receipt Code:</strong>
+                            <span>${goodsReceipt.receiptCode}</span>
                         </div>
                     </div>
 
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <p><strong>Requestor:</strong> ${goodsReceipt.requestorName}</p>
+                    <!-- Request Info -->
+                    <div class="row mb-3">
+                        <div class="col-md-6 d-flex">
+                            <strong class="me-2" style="min-width: 140px;">Requestor:</strong>
+                            <span>${goodsReceipt.requestorName}</span>
                         </div>
-                        <div class="col-md-6">
-                            <p><strong>Request Date:</strong>
-                                <fmt:parseDate value="${goodsReceipt.requestDate}"
-                                               pattern="yyyy-MM-dd'T'HH:mm" var="parsedRequestDate"
-                                               type="both"/>
-                                <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
-                                                value="${parsedRequestDate}"/>
-                            </p>
+
+                        <div class="col-md-6 d-flex">
+                            <strong class="me-2" style="min-width: 140px;">Request Date:</strong>
+                            <span>
+                    <fmt:parseDate value="${goodsReceipt.requestDate}"
+                                   pattern="yyyy-MM-dd'T'HH:mm"
+                                   var="parsedRequestDate"
+                                   type="both"/>
+                    <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                    value="${parsedRequestDate}"/>
+                </span>
                         </div>
                     </div>
 
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <p><strong>Warehouse:</strong> ${goodsReceipt.warehouseName}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Received Date:</strong>
-                                <fmt:parseDate value="${goodsReceipt.receivedAt}"
-                                               pattern="yyyy-MM-dd'T'HH:mm" var="parsedReceivedAt"
-                                               type="both"/>
-                                <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
-                                                value="${parsedReceivedAt}"/>
-                            </p>
+                    <!-- Approval -->
+                    <div class="row mb-3">
+                        <div class="col-md-6 d-flex">
+                            <strong class="me-2" style="min-width: 140px;">Approved By:</strong>
+                            <span>${goodsReceipt.approver}</span>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-12">
-                            <p><strong>Note:</strong> ${goodsReceipt.note}</p>
+                    <!-- Import Info -->
+                    <div class="row mb-3">
+                        <div class="col-md-6 d-flex">
+                            <strong class="me-2" style="min-width: 140px;">Import By:</strong>
+                            <span>${goodsReceipt.warehouseName}</span>
+                        </div>
+
+                        <div class="col-md-6 d-flex">
+                            <strong class="me-2" style="min-width: 140px;">Received Date:</strong>
+                            <span>
+                    <fmt:parseDate value="${goodsReceipt.receivedAt}"
+                                   pattern="yyyy-MM-dd'T'HH:mm"
+                                   var="parsedReceivedAt"
+                                   type="both"/>
+                    <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                    value="${parsedReceivedAt}"/>
+                </span>
                         </div>
                     </div>
+
+                    <!-- Supplier -->
+                    <div class="row mb-3">
+                        <div class="col-md-6 d-flex">
+                            <strong class="me-2" style="min-width: 140px;">Supplier:</strong>
+                            <span>${goodsReceipt.supplier}</span>
+                        </div>
+                    </div>
+
+                    <!-- Note -->
+                    <div class="mb-2 d-flex align-items-center">
+                        <strong class="me-2 mb-0" style="min-width: 140px;">Note:</strong>
+
+                        <span class="flex-grow-1"
+                              style="white-space: nowrap; overflow: hidden;">
+                                ${empty goodsReceipt.note ? 'No note' : goodsReceipt.note}
+                        </span>
+                    </div>
+
                 </div>
             </div>
 
@@ -125,7 +159,7 @@
                                                            value="${productItem.serial}" readonly>
                                                     <div class="input-group-append">
                                                         <a class="btn btn-outline-info"
-                                                           href="${pageContext.request.contextPath}/products/items/update?productItemId=${productItem.id}"
+                                                           href="${pageContext.request.contextPath}/products/items?productId=${productItem.productId}&searchSerial=${productItem.serial}"
                                                            title="View Detail">
                                                             View
                                                         </a>

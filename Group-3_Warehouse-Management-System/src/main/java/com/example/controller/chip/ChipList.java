@@ -7,12 +7,12 @@ package com.example.controller.chip;
 import com.example.model.Chip;
 import com.example.service.ChipService;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 @WebServlet(name = "ChipList", urlPatterns = {"/specification/chip"})
@@ -46,10 +46,20 @@ public class ChipList extends HttpServlet {
             pageNo = totalPages;
         }
 
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            Object flash = session.getAttribute("flashChipCreateError");
+            if (flash != null) {
+                request.setAttribute("error", flash);
+                session.removeAttribute("flashChipCreateError");
+            }
+        }
+
         List<Chip> chips = c.getChipByPage(pageNo, PAGE_SIZE);
 
         request.setAttribute("chips", chips);
         request.setAttribute("pageNo", pageNo);
+        request.setAttribute("pageSize", PAGE_SIZE);
         request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher("/WEB-INF/specification/chip/chipList.jsp")

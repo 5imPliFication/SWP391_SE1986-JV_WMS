@@ -17,4 +17,6 @@ public class PurchaseRequestDTO {
     private String note;
     private String createdBy;
     private LocalDateTime createdAt;
+    private String approvedBy;
+    private LocalDateTime approvedAt;
 }

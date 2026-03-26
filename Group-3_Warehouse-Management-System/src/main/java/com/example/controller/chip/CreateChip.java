@@ -9,7 +9,6 @@ import com.example.service.ActivityLogService;
 import com.example.service.ChipService;
 import static com.example.util.ChipFormatter.formatChipName;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -43,7 +42,14 @@ public class CreateChip extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
-        c.CreateChip(formatChipName(name), active);
+        String formattedName = formatChipName(name);
+        if (c.chipExists(formattedName)) {
+            session.setAttribute("flashChipCreateError", "Đã tồn tại");
+            response.sendRedirect(request.getContextPath() + "/specification/chip");
+            return;
+        }
+
+        c.CreateChip(formattedName, active);
         activityLogService.log(user, "Create new chip");
 
         response.sendRedirect(

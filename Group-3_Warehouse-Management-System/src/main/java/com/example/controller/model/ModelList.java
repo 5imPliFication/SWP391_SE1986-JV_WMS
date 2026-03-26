@@ -13,6 +13,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -53,10 +54,20 @@ public class ModelList extends HttpServlet {
             pageNo = totalPages;
         }
 
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            Object flash = session.getAttribute("flashModelCreateError");
+            if (flash != null) {
+                request.setAttribute("error", flash);
+                session.removeAttribute("flashModelCreateError");
+            }
+        }
+
         List<Model> models = m.getModelByPage(pageNo, PAGE_SIZE);
 
         request.setAttribute("models", models);
         request.setAttribute("pageNo", pageNo);
+        request.setAttribute("pageSize", PAGE_SIZE);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("brands", b.getActiveBrands());
 
