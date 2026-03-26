@@ -122,12 +122,12 @@
                             <div class="mb-3">
                                 <label for="customerName" class="form-label">Customer Name</label>
                                 <input type="text" class="form-control" id="customerName" name="customerName"
-                                       value="${param.customerName}" placeholder="Walk-in Customer">
+                                       value="${param.customerName}" placeholder="Enter customer name" required>
                             </div>
                             <div class="mb-3">
                                 <label for="customerPhone" class="form-label">Phone Number</label>
                                 <input type="text" class="form-control" id="customerPhone" name="customerPhone"
-                                       value="${param.customerPhone}" placeholder="Enter phone number">
+                                       value="${param.customerPhone}" placeholder="Enter phone number" required>
                             </div>
                             <div class="mb-0">
                                 <label for="note" class="form-label">Note</label>
