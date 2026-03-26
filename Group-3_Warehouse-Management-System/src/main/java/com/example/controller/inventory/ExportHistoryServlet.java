@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
-@WebServlet("/inventory/export-history")
+@WebServlet("/export-history")
 public class ExportHistoryServlet extends HttpServlet {
     private OrderService orderService;
 

@@ -19,7 +19,7 @@
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Export History Detail</h2>
-            <a href="${pageContext.request.contextPath}/inventory/export-history" class="btn btn-secondary">
+            <a href="${pageContext.request.contextPath}/export-history" class="btn btn-secondary">
                 Back to List
             </a>
         </div>

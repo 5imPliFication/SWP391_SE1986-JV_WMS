@@ -205,7 +205,7 @@
 
                     <c:if test="${fn:contains(permissions, 'IMPORT_PRODUCT')}">
                         <li>
-                            <a href="${pageContext.request.contextPath}/inventory/import-history">
+                            <a href="${pageContext.request.contextPath}/import-history">
                                 <span>Import History</span>
                             </a>
                         </li>
@@ -213,7 +213,7 @@
 
                     <c:if test="${fn:contains(permissions, 'EXPORT_PRODUCT')}">
                         <li>
-                            <a href="${pageContext.request.contextPath}/inventory/export-history">
+                            <a href="${pageContext.request.contextPath}/export-history">
                                 <span>Export History</span>
                             </a>
                         </li>

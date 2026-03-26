@@ -344,7 +344,7 @@
                                                             </a>
                                                         </c:when>
                                                         <c:when test="${item.type == 'EXPORT' && item.referenceType == 'ORDER' && item.referenceId != null}">
-                                                            <a href="${pageContext.request.contextPath}/inventory/export-history/detail?orderId=${item.referenceId}" class="font-weight-bold" style="color: #e65100;">
+                                                            <a href="${pageContext.request.contextPath}/export-history/detail?orderId=${item.referenceId}" class="font-weight-bold" style="color: #e65100;">
                                                                 #EX-${item.referenceId}
                                                             </a>
                                                         </c:when>

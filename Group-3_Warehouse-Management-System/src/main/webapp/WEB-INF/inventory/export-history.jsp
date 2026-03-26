@@ -19,7 +19,7 @@
     <h2 class="mb-4">Export History</h2>
 
     <div class="d-flex align-items-center mb-3">
-        <form class="form-inline" action="${pageContext.request.contextPath}/inventory/export-history" method="get">
+        <form class="form-inline" action="${pageContext.request.contextPath}/export-history" method="get">
             <%--search by order code--%>
             <input type="text" name="searchCode" class="form-control mr-5"
                    placeholder="Search order code" value="${searchCode}">
@@ -88,7 +88,7 @@
                                     ${order.processedBy != null ? order.processedBy.fullName : '-'}
                             </td>
                             <td class="text-center align-middle">
-                                <a href="${pageContext.request.contextPath}/inventory/export-history/detail?orderId=${order.id}"
+                                <a href="${pageContext.request.contextPath}/export-history/detail?orderId=${order.id}"
                                    class="btn btn-info btn-sm">
                                     View
                                 </a>
@@ -117,7 +117,7 @@
                 <%-- previous page--%>
                 <li class="page-item ${pageNo <= 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/export-history?pageNo=${pageNo - 1}&searchCode=${searchCode}&fromDate=${fromDate}&toDate=${toDate}">
+                       href="${pageContext.request.contextPath}/export-history?pageNo=${pageNo - 1}&searchCode=${searchCode}&fromDate=${fromDate}&toDate=${toDate}">
                         Previous
                     </a>
                 </li>
@@ -131,7 +131,7 @@
                         <c:when test="${i == 1}">
                             <li class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/export-history?pageNo=${i}&searchCode=${searchCode}&fromDate=${fromDate}&toDate=${toDate}">
+                                   href="${pageContext.request.contextPath}/export-history?pageNo=${i}&searchCode=${searchCode}&fromDate=${fromDate}&toDate=${toDate}">
                                         ${i}
                                 </a>
                             </li>
@@ -140,7 +140,7 @@
                         <c:when test="${i == totalPages}">
                             <li class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/export-history?pageNo=${i}&searchCode=${searchCode}&fromDate=${fromDate}&toDate=${toDate}">
+                                   href="${pageContext.request.contextPath}/export-history?pageNo=${i}&searchCode=${searchCode}&fromDate=${fromDate}&toDate=${toDate}">
                                         ${i}
                                 </a>
                             </li>
@@ -149,7 +149,7 @@
                         <c:when test="${i >= left && i <= right}">
                             <li class="page-item ${i == pageNo ? 'active' : ''}">
                                 <a class="page-link"
-                                   href="${pageContext.request.contextPath}/inventory/export-history?pageNo=${i}&searchCode=${searchCode}&fromDate=${fromDate}&toDate=${toDate}">
+                                   href="${pageContext.request.contextPath}/export-history?pageNo=${i}&searchCode=${searchCode}&fromDate=${fromDate}&toDate=${toDate}">
                                         ${i}
                                 </a>
                             </li>
@@ -166,7 +166,7 @@
                 <%--next page--%>
                 <li class="page-item ${pageNo >= totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/inventory/export-history?pageNo=${pageNo + 1}&searchCode=${searchCode}&fromDate=${fromDate}&toDate=${toDate}">
+                       href="${pageContext.request.contextPath}/export-history?pageNo=${pageNo + 1}&searchCode=${searchCode}&fromDate=${fromDate}&toDate=${toDate}">
                         Next
                     </a>
                 </li>
