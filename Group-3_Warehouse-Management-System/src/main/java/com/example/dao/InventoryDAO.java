@@ -441,60 +441,57 @@ public class InventoryDAO {
         return list;
     }
 
-    public void updateOrderStatus(Long orderId, Long warehouseKeeperId) {
-        String sql = "UPDATE orders SET status = 'COMPLETED', processed_by = ?, processed_at = NOW() WHERE id = ?";
-        try (Connection con = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setLong(1, warehouseKeeperId);
-            ps.setLong(2, orderId);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to complete export order", e);
-        }
-    }
-
-
-    // assign order item correspond serial and check validate serial
-    public void assignSerialsToOrderItems(Map<Long, List<String>> orderItemSerialsMap) {
-
+    public void executeExportTransaction(Long orderId, Long warehouseKeeperId, Map<Long, List<String>> orderItemSerialsMap) {
         try (Connection con = DBConfig.getDataSource().getConnection()) {
             con.setAutoCommit(false);
             try {
-                for (Map.Entry<Long, List<String>> entry : orderItemSerialsMap.entrySet()) {
-                    // get order item id
-                    Long orderItemId = entry.getKey();
-                    for (String serial : entry.getValue()) {
-                        // get product item id by serial and check validate of serial
-                        Long productItemId = getProductItemIdBySerial(serial);
-                        if (productItemId == null) {
-                            con.rollback();
-                            throw new IllegalArgumentException(
-                                    "Serial " + serial + " does not exist or inactive");
-                        }
-                        insertOrderItemProductItem(orderItemId, productItemId);
-                    }
-                }
+                assignSerialsToOrderItems(con, orderItemSerialsMap);
+                subtractInventory(con, orderItemSerialsMap);
+                saveStockMovements(con, orderId, orderItemSerialsMap);
+                updateOrderStatus(con, orderId, warehouseKeeperId);
                 con.commit();
             } catch (Exception e) {
                 con.rollback();
-                throw e;
+                if (e instanceof IllegalArgumentException) {
+                    throw (IllegalArgumentException) e;
+                }
+                throw new RuntimeException("Transaction failed during export order", e);
             } finally {
                 con.setAutoCommit(true);
             }
-
         } catch (SQLException e) {
-            throw new RuntimeException("Database error during serial assignment", e);
+            throw new RuntimeException("Database error during export transaction", e);
+        }
+    }
+
+    public void updateOrderStatus(Connection con, Long orderId, Long warehouseKeeperId) throws SQLException {
+        String sql = "UPDATE orders SET status = 'COMPLETED', processed_by = ?, processed_at = NOW() WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, warehouseKeeperId);
+            ps.setLong(2, orderId);
+            ps.executeUpdate();
+        }
+    }
+
+    // assign order item correspond serial and check validate serial
+    private void assignSerialsToOrderItems(Connection con, Map<Long, List<String>> orderItemSerialsMap) throws SQLException {
+        for (Map.Entry<Long, List<String>> entry : orderItemSerialsMap.entrySet()) {
+            Long orderItemId = entry.getKey();
+            for (String serial : entry.getValue()) {
+                Long productItemId = getProductItemIdBySerial(con, serial);
+                if (productItemId == null) {
+                    throw new IllegalArgumentException("Serial " + serial + " does not exist or inactive");
+                }
+                insertOrderItemProductItem(con, orderItemId, productItemId);
+            }
         }
     }
 
     // get product item id by serial
-    public Long getProductItemIdBySerial(String serial) throws SQLException {
+    private Long getProductItemIdBySerial(Connection con, String serial) throws SQLException {
         String sql = "SELECT id FROM product_items WHERE serial = ? AND is_active = 1";
-
-        try (Connection con = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, serial);
-
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getLong("id");
@@ -505,13 +502,9 @@ public class InventoryDAO {
     }
 
     // insert data to table order_item_product_items to assign product item correspond order item
-    public void insertOrderItemProductItem(Long orderItemId, Long productItemId)
-            throws SQLException {
-
+    private void insertOrderItemProductItem(Connection con, Long orderItemId, Long productItemId) throws SQLException {
         String sql = "INSERT INTO order_item_product_items (order_item_id, product_item_id) VALUES (?, ?)";
-
-        try (Connection con = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, orderItemId);
             ps.setLong(2, productItemId);
             ps.executeUpdate();
@@ -519,28 +512,25 @@ public class InventoryDAO {
     }
 
     // subtract quantity of product in inventory
-    public void subtractInventory(Map<Long, List<String>> orderItemSerialsMap) {
+    private void subtractInventory(Connection con, Map<Long, List<String>> orderItemSerialsMap) throws SQLException {
         String sql = "UPDATE product_items SET is_active = 0, updated_at = NOW() WHERE id = ?";
-
-        try (Connection con = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             for (List<String> serials : orderItemSerialsMap.values()) {
                 for (String serial : serials) {
-                    Long productItemId = getProductItemIdBySerial(serial);
-                    ps.setLong(1, productItemId);
-                    ps.executeUpdate();
+                    Long productItemId = getProductItemIdBySerial(con, serial);
+                    if (productItemId != null) {
+                        ps.setLong(1, productItemId);
+                        ps.addBatch();
+                    }
                 }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            ps.executeBatch();
         }
     }
 
-    public void saveStockMovements(Long id, Map<Long, List<String>> orderItemSerialsMap) {
+    private void saveStockMovements(Connection con, Long id, Map<Long, List<String>> orderItemSerialsMap) throws SQLException {
         String sql = "INSERT INTO stock_movements (product_id, quantity, type, reference_type, created_at, reference_id) VALUES (?, ?, ?, ?, NOW(), ?)";
-
-        try (Connection con = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             for (Map.Entry<Long, List<String>> entry : orderItemSerialsMap.entrySet()) {
                 Long productId = entry.getKey();
                 int quantity = entry.getValue().size();
@@ -553,8 +543,6 @@ public class InventoryDAO {
                 ps.addBatch();
             }
             ps.executeBatch();
-        } catch (SQLException e) {
-
         }
     }
 }

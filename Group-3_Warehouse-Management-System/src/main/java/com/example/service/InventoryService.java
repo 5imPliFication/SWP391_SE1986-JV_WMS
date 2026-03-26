@@ -205,7 +205,7 @@ public class InventoryService {
 
     public void handleExport(User user, ExportDTO exportOrder, String[] serials) {
         int serialIndex = 0;
-        // product item id -> list serials assigned to this item
+        // order item id -> list serials assigned to this item
         Map<Long, List<String>> orderItemSerialsMap = new HashMap<>();
         for (ExportProductDTO item : exportOrder.getItems()) {
             List<String> assignedSerials = new ArrayList<>();
@@ -216,16 +216,7 @@ public class InventoryService {
             orderItemSerialsMap.put(item.getId(), assignedSerials);
         }
 
-        // assign serials to order items
-        inventoryDAO.assignSerialsToOrderItems(orderItemSerialsMap);
-
-        // subtract quantity from inventory
-        inventoryDAO.subtractInventory(orderItemSerialsMap);
-
-        // save to stock movement
-        inventoryDAO.saveStockMovements(exportOrder.getId(), orderItemSerialsMap);
-
-        // update order status to complete
-        inventoryDAO.updateOrderStatus(exportOrder.getId(), user.getId());
+        // execute all export steps within a single transaction
+        inventoryDAO.executeExportTransaction(exportOrder.getId(), user.getId(), orderItemSerialsMap);
     }
 }
