@@ -321,18 +321,6 @@
                             </a>
                         </c:when>
 
-                        <%-- PROCESSING: Can complete or cancel --%>
-                        <c:when test="${order.status == 'PROCESSING'}">
-                            <form action="${pageContext.request.contextPath}/warehouse/order/complete"
-                                  method="post"
-                                  onsubmit="return confirm('Mark this order as completed?');">
-                                <input type="hidden" name="orderId" value="${order.id}"/>
-                                <button type="submit" class="btn btn-success btn-lg btn-block mb-3">
-                                    <i class="fas fa-check-circle mr-2"></i>Mark as Completed
-                                </button>
-                            </form>
-                        </c:when>
-
                         <%-- COMPLETED or CANCELLED: No actions available --%>
                         <c:otherwise>
                             <div class="alert alert-info mb-0" role="alert">
@@ -344,7 +332,7 @@
                                     </c:when>
                                     <c:when test="${order.status == 'CANCELLED'}">
                                         <strong>Order Cancelled</strong><br>
-                                        This order has been cancelled.
+                                        This order has been canceled.
                                         <c:if test="${not empty order.note && order.note.startsWith('CANCELLED:')}">
                                             <hr class="my-2">
                                             <small class="d-block mt-2">

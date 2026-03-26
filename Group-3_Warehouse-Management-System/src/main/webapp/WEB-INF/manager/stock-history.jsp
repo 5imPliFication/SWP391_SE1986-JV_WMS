@@ -338,13 +338,13 @@
                                                     <c:choose>
                                                         <c:when
                                                             test="${item.type == 'IMPORT' && item.goodsReceiptId != null}">
-                                                            <a href="${pageContext.request.contextPath}/inventory/import-history?action=detail&id=${item.goodsReceiptId}"
+                                                            <a href="${pageContext.request.contextPath}/import-history?action=detail&id=${item.goodsReceiptId}"
                                                                 class="font-weight-bold" style="color: #2e7d32;">
                                                                 #IM-${item.goodsReceiptId}
                                                             </a>
                                                         </c:when>
                                                         <c:when test="${item.type == 'EXPORT' && item.referenceType == 'ORDER' && item.referenceId != null}">
-                                                            <a href="${pageContext.request.contextPath}/warehouse/order/detail?id=${item.referenceId}" class="font-weight-bold" style="color: #e65100;">
+                                                            <a href="${pageContext.request.contextPath}/export-history/detail?orderId=${item.referenceId}" class="font-weight-bold" style="color: #e65100;">
                                                                 #EX-${item.referenceId}
                                                             </a>
                                                         </c:when>

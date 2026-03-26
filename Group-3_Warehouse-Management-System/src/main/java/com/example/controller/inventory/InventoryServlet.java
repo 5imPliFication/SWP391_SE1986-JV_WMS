@@ -56,5 +56,6 @@ public class InventoryServlet extends HttpServlet {
         request.setAttribute("products", result.get("products"));
         request.setAttribute("totalPages", result.get("totalPages"));
         request.setAttribute("pageNo", pageNo);
+        request.setAttribute("pageSize", AppConstants.PAGE_SIZE);
     }
 }

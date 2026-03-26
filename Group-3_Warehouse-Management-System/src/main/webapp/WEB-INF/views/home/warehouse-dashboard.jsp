@@ -103,7 +103,7 @@
     </div>
     <!-- Quick Links -->
     <div class="row">
-        <div class="col-md-4 mb-4">
+        <div class="col-md-6 mb-4">
             <div class="card shadow h-100">
                 <div class="card-body text-center">
                     <i class="fas fa-list fa-3x text-warning mb-3"></i>
@@ -115,7 +115,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-4">
+        <div class="col-md-6 mb-4">
             <div class="card shadow h-100">
                 <div class="card-body text-center">
                     <i class="fas fa-boxes fa-3x text-info mb-3"></i>
@@ -123,18 +123,6 @@
                     <p class="text-muted">Check and manage product stock</p>
                     <a href="${pageContext.request.contextPath}/products" class="btn btn-info">
                         <i class="fas fa-arrow-right mr-1"></i>View Inventory
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="card shadow h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-chart-bar fa-3x text-success mb-3"></i>
-                    <h5>Statistics</h5>
-                    <p class="text-muted">View fulfillment reports</p>
-                    <a href="${pageContext.request.contextPath}/report?type=inventory" class="btn btn-success">
-                        <i class="fas fa-arrow-right mr-1"></i>View Reports
                     </a>
                 </div>
             </div>

@@ -56,12 +56,11 @@
             <c:choose>
 
                 <c:when test="${not empty products}">
-
                     <c:forEach items="${products}" var="product" varStatus="loop">
-
                         <tr>
-
-                            <td>${loop.index + 1}</td>
+                            <td>
+                                    ${(pageNo - 1) * pageSize + loop.index + 1}
+                            </td>
 
                             <td>${product.name}</td>
 
@@ -85,16 +84,11 @@
                                         </span>
                                     </c:otherwise>
                                 </c:choose>
-
                             </td>
-
                             <td>
-
                                 <a href="${pageContext.request.contextPath}/products/items?productId=${product.id}"
                                    class="btn btn-sm btn-primary">
-
                                     View
-
                                 </a>
 
                             </td>
