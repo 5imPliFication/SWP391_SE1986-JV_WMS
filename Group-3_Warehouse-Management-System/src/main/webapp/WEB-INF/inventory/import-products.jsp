@@ -72,8 +72,8 @@
             <div class="row mb-3">
                 <div class="col-md-12">
                     <small class="text-muted">Note</small>
-                    <div class="p-2 border rounded bg-light"
-                         style="white-space: pre-wrap; min-height: 48px;">
+                    <div class="pt-2 pl-2 border rounded bg-light"
+                         style="min-height: 48px;">
                         ${sessionScope.purchaseNote}
                     </div>
                 </div>
@@ -120,13 +120,11 @@
 
         <div class="row">
             <div class="col-md-2">
-                <label class="font-weight-bold mb-1">Supplier</label>
-                <input type="text" class="form-control form-control-sm" name="supplier" required>
+                <h3 class="font-weight-bold mb-1">Supplier</h3><br>
+                <input type="text" class="form-control form-control-sm" name="supplier" required style="height: 45px; width:500px" placeholder="Enter supplier">
             </div>
         </div>
-
-        <br><br>
-
+        <br>
         <div class="table-responsive">
             <table class="table table-bordered">
                 <thead class="thead-dark">
@@ -147,8 +145,7 @@
                     <c:when test="${empty importItems}">
                         <tr>
                             <td colspan="6" class="text-center text-muted py-3">
-                                No product items to import. Please go from Purchase Request
-                                or upload an Excel file.
+                                No product items to import.
                             </td>
                         </tr>
                     </c:when>
