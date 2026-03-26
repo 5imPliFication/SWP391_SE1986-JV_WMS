@@ -20,7 +20,8 @@
             }
 
             th {
-                background-color: #f4f4f4;
+                background-color: #1e293b;
+                color: #ffffff;
             }
 
             .product-img {
