@@ -530,13 +530,24 @@ public class InventoryDAO {
 
     private void saveStockMovements(Connection con, Long id, Map<Long, List<String>> orderItemSerialsMap) throws SQLException {
         String sql = "INSERT INTO stock_movements (product_id, quantity, type, reference_type, created_at, reference_id) VALUES (?, ?, ?, ?, NOW(), ?)";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            for (Map.Entry<Long, List<String>> entry : orderItemSerialsMap.entrySet()) {
-                Long productId = entry.getKey();
-                int quantity = entry.getValue().size();
+        Map<Long, Long> productIdsByOrderItem = getProductIdsByOrderItemIds(con, id, orderItemSerialsMap.keySet());
+        Map<Long, Integer> quantityByProductId = new HashMap<>();
 
-                ps.setLong(1, productId);
-                ps.setInt(2, quantity);
+        for (Map.Entry<Long, List<String>> entry : orderItemSerialsMap.entrySet()) {
+            Long orderItemId = entry.getKey();
+            Long productId = productIdsByOrderItem.get(orderItemId);
+
+            if (productId == null) {
+                throw new IllegalArgumentException("Cannot find product for order item ID: " + orderItemId);
+            }
+
+            quantityByProductId.merge(productId, entry.getValue().size(), Integer::sum);
+        }
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            for (Map.Entry<Long, Integer> entry : quantityByProductId.entrySet()) {
+                ps.setLong(1, entry.getKey());
+                ps.setInt(2, entry.getValue());
                 ps.setString(3, MovementType.EXPORT.name());
                 ps.setString(4, ReferenceType.ORDER.name());
                 ps.setLong(5, id);
@@ -544,5 +555,26 @@ public class InventoryDAO {
             }
             ps.executeBatch();
         }
+    }
+
+    private Map<Long, Long> getProductIdsByOrderItemIds(Connection con, Long orderId, java.util.Set<Long> orderItemIds)
+            throws SQLException {
+        Map<Long, Long> productIdsByOrderItem = new HashMap<>();
+        String sql = "SELECT id, product_id FROM order_items WHERE order_id = ? AND id = ?";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            for (Long orderItemId : orderItemIds) {
+                ps.setLong(1, orderId);
+                ps.setLong(2, orderItemId);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        productIdsByOrderItem.put(orderItemId, rs.getLong("product_id"));
+                    }
+                }
+            }
+        }
+
+        return productIdsByOrderItem;
     }
 }
