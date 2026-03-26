@@ -395,9 +395,10 @@
         </div>
     </c:if>
 
-    <!-- Action Buttons (Only for DRAFT) -->
-    <c:if test="${order.status == 'DRAFT'}">
-        <div class="row mb-4">
+    <!-- Action Buttons (For DRAFT and SUBMITTED) -->
+    <c:if test="${order.status == 'DRAFT' || order.status == 'SUBMITTED'}">
+        <div class="row mb-4 justify-content-center">
+            <c:if test="${order.status == 'DRAFT'}">
             <div class="col-md-6">
                 <div class="card shadow-sm border-primary h-100">
                     <div class="card-body text-center py-4">
@@ -423,12 +424,13 @@
                     </div>
                 </div>
             </div>
+            </c:if>
 
             <div class="col-md-6">
                 <div class="card shadow-sm border-danger h-100">
                     <div class="card-body text-center py-4">
                         <h5 class="mb-3"><i class="fas fa-times-circle mr-2"></i>Cancel Order</h5>
-                        <p class="text-muted mb-4">Discard this draft? This cannot be undone.</p>
+                        <p class="text-muted mb-4">Discard this order? This cannot be undone.</p>
                         <form action="${pageContext.request.contextPath}/salesman/order/cancel" method="post"
                               onsubmit="return confirm('Cancel this order? This action cannot be undone.');">
                             <input type="hidden" name="orderId" value="${order.id}"/>
@@ -443,7 +445,7 @@
     </c:if>
 
     <!-- Locked Order Notice -->
-    <c:if test="${order.status != 'DRAFT'}">
+    <c:if test="${order.status != 'DRAFT' && order.status != 'SUBMITTED'}">
         <div class="alert alert-info shadow-sm">
             <h5 class="alert-heading"><i class="fas fa-lock mr-2"></i>Order ${order.status}</h5>
             <p class="mb-0">

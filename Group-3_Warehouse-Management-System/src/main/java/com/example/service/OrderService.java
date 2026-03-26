@@ -176,12 +176,12 @@ public class OrderService {
         String userRole = user.getRole().getName();
 
         if ("Salesman".equalsIgnoreCase(userRole)) {
-            // Salesman can only cancel their own draft orders
+            // Salesman can only cancel their own draft or submitted orders
             if (!order.getCreatedBy().getId().equals(userId)) {
                 throw new SecurityException("You can only cancel your own orders");
             }
-            if (!"DRAFT".equals(order.getStatus())) {
-                throw new IllegalStateException("You can only cancel draft orders. This order is " + order.getStatus());
+            if (!"DRAFT".equals(order.getStatus()) && !"SUBMITTED".equals(order.getStatus())) {
+                throw new IllegalStateException("You can only cancel draft or submitted orders. This order is " + order.getStatus());
             }
         } else if ("Warehouse".equalsIgnoreCase(userRole)) {
             // Warehouse can cancel SUBMITTED or PROCESSING orders
