@@ -16,12 +16,12 @@ public class DBConfig {
 
         // JDBC URL
         config.setJdbcUrl(
-                "jdbc:mysql://localhost:3306/laptop_wms_3" +
-                        "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh"
+                "jdbc:mysql://localhost:3306/laptop_wms"
+                + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh"
         );
 
         config.setUsername("root");
-        config.setPassword("123456");
+        config.setPassword("123a");
 
         // MySQL Driver
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
@@ -36,7 +36,8 @@ public class DBConfig {
         dataSource = new HikariDataSource(config);
     }
 
-    private DBConfig() {}
+    private DBConfig() {
+    }
 
     public static DataSource getDataSource() {
         return dataSource;
@@ -52,4 +53,3 @@ public class DBConfig {
         }
     }
 }
-

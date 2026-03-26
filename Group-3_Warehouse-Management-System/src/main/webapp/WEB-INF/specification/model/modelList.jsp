@@ -80,7 +80,7 @@
                             <c:forEach var="m" items="${models}" varStatus="s">
                                 <tr>
 
-                                    <td>${(pageNo - 1) * 2 + s.index + 1}</td>
+                                    <td>${(pageNo - 1) * pageSize + s.index + 1}</td>
 
                                     <td>${m.name}</td>
 
