@@ -46,7 +46,7 @@
             background-color: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
 
@@ -120,7 +120,8 @@
                         <c:otherwise>Report</c:otherwise>
                     </c:choose>
                 </h2>
-                <p class="text-muted mb-0">Track movement trends and review detailed inventory in-out-balance at a glance.</p>
+                <p class="text-muted mb-0">Track movement trends and review detailed inventory in-out-balance at a
+                    glance.</p>
             </div>
             <div class="text-muted small">
                 Primary View: <span class="font-weight-bold">Inventory In-Out-Balance</span>
@@ -163,7 +164,7 @@
     <!-- Error/Message Display -->
     <c:if test="${not empty message}">
         <div class="alert alert-${messageType} alert-dismissible fade show" role="alert">
-            ${message}
+                ${message}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -223,7 +224,9 @@
                         </c:when>
                         <c:otherwise>
                             <tr>
-                                <td colspan="3" class="text-center text-muted py-4">No import data found for ${month}/${year}.</td>
+                                <td colspan="3" class="text-center text-muted py-4">No import data found
+                                    for ${month}/${year}.
+                                </td>
                             </tr>
                         </c:otherwise>
                     </c:choose>
@@ -290,7 +293,9 @@
                         </c:when>
                         <c:otherwise>
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-4">No export data found for ${month}/${year}.</td>
+                                <td colspan="4" class="text-center text-muted py-4">No export data found
+                                    for ${month}/${year}.
+                                </td>
                             </tr>
                         </c:otherwise>
                     </c:choose>
@@ -335,7 +340,9 @@
                             </c:when>
                             <c:otherwise>
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">No orders contain this product in ${month}/${year}.</td>
+                                    <td colspan="7" class="text-center text-muted py-4">No orders contain this product
+                                        in ${month}/${year}.
+                                    </td>
                                 </tr>
                             </c:otherwise>
                         </c:choose>
@@ -377,31 +384,91 @@
             <form action="${pageContext.request.contextPath}/report" method="get" class="filter-grid">
                 <input type="hidden" name="type" value="inventory"/>
                 <input type="hidden" name="year" value="${year}"/>
+                <input type="hidden" name="fromDate" id="fromDateHidden" value="${fromDate}"/>
+                <input type="hidden" name="toDate" id="toDateHidden" value="${toDate}"/>
+
                 <div>
-                    <label class="small font-weight-bold text-muted">Month (quick pick)</label>
-                    <input type="number" name="month" class="form-control" style="min-width: 120px;"
-                           placeholder="Input month" value="${month}" min="1" max="12">
+                    <label class="small font-weight-bold text-muted">Month</label>
+                    <select name="month" id="monthSelect" class="form-control" style="min-width: 150px;">
+                        <option value="">-- Select Month --</option>
+                        <c:forEach begin="1" end="12" var="m">
+                            <option value="${m}" ${month == m ? 'selected' : ''}>
+                                <c:choose>
+                                    <c:when test="${m == 1}">January</c:when>
+                                    <c:when test="${m == 2}">February</c:when>
+                                    <c:when test="${m == 3}">March</c:when>
+                                    <c:when test="${m == 4}">April</c:when>
+                                    <c:when test="${m == 5}">May</c:when>
+                                    <c:when test="${m == 6}">June</c:when>
+                                    <c:when test="${m == 7}">July</c:when>
+                                    <c:when test="${m == 8}">August</c:when>
+                                    <c:when test="${m == 9}">September</c:when>
+                                    <c:when test="${m == 10}">October</c:when>
+                                    <c:when test="${m == 11}">November</c:when>
+                                    <c:when test="${m == 12}">December</c:when>
+                                </c:choose>
+                            </option>
+                        </c:forEach>
+                    </select>
                 </div>
+
                 <div>
                     <label class="small font-weight-bold text-muted">From Date</label>
-                    <input type="date" name="fromDate" class="form-control" style="min-width: 180px;"
-                           value="${fromDate}">
+                    <input type="text" id="fromDateDisplay" class="form-control" style="min-width: 140px;"
+                           value="${fromDate}" readonly/>
                 </div>
                 <div>
                     <label class="small font-weight-bold text-muted">To Date</label>
-                    <input type="date" name="toDate" class="form-control" style="min-width: 180px;"
-                           value="${toDate}">
+                    <input type="text" id="toDateDisplay" class="form-control" style="min-width: 140px;"
+                           value="${toDate}" readonly/>
                 </div>
+
                 <button type="submit" class="btn btn-primary">Apply Period</button>
-                <a href="${pageContext.request.contextPath}/report?type=inventory&year=${year}" class="btn btn-outline-secondary">Reset</a>
+                <a href="${pageContext.request.contextPath}/report?type=inventory&year=${year}"
+                   class="btn btn-outline-secondary">Reset</a>
             </form>
         </div>
+
+        <script>
+            (function () {
+                const monthSelect  = document.getElementById('monthSelect');
+                const fromHidden   = document.getElementById('fromDateHidden');
+                const toHidden     = document.getElementById('toDateHidden');
+                const fromDisplay  = document.getElementById('fromDateDisplay');
+                const toDisplay    = document.getElementById('toDateDisplay');
+                const year         = parseInt('${year}') || new Date().getFullYear();
+
+                function pad(n) { return String(n).padStart(2, '0'); }
+
+                function updateDates(month) {
+                    if (!month) return;
+                    const m       = parseInt(month);
+                    const lastDay = new Date(year, m, 0).getDate();
+                    const from    = year + '-' + pad(m) + '-01';
+                    const to      = year + '-' + pad(m) + '-' + pad(lastDay);
+
+                    fromHidden.value  = from;
+                    toHidden.value    = to;
+                    fromDisplay.value = from;
+                    toDisplay.value   = to;
+                }
+
+                if (monthSelect.value) {
+                    updateDates(monthSelect.value);
+                }
+
+                monthSelect.addEventListener('change', function () {
+                    updateDates(this.value);
+                });
+            })();
+        </script>
 
         <!-- 6. TABLE -->
         <div class="panel">
             <h3 class="panel-title">Inventory In-Out-Balance Table</h3>
             <p class="mb-2"><strong>Period:</strong> ${fromDate} to ${toDate}</p>
-            <p class="text-muted mb-3">This is the primary manager view for stock movement and closing balance health.</p>
+            <p class="text-muted mb-3">This is the primary manager view for stock movement and closing balance
+                health.</p>
 
             <c:set var="cardOpeningQty" value="0"/>
             <c:set var="cardImportQty" value="0"/>
@@ -426,19 +493,22 @@
                 <div class="col-md-3 mb-2">
                     <div class="border rounded p-3 bg-light h-100">
                         <div class="text-muted small">Import Qty</div>
-                        <div class="h5 mb-0 text-success"><fmt:formatNumber value="${cardImportQty}" type="number"/></div>
+                        <div class="h5 mb-0 text-success"><fmt:formatNumber value="${cardImportQty}"
+                                                                            type="number"/></div>
                     </div>
                 </div>
                 <div class="col-md-3 mb-2">
                     <div class="border rounded p-3 bg-light h-100">
                         <div class="text-muted small">Export Qty</div>
-                        <div class="h5 mb-0 text-danger"><fmt:formatNumber value="${cardExportQty}" type="number"/></div>
+                        <div class="h5 mb-0 text-danger"><fmt:formatNumber value="${cardExportQty}"
+                                                                           type="number"/></div>
                     </div>
                 </div>
                 <div class="col-md-3 mb-2">
                     <div class="border rounded p-3 bg-light h-100">
                         <div class="text-muted small">Closing Value</div>
-                        <div class="h5 mb-0 text-primary"><fmt:formatNumber value="${cardClosingValue}" type="number" maxFractionDigits="0"/></div>
+                        <div class="h5 mb-0 text-primary"><fmt:formatNumber value="${cardClosingValue}" type="number"
+                                                                            maxFractionDigits="0"/></div>
                     </div>
                 </div>
             </div>
@@ -447,8 +517,7 @@
                 <table class="table table-bordered table-hover mb-0">
                     <thead>
                     <tr class="inv-summary-head text-center">
-                        <th rowspan="2" style="min-width:120px;">Item Code</th>
-                        <th rowspan="2" style="min-width:220px;">Item Name</th>
+                        <th class="" rowspan="2" style="min-width:220px; position: sticky; left:0; z-index:2; background: #d8ebfb">Product Name</th>
                         <th colspan="2">Opening</th>
                         <th colspan="2">Import</th>
                         <th colspan="2">Export</th>
@@ -489,44 +558,63 @@
                                 <c:set var="sumClosingValue" value="${sumClosingValue + row.closingValue}"/>
 
                                 <tr>
-                                    <td class="font-weight-bold text-primary inv-sticky-first">
-                                        SP<fmt:formatNumber value="${row.productId}" pattern="000000"/>
-                                    </td>
-                                    <td>${row.productName}</td>
+                                    <td class="inv-sticky-first">${row.productName}</td>
 
-                                    <td class="text-right"><fmt:formatNumber value="${row.openingQty}" type="number"/></td>
-                                    <td class="text-right"><fmt:formatNumber value="${row.openingValue}" type="number" maxFractionDigits="0"/></td>
+                                    <td class="text-right"><fmt:formatNumber value="${row.openingQty}"
+                                                                             type="number"/></td>
+                                    <td class="text-right"><fmt:formatNumber value="${row.openingValue}" type="number"
+                                                                             maxFractionDigits="0"/></td>
 
-                                    <td class="text-right text-success"><fmt:formatNumber value="${row.importQty}" type="number"/></td>
-                                    <td class="text-right text-success"><fmt:formatNumber value="${row.importValue}" type="number" maxFractionDigits="0"/></td>
+                                    <td class="text-right text-success"><fmt:formatNumber value="${row.importQty}"
+                                                                                          type="number"/></td>
+                                    <td class="text-right text-success"><fmt:formatNumber value="${row.importValue}"
+                                                                                          type="number"
+                                                                                          maxFractionDigits="0"/></td>
 
-                                    <td class="text-right text-danger"><fmt:formatNumber value="${row.exportQty}" type="number"/></td>
-                                    <td class="text-right text-danger"><fmt:formatNumber value="${row.exportValue}" type="number" maxFractionDigits="0"/></td>
+                                    <td class="text-right text-danger"><fmt:formatNumber value="${row.exportQty}"
+                                                                                         type="number"/></td>
+                                    <td class="text-right text-danger"><fmt:formatNumber value="${row.exportValue}"
+                                                                                         type="number"
+                                                                                         maxFractionDigits="0"/></td>
 
-                                    <td class="text-right font-weight-bold"><fmt:formatNumber value="${row.closingQty}" type="number"/></td>
-                                    <td class="text-right font-weight-bold text-primary"><fmt:formatNumber value="${row.closingValue}" type="number" maxFractionDigits="0"/></td>
+                                    <td class="text-right font-weight-bold"><fmt:formatNumber value="${row.closingQty}"
+                                                                                              type="number"/></td>
+                                    <td class="text-right font-weight-bold text-primary"><fmt:formatNumber
+                                            value="${row.closingValue}" type="number" maxFractionDigits="0"/></td>
                                 </tr>
                             </c:forEach>
 
                             <tr class="inv-summary-total">
-                                <td colspan="2" class="inv-sticky-first">Total Items: ${fn:length(movementRows)}</td>
+                                <td colspan="1" class="inv-sticky-first">Total Items: ${fn:length(movementRows)}</td>
 
                                 <td class="text-right"><fmt:formatNumber value="${sumOpeningQty}" type="number"/></td>
-                                <td class="text-right"><fmt:formatNumber value="${sumOpeningValue}" type="number" maxFractionDigits="0"/></td>
+                                <td class="text-right"><fmt:formatNumber value="${sumOpeningValue}" type="number"
+                                                                         maxFractionDigits="0"/></td>
 
-                                <td class="text-right text-success"><fmt:formatNumber value="${sumImportQty}" type="number"/></td>
-                                <td class="text-right text-success"><fmt:formatNumber value="${sumImportValue}" type="number" maxFractionDigits="0"/></td>
+                                <td class="text-right text-success"><fmt:formatNumber value="${sumImportQty}"
+                                                                                      type="number"/></td>
+                                <td class="text-right text-success"><fmt:formatNumber value="${sumImportValue}"
+                                                                                      type="number"
+                                                                                      maxFractionDigits="0"/></td>
 
-                                <td class="text-right text-danger"><fmt:formatNumber value="${sumExportQty}" type="number"/></td>
-                                <td class="text-right text-danger"><fmt:formatNumber value="${sumExportValue}" type="number" maxFractionDigits="0"/></td>
+                                <td class="text-right text-danger"><fmt:formatNumber value="${sumExportQty}"
+                                                                                     type="number"/></td>
+                                <td class="text-right text-danger"><fmt:formatNumber value="${sumExportValue}"
+                                                                                     type="number"
+                                                                                     maxFractionDigits="0"/></td>
 
                                 <td class="text-right"><fmt:formatNumber value="${sumClosingQty}" type="number"/></td>
-                                <td class="text-right text-primary"><fmt:formatNumber value="${sumClosingValue}" type="number" maxFractionDigits="0"/></td>
+                                <td class="text-right text-primary"><fmt:formatNumber value="${sumClosingValue}"
+                                                                                      type="number"
+                                                                                      maxFractionDigits="0"/></td>
                             </tr>
+
                         </c:when>
                         <c:otherwise>
                             <tr>
-                                <td colspan="10" class="text-center text-muted py-4">No inventory movement data found in selected period.</td>
+                                <td colspan="10" class="text-center text-muted py-4">No inventory movement data found in
+                                    selected period.
+                                </td>
                             </tr>
                         </c:otherwise>
                     </c:choose>
@@ -539,7 +627,8 @@
             <h3 class="panel-title">How To Read This Table</h3>
             <div class="row small text-muted">
                 <div class="col-md-4 mb-2"><strong>Opening</strong>: Stock before the selected period starts.</div>
-                <div class="col-md-4 mb-2"><strong>Import/Export</strong>: Net movement inside the selected period.</div>
+                <div class="col-md-4 mb-2"><strong>Import/Export</strong>: Net movement inside the selected period.
+                </div>
                 <div class="col-md-4 mb-2"><strong>Closing</strong>: Opening + Import - Export.</div>
             </div>
         </div>
@@ -557,7 +646,8 @@
     <c:if test="${not empty chartSummaryData}">
         <div class="panel">
             <h3 class="panel-title">Annual Overview - Import vs Export</h3>
-            <p class="text-muted mb-3">Year-level context for planning, while daily operations should focus on the table above.</p>
+            <p class="text-muted mb-3">Year-level context for planning, while daily operations should focus on the table
+                above.</p>
             <div style="position: relative; height: 300px;">
                 <canvas id="overviewChart"></canvas>
             </div>
@@ -641,16 +731,16 @@
                             datasets: [{
                                 label: reportType === 'inventory' ? 'Inventory Quantity' : (reportType === 'export' ? 'Exported Quantity' : 'Imported Quantity'),
                                 data: trendData,
-                                backgroundColor: reportType === 'inventory' 
+                                backgroundColor: reportType === 'inventory'
                                     ? 'rgba(34, 197, 94, 0.2)'
                                     : (reportType === 'export' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(59, 130, 246, 0.2)'),
-                                borderColor: reportType === 'inventory' 
+                                borderColor: reportType === 'inventory'
                                     ? 'rgba(34, 197, 94, 1)'
                                     : (reportType === 'export' ? 'rgba(239, 68, 68, 1)' : 'rgba(59, 130, 246, 1)'),
                                 borderWidth: 2,
                                 fill: true,
                                 tension: 0.3,
-                                pointBackgroundColor: reportType === 'inventory' 
+                                pointBackgroundColor: reportType === 'inventory'
                                     ? 'rgba(34, 197, 94, 1)'
                                     : (reportType === 'export' ? 'rgba(239, 68, 68, 1)' : 'rgba(59, 130, 246, 1)'),
                                 pointRadius: 4
