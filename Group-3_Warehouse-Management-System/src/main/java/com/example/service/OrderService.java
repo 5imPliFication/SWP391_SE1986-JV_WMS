@@ -418,7 +418,9 @@ public class OrderService {
 
     public ExportDTO getExportHistoryDetail(Long orderId) {
         ExportDTO exportDTO = orderDAO.getExportOrderHeader(orderId);
-        if (exportDTO == null) return null;
+        if (exportDTO == null) {
+            return null;
+        }
         exportDTO.setItems(orderDAO.getExportOrderItems(orderId));
         return exportDTO;
     }
