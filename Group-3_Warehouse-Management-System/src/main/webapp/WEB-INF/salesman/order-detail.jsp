@@ -498,7 +498,7 @@
                                         ${currency:format(p.currentPrice)} VND
                                     </div>
                                     <div class="input-group input-group-sm">
-                                        <input type="number" class="form-control text-center" min="1" 
+                                        <input type="number" class="form-control text-center" min="1"
                                                value="${p.id == param.productId && not empty param.quantity ? param.quantity : '1'}"
                                                max="${p.totalQuantity}" step="1" id="qty-${p.id}">
                                         <div class="input-group-append">
