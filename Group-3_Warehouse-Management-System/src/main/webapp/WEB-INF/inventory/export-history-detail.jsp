@@ -37,7 +37,8 @@
                         </div>
                         <div class="col-md-6">
                             <p><strong>Total Value:</strong>
-                                    ${order.total}
+                                <fmt:formatNumber value="${order.total}" type="number" groupingUsed="true"/>
+                                 VND
                             </p>
                         </div>
                     </div>
@@ -49,7 +50,10 @@
                         </div>
                         <div class="col-md-6">
                             <p><strong>Order Date:</strong>
-                                    ${order.createdAt}
+                                <fmt:parseDate value="${order.createdAt}"
+                                               pattern="yyyy-MM-dd'T'HH:mm" var="parsedCreatedAt"/>
+                                <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                                value="${parsedCreatedAt}"/>
                             </p>
                         </div>
                     </div>
@@ -61,7 +65,10 @@
                         </div>
                         <div class="col-md-6">
                             <p><strong>Processed Date:</strong>
-                                    ${order.processedAt}
+                                <fmt:parseDate value="${order.processedAt}"
+                                               pattern="yyyy-MM-dd'T'HH:mm" var="parseProcessedAt"/>
+                                <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                                value="${parseProcessedAt}"/>
                             </p>
                         </div>
                     </div>
@@ -82,8 +89,10 @@
                         <th style="width: 60px;" class="text-center">No.</th>
                         <th>Product Name / Serial</th>
                         <th style="width: 150px;" class="text-center">Quantity</th>
-                        <th style="width: 200px;" class="text-center">Price</th>
                         <th style="width: 200px;" class="text-center">Unit</th>
+                        <th style="width: 200px;" class="text-center">Price</th>
+                        <th style="width: 200px;" class="text-center">Total Price</th>
+                        <th style="width: 200px;" class="text-center">Unit Price</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -103,16 +112,26 @@
                                             ${item.quantity}
                                     </td>
                                     <td class="text-center align-middle">
-                                            ${item.priceAtPurchase}
-                                    </td><td class="text-center align-middle">
                                             ${item.unit}
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <fmt:formatNumber value="${item.priceAtPurchase}" type="number" groupingUsed="true"/>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <fmt:formatNumber
+                                                value="${item.quantity * item.priceAtPurchase}"
+                                                type="number"
+                                                groupingUsed="true"/>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        VND
                                     </td>
                                 </tr>
 
                                 <%-- detail rows --%>
                                 <c:forEach items="${item.productItems}" var="productItem" varStatus="productStatus">
                                     <tr class="sub-item item-group-${item.id}" style="display:none;">
-                                        <td colspan="5">
+                                        <td colspan="7">
                                             <div class="d-flex align-items-center">
 
                                                 <!-- STT -->

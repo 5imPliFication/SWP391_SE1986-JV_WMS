@@ -1163,7 +1163,7 @@ public class OrderDAO {
                     dto.setCustomerName(rs.getString("customer_name"));
                     dto.setTotal(rs.getDouble("total_price"));
                     dto.setSalesmanName(rs.getString("salesman_name"));
-                    dto.setCreatedAt(rs.getTimestamp("order_date").toLocalDateTime());
+                    dto.setCreatedAt(rs.getObject("order_date", LocalDateTime.class));
                     dto.setWarehouseStaffName(rs.getString("warehouse_staff_name"));
                     dto.setProcessedAt(rs.getTimestamp("processed_at").toLocalDateTime());
                     dto.setNote(rs.getString("note"));
