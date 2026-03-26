@@ -441,7 +441,7 @@ public class InventoryDAO {
         return list;
     }
 
-    public void executeExportTransaction(Long orderId, Long warehouseKeeperId, Map<Long, List<String>> orderItemSerialsMap) {
+    public void executeExport(Long orderId, Long warehouseKeeperId, Map<Long, List<String>> orderItemSerialsMap) {
         try (Connection con = DBConfig.getDataSource().getConnection()) {
             con.setAutoCommit(false);
             try {
