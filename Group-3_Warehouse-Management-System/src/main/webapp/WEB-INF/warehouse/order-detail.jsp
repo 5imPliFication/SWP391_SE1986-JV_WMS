@@ -209,7 +209,7 @@
                                     <td class="px-4 align-middle">
                                             <%-- Product name from Product entity --%>
                                         <div class="font-weight-bold">${item.product.name}</div>
-                                        <%-- Linked product items are reserved when salesman adds them to the order. --%>
+                                            <%-- Linked product items are reserved when salesman adds them to the order. --%>
                                         <c:if test="${order.status == 'SUBMITTED' || order.status == 'PROCESSING' || order.status == 'COMPLETED'}">
                                             <br><small class="text-warning">
                                             <i class="fas fa-exclamation-triangle mr-1"></i>
@@ -218,11 +218,11 @@
                                         </c:if>
                                     </td>
                                     <td class="px-4 align-middle text-right">
-                                        ${currency:format(item.priceAtPurchase)} VND
+                                            ${currency:format(item.priceAtPurchase)} VND
                                         <c:if test="${item.priceAtPurchase != item.productItem.importedPrice}">
                                             <br><small class="text-warning">
                                             <i class="fas fa-info-circle"></i> Imported:
-                                            ${currency:format(item.productItem.importedPrice)} VND
+                                                ${currency:format(item.productItem.importedPrice)} VND
                                         </small>
                                         </c:if>
                                     </td>
@@ -358,7 +358,8 @@
                 <div class="card-body">
                     <div class="pl-3">
                         <div class="pb-3">
-                            <c:set var="step1Active" value="${order.status == 'SUBMITTED' || order.status == 'PROCESSING' || order.status == 'COMPLETED'}"/>
+                            <c:set var="step1Active"
+                                   value="${order.status == 'SUBMITTED' || order.status == 'PROCESSING' || order.status == 'COMPLETED'}"/>
                             <div class="d-flex align-items-center mb-2">
                                 <div class="mr-3">
                                     <c:choose>
@@ -379,7 +380,8 @@
                         </div>
 
                         <div class="pb-3">
-                            <c:set var="step2Active" value="${order.status == 'PROCESSING' || order.status == 'COMPLETED'}"/>
+                            <c:set var="step2Active"
+                                   value="${order.status == 'PROCESSING' || order.status == 'COMPLETED'}"/>
                             <div class="d-flex align-items-center mb-2">
                                 <div class="mr-3">
                                     <c:choose>
@@ -434,14 +436,10 @@
                     <c:choose>
                         <%-- SUBMITTED: Can start processing or cancel --%>
                         <c:when test="${order.status == 'SUBMITTED'}">
-                            <form action="${pageContext.request.contextPath}/warehouse/order/process"
-                                  method="post"
-                                  onsubmit="return confirm('Start processing this order? Reserved stock remains linked to this order.');">
-                                <input type="hidden" name="orderId" value="${order.id}"/>
-                                <button type="submit" class="btn btn-primary btn-lg btn-block mb-3">
-                                    <i class="fas fa-play-circle mr-2"></i>Start Processing
-                                </button>
-                            </form>
+                            <a href="${pageContext.request.contextPath}/export?orderId=${order.id}"
+                               class="btn btn-success btn-lg btn-block mb-3">
+                                <i class="fas fa-barcode mr-2"></i>Start Processing
+                            </a>
 
                             <div class="card border-danger">
                                 <div class="card-body p-3">
@@ -559,7 +557,7 @@
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
 <script>
     // Auto-dismiss alerts after 5 seconds
-    setTimeout(function() {
+    setTimeout(function () {
         $('.alert-dismissible').fadeOut('slow');
     }, 5000);
 </script>
