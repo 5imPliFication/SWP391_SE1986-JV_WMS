@@ -241,8 +241,8 @@
                     <div class="sidebar-category">Reports</div>
 
                     <li>
-                        <a href="${pageContext.request.contextPath}/summary_report">
-                            <span>Summary Report</span>
+                        <a href="${pageContext.request.contextPath}/stock-history">
+                            <span>Stock Movement History</span>
                         </a>
                     </li>
                     <li>

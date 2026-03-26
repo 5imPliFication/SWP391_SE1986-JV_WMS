@@ -163,59 +163,57 @@
             <div class="container-fluid" style="padding: 24px;">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="font-weight-bold text-dark m-0">
-                        <i class="fas fa-history mr-2"></i>Stock History
+                        <i class="fas fa-history mr-2"></i>Stock Movement History
                     </h2>
-                    <a href="${pageContext.request.contextPath}/summary_report"
-                       class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left mr-1"></i>
-                        Back to Summary Report
-                    </a>
+
                 </div>
 
                 <div class="filter-card">
-                    <form method="get" action="${pageContext.request.contextPath}/stock-history">
+                    <form method="get" action="${pageContext.request.contextPath}/stock-history" id="filterForm">
                         <div class="row align-items-end">
                             <div class="col-md-2 mb-3 mb-md-0">
                                 <div class="form-group mb-0">
-                                    <label for="fromDate"><i class="fas fa-calendar-alt mr-1"></i>From Date</label>
-                                    <input type="date" class="form-control" id="fromDate" name="fromDate" value="${fromDate}">
+                                    <label for="year"><i class="fas fa-calendar-alt mr-1"></i>Year</label>
+                                    <select class="form-control" id="year" name="year">
+                                        <option value="all" ${year == 'all' ? 'selected' : ''}>All Time</option>
+                                        <c:forEach var="y" begin="2024" end="${currentYear}">
+                                            <c:set var="yearVal" value="${currentYear - (y - 2024)}" />
+                                            <option value="${yearVal}" ${year != 'all' && year == yearVal ? 'selected' : ''}>${yearVal}</option>
+                                        </c:forEach>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-2 mb-3 mb-md-0">
                                 <div class="form-group mb-0">
-                                    <label for="toDate"><i class="fas fa-calendar-alt mr-1"></i>To Date</label>
-                                    <input type="date" class="form-control" id="toDate" name="toDate" value="${toDate}">
+                                    <label for="month"><i class="fas fa-calendar-day mr-1"></i>Month</label>
+                                    <select class="form-control" id="month" name="month">
+                                        <option value="all" ${month == 'all' ? 'selected' : ''}>All Months</option>
+                                        <c:forEach var="m" begin="1" end="12">
+                                            <option value="${m}" ${month != 'all' && month == m ? 'selected' : ''}>Month ${m}</option>
+                                        </c:forEach>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-2 mb-3 mb-md-0">
                                 <div class="form-group mb-0">
-                                    <label for="type"><i class="fas fa-exchange-alt mr-1"></i>Movement Type</label>
+                                    <label for="productName"><i class="fas fa-box mr-1"></i>Product</label>
+                                    <input type="text" class="form-control" id="productName" name="productName" value="${productName}" placeholder="Product name...">
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-3 mb-md-0">
+                                <div class="form-group mb-0">
+                                    <label for="type"><i class="fas fa-exchange-alt mr-1"></i>Type</label>
                                     <select class="form-control" id="type" name="type">
                                         <option value="">All Types</option>
                                         <option value="IMPORT" ${type=='IMPORT' ? 'selected' : '' }>IMPORT</option>
                                         <option value="EXPORT" ${type=='EXPORT' ? 'selected' : '' }>EXPORT</option>
-                                        <option value="ADJUSTMENT" ${type=='ADJUSTMENT' ? 'selected' : '' }>ADJUSTMENT</option>
-                                        <option value="RETURN" ${type=='RETURN' ? 'selected' : '' }>RETURN</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-2 mb-3 mb-md-0">
                                 <div class="form-group mb-0">
-                                    <label for="referenceType"><i class="fas fa-file-alt mr-1"></i>Reference Type</label>
-                                    <select class="form-control" id="referenceType" name="referenceType">
-                                        <option value="">All References</option>
-                                        <option value="ORDER" ${referenceType=='ORDER' ? 'selected' : '' }>ORDER</option>
-                                        <option value="GOODS_RECEIPT" ${referenceType=='GOODS_RECEIPT' ? 'selected' : '' }>GOODS RECEIPT
-                                        </option>
-                                        <option value="AUDIT_ADJUSTMENT" ${referenceType=='AUDIT_ADJUSTMENT' ? 'selected' : '' }>AUDIT
-                                            ADJUSTMENT</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2 mb-3 mb-md-0">
-                                <div class="form-group mb-0">
-                                    <label for="staffName"><i class="fas fa-user mr-1"></i>Staff Name</label>
-                                    <input type="text" class="form-control" id="staffName" name="staffName" value="${staffName}" placeholder="Search staff...">
+                                    <label for="staffName"><i class="fas fa-user mr-1"></i>Staff</label>
+                                    <input type="text" class="form-control" id="staffName" name="staffName" value="${staffName}" placeholder="Staff name...">
                                 </div>
                             </div>
                             <div class="col-md-2">
@@ -260,15 +258,15 @@
                                     <td>
                                         <c:choose>
 
-                                            <c:when test="${item.type == 'IMPORT' || item.type == 'RETURN'}">
+                                            <c:when test="${item.type == 'IMPORT' }">
                                                 <span class="text-success font-weight-bold" style="font-size:15px;">
-                                                    +${item.quantity}
+                                                    ${item.quantity}
                                                 </span>
                                             </c:when>
 
                                             <c:when test="${item.type == 'EXPORT'}">
                                                 <span class="text-danger font-weight-bold" style="font-size:15px;">
-                                                    -${item.quantity}
+                                                    ${item.quantity}
                                                 </span>
                                             </c:when>
 
@@ -391,7 +389,7 @@
                             <ul class="pagination mb-0">
                                 <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
                                     <a class="page-link"
-                                       href="${pageContext.request.contextPath}/stock-history?page=${currentPage - 1}&fromDate=${fromDate != null ? fromDate : ''}&toDate=${toDate != null ? toDate : ''}&type=${type != null ? type : ''}&referenceType=${referenceType != null ? referenceType : ''}&staffName=${staffName != null ? staffName : ''}">
+                                       href="${pageContext.request.contextPath}/stock-history?page=${currentPage - 1}&year=${year != null ? year : ''}&month=${month != null ? month : ''}&type=${type != null ? type : ''}&staffName=${staffName != null ? staffName : ''}&productName=${productName != null ? productName : ''}">
                                         <i class="fas fa-chevron-left mr-1"></i>Previous
                                     </a>
                                 </li>
@@ -401,7 +399,7 @@
                                         <c:when test="${i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2)}">
                                             <li class="page-item ${currentPage == i ? 'active' : ''}">
                                                 <a class="page-link"
-                                                   href="${pageContext.request.contextPath}/stock-history?page=${i}&fromDate=${fromDate != null ? fromDate : ''}&toDate=${toDate != null ? toDate : ''}&type=${type != null ? type : ''}&referenceType=${referenceType != null ? referenceType : ''}&staffName=${staffName != null ? staffName : ''}">${i}</a>
+                                                   href="${pageContext.request.contextPath}/stock-history?page=${i}&year=${year != null ? year : ''}&month=${month != null ? month : ''}&type=${type != null ? type : ''}&staffName=${staffName != null ? staffName : ''}&productName=${productName != null ? productName : ''}">${i}</a>
                                             </li>
                                         </c:when>
                                         <c:when test="${i == currentPage - 3 || i == currentPage + 3}">
@@ -412,7 +410,7 @@
 
                                 <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
                                     <a class="page-link"
-                                       href="${pageContext.request.contextPath}/stock-history?page=${currentPage + 1}&fromDate=${fromDate != null ? fromDate : ''}&toDate=${toDate != null ? toDate : ''}&type=${type != null ? type : ''}&staffName=${staffName != null ? staffName : ''}">
+                                       href="${pageContext.request.contextPath}/stock-history?page=${currentPage + 1}&year=${year != null ? year : ''}&month=${month != null ? month : ''}&type=${type != null ? type : ''}&staffName=${staffName != null ? staffName : ''}&productName=${productName != null ? productName : ''}">
                                         Next<i class="fas fa-chevron-right ml-1"></i>
                                     </a>
                                 </li>
@@ -423,6 +421,25 @@
 
             </div>
             <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const yearSelect = document.getElementById('year');
+                    const monthSelect = document.getElementById('month');
+
+                    function updateMonthStatus() {
+                        const selectedYear = yearSelect.value;
+                        if (selectedYear === 'all' || selectedYear === '') {
+                            monthSelect.value = 'all';
+                            monthSelect.disabled = true;
+                        } else {
+                            monthSelect.disabled = false;
+                        }
+                    }
+
+                    yearSelect.addEventListener('change', updateMonthStatus);
+                    updateMonthStatus(); // Initial check
+                });
+            </script>
         </main>
     </body>
 
