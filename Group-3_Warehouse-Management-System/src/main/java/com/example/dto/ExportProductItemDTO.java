@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class ExportProductItemDTO {
     private Long id;
     private String serial;
+    private Long productId;
 }
