@@ -4,6 +4,7 @@ import com.example.model.Role;
 import com.example.model.User;
 import com.example.service.RoleService;
 import com.example.service.UserService;
+import com.example.validator.UserValidator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -40,9 +41,15 @@ public class UserCreateServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = new User();
         Role role = new Role();
+
+        String rawPassword = request.getParameter("password");
+        if(!UserValidator.validatePassword(rawPassword)){
+            request.setAttribute("error", "Password must be at least 8 characters, contain 1 number, 1 capitalize character and 1 special character");
+            request.getRequestDispatcher("/WEB-INF/user/user-create.jsp").forward(request, response);
+        }
         user.setFullName(request.getParameter("fullName"));
         user.setEmail(request.getParameter("email"));
-        user.setPasswordHash(hashPassword(request.getParameter("password")));
+        user.setPasswordHash(hashPassword(rawPassword));
         role.setId(Long.parseLong(request.getParameter("role")));
         user.setRole(role);
 
