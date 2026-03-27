@@ -47,6 +47,7 @@ public class BrandList extends HttpServlet {
 
         request.setAttribute("brandList", brandList);
         request.setAttribute("pageNo", pageNo);
+        request.setAttribute("pageSize", pageSize);
         request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher("/WEB-INF/product/brand/brand-list.jsp")

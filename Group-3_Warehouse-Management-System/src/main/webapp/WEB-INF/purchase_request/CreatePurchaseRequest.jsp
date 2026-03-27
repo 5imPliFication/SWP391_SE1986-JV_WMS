@@ -130,8 +130,7 @@
 
                 <!-- RIGHT: Table -->
                 <div class="col-md-8">
-                    <div class="table-container">
-
+                    <div>
                         <c:set var="tableHeader" scope="request">
                             <tr>
                                 <th class="col-product">Product</th>

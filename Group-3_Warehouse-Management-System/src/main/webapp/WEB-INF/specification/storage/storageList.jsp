@@ -124,7 +124,8 @@
                                         type="number"
                                         id="storageSize"
                                         name="size"
-                                        class="form-control">
+                                        class="form-control"
+                                        placeholder="VD: 256, 512, 1024">
 
                                 </div>
 

@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet("/inventory/export-history/detail")
+@WebServlet("/export-history/detail")
 public class ExportHistoryDetailServlet extends HttpServlet {
     private OrderService orderService;
 
@@ -23,7 +23,7 @@ public class ExportHistoryDetailServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String idStr = request.getParameter("orderId");
         if (idStr == null || idStr.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/inventory/export-history");
+            response.sendRedirect(request.getContextPath() + "/export-history");
             return;
         }
 

@@ -11,85 +11,76 @@
     <body>
         <jsp:include page="/WEB-INF/common/sidebar.jsp" />
         <main class=" main-content">
-
-            <div>
-                <h2 >Update Brand</h2>
-            </div>
-
-            <!-- message -->
-
-            <c:if test="${not empty error}">
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    Brand đã tồn tại
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            </c:if>
-
-
-
-
-            <div class="card mb-4 shadow-sm">
-                <form action="brand-update" method="post" class="p-4">
-                    <input type="hidden" name="id" value="${brand.id}">
-                    <input type="hidden" id="isActive" name="status" value="${brand.active}">
-                    <div >
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Brand names</label>
-                            <input type="text" name="name" class="form-control" value="${brand.name}" required>
+            <div class=" d-flex justify-content-center">
+                <div class=" mb-4 shadow-sm w-50">
+                    <h2 >Update Brand</h2>
+                    <c:if test="${not empty error}">
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Brand đã tồn tại
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Description</label>
-                            <textarea name="description" class="form-control" rows="8">${brand.description}</textarea>
-                        </div>
-                        <div class="d-grid mb-3">
-                            <label class="form-label fw-bold">Status</label>
-                            <button type="button"
-                                    id="btnStatus"
-                                    data-active="${brand.active}"
-                                    class="btn ${brand.active ? 'btn-danger' : 'btn-success'}"
-                                    onclick="toggleStatus()">
-                                ${brand.active ? "Inactive" : "Active"}
-                            </button>
-                        </div>
-
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <button type="submit" class="btn btn-primary">Save Change</button>
+                    </c:if>
+                    <form action="brand-update" method="post" class="p-4">
+                        <input type="hidden" name="id" value="${brand.id}">
+                        <input type="hidden" id="isActive" name="status" value="${brand.active}">
                         <div >
-                            <a href="brands" class="btn btn-outline-secondary ">Back to List</a>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Brand names</label>
+                                <input type="text" name="name" class="form-control" value="${brand.name}" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Description</label>
+                                <textarea name="description" class="form-control" rows="8">${brand.description}</textarea>
+                            </div>
+                            <div class="d-grid mb-3">
+                                <label class="form-label fw-bold">Status</label>
+                                <button type="button"
+                                        id="btnStatus"
+                                        data-active="${brand.active}"
+                                        class="btn ${brand.active ? 'btn-danger' : 'btn-success'}"
+                                        onclick="toggleStatus()">
+                                    ${brand.active ? "Inactive" : "Active"}
+                                </button>
+                            </div>
+
                         </div>
-                    </div>
+                        <div class="d-flex justify-content-between">
+                            <div >
+                                <a href="brands" class="btn btn-outline-secondary ">Back to List</a>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Change</button>
+                        </div>
 
-                </form>
+                    </form>
+                </div>
             </div>
-
         </main>
     </body>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
     <script>
-                                        function toggleStatus() {
-                                            const hidden = document.getElementById("isActive");
-                                            const btn = document.getElementById("btnStatus");
+                                            function toggleStatus() {
+                                                const hidden = document.getElementById("isActive");
+                                                const btn = document.getElementById("btnStatus");
 
-                                            let current = hidden.value === "true";
-                                            let newStatus = !current;
+                                                let current = hidden.value === "true";
+                                                let newStatus = !current;
 
-                                            hidden.value = newStatus;
+                                                hidden.value = newStatus;
 
-                                            if (newStatus) {
-                                                btn.classList.remove("btn-success");
-                                                btn.classList.add("btn-danger");
-                                                btn.innerText = "Inactive";
-                                            } else {
-                                                btn.classList.remove("btn-danger");
-                                                btn.classList.add("btn-success");
-                                                btn.innerText = "Active";
+                                                if (newStatus) {
+                                                    btn.classList.remove("btn-success");
+                                                    btn.classList.add("btn-danger");
+                                                    btn.innerText = "Inactive";
+                                                } else {
+                                                    btn.classList.remove("btn-danger");
+                                                    btn.classList.add("btn-success");
+                                                    btn.innerText = "Active";
+                                                }
                                             }
-                                        }
     </script>
 
 </html>

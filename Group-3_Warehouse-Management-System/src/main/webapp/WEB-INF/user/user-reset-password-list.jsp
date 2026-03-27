@@ -68,7 +68,7 @@
 
     <c:set var="tableHeader" scope="request">
         <tr>
-            <th>Request ID</th>
+            <th>No.</th>
             <th>Full Name</th>
             <th>Email</th>
             <th>Request Status</th>

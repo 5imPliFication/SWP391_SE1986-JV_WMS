@@ -69,12 +69,15 @@
                             <tr>
                                 <th>Status</th>
                                 <td>
-                                    <button type="button"
-                                            id="statusBtn"
-                                            class="btn ${user.active ? 'btn-success' : 'btn-danger'}"
-                                            onclick="toggleStatus()">
-                                        ${user.active ? 'ACTIVE' : 'INACTIVE'}
-                                    </button>
+                                    <c:if test="${sessionScope.user != null 
+                                                  and sessionScope.user.id != user.id}">
+                                          <button type="button"
+                                                  id="statusBtn"
+                                                  class="btn ${user.active ? 'btn-success' : 'btn-danger'}"
+                                                  onclick="toggleStatus()">
+                                              ${user.active ? 'ACTIVE' : 'INACTIVE'}
+                                          </button>
+                                    </c:if>
                                 </td>
                             </tr>
 

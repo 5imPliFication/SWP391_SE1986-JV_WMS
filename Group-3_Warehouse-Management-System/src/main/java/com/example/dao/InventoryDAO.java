@@ -231,22 +231,12 @@ public class InventoryDAO {
     }
 
     public boolean isExistSerial(String serial) {
-        StringBuilder sql = new StringBuilder("select serial from product_items as pt "
-                + "where 1 = 1 ");
+        String sql = "SELECT 1 FROM product_items pt WHERE pt.serial = ?";
 
-        // if param has value of searchName
-        if (serial != null && !serial.trim().isEmpty()) {
-            sql.append(" and pt.serial like ? ");
-        }
-
-        // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            // if searchName has value -> set value to query
-            if (serial != null) {
-                ps.setString(1, "%" + serial + "%");
-            }
+            ps.setString(1, serial);
 
             ResultSet rs = ps.executeQuery();
             return rs.next();
@@ -529,20 +519,43 @@ public class InventoryDAO {
     }
 
     private void saveStockMovements(Connection con, Long id, Map<Long, List<String>> orderItemSerialsMap) throws SQLException {
-        String sql = "INSERT INTO stock_movements (product_id, quantity, type, reference_type, created_at, reference_id) VALUES (?, ?, ?, ?, NOW(), ?)";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        String queryProductId = "SELECT product_id FROM order_items WHERE id = ?";
+        String moveSql = "INSERT INTO stock_movements (product_id, quantity, type, reference_type, created_at, reference_id) VALUES (?, ?, ?, ?, NOW(), ?)";
+        String prodSql = "UPDATE products SET total_quantity = total_quantity - ? WHERE id = ?";
+        
+        try (PreparedStatement psRead = con.prepareStatement(queryProductId);
+             PreparedStatement psMove = con.prepareStatement(moveSql);
+             PreparedStatement psProd = con.prepareStatement(prodSql)) {
+             
             for (Map.Entry<Long, List<String>> entry : orderItemSerialsMap.entrySet()) {
-                Long productId = entry.getKey();
+                Long orderItemId = entry.getKey();
                 int quantity = entry.getValue().size();
 
-                ps.setLong(1, productId);
-                ps.setInt(2, quantity);
-                ps.setString(3, MovementType.EXPORT.name());
-                ps.setString(4, ReferenceType.ORDER.name());
-                ps.setLong(5, id);
-                ps.addBatch();
+                Long productId = null;
+                psRead.setLong(1, orderItemId);
+                try (ResultSet rs = psRead.executeQuery()) {
+                    if (rs.next()) {
+                        productId = rs.getLong("product_id");
+                    }
+                }
+                
+                if (productId != null) {
+                    // Save stock movement
+                    psMove.setLong(1, productId);
+                    psMove.setInt(2, quantity);
+                    psMove.setString(3, MovementType.EXPORT.name());
+                    psMove.setString(4, ReferenceType.ORDER.name());
+                    psMove.setLong(5, id);
+                    psMove.addBatch();
+                    
+                    // Decrease product total quantity
+                    psProd.setInt(1, quantity);
+                    psProd.setLong(2, productId);
+                    psProd.addBatch();
+                }
             }
-            ps.executeBatch();
+            psMove.executeBatch();
+            psProd.executeBatch();
         }
     }
 }

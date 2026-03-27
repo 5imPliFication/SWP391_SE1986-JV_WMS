@@ -125,7 +125,8 @@
                                         id="lapSize"
                                         name="size"
                                         class="form-control"
-                                        step="any">
+                                        step="any"
+                                        placeholder="VD: 14.4, 13.3, 15.6">
                                 </div>
 
 

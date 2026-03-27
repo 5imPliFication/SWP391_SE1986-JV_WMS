@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/inventory/import-history")
+@WebServlet("/import-history")
 public class ImportHistoryServlet extends HttpServlet {
 
     private final GoodsHistoryService goodsHistoryService = new GoodsHistoryService();

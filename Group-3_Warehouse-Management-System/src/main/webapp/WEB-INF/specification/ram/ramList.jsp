@@ -124,7 +124,8 @@
                                         type="number"
                                         id="ramsize"
                                         name="size"
-                                        class="form-control">
+                                        class="form-control"
+                                        placeholder="VD: 8, 16, 32">
 
                                 </div>
 

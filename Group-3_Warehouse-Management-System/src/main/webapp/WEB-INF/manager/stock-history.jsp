@@ -1,429 +1,466 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<!DOCTYPE html>
-<html>
+    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+        <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+            <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+                <!DOCTYPE html>
+                <html>
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Stock History - Warehouse Management</title>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-        <style>
-            .filter-card {
-                background: #fff;
-                border-radius: 16px;
-                padding: 20px 24px;
-                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-                border: 1px solid #f0f0f0;
-                margin-bottom: 24px;
-            }
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Stock History - Warehouse Management</title>
+                    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/bootstrap.min.css">
+                    <link rel="stylesheet"
+                        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+                    <style>
+                        .filter-card {
+                            background: #fff;
+                            border-radius: 16px;
+                            padding: 20px 24px;
+                            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+                            border: 1px solid #f0f0f0;
+                            margin-bottom: 24px;
+                        }
 
-            .filter-card label {
-                font-size: 13px;
-                font-weight: 600;
-                color: #555;
-                margin-bottom: 4px;
-            }
+                        .filter-card label {
+                            font-size: 13px;
+                            font-weight: 600;
+                            color: #555;
+                            margin-bottom: 4px;
+                        }
 
-            .filter-card input,
-            .filter-card select {
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                padding: 8px 12px;
-                font-size: 14px;
-            }
+                        .filter-card input,
+                        .filter-card select {
+                            border: 1px solid #ddd;
+                            border-radius: 8px;
+                            padding: 8px 12px;
+                            font-size: 14px;
+                        }
 
-            .filter-card .btn-filter {
-                background: #2563eb;
-                color: #fff;
-                border: none;
-                border-radius: 8px;
-                padding: 8px 24px;
-                font-weight: 600;
-                font-size: 14px;
-                transition: background 0.2s;
-            }
+                        .filter-card .btn-filter {
+                            background: #2563eb;
+                            color: #fff;
+                            border: none;
+                            border-radius: 8px;
+                            padding: 8px 24px;
+                            font-weight: 600;
+                            font-size: 14px;
+                            transition: background 0.2s;
+                        }
 
-            .filter-card .btn-filter:hover {
-                background: #1d4ed8;
-                color: #fff;
-            }
+                        .filter-card .btn-filter:hover {
+                            background: #1d4ed8;
+                            color: #fff;
+                        }
 
-            .filter-card .btn-reset {
-                background: #f1f5f9;
-                color: #64748b;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                padding: 8px 20px;
-                font-weight: 600;
-                font-size: 14px;
-                transition: background 0.2s;
-            }
+                        .filter-card .btn-reset {
+                            background: #f1f5f9;
+                            color: #64748b;
+                            border: 1px solid #e2e8f0;
+                            border-radius: 8px;
+                            padding: 8px 20px;
+                            font-weight: 600;
+                            font-size: 14px;
+                            transition: background 0.2s;
+                        }
 
-            .filter-card .btn-reset:hover {
-                background: #e2e8f0;
-                color: #64748b;
-            }
+                        .filter-card .btn-reset:hover {
+                            background: #e2e8f0;
+                            color: #64748b;
+                        }
 
-            .table-card {
-                background: #fff;
-                border-radius: 16px;
-                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-                border: 1px solid #f0f0f0;
-                overflow: hidden;
-                margin-bottom: 24px;
-            }
+                        .table-card {
+                            background: #fff;
+                            border-radius: 16px;
+                            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+                            border: 1px solid #f0f0f0;
+                            overflow: hidden;
+                            margin-bottom: 24px;
+                        }
 
-            .table th {
-                border-top: none;
-                border-bottom: 2px solid #f0f0f0;
-                font-weight: 600;
-                color: #444;
-                background-color: #f8fafc;
-                padding: 16px 20px;
-            }
+                        .table th {
+                            border-top: none;
+                            border-bottom: 2px solid #f0f0f0;
+                            font-weight: 600;
+                            color: #444;
+                            background-color: #f8fafc;
+                            padding: 16px 20px;
+                        }
 
-            .table td {
-                padding: 16px 20px;
-                vertical-align: middle;
-                border-bottom: 1px solid #f0f0f0;
-                color: #555;
-            }
+                        .table td {
+                            padding: 16px 20px;
+                            vertical-align: middle;
+                            border-bottom: 1px solid #f0f0f0;
+                            color: #555;
+                        }
 
-            .table tbody tr:hover {
-                background-color: #f8fafc;
-            }
+                        .table tbody tr:hover {
+                            background-color: #f8fafc;
+                        }
 
-            .badge-type {
-                padding: 6px 12px;
-                border-radius: 6px;
-                font-weight: 600;
-                font-size: 12px;
-                white-space: nowrap;
-            }
+                        .badge-type {
+                            padding: 6px 12px;
+                            border-radius: 6px;
+                            font-weight: 600;
+                            font-size: 12px;
+                            white-space: nowrap;
+                        }
 
-            .type-import {
-                background: #e8f5e9;
-                color: #2e7d32;
-            }
+                        .type-import {
+                            background: #e8f5e9;
+                            color: #2e7d32;
+                        }
 
-            .type-export {
-                background: #fff3e0;
-                color: #e65100;
-            }
+                        .type-export {
+                            background: #fff3e0;
+                            color: #e65100;
+                        }
 
-            .type-adjustment {
-                background: #e3f2fd;
-                color: #1565c0;
-            }
+                        .type-adjustment {
+                            background: #e3f2fd;
+                            color: #1565c0;
+                        }
 
-            .type-return {
-                background: #f3e5f5;
-                color: #6a1b9a;
-            }
+                        .type-return {
+                            background: #f3e5f5;
+                            color: #6a1b9a;
+                        }
 
-            .pagination {
-                margin: 0;
-            }
+                        .pagination {
+                            margin: 0;
+                        }
 
-            .page-link {
-                border-radius: 6px;
-                margin: 0 2px;
-                border: 1px solid #e2e8f0;
-                color: #2563eb;
-            }
+                        .page-link {
+                            border-radius: 6px;
+                            margin: 0 2px;
+                            border: 1px solid #e2e8f0;
+                            color: #2563eb;
+                        }
 
-            .page-item.active .page-link {
-                background-color: #2563eb;
-                border-color: #2563eb;
-            }
+                        .page-item.active .page-link {
+                            background-color: #2563eb;
+                            border-color: #2563eb;
+                        }
 
-            .main-content {
-                margin-left: 250px;
-            }
+                        .main-content {
+                            margin-left: 250px;
+                        }
 
-            .header {
-                height: 60px;
-                background: #fff;
-                border-bottom: 1px solid #e5e7eb;
-                display: flex;
-                align-items: center;
-                padding: 0 24px;
-                box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            }
-        </style>
-    </head>
+                        .header {
+                            height: 60px;
+                            background: #fff;
+                            border-bottom: 1px solid #e5e7eb;
+                            display: flex;
+                            align-items: center;
+                            padding: 0 24px;
+                            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+                        }
+                    </style>
+                </head>
 
-    <body>
-        <jsp:include page="/WEB-INF/common/sidebar.jsp" />
-        <main class="main-content">
+                <body>
+                    <jsp:include page="/WEB-INF/common/sidebar.jsp" />
+                    <main class="main-content">
 
-            <div class="container-fluid" style="padding: 24px;">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="font-weight-bold text-dark m-0">
-                        <i class="fas fa-history mr-2"></i>Stock History
-                    </h2>
-                    <a href="${pageContext.request.contextPath}/summary_report"
-                       class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left mr-1"></i>
-                        Back to Summary Report
-                    </a>
-                </div>
+                        <div class="container-fluid" style="padding: 24px;">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h2 class="font-weight-bold text-dark m-0">
+                                    <i class="fas fa-history mr-2"></i>Stock Movement History
+                                </h2>
 
-                <div class="filter-card">
-                    <form method="get" action="${pageContext.request.contextPath}/stock-history">
-                        <div class="row align-items-end">
-                            <div class="col-md-2 mb-3 mb-md-0">
-                                <div class="form-group mb-0">
-                                    <label for="fromDate"><i class="fas fa-calendar-alt mr-1"></i>From Date</label>
-                                    <input type="date" class="form-control" id="fromDate" name="fromDate" value="${fromDate}">
-                                </div>
                             </div>
-                            <div class="col-md-2 mb-3 mb-md-0">
-                                <div class="form-group mb-0">
-                                    <label for="toDate"><i class="fas fa-calendar-alt mr-1"></i>To Date</label>
-                                    <input type="date" class="form-control" id="toDate" name="toDate" value="${toDate}">
-                                </div>
-                            </div>
-                            <div class="col-md-2 mb-3 mb-md-0">
-                                <div class="form-group mb-0">
-                                    <label for="type"><i class="fas fa-exchange-alt mr-1"></i>Movement Type</label>
-                                    <select class="form-control" id="type" name="type">
-                                        <option value="">All Types</option>
-                                        <option value="IMPORT" ${type=='IMPORT' ? 'selected' : '' }>IMPORT</option>
-                                        <option value="EXPORT" ${type=='EXPORT' ? 'selected' : '' }>EXPORT</option>
-                                        <option value="ADJUSTMENT" ${type=='ADJUSTMENT' ? 'selected' : '' }>ADJUSTMENT</option>
-                                        <option value="RETURN" ${type=='RETURN' ? 'selected' : '' }>RETURN</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2 mb-3 mb-md-0">
-                                <div class="form-group mb-0">
-                                    <label for="referenceType"><i class="fas fa-file-alt mr-1"></i>Reference Type</label>
-                                    <select class="form-control" id="referenceType" name="referenceType">
-                                        <option value="">All References</option>
-                                        <option value="ORDER" ${referenceType=='ORDER' ? 'selected' : '' }>ORDER</option>
-                                        <option value="GOODS_RECEIPT" ${referenceType=='GOODS_RECEIPT' ? 'selected' : '' }>GOODS RECEIPT
-                                        </option>
-                                        <option value="AUDIT_ADJUSTMENT" ${referenceType=='AUDIT_ADJUSTMENT' ? 'selected' : '' }>AUDIT
-                                            ADJUSTMENT</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2 mb-3 mb-md-0">
-                                <div class="form-group mb-0">
-                                    <label for="staffName"><i class="fas fa-user mr-1"></i>Staff Name</label>
-                                    <input type="text" class="form-control" id="staffName" name="staffName" value="${staffName}" placeholder="Search staff...">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="d-flex" style="gap: 8px;">
-                                    <button type="submit" class="btn btn-filter flex-grow-1">
-                                        <i class="fas fa-search mr-1"></i>Filter
-                                    </button>
-                                    <a href="${pageContext.request.contextPath}/stock-history" class="btn btn-reset">
-                                        <i class="fas fa-redo"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
 
-                <div class="table-card">
-                    <div class="table-responsive">
-                        <!-- HEADER -->
-                        <c:set var="tableHeader" scope="request">
-                            <tr>
-                                <th>Product </th>
-                                <th>Quantity</th>
-                                <th>Type</th>
-                                <th>Reference Type</th>
-                                <th>Refer ID</th>
-                                <th>Staff Name</th>
-                                <th>Date & Time</th>
-                            </tr>
-                        </c:set>
-
-                        <!-- BODY -->
-                        <c:set var="tableBody" scope="request">
-
-                            <c:forEach var="item" items="${list}">
-                                <tr>
-
-                                    <td>
-                                        ${item.productName}
-                                    </td>
-
-                                    <td>
-                                        <c:choose>
-
-                                            <c:when test="${item.type == 'IMPORT' || item.type == 'RETURN'}">
-                                                <span class="text-success font-weight-bold" style="font-size:15px;">
-                                                    +${item.quantity}
-                                                </span>
-                                            </c:when>
-
-                                            <c:when test="${item.type == 'EXPORT'}">
-                                                <span class="text-danger font-weight-bold" style="font-size:15px;">
-                                                    -${item.quantity}
-                                                </span>
-                                            </c:when>
-
-                                            <c:otherwise>
-                                                <span class="text-primary font-weight-bold" style="font-size:15px;">
-                                                    ${item.quantity}
-                                                </span>
-                                            </c:otherwise>
-
-                                        </c:choose>
-                                    </td>
-
-                                    <td>
-
-                                        <c:choose>
-
-                                            <c:when test="${item.type == 'IMPORT'}">
-                                                <span class="badge-type type-import">
-                                                    <i class="fas fa-arrow-down mr-1"></i>IMPORT
-                                                </span>
-                                            </c:when>
-
-                                            <c:when test="${item.type == 'EXPORT'}">
-                                                <span class="badge-type type-export">
-                                                    <i class="fas fa-arrow-up mr-1"></i>EXPORT
-                                                </span>
-                                            </c:when>
-
-                                            <c:when test="${item.type == 'ADJUSTMENT'}">
-                                                <span class="badge-type type-adjustment">
-                                                    <i class="fas fa-sliders-h mr-1"></i>ADJUSTMENT
-                                                </span>
-                                            </c:when>
-
-                                            <c:when test="${item.type == 'RETURN'}">
-                                                <span class="badge-type type-return">
-                                                    <i class="fas fa-undo mr-1"></i>RETURN
-                                                </span>
-                                            </c:when>
-
-                                        </c:choose>
-
-                                    </td>
-
-                                    <td>
-                                        <span class="badge badge-light"
-                                              style="font-size:13px;border:1px solid #ddd;color:#555;">
-                                            ${item.referenceType}
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${item.type == 'IMPORT' && item.goodsReceiptId != null}">
-                                                <a href="${pageContext.request.contextPath}/inventory/import-history?action=detail&id=${item.goodsReceiptId}" class="font-weight-bold" style="color: #2e7d32;">
-                                                    #IM-${item.goodsReceiptId}
-                                                </a>
-                                            </c:when>
-                                            <c:when test="${item.type == 'EXPORT' && item.referenceType == 'ORDER' && item.referenceId != null}">
-                                                <a href="${pageContext.request.contextPath}/warehouse/order/detail?id=${item.referenceId}" class="font-weight-bold" style="color: #e65100;">
-                                                    #EX-${item.referenceId}
-                                                </a>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="text-muted">-</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-
-                                    <td>
-                                        <span class="font-weight-500 text-dark">
-                                            <i class="fas fa-user-circle text-secondary mr-1"></i>
-                                            ${item.staffName != null ? item.staffName : 'System'}
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        ${item.createdAt}
-                                    </td>
-
-                                </tr>
-                            </c:forEach>
-
-
-                            <c:if test="${empty list}">
-                                <tr>
-                                    <td colspan="7" class="text-center py-5">
-
-                                        <div class="text-muted mb-2">
-                                            <i class="fas fa-inbox fa-3x"></i>
+                            <div class="filter-card">
+                                <form method="get" action="${pageContext.request.contextPath}/stock-history"
+                                    id="filterForm">
+                                    <div class="row align-items-end">
+                                        <div class="col-md-2 mb-3 mb-md-0">
+                                            <div class="form-group mb-0">
+                                                <label for="year"><i class="fas fa-calendar-alt mr-1"></i>Year</label>
+                                                <select class="form-control" id="year" name="year">
+                                                    <option value="all" ${year=='all' ? 'selected' : '' }>All Time
+                                                    </option>
+                                                    <c:forEach var="y" begin="2024" end="${currentYear}">
+                                                        <c:set var="yearVal" value="${currentYear - (y - 2024)}" />
+                                                        <option value="${yearVal}" ${year !='all' && year==yearVal
+                                                            ? 'selected' : '' }>${yearVal}</option>
+                                                    </c:forEach>
+                                                </select>
+                                            </div>
                                         </div>
+                                        <div class="col-md-2 mb-3 mb-md-0">
+                                            <div class="form-group mb-0">
+                                                <label for="month"><i class="fas fa-calendar-day mr-1"></i>Month</label>
+                                                <select class="form-control" id="month" name="month">
+                                                    <option value="all" ${month=='all' ? 'selected' : '' }>All Months
+                                                    </option>
+                                                    <c:forEach var="m" begin="1" end="12">
+                                                        <option value="${m}" ${month !='all' && month==m ? 'selected'
+                                                            : '' }>Month ${m}</option>
+                                                    </c:forEach>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-3 mb-md-0">
+                                            <div class="form-group mb-0">
+                                                <label for="productName"><i class="fas fa-box mr-1"></i>Product</label>
+                                                <input type="text" class="form-control" id="productName"
+                                                    name="productName" value="${productName}"
+                                                    placeholder="Product name...">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-3 mb-md-0">
+                                            <div class="form-group mb-0">
+                                                <label for="type"><i class="fas fa-exchange-alt mr-1"></i>Type</label>
+                                                <select class="form-control" id="type" name="type">
+                                                    <option value="">All Types</option>
+                                                    <option value="IMPORT" ${type=='IMPORT' ? 'selected' : '' }>IMPORT
+                                                    </option>
+                                                    <option value="EXPORT" ${type=='EXPORT' ? 'selected' : '' }>EXPORT
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-3 mb-md-0">
+                                            <div class="form-group mb-0">
+                                                <label for="staffName"><i class="fas fa-user mr-1"></i>Staff</label>
+                                                <input type="text" class="form-control" id="staffName" name="staffName"
+                                                    value="${staffName}" placeholder="Staff name...">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="d-flex" style="gap: 8px;">
+                                                <button type="submit" class="btn btn-filter flex-grow-1">
+                                                    <i class="fas fa-search mr-1"></i>Filter
+                                                </button>
+                                                <a href="${pageContext.request.contextPath}/stock-history"
+                                                    class="btn btn-reset">
+                                                    <i class="fas fa-redo"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
 
-                                        <h5 class="text-secondary mt-3">
-                                            No Stock History Found
-                                        </h5>
+                            <div class="table-card">
+                                <div class="table-responsive">
+                                    <!-- HEADER -->
+                                    <c:set var="tableHeader" scope="request">
+                                        <tr>
+                                            <th>Product </th>
+                                            <th>Quantity</th>
+                                            <th>Type</th>
+                                            <th>Reference Type</th>
+                                            <th>Refer ID</th>
+                                            <th>Staff Name</th>
+                                            <th>Date & Time</th>
+                                        </tr>
+                                    </c:set>
 
-                                        <p class="text-muted">
-                                            There are no movements matching your current filters.
-                                        </p>
+                                    <!-- BODY -->
+                                    <c:set var="tableBody" scope="request">
 
-                                    </td>
-                                </tr>
-                            </c:if>
+                                        <c:forEach var="item" items="${list}">
+                                            <tr>
 
-                        </c:set>
+                                                <td>
+                                                    ${item.productName}
+                                                </td>
 
-                        <!-- COMMON TABLE -->
-                        <jsp:include page="/WEB-INF/common/table.jsp"/>
+                                                <td>
+                                                    <c:choose>
 
-                    </div>
-                </div>
+                                                        <c:when test="${item.type == 'IMPORT' }">
+                                                            <span class="text-success font-weight-bold"
+                                                                style="font-size:15px;">
+                                                                ${item.quantity}
+                                                            </span>
+                                                        </c:when>
 
-                <%-- Pagination --%>
-                <c:if test="${totalPages > 1}">
-                    <div class="d-flex justify-content-between align-items-center mt-4 mb-5">
-                        <div class="text-muted font-weight-bold" style="font-size: 14px;">
-                            Page ${currentPage} of ${totalPages}
+                                                        <c:when test="${item.type == 'EXPORT'}">
+                                                            <span class="text-danger font-weight-bold"
+                                                                style="font-size:15px;">
+                                                                ${item.quantity}
+                                                            </span>
+                                                        </c:when>
+
+                                                        <c:otherwise>
+                                                            <span class="text-primary font-weight-bold"
+                                                                style="font-size:15px;">
+                                                                ${item.quantity}
+                                                            </span>
+                                                        </c:otherwise>
+
+                                                    </c:choose>
+                                                </td>
+
+                                                <td>
+
+                                                    <c:choose>
+
+                                                        <c:when test="${item.type == 'IMPORT'}">
+                                                            <span class="badge-type type-import">
+                                                                <i class="fas fa-arrow-down mr-1"></i>IMPORT
+                                                            </span>
+                                                        </c:when>
+
+                                                        <c:when test="${item.type == 'EXPORT'}">
+                                                            <span class="badge-type type-export">
+                                                                <i class="fas fa-arrow-up mr-1"></i>EXPORT
+                                                            </span>
+                                                        </c:when>
+
+                                                        <c:when test="${item.type == 'ADJUSTMENT'}">
+                                                            <span class="badge-type type-adjustment">
+                                                                <i class="fas fa-sliders-h mr-1"></i>ADJUSTMENT
+                                                            </span>
+                                                        </c:when>
+
+                                                        <c:when test="${item.type == 'RETURN'}">
+                                                            <span class="badge-type type-return">
+                                                                <i class="fas fa-undo mr-1"></i>RETURN
+                                                            </span>
+                                                        </c:when>
+
+                                                    </c:choose>
+
+                                                </td>
+
+                                                <td>
+                                                    <span class="badge badge-light"
+                                                        style="font-size:13px;border:1px solid #ddd;color:#555;">
+                                                        ${item.referenceType}
+                                                    </span>
+                                                </td>
+
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when
+                                                            test="${item.type == 'IMPORT' && item.goodsReceiptId != null}">
+                                                            <a href="${pageContext.request.contextPath}/import-history?action=detail&id=${item.goodsReceiptId}"
+                                                                class="font-weight-bold" style="color: #2e7d32;">
+                                                                #IM-${item.goodsReceiptId}
+                                                            </a>
+                                                        </c:when>
+                                                        <c:when test="${item.type == 'EXPORT' && item.referenceType == 'ORDER' && item.referenceId != null}">
+                                                            <a href="${pageContext.request.contextPath}/export-history/detail?orderId=${item.referenceId}" class="font-weight-bold" style="color: #e65100;">
+                                                                #EX-${item.referenceId}
+                                                            </a>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="text-muted">-</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+
+                                                <td>
+                                                    <span class="font-weight-500 text-dark">
+                                                        <i class="fas fa-user-circle text-secondary mr-1"></i>
+                                                        ${item.staffName != null ? item.staffName : 'System'}
+                                                    </span>
+                                                </td>
+
+                                                <td>
+                                                    ${fn:substring(fn:replace(item.createdAt, 'T', ' '), 0, 16)}
+                                                </td>
+
+                                            </tr>
+                                        </c:forEach>
+
+
+                                        <c:if test="${empty list}">
+                                            <tr>
+                                                <td colspan="7" class="text-center py-5">
+
+                                                    <div class="text-muted mb-2">
+                                                        <i class="fas fa-inbox fa-3x"></i>
+                                                    </div>
+
+                                                    <h5 class="text-secondary mt-3">
+                                                        No Stock History Found
+                                                    </h5>
+
+                                                    <p class="text-muted">
+                                                        There are no movements matching your current filters.
+                                                    </p>
+
+                                                </td>
+                                            </tr>
+                                        </c:if>
+
+                                    </c:set>
+
+                                    <!-- COMMON TABLE -->
+                                    <jsp:include page="/WEB-INF/common/table.jsp" />
+
+                                </div>
+                            </div>
+
+                            <%-- Pagination --%>
+                                <c:if test="${totalPages > 1}">
+                                    <div class="d-flex justify-content-between align-items-center mt-4 mb-5">
+                                        <div class="text-muted font-weight-bold" style="font-size: 14px;">
+                                            Page ${currentPage} of ${totalPages}
+                                        </div>
+                                        <nav aria-label="Page navigation">
+                                            <ul class="pagination mb-0">
+                                                <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                                                    <a class="page-link"
+                                                        href="${pageContext.request.contextPath}/stock-history?page=${currentPage - 1}&year=${year != null ? year : ''}&month=${month != null ? month : ''}&type=${type != null ? type : ''}&staffName=${staffName != null ? staffName : ''}&productName=${productName != null ? productName : ''}">
+                                                        <i class="fas fa-chevron-left mr-1"></i>Previous
+                                                    </a>
+                                                </li>
+
+                                                <c:forEach begin="1" end="${totalPages}" var="i">
+                                                    <c:choose>
+                                                        <c:when
+                                                            test="${i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2)}">
+                                                            <li class="page-item ${currentPage == i ? 'active' : ''}">
+                                                                <a class="page-link"
+                                                                    href="${pageContext.request.contextPath}/stock-history?page=${i}&year=${year != null ? year : ''}&month=${month != null ? month : ''}&type=${type != null ? type : ''}&staffName=${staffName != null ? staffName : ''}&productName=${productName != null ? productName : ''}">${i}</a>
+                                                            </li>
+                                                        </c:when>
+                                                        <c:when test="${i == currentPage - 3 || i == currentPage + 3}">
+                                                            <li class="page-item disabled"><span
+                                                                    class="page-link">...</span></li>
+                                                        </c:when>
+                                                    </c:choose>
+                                                </c:forEach>
+
+                                                <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+                                                    <a class="page-link"
+                                                        href="${pageContext.request.contextPath}/stock-history?page=${currentPage + 1}&year=${year != null ? year : ''}&month=${month != null ? month : ''}&type=${type != null ? type : ''}&staffName=${staffName != null ? staffName : ''}&productName=${productName != null ? productName : ''}">
+                                                        Next<i class="fas fa-chevron-right ml-1"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </c:if>
+
                         </div>
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination mb-0">
-                                <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                                    <a class="page-link"
-                                       href="${pageContext.request.contextPath}/stock-history?page=${currentPage - 1}&fromDate=${fromDate != null ? fromDate : ''}&toDate=${toDate != null ? toDate : ''}&type=${type != null ? type : ''}&referenceType=${referenceType != null ? referenceType : ''}&staffName=${staffName != null ? staffName : ''}">
-                                        <i class="fas fa-chevron-left mr-1"></i>Previous
-                                    </a>
-                                </li>
+                        <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const yearSelect = document.getElementById('year');
+                                const monthSelect = document.getElementById('month');
 
-                                <c:forEach begin="1" end="${totalPages}" var="i">
-                                    <c:choose>
-                                        <c:when test="${i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2)}">
-                                            <li class="page-item ${currentPage == i ? 'active' : ''}">
-                                                <a class="page-link"
-                                                   href="${pageContext.request.contextPath}/stock-history?page=${i}&fromDate=${fromDate != null ? fromDate : ''}&toDate=${toDate != null ? toDate : ''}&type=${type != null ? type : ''}&referenceType=${referenceType != null ? referenceType : ''}&staffName=${staffName != null ? staffName : ''}">${i}</a>
-                                            </li>
-                                        </c:when>
-                                        <c:when test="${i == currentPage - 3 || i == currentPage + 3}">
-                                            <li class="page-item disabled"><span class="page-link">...</span></li>
-                                            </c:when>
-                                        </c:choose>
-                                    </c:forEach>
+                                function updateMonthStatus() {
+                                    const selectedYear = yearSelect.value;
+                                    if (selectedYear === 'all' || selectedYear === '') {
+                                        monthSelect.value = 'all';
+                                        monthSelect.disabled = true;
+                                    } else {
+                                        monthSelect.disabled = false;
+                                    }
+                                }
 
-                                <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                                    <a class="page-link"
-                                       href="${pageContext.request.contextPath}/stock-history?page=${currentPage + 1}&fromDate=${fromDate != null ? fromDate : ''}&toDate=${toDate != null ? toDate : ''}&type=${type != null ? type : ''}&staffName=${staffName != null ? staffName : ''}">
-                                        Next<i class="fas fa-chevron-right ml-1"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                </c:if>
+                                yearSelect.addEventListener('change', updateMonthStatus);
+                                updateMonthStatus(); // Initial check
+                            });
+                        </script>
+                    </main>
+                </body>
 
-            </div>
-            <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
-        </main>
-    </body>
-
-</html>
+                </html>

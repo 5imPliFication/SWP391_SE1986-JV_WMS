@@ -211,19 +211,11 @@
                                         <div class="font-weight-bold">${item.product.name}</div>
                                             <%-- Linked product items are reserved when salesman adds them to the order. --%>
                                         <c:if test="${order.status == 'SUBMITTED' || order.status == 'PROCESSING' || order.status == 'COMPLETED'}">
-                                            <br><small class="text-warning">
-                                            <i class="fas fa-exclamation-triangle mr-1"></i>
-                                            Stock Reserved (${item.quantity} units linked)
-                                        </small>
                                         </c:if>
                                     </td>
                                     <td class="px-4 align-middle text-right">
                                             ${currency:format(item.priceAtPurchase)} VND
                                         <c:if test="${item.priceAtPurchase != item.productItem.importedPrice}">
-                                            <br><small class="text-warning">
-                                            <i class="fas fa-info-circle"></i> Imported:
-                                                ${currency:format(item.productItem.importedPrice)} VND
-                                        </small>
                                         </c:if>
                                     </td>
                                     <td class="px-4 align-middle text-center">
@@ -312,119 +304,6 @@
                 </div>
             </div>
 
-            <!-- Inventory Note (Important!) -->
-            <c:if test="${order.status == 'DRAFT' || order.status == 'SUBMITTED'}">
-                <div class="alert alert-warning mb-4" role="alert">
-                    <h6 class="alert-heading">
-                        <i class="fas fa-info-circle mr-2"></i>Inventory Status
-                    </h6>
-                    <small>
-                        <strong>Warehouse inventory NOT yet consumed.</strong>
-                        <br>Product items were reserved when they were added to this order.
-                    </small>
-                </div>
-            </c:if>
-
-            <c:if test="${order.status == 'PROCESSING'}">
-                <div class="alert alert-success mb-4" role="alert">
-                    <h6 class="alert-heading">
-                        <i class="fas fa-check-circle mr-2"></i>Inventory Consumed
-                    </h6>
-                    <small>
-                        <i class="fas fa-check mr-1"></i>Warehouse inventory has been reduced by the order quantities.
-                        <br><i class="fas fa-undo mr-1"></i>If cancelled, inventory will be restored.
-                    </small>
-                </div>
-            </c:if>
-
-            <c:if test="${order.status == 'COMPLETED'}">
-                <div class="alert alert-info mb-4" role="alert">
-                    <h6 class="alert-heading">
-                        <i class="fas fa-box mr-2"></i>Order Fulfilled
-                    </h6>
-                    <small>
-                        This order has been completed. Warehouse inventory quantity remains reduced.
-                    </small>
-                </div>
-            </c:if>
-
-            <!-- Status Timeline -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0 font-weight-bold">
-                        <i class="fas fa-history text-info mr-2"></i>Order Timeline
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="pl-3">
-                        <div class="pb-3">
-                            <c:set var="step1Active"
-                                   value="${order.status == 'SUBMITTED' || order.status == 'PROCESSING' || order.status == 'COMPLETED'}"/>
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="mr-3">
-                                    <c:choose>
-                                        <c:when test="${step1Active}">
-                                            <i class="fas fa-check-circle text-success fa-2x"></i>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <i class="far fa-circle text-muted fa-2x"></i>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                                <div>
-                                    <small class="text-muted d-block">Step 1</small>
-                                    <strong class="${step1Active ? 'text-success' : ''}">Submitted</strong>
-                                    <br><small class="text-muted">Stock reserved</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="pb-3">
-                            <c:set var="step2Active"
-                                   value="${order.status == 'PROCESSING' || order.status == 'COMPLETED'}"/>
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="mr-3">
-                                    <c:choose>
-                                        <c:when test="${step2Active}">
-                                            <i class="fas fa-check-circle text-success fa-2x"></i>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <i class="far fa-circle text-muted fa-2x"></i>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                                <div>
-                                    <small class="text-muted d-block">Step 2</small>
-                                    <strong class="${step2Active ? 'text-success' : ''}">Processing</strong>
-                                    <br><small class="text-muted">Stock reduced from product_items</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <c:set var="step3Active" value="${order.status == 'COMPLETED'}"/>
-                            <div class="d-flex align-items-center">
-                                <div class="mr-3">
-                                    <c:choose>
-                                        <c:when test="${step3Active}">
-                                            <i class="fas fa-check-circle text-success fa-2x"></i>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <i class="far fa-circle text-muted fa-2x"></i>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                                <div>
-                                    <small class="text-muted d-block">Step 3</small>
-                                    <strong class="${step3Active ? 'text-success' : ''}">Completed</strong>
-                                    <br><small class="text-muted">Order fulfilled</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Action Buttons -->
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white">
@@ -440,80 +319,6 @@
                                class="btn btn-success btn-lg btn-block mb-3">
                                 <i class="fas fa-barcode mr-2"></i>Start Processing
                             </a>
-
-                            <div class="card border-danger">
-                                <div class="card-body p-3">
-                                    <h6 class="text-danger mb-3">
-                                        <i class="fas fa-exclamation-triangle mr-2"></i>Cancel Order
-                                    </h6>
-                                    <form action="${pageContext.request.contextPath}/warehouse/order/cancel"
-                                          method="post"
-                                          onsubmit="return confirm('Cancel this order? This cannot be undone.');">
-                                        <input type="hidden" name="orderId" value="${order.id}"/>
-
-                                        <div class="form-group mb-3">
-                                            <label for="cancelNote" class="font-weight-bold small">
-                                                Cancellation Reason *
-                                            </label>
-                                            <textarea class="form-control form-control-sm"
-                                                      id="cancelNote"
-                                                      name="note"
-                                                      rows="3"
-                                                      placeholder="Why is this order being cancelled?"
-                                                      required></textarea>
-                                        </div>
-
-                                        <button type="submit" class="btn btn-danger btn-block">
-                                            <i class="fas fa-times-circle mr-2"></i>Cancel Order
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </c:when>
-
-                        <%-- PROCESSING: Can complete or cancel --%>
-                        <c:when test="${order.status == 'PROCESSING'}">
-                            <form action="${pageContext.request.contextPath}/warehouse/order/complete"
-                                  method="post"
-                                  onsubmit="return confirm('Mark this order as completed?');">
-                                <input type="hidden" name="orderId" value="${order.id}"/>
-                                <button type="submit" class="btn btn-success btn-lg btn-block mb-3">
-                                    <i class="fas fa-check-circle mr-2"></i>Mark as Completed
-                                </button>
-                            </form>
-
-                            <div class="card border-danger">
-                                <div class="card-body p-3">
-                                    <h6 class="text-danger mb-3">
-                                        <i class="fas fa-exclamation-triangle mr-2"></i>Cancel Order
-                                    </h6>
-                                    <p class="small text-muted mb-3">
-                                        <i class="fas fa-undo mr-1"></i>
-                                        Product item quantities will be restored if cancelled.
-                                    </p>
-                                    <form action="${pageContext.request.contextPath}/warehouse/order/cancel"
-                                          method="post"
-                                          onsubmit="return confirm('Cancel this order? Stock will be restored to product_items.');">
-                                        <input type="hidden" name="orderId" value="${order.id}"/>
-
-                                        <div class="form-group mb-3">
-                                            <label for="cancelNoteProcessing" class="font-weight-bold small">
-                                                Cancellation Reason *
-                                            </label>
-                                            <textarea class="form-control form-control-sm"
-                                                      id="cancelNoteProcessing"
-                                                      name="note"
-                                                      rows="3"
-                                                      placeholder="Why is this order being cancelled?"
-                                                      required></textarea>
-                                        </div>
-
-                                        <button type="submit" class="btn btn-danger btn-block">
-                                            <i class="fas fa-times-circle mr-2"></i>Cancel Order
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
                         </c:when>
 
                         <%-- COMPLETED or CANCELLED: No actions available --%>
@@ -527,7 +332,7 @@
                                     </c:when>
                                     <c:when test="${order.status == 'CANCELLED'}">
                                         <strong>Order Cancelled</strong><br>
-                                        This order has been cancelled.
+                                        This order has been canceled.
                                         <c:if test="${not empty order.note && order.note.startsWith('CANCELLED:')}">
                                             <hr class="my-2">
                                             <small class="d-block mt-2">

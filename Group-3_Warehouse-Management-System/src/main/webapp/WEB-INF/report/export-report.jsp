@@ -111,8 +111,15 @@
                         <c:forEach items="${reportItems}" var="item" varStatus="loop">
                             <tr>
                                 <td class="text-center">${loop.index + 1}</td>
-                                <td>${item.productName}</td>
-                                <td class="text-center">${item.quantity}</td>
+                                <td>
+                                    <a href="${pageContext.request.contextPath}/stock-history?year=${year}&month=${month}&productName=${item.productName}&type=EXPORT" class="font-weight-bold">
+                                ${item.productName}
+                                    </a>
+
+                                </td>
+                                <td class="text-center">
+                                        ${item.quantity}
+                                </td>
                             </tr>
                         </c:forEach>
                     </c:when>

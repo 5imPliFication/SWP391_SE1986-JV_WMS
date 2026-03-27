@@ -6,6 +6,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
 
 <!DOCTYPE html>
 <html>
@@ -147,7 +148,9 @@
                                 </c:if>
 
                                 <td>${pr.approvedByName}</td>
-                                <td>${pr.createdAt}</td>
+                                <td>
+                                    ${pr.createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}
+                                </td>
 
                                 <td>
                                     <a href="${pageContext.request.contextPath}/purchase-request/detail?id=${pr.id}">

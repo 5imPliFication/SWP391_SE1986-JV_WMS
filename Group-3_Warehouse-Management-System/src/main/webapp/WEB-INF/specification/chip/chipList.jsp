@@ -124,7 +124,8 @@
                                         type="text"
                                         id="ChipName"
                                         name="name"
-                                        class="form-control">
+                                        class="form-control"
+                                        placeholder="VD: i5-12450H, i7-13620H, Ryzen 5 5600H">
 
                                 </div>
 

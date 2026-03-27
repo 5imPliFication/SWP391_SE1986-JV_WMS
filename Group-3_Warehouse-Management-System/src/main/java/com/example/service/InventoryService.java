@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 public class InventoryService {
 
@@ -73,6 +75,7 @@ public class InventoryService {
 
     // check valid data from list product items import
     private String validateProductItems(List<ProductItemDTO> productItemDTOs) {
+        Set<String> seenSerials = new HashSet<>();
         for (ProductItemDTO item : productItemDTOs) {
             String serial = item.getSerial();
             Double price = item.getImportPrice();
@@ -81,6 +84,11 @@ public class InventoryService {
             String messageValidator = ImportProductItemValidator.validateImportProductItem(serial, price);
             if (messageValidator != null) {
                 return messageValidator;
+            }
+
+            // check duplicate in current list
+            if (!seenSerials.add(serial)) {
+                return "Duplicate serial " + serial + " in the input list";
             }
 
             // check is exist serial

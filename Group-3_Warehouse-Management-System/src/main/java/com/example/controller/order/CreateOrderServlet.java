@@ -102,9 +102,16 @@ public class CreateOrderServlet extends HttpServlet {
             }
         }
 
+        try {
+            orderService.submitOrder((long) orderId, user.getId());
+        } catch (Exception e) {
+            redirectBackWithError(req, resp, "Failed to submit order: " + e.getMessage(), customerName, customerPhone, note, orderItemsRaw);
+            return;
+        }
+
         activityLogService.log(user, "Create order");
-        String success = URLEncoder.encode("Order created successfully", StandardCharsets.UTF_8);
-        resp.sendRedirect(req.getContextPath() + "/salesman/order/detail?id=" + orderId + "&success=" + success);
+        String success = URLEncoder.encode("Order created and submitted successfully", StandardCharsets.UTF_8);
+        resp.sendRedirect(req.getContextPath() + "/salesman/orders?success=" + success);
     }
 
     private void redirectBackWithError(HttpServletRequest req,

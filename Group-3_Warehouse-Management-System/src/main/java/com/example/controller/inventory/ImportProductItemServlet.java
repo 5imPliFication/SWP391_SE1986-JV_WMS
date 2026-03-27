@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@WebServlet("/inventory/import")
+@WebServlet("/import")
 @MultipartConfig
 public class ImportProductItemServlet extends HttpServlet {
 
@@ -135,7 +135,7 @@ public class ImportProductItemServlet extends HttpServlet {
 
         List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
         if (importItems == null) {
-            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            response.sendRedirect(request.getContextPath() + "/import");
             return;
         }
 
@@ -166,7 +166,7 @@ public class ImportProductItemServlet extends HttpServlet {
         importItems.remove(deleteIndex);
 
         session.setAttribute("importItems", importItems);
-        response.sendRedirect(request.getContextPath() + "/inventory/import");
+        response.sendRedirect(request.getContextPath() + "/import");
     }
 
     // save purchase request and others information relative
@@ -185,7 +185,7 @@ public class ImportProductItemServlet extends HttpServlet {
         if (importItems == null || importItems.isEmpty()) {
             session.setAttribute("message", "No product items to save");
             session.setAttribute("messageType", "danger");
-            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            response.sendRedirect(request.getContextPath() + "/import");
             return;
         }
 
@@ -198,7 +198,7 @@ public class ImportProductItemServlet extends HttpServlet {
         if (productIds == null || serials == null || prices == null || productIds.length == 0) {
             session.setAttribute("message", "No valid item data submitted.");
             session.setAttribute("messageType", "danger");
-            response.sendRedirect(request.getContextPath() + "/inventory/import");
+            response.sendRedirect(request.getContextPath() + "/import");
             return;
         }
 
@@ -221,11 +221,13 @@ public class ImportProductItemServlet extends HttpServlet {
         } else {
             session.setAttribute("message", resultSave);
             session.setAttribute("messageType", "danger");
+            response.sendRedirect(request.getContextPath() + "/import");
+            return;
         }
 
         // delete session after save success
         session.removeAttribute("importItems");
-        response.sendRedirect(request.getContextPath() + "/inventory/import-history");
+        response.sendRedirect(request.getContextPath() + "/import-history");
     }
 
 }

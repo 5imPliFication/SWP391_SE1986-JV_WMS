@@ -19,7 +19,7 @@
             <h2 class="mb-4">Import History</h2>
 
             <div class="d-flex align-items-center mb-3">
-                <form class="form-inline" action="${pageContext.request.contextPath}/inventory/import-history"
+                <form class="form-inline" action="${pageContext.request.contextPath}/import-history"
                       method="get">
                     <%--search name customer--%>
                     <input type="text" name="receiptCode" class="form-control mr-5"
@@ -92,7 +92,7 @@
                                         ${goodsReceipt.warehouseName}
                                     </td>
                                     <td class="text-center align-middle">
-                                        <a href="${pageContext.request.contextPath}/inventory/import-history?action=detail&id=${goodsReceipt.id}"
+                                        <a href="${pageContext.request.contextPath}/import-history?action=detail&id=${goodsReceipt.id}"
                                            class="btn btn-info btn-sm">
                                             View
                                         </a>
@@ -127,7 +127,7 @@
                         <%-- previous page--%>
                         <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                             <a class="page-link"
-                               href="${pageContext.request.contextPath}/inventory/import-history?pageNo=${pageNo - 1}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
+                               href="${pageContext.request.contextPath}/import-history?pageNo=${pageNo - 1}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
                                 Previous
                             </a>
                         </li>
@@ -141,7 +141,7 @@
                                 <c:when test="${i == 1}">
                                     <li class="page-item ${i == pageNo ? 'active' : ''}">
                                         <a class="page-link"
-                                           href="${pageContext.request.contextPath}/inventory/import-history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
+                                           href="${pageContext.request.contextPath}/import-history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
                                             ${i}
                                         </a>
                                     </li>
@@ -150,7 +150,7 @@
                                 <c:when test="${i == totalPages}">
                                     <li class="page-item ${i == pageNo ? 'active' : ''}">
                                         <a class="page-link"
-                                           href="${pageContext.request.contextPath}/inventory/import-history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
+                                           href="${pageContext.request.contextPath}/import-history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
                                             ${i}
                                         </a>
                                     </li>
@@ -160,7 +160,7 @@
                                     <li
                                         class="page-item ${i == pageNo ? 'active' : ''}">
                                         <a class="page-link"
-                                           href="${pageContext.request.contextPath}/inventory/import-history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
+                                           href="${pageContext.request.contextPath}/import-history?pageNo=${i}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
                                             ${i}
                                         </a>
                                     </li>
@@ -177,7 +177,7 @@
                         <%--next page--%>
                         <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                             <a class="page-link"
-                               href="${pageContext.request.contextPath}/inventory/import-history?pageNo=${pageNo + 1}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
+                               href="${pageContext.request.contextPath}/import-history?pageNo=${pageNo + 1}&receiptCode=${receiptCode}&fromDate=${fromDate}&toDate=${toDate}">
                                 Next
                             </a>
                         </li>
