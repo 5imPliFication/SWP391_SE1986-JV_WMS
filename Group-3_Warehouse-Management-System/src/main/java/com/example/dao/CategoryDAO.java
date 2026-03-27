@@ -147,7 +147,7 @@ public class CategoryDAO {
         return categories;
     }
 
-    public List<Category> searchCategories(String name, Integer isActive) {
+    public List<Category> searchCategories(String name, Integer isActive, int limit, int offset) {
         List<Category> categories = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM categories WHERE 1=1");
 
@@ -157,7 +157,7 @@ public class CategoryDAO {
         if (isActive != null)
             sql.append(" AND is_active = ?");
 
-        sql.append(" ORDER BY id DESC");
+        sql.append(" ORDER BY id DESC LIMIT ? OFFSET ?");
 
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -168,6 +168,9 @@ public class CategoryDAO {
 
             if (isActive != null)
                 ps.setInt(index++, isActive);
+
+            ps.setInt(index++, limit);
+            ps.setInt(index++, offset);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -184,5 +187,36 @@ public class CategoryDAO {
             throw new RuntimeException("Error searching categories", e);
         }
         return categories;
+    }
+
+    public int getTotalCategories(String name, Integer isActive) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM categories WHERE 1=1");
+
+        if (name != null && !name.isEmpty())
+            sql.append(" AND name LIKE ?");
+
+        if (isActive != null)
+            sql.append(" AND is_active = ?");
+
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int index = 1;
+            if (name != null && !name.isEmpty())
+                ps.setString(index++, "%" + name + "%");
+
+            if (isActive != null)
+                ps.setInt(index++, isActive);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error getting total categories count", e);
+        }
+        return 0;
     }
 }
