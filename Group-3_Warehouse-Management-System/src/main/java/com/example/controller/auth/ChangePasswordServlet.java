@@ -3,6 +3,7 @@ package com.example.controller.auth;
 import com.example.model.User;
 import com.example.service.ActivityLogService;
 import com.example.service.UserService;
+import com.example.validator.UserValidator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -47,6 +48,14 @@ public class ChangePasswordServlet extends HttpServlet {
         System.out.println(user.getEmail());
         String currentPassword = request.getParameter("currentPassword");
         String newPassword = request.getParameter("newPassword");
+        
+        // Validate new password
+        if (!UserValidator.validatePassword(newPassword)) {
+            request.setAttribute("error", "Password must be at least 8 characters, contain 1 number, 1 capitalize character and 1 special character");
+            request.getRequestDispatcher("/WEB-INF/auth/change-password.jsp").forward(request, response);
+            return;
+        }
+        
         success = userService.changePassword(
                 user.getEmail().trim().toLowerCase(),
                 currentPassword,

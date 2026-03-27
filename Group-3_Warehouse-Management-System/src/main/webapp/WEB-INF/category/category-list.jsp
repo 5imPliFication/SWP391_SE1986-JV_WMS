@@ -144,8 +144,64 @@
 
 
             </div>
+
+            <%-- Pagination --%>
+            <c:if test="${totalPages > 1}">
+                <div class="d-flex justify-content-between align-items-center mt-4 mb-5">
+                    <div class="text-muted font-weight-bold" style="font-size: 14px;">
+                        Page ${currentPage} of ${totalPages}
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination mb-0">
+                            <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/categories?page=${currentPage - 1}&searchName=${searchName != null ? searchName : ''}&statusFilter=${statusFilter != null ? statusFilter : ''}">
+                                    <i class="fas fa-chevron-left mr-1"></i>Previous
+                                </a>
+                            </li>
+
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <c:choose>
+                                    <c:when test="${i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2)}">
+                                        <li class="page-item ${currentPage == i ? 'active' : ''}">
+                                            <a class="page-link"
+                                               href="${pageContext.request.contextPath}/categories?page=${i}&searchName=${searchName != null ? searchName : ''}&statusFilter=${statusFilter != null ? statusFilter : ''}">${i}</a>
+                                        </li>
+                                    </c:when>
+                                    <c:when test="${i == currentPage - 3 || i == currentPage + 3}">
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    </c:when>
+                                </c:choose>
+                            </c:forEach>
+
+                            <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   href="${pageContext.request.contextPath}/categories?page=${currentPage + 1}&searchName=${searchName != null ? searchName : ''}&statusFilter=${statusFilter != null ? statusFilter : ''}">
+                                    Next<i class="fas fa-chevron-right ml-1"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </c:if>
         </div>
 
+        <style>
+            .pagination {
+                margin: 0;
+            }
+            .page-link {
+                border-radius: 6px;
+                margin: 0 2px;
+                border: 1px solid #e2e8f0;
+                color: #2563eb;
+            }
+            .page-item.active .page-link {
+                background-color: #2563eb;
+                border-color: #2563eb;
+                color: #fff;
+            }
+        </style>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
