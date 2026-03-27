@@ -117,7 +117,7 @@
                                 data-status="${b.active ? 1 : 0}"
                                 data-name="${fn:toLowerCase(b.name)}">
 
-                                <td>${s.index + 1}</td>
+                                <td>${(pageNo - 1) * pageSize + s.index + 1}</td>
 
                                 <td>${b.name}</td>
 

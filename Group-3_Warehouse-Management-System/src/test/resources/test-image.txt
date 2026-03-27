@@ -1,0 +1,2 @@
+This project currently has no bundled image assets.
+Provide an image path via -Dtest.imagePath=... when running ProductCrudSeleniumTest.
