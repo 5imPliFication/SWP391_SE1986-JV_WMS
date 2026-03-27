@@ -381,50 +381,105 @@ public class ReportDAO {
                 SELECT
                     p.id AS product_id,
                     p.name AS product_name,
-                    COALESCE(price_stats.unit_price, 0) AS unit_price,
+                    COALESCE(closing_stats.closing_value / NULLIF(closing_stats.closing_qty, 0), 0) AS unit_price,
                     COALESCE(opening_stats.opening_qty, 0) AS opening_qty,
+                    COALESCE(opening_stats.opening_value, 0) AS opening_value,
                     COALESCE(import_stats.import_qty, 0) AS import_qty,
-                    COALESCE(export_stats.export_qty, 0) AS export_qty
+                    COALESCE(import_stats.import_value, 0) AS import_value,
+                    COALESCE(export_stats.export_qty, 0) AS export_qty,
+                    COALESCE(export_stats.export_value, 0) AS export_value,
+                    COALESCE(closing_stats.closing_qty, 0) AS closing_qty,
+                    COALESCE(closing_stats.closing_value, 0) AS closing_value
                 FROM products p
                 LEFT JOIN (
                     SELECT
                         product_id,
-                        AVG(imported_price) AS unit_price
-                    FROM product_items
-                    GROUP BY product_id
-                ) price_stats ON price_stats.product_id = p.id
-                LEFT JOIN (
-                    SELECT
-                        product_id,
-                        SUM(CASE
-                            WHEN type = 'IMPORT' THEN quantity
-                            WHEN type = 'EXPORT' THEN -quantity
-                            ELSE 0
-                        END) AS opening_qty
-                    FROM stock_movements
-                    WHERE created_at < ?
+                        COUNT(*) AS opening_qty,
+                        SUM(imported_price) AS opening_value
+                    FROM (
+                        SELECT
+                            pi.id,
+                            pi.product_id,
+                            pi.imported_price,
+                            pi.imported_at,
+                            exported_items.exported_at
+                        FROM product_items pi
+                        LEFT JOIN (
+                            SELECT
+                                oipi.product_item_id,
+                                MIN(o.processed_at) AS exported_at
+                            FROM order_item_product_items oipi
+                            JOIN order_items oi ON oi.id = oipi.order_item_id
+                            JOIN orders o ON o.id = oi.order_id
+                            WHERE o.status = 'COMPLETED'
+                              AND o.processed_at IS NOT NULL
+                            GROUP BY oipi.product_item_id
+                        ) exported_items ON exported_items.product_item_id = pi.id
+                    ) opening_items
+                    WHERE imported_at < ?
+                      AND (exported_at IS NULL OR exported_at >= ?)
                     GROUP BY product_id
                 ) opening_stats ON opening_stats.product_id = p.id
                 LEFT JOIN (
                     SELECT
                         product_id,
-                        SUM(quantity) AS import_qty
-                    FROM stock_movements
-                    WHERE type = 'IMPORT'
-                      AND created_at >= ?
-                      AND created_at < ?
+                        COUNT(*) AS import_qty,
+                        SUM(imported_price) AS import_value
+                    FROM product_items
+                    WHERE imported_at >= ?
+                      AND imported_at < ?
                     GROUP BY product_id
                 ) import_stats ON import_stats.product_id = p.id
                 LEFT JOIN (
                     SELECT
-                        product_id,
-                        SUM(quantity) AS export_qty
-                    FROM stock_movements
-                    WHERE type = 'EXPORT'
-                      AND created_at >= ?
-                      AND created_at < ?
-                    GROUP BY product_id
+                        pi.product_id,
+                        COUNT(*) AS export_qty,
+                        SUM(pi.imported_price) AS export_value
+                    FROM product_items pi
+                    JOIN (
+                        SELECT
+                            oipi.product_item_id,
+                            MIN(o.processed_at) AS exported_at
+                        FROM order_item_product_items oipi
+                        JOIN order_items oi ON oi.id = oipi.order_item_id
+                        JOIN orders o ON o.id = oi.order_id
+                        WHERE o.status = 'COMPLETED'
+                          AND o.processed_at IS NOT NULL
+                        GROUP BY oipi.product_item_id
+                    ) exported_items ON exported_items.product_item_id = pi.id
+                    WHERE exported_items.exported_at >= ?
+                      AND exported_items.exported_at < ?
+                    GROUP BY pi.product_id
                 ) export_stats ON export_stats.product_id = p.id
+                LEFT JOIN (
+                    SELECT
+                        product_id,
+                        COUNT(*) AS closing_qty,
+                        SUM(imported_price) AS closing_value
+                    FROM (
+                        SELECT
+                            pi.id,
+                            pi.product_id,
+                            pi.imported_price,
+                            pi.imported_at,
+                            exported_items.exported_at
+                        FROM product_items pi
+                        LEFT JOIN (
+                            SELECT
+                                oipi.product_item_id,
+                                MIN(o.processed_at) AS exported_at
+                            FROM order_item_product_items oipi
+                            JOIN order_items oi ON oi.id = oipi.order_item_id
+                            JOIN orders o ON o.id = oi.order_id
+                            WHERE o.status = 'COMPLETED'
+                              AND o.processed_at IS NOT NULL
+                            GROUP BY oipi.product_item_id
+                        ) exported_items ON exported_items.product_item_id = pi.id
+                    ) closing_items
+                    WHERE imported_at < ?
+                      AND (exported_at IS NULL OR exported_at >= ?)
+                    GROUP BY product_id
+                ) closing_stats ON closing_stats.product_id = p.id
                 WHERE COALESCE(opening_stats.opening_qty, 0) <> 0
                    OR COALESCE(import_stats.import_qty, 0) <> 0
                    OR COALESCE(export_stats.export_qty, 0) <> 0
@@ -439,16 +494,19 @@ public class ReportDAO {
 
             ps.setTimestamp(1, fromTs);
             ps.setTimestamp(2, fromTs);
-            ps.setTimestamp(3, toTs);
-            ps.setTimestamp(4, fromTs);
-            ps.setTimestamp(5, toTs);
+            ps.setTimestamp(3, fromTs);
+            ps.setTimestamp(4, toTs);
+            ps.setTimestamp(5, fromTs);
+            ps.setTimestamp(6, toTs);
+            ps.setTimestamp(7, toTs);
+            ps.setTimestamp(8, toTs);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     long openingQty = rs.getLong("opening_qty");
                     long importQty = rs.getLong("import_qty");
                     long exportQty = rs.getLong("export_qty");
-                    long closingQty = openingQty + importQty - exportQty;
+                    long closingQty = rs.getLong("closing_qty");
 
                     BigDecimal unitPrice = rs.getBigDecimal("unit_price");
                     if (unitPrice == null) {
@@ -456,10 +514,15 @@ public class ReportDAO {
                     }
                     unitPrice = unitPrice.setScale(0, RoundingMode.HALF_UP);
 
-                    BigDecimal openingValue = unitPrice.multiply(BigDecimal.valueOf(openingQty));
-                    BigDecimal importValue = unitPrice.multiply(BigDecimal.valueOf(importQty));
-                    BigDecimal exportValue = unitPrice.multiply(BigDecimal.valueOf(exportQty));
-                    BigDecimal closingValue = unitPrice.multiply(BigDecimal.valueOf(closingQty));
+                    BigDecimal openingValue = rs.getBigDecimal("opening_value");
+                    BigDecimal importValue = rs.getBigDecimal("import_value");
+                    BigDecimal exportValue = rs.getBigDecimal("export_value");
+                    BigDecimal closingValue = rs.getBigDecimal("closing_value");
+
+                    if (openingValue == null) openingValue = BigDecimal.ZERO;
+                    if (importValue == null) importValue = BigDecimal.ZERO;
+                    if (exportValue == null) exportValue = BigDecimal.ZERO;
+                    if (closingValue == null) closingValue = BigDecimal.ZERO;
 
                     rows.add(new InventoryMovementRowDTO(
                             rs.getLong("product_id"),
