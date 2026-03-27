@@ -39,7 +39,11 @@ public class CategoryService {
         return categoryDAO.getAllActive();
     }
 
-    public List<Category> searchCategories(String name, Integer isActive) {
-        return categoryDAO.searchCategories(name, isActive);
+    public List<Category> searchCategories(String name, Integer isActive, int limit, int offset) {
+        return categoryDAO.searchCategories(name, isActive, limit, offset);
+    }
+
+    public int getTotalCategoriesCount(String name, Integer isActive) {
+        return categoryDAO.getTotalCategories(name, isActive);
     }
 }
