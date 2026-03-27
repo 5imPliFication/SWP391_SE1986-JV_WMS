@@ -231,22 +231,12 @@ public class InventoryDAO {
     }
 
     public boolean isExistSerial(String serial) {
-        StringBuilder sql = new StringBuilder("select serial from product_items as pt "
-                + "where 1 = 1 ");
+        String sql = "SELECT 1 FROM product_items pt WHERE pt.serial = ?";
 
-        // if param has value of searchName
-        if (serial != null && !serial.trim().isEmpty()) {
-            sql.append(" and pt.serial like ? ");
-        }
-
-        // access data
         try (Connection conn = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            // if searchName has value -> set value to query
-            if (serial != null) {
-                ps.setString(1, "%" + serial + "%");
-            }
+            ps.setString(1, serial);
 
             ResultSet rs = ps.executeQuery();
             return rs.next();

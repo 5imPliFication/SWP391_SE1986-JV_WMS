@@ -221,6 +221,8 @@ public class ImportProductItemServlet extends HttpServlet {
         } else {
             session.setAttribute("message", resultSave);
             session.setAttribute("messageType", "danger");
+            response.sendRedirect(request.getContextPath() + "/import");
+            return;
         }
 
         // delete session after save success
