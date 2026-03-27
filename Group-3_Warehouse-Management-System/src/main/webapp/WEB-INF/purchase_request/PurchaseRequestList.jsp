@@ -147,7 +147,9 @@
                                 </c:if>
 
                                 <td>${pr.approvedByName}</td>
-                                <td>${pr.createdAt}</td>
+                                <td>
+                                    ${fn:substringBefore(pr.createdAt, 'T')}
+                                </td>
 
                                 <td>
                                     <a href="${pageContext.request.contextPath}/purchase-request/detail?id=${pr.id}">

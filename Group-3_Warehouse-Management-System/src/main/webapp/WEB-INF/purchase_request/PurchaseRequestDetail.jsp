@@ -91,49 +91,72 @@
 
 
             <!-- ACTIONS -->
-            <div class="mt-3 d-flex gap-2">
-                <c:if test="${sessionScope.user != null
-                              and sessionScope.user.role != null
-                              and sessionScope.user.role.active
-                              and fn:contains(sessionScope.userPermissions, 'UPDATE_PURCHASE_REQUEST')}">
-                    <c:if test="${!isManager && isPending}">
-                        <form method="post"
-                              action="${pageContext.request.contextPath}/purchase-request/detail"
-                              onsubmit="return confirm('Cancel this purchase request?')">
-                            <input type="hidden" name="id" value="${prList.id}">
-                            <input type="hidden" name="action" value="cancel">
-                            <button class="btn btn-danger">❌ Cancel</button>
-                        </form>
-                    </c:if>
-                    <c:if test="${isWarehouse}">
-                        <%--đặt tên prList nhưng có giá trị là purchaseDetail ?--%>
-                        <c:if test="${prList.status eq 'APPROVED'}">
-                            <a href="${pageContext.request.contextPath}/import?purchaseId=${prList.id}&action=import"
-                               class="btn btn-primary">
-                                Import Product
-                            </a>
-                        </c:if>
-                    </c:if>
+            <div class="mt-3 d-flex align-items-center">
 
-                    <c:if test="${isManager && isPending}">
-                        <form method="post" action="${pageContext.request.contextPath}/purchase-request/detail">
-                            <input type="hidden" name="id" value="${prList.id}">
-                            <input type="hidden" name="action" value="approve">
-                            <button class="btn btn-success">Approve</button>
-                        </form>
-
-                        <form method="post" action="${pageContext.request.contextPath}/purchase-request/detail">
-                            <input type="hidden" name="id" value="${prList.id}">
-                            <input type="hidden" name="action" value="reject">
-                            <button class="btn btn-danger">Reject</button>
-                        </form>
-                    </c:if>
-                </c:if>
+                <!-- Back button -->
                 <a href="${pageContext.request.contextPath}/purchase-request/list"
-                   class="btn btn-secondary ms-auto">
+                   class="btn btn-secondary">
                     ← Back
                 </a>
+
+                <!-- Action buttons -->
+                <div class="ms-auto d-flex gap-2">
+
+                    <c:if test="${sessionScope.user != null 
+                                  and sessionScope.user.role != null 
+                                  and sessionScope.user.role.active 
+                                  and fn:contains(sessionScope.userPermissions, 'UPDATE_PURCHASE_REQUEST')}">
+
+                          <!-- Cancel -->
+                          <c:if test="${!isManager and isPending}">
+                              <form method="post"
+                                    action="${pageContext.request.contextPath}/purchase-request/detail"
+                                    onsubmit="return confirm('Cancel this purchase request?')">
+
+                                  <input type="hidden" name="id" value="${prList.id}">
+                                  <input type="hidden" name="action" value="cancel">
+
+                                  <button class="btn btn-danger">❌ Cancel</button>
+                              </form>
+                          </c:if>
+
+                          <!-- Import -->
+                          <c:if test="${isWarehouse and prList.status eq 'APPROVED'}">
+                              <a href="${pageContext.request.contextPath}/import?purchaseId=${prList.id}&action=import"
+                                 class="btn btn-primary">
+                                  Import Product
+                              </a>
+                          </c:if>
+
+                          <!-- Manager -->
+                          <c:if test="${isManager and isPending}">
+
+                              <form method="post"
+                                    action="${pageContext.request.contextPath}/purchase-request/detail">
+
+                                  <input type="hidden" name="id" value="${prList.id}">
+                                  <input type="hidden" name="action" value="approve">
+
+                                  <button class="btn btn-success">✔ Approve</button>
+                              </form>
+
+                              <form method="post"
+                                    action="${pageContext.request.contextPath}/purchase-request/detail">
+
+                                  <input type="hidden" name="id" value="${prList.id}">
+                                  <input type="hidden" name="action" value="reject">
+
+                                  <button class="btn btn-danger">✖ Reject</button>
+                              </form>
+
+                          </c:if>
+
+                    </c:if>
+
+                </div>
+
             </div>
+
         </main>
 
 
