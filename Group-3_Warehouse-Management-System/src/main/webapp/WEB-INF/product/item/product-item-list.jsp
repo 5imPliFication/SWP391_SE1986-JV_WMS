@@ -142,16 +142,17 @@
                                         <input type="hidden" name="isActive" value="${param.isActive}">
                                         <c:if test="${pi.isActive == true }">
                                             <button class="btn-warning" type="submit" name="btnChangeStatus"
-                                                    value="unavailable">
+                                                    value="unavailable"
+                                                    onclick="return confirm('Are you sure you want to mark this item as unavailable?');">
                                                 Mark Unavailable
                                             </button>
                                         </c:if>
-                                        <c:if test="${pi.isActive == false }">
-                                            <button class="btn-success" type="submit" name="btnChangeStatus"
-                                                    value="available">
-                                                Mark Available
-                                            </button>
-                                        </c:if>
+<%--                                        <c:if test="${pi.isActive == false }">--%>
+<%--                                            <button class="btn-success" type="submit" name="btnChangeStatus"--%>
+<%--                                                    value="available">--%>
+<%--                                                Mark Available--%>
+<%--                                            </button>--%>
+<%--                                        </c:if>--%>
                                     </form>
                                 </c:if>
                             </td>

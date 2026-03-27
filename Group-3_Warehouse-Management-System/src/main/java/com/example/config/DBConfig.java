@@ -16,12 +16,12 @@ public class DBConfig {
 
         // JDBC URL
         config.setJdbcUrl(
-                "jdbc:mysql://localhost:3306/laptop_wms_4"
+                "jdbc:mysql://localhost:3306/laptop_wms_2"
                 + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh"
         );
 
         config.setUsername("root");
-        config.setPassword("1231");
+        config.setPassword("1234");
 
         // MySQL Driver
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");

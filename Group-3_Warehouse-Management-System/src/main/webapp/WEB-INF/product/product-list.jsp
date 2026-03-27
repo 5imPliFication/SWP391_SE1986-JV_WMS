@@ -8,6 +8,7 @@
     <title>Product List</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 </head>
 <body>
@@ -151,7 +152,6 @@
         <tr>
             <th>Image</th>
             <th>Name</th>
-            <th>Description</th>
             <th>Category</th>
             <th>Brand</th>
             <th>Model</th>
@@ -164,8 +164,6 @@
             <th>Total Quantity</th>
             <th>Unit</th>
             <th>Status</th>
-            <th>Created Time</th>
-            <th>Updated Time</th>
             <th>Action</th>
         </tr>
     </c:set>
@@ -185,7 +183,6 @@
                             ${p.name}
                     </a>
                 </td>
-                <td>${p.description}</td>
                 <td>${p.category.name}</td>
                 <td>${p.brand.name}</td>
                 <td>${p.model.name}</td>
@@ -202,31 +199,32 @@
                         <jsp:param name="active" value="${p.isActive}"/>
                     </jsp:include>
                 </td>
-                <td>
-                        <%--Convert LocalDateTime to Date for JSTL formatting--%>
-                        <fmt:parseDate value="${p.createdAt}"
-                                       pattern="yyyy-MM-dd'T'HH:mm"
-                                       var="parsedCreatedDate"
-                                       type="both"/>
-                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
-                                        value="${parsedCreatedDate}"/>
-                </td>
-                <td>
-                        <%--Convert LocalDateTime to Date for JSTL formatting--%>
-                        <fmt:parseDate value="${p.updatedAt}"
-                                       pattern="yyyy-MM-dd'T'HH:mm"
-                                       var="parsedUpdatedDate"
-                                       type="both"/>
-                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
-                                        value="${parsedUpdatedDate}"/>
-                </td>
-                <td>
-                    <c:if test="${sessionScope.user != null
+                <td class="text-nowrap">
+                    <div class="d-flex gap-2">
+                            <%--Product Details--%>
+                        <form method="get" action="${pageContext.request.contextPath}/products/details">
+                            <input type="hidden" name="productId" value="${p.id}">
+                            <input type="hidden" name="pageNo" value="${param.pageNo}">
+                            <input type="hidden" name="searchName" value="${param.searchName}">
+                            <input type="hidden" name="brandId" value="${param.brandId}">
+                            <input type="hidden" name="categoryId" value="${param.categoryId}">
+                            <input type="hidden" name="modelId" value="${param.modelId}">
+                            <input type="hidden" name="chipId" value="${param.chipId}">
+                            <input type="hidden" name="ramId" value="${param.ramId}">
+                            <input type="hidden" name="storageId" value="${param.storageId}">
+                            <input type="hidden" name="sizeId" value="${param.sizeId}">
+                            <input type="hidden" name="isActive" value="${param.isActive}">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </form>
+
+                        <c:if test="${sessionScope.user != null
                                           and sessionScope.user.role != null
                                           and sessionScope.user.role.active
                                           and fn:contains(sessionScope.userPermissions, 'UPDATE_PRODUCT')}">
 
-                        <form method="get" action="${pageContext.request.contextPath}/products/update">
+                            <form method="get" action="${pageContext.request.contextPath}/products/update">
                                 <input type="hidden" name="productId" value="${p.id}">
                                 <input type="hidden" name="pageNo" value="${param.pageNo}">
                                 <input type="hidden" name="searchName" value="${param.searchName}">
@@ -238,17 +236,18 @@
                                 <input type="hidden" name="storageId" value="${param.storageId}">
                                 <input type="hidden" name="sizeId" value="${param.sizeId}">
                                 <input type="hidden" name="isActive" value="${param.isActive}">
-                            <button type="submit" class="btn btn-sm btn-primary">Edit</button>
-                        </form>
+                                <button type="submit" class="btn btn-sm btn-primary">Edit</button>
+                            </form>
+                        </c:if>
 
-                    </c:if>
+                    </div>
                 </td>
             </tr>
         </c:forEach>
 
         <c:if test="${empty products}">
             <tr>
-                <td colspan="17" class="text-center text-muted">No data</td>
+                <td colspan="15" class="text-center text-muted">No data</td>
             </tr>
         </c:if>
 
@@ -266,7 +265,7 @@
                     <%-- previous page --%>
                 <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/products?pageNo=${pageNo - 1}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&modelName=${param.modelName}&chipName=${param.chipName}&ramSize=${param.ramSize}&storageSize=${param.storageSize}&screenSize=${param.screenSize}&isActive=${param.isActive}">
+                       href="${pageContext.request.contextPath}/products?pageNo=${pageNo - 1}&searchName=${param.searchName}&brandId=${param.brandId}&categoryId=${param.categoryId}&modelId=${param.modelId}&chipId=${param.chipId}&ramId=${param.ramId}&storageId=${param.storageId}&sizeId=${param.sizeId}&isActive=${param.isActive}">
                         Previous
                     </a>
                 </li>
@@ -275,7 +274,7 @@
                 <c:forEach begin="1" end="${totalPages}" var="i">
                     <li class="page-item ${i == pageNo ? 'active' : ''}">
                         <a class="page-link"
-                           href="${pageContext.request.contextPath}/products?pageNo=${i}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&modelName=${param.modelName}&chipName=${param.chipName}&ramSize=${param.ramSize}&storageSize=${param.storageSize}&screenSize=${param.screenSize}&isActive=${param.isActive}">
+                           href="${pageContext.request.contextPath}/products?pageNo=${i}&searchName=${param.searchName}&brandId=${param.brandId}&categoryId=${param.categoryId}&modelId=${param.modelId}&chipId=${param.chipId}&ramId=${param.ramId}&storageId=${param.storageId}&sizeId=${param.sizeId}&isActive=${param.isActive}">
                                 ${i}
                         </a>
                     </li>
@@ -284,7 +283,7 @@
                     <%-- next page--%>
                 <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
                     <a class="page-link"
-                       href="${pageContext.request.contextPath}/products?pageNo=${pageNo + 1}&searchName=${param.searchName}&brandName=${param.brandName}&categoryName=${param.categoryName}&modelName=${param.modelName}&chipName=${param.chipName}&ramSize=${param.ramSize}&storageSize=${param.storageSize}&screenSize=${param.screenSize}&isActive=${param.isActive}">
+                       href="${pageContext.request.contextPath}/products?pageNo=${pageNo + 1}&searchName=${param.searchName}&brandId=${param.brandId}&categoryId=${param.categoryId}&modelId=${param.modelId}&chipId=${param.chipId}&ramId=${param.ramId}&storageId=${param.storageId}&sizeId=${param.sizeId}&isActive=${param.isActive}">
                         Next
                     </a>
                 </li>
