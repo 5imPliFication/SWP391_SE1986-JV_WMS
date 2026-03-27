@@ -381,25 +381,53 @@ public class ReportDAO {
                 SELECT
                     p.id AS product_id,
                     p.name AS product_name,
-                    COALESCE(AVG(pi.imported_price), 0) AS unit_price,
-                    COALESCE(SUM(CASE
-                        WHEN sm.created_at < ? AND sm.type = 'IMPORT' THEN sm.quantity
-                        WHEN sm.created_at < ? AND sm.type = 'EXPORT' THEN -sm.quantity
-                        ELSE 0
-                    END), 0) AS opening_qty,
-                    COALESCE(SUM(CASE
-                        WHEN sm.created_at >= ? AND sm.created_at < ? AND sm.type = 'IMPORT' THEN sm.quantity
-                        ELSE 0
-                    END), 0) AS import_qty,
-                    COALESCE(SUM(CASE
-                        WHEN sm.created_at >= ? AND sm.created_at < ? AND sm.type = 'EXPORT' THEN sm.quantity
-                        ELSE 0
-                    END), 0) AS export_qty
+                    COALESCE(price_stats.unit_price, 0) AS unit_price,
+                    COALESCE(opening_stats.opening_qty, 0) AS opening_qty,
+                    COALESCE(import_stats.import_qty, 0) AS import_qty,
+                    COALESCE(export_stats.export_qty, 0) AS export_qty
                 FROM products p
-                LEFT JOIN stock_movements sm ON sm.product_id = p.id
-                LEFT JOIN product_items pi ON pi.product_id = p.id
-                GROUP BY p.id, p.name
-                HAVING opening_qty <> 0 OR import_qty <> 0 OR export_qty <> 0
+                LEFT JOIN (
+                    SELECT
+                        product_id,
+                        AVG(imported_price) AS unit_price
+                    FROM product_items
+                    GROUP BY product_id
+                ) price_stats ON price_stats.product_id = p.id
+                LEFT JOIN (
+                    SELECT
+                        product_id,
+                        SUM(CASE
+                            WHEN type = 'IMPORT' THEN quantity
+                            WHEN type = 'EXPORT' THEN -quantity
+                            ELSE 0
+                        END) AS opening_qty
+                    FROM stock_movements
+                    WHERE created_at < ?
+                    GROUP BY product_id
+                ) opening_stats ON opening_stats.product_id = p.id
+                LEFT JOIN (
+                    SELECT
+                        product_id,
+                        SUM(quantity) AS import_qty
+                    FROM stock_movements
+                    WHERE type = 'IMPORT'
+                      AND created_at >= ?
+                      AND created_at < ?
+                    GROUP BY product_id
+                ) import_stats ON import_stats.product_id = p.id
+                LEFT JOIN (
+                    SELECT
+                        product_id,
+                        SUM(quantity) AS export_qty
+                    FROM stock_movements
+                    WHERE type = 'EXPORT'
+                      AND created_at >= ?
+                      AND created_at < ?
+                    GROUP BY product_id
+                ) export_stats ON export_stats.product_id = p.id
+                WHERE COALESCE(opening_stats.opening_qty, 0) <> 0
+                   OR COALESCE(import_stats.import_qty, 0) <> 0
+                   OR COALESCE(export_stats.export_qty, 0) <> 0
                 ORDER BY p.id ASC
                 """;
 
@@ -411,10 +439,9 @@ public class ReportDAO {
 
             ps.setTimestamp(1, fromTs);
             ps.setTimestamp(2, fromTs);
-            ps.setTimestamp(3, fromTs);
-            ps.setTimestamp(4, toTs);
-            ps.setTimestamp(5, fromTs);
-            ps.setTimestamp(6, toTs);
+            ps.setTimestamp(3, toTs);
+            ps.setTimestamp(4, fromTs);
+            ps.setTimestamp(5, toTs);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
