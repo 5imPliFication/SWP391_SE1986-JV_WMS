@@ -37,7 +37,7 @@
                 <div class="col-md-4">
                     <label class="fw-semibold">Created At</label>
                     <input class="form-control"
-                           value="${prList.createdAt}"
+                           value="${fn:substringBefore(prList.createdAt, 'T')}"
                            readonly>
                 </div>
             </div>
