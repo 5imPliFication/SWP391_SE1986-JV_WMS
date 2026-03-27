@@ -46,6 +46,7 @@ public class UserCreateServlet extends HttpServlet {
         if(!UserValidator.validatePassword(rawPassword)){
             request.setAttribute("error", "Password must be at least 8 characters, contain 1 number, 1 capitalize character and 1 special character");
             request.getRequestDispatcher("/WEB-INF/user/user-create.jsp").forward(request, response);
+            return;
         }
         user.setFullName(request.getParameter("fullName"));
         user.setEmail(request.getParameter("email"));
