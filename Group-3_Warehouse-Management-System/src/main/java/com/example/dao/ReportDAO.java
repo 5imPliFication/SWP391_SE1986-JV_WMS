@@ -6,8 +6,6 @@ import com.example.dto.InventoryMovementRowDTO;
 import com.example.dto.ReportItemDTO;
 import com.example.enums.MovementType;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -381,26 +379,19 @@ public class ReportDAO {
                 SELECT
                     p.id AS product_id,
                     p.name AS product_name,
-                    COALESCE(closing_stats.closing_value / NULLIF(closing_stats.closing_qty, 0), 0) AS unit_price,
                     COALESCE(opening_stats.opening_qty, 0) AS opening_qty,
-                    COALESCE(opening_stats.opening_value, 0) AS opening_value,
                     COALESCE(import_stats.import_qty, 0) AS import_qty,
-                    COALESCE(import_stats.import_value, 0) AS import_value,
                     COALESCE(export_stats.export_qty, 0) AS export_qty,
-                    COALESCE(export_stats.export_value, 0) AS export_value,
-                    COALESCE(closing_stats.closing_qty, 0) AS closing_qty,
-                    COALESCE(closing_stats.closing_value, 0) AS closing_value
+                    COALESCE(closing_stats.closing_qty, 0) AS closing_qty
                 FROM products p
                 LEFT JOIN (
                     SELECT
                         product_id,
-                        COUNT(*) AS opening_qty,
-                        SUM(imported_price) AS opening_value
+                        COUNT(*) AS opening_qty
                     FROM (
                         SELECT
                             pi.id,
                             pi.product_id,
-                            pi.imported_price,
                             pi.imported_at,
                             exported_items.exported_at
                         FROM product_items pi
@@ -423,8 +414,7 @@ public class ReportDAO {
                 LEFT JOIN (
                     SELECT
                         product_id,
-                        COUNT(*) AS import_qty,
-                        SUM(imported_price) AS import_value
+                        COUNT(*) AS import_qty
                     FROM product_items
                     WHERE imported_at >= ?
                       AND imported_at < ?
@@ -433,8 +423,7 @@ public class ReportDAO {
                 LEFT JOIN (
                     SELECT
                         pi.product_id,
-                        COUNT(*) AS export_qty,
-                        SUM(pi.imported_price) AS export_value
+                        COUNT(*) AS export_qty
                     FROM product_items pi
                     JOIN (
                         SELECT
@@ -454,13 +443,11 @@ public class ReportDAO {
                 LEFT JOIN (
                     SELECT
                         product_id,
-                        COUNT(*) AS closing_qty,
-                        SUM(imported_price) AS closing_value
+                        COUNT(*) AS closing_qty
                     FROM (
                         SELECT
                             pi.id,
                             pi.product_id,
-                            pi.imported_price,
                             pi.imported_at,
                             exported_items.exported_at
                         FROM product_items pi
@@ -508,34 +495,13 @@ public class ReportDAO {
                     long exportQty = rs.getLong("export_qty");
                     long closingQty = rs.getLong("closing_qty");
 
-                    BigDecimal unitPrice = rs.getBigDecimal("unit_price");
-                    if (unitPrice == null) {
-                        unitPrice = BigDecimal.ZERO;
-                    }
-                    unitPrice = unitPrice.setScale(0, RoundingMode.HALF_UP);
-
-                    BigDecimal openingValue = rs.getBigDecimal("opening_value");
-                    BigDecimal importValue = rs.getBigDecimal("import_value");
-                    BigDecimal exportValue = rs.getBigDecimal("export_value");
-                    BigDecimal closingValue = rs.getBigDecimal("closing_value");
-
-                    if (openingValue == null) openingValue = BigDecimal.ZERO;
-                    if (importValue == null) importValue = BigDecimal.ZERO;
-                    if (exportValue == null) exportValue = BigDecimal.ZERO;
-                    if (closingValue == null) closingValue = BigDecimal.ZERO;
-
                     rows.add(new InventoryMovementRowDTO(
                             rs.getLong("product_id"),
                             rs.getString("product_name"),
-                            unitPrice,
                             openingQty,
                             importQty,
                             exportQty,
-                            closingQty,
-                            openingValue,
-                            importValue,
-                            exportValue,
-                            closingValue
+                            closingQty
                     ));
                 }
             }

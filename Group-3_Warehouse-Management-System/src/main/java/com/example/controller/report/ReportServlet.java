@@ -38,66 +38,62 @@ public class ReportServlet extends HttpServlet {
             return;
         }
 
-        // get data from request parameters
-        String type = request.getParameter("type");
-
-        // default: inventory report for current month
-        if (type == null || type.isEmpty()) {
-            type = "inventory";
-        }
+        String rawType = request.getParameter("type");
+        boolean isDefaultLanding = rawType == null || rawType.isBlank();
+        String type = normalizeType(rawType);
+        String inventoryFallbackView = isDefaultLanding ? "in-out-stock" : "inventory";
 
         // Use for total compare chart
-        String yearStr = request.getParameter("year");
-        int year = (yearStr != null && !yearStr.isEmpty())
-                ? Integer.parseInt(yearStr)
-                : LocalDate.now().getYear();
+        int year = parsePositiveInt(request.getParameter("year"), LocalDate.now().getYear());
         List<MonthSummaryDTO> summary = reportService.getMonthSummary(year);
         String chartSummaryData = gson.toJson(summary);
         request.setAttribute("chartSummaryData", chartSummaryData);
 
-        // handle different report types
-        if (type.equals("import")) {
+        if ("import".equals(type)) {
             handleImportReport(request, response);
-        } else if (type.equals("export")) {
+        } else if ("export".equals(type)) {
             handleExportReport(request, response);
-        } else if (type.equals("inventory")) {
-            handleInventoryReport(request, response);
         } else {
-            handleImportReport(request, response);
+            handleInventoryReport(request, response, inventoryFallbackView);
         }
     }
 
-    private void handleInventoryReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String yearStr = request.getParameter("year");
-        String monthStr = request.getParameter("month");
-        String fromDateStr = request.getParameter("fromDate");
-        String toDateStr = request.getParameter("toDate");
+    private void handleInventoryReport(HttpServletRequest request, HttpServletResponse response, String fallbackView) throws ServletException, IOException {
+        String requestedView = request.getParameter("view");
+        String view = (requestedView == null || requestedView.isBlank())
+                ? normalizeInventoryView(fallbackView)
+                : normalizeInventoryView(requestedView);
 
-        int year = (yearStr != null && !yearStr.isEmpty()) ? Integer.parseInt(yearStr) : LocalDate.now().getYear();
-        int month = (monthStr != null && !monthStr.isEmpty()) ? Integer.parseInt(monthStr) : LocalDate.now().getMonthValue();
+        int year = parsePositiveInt(request.getParameter("year"), LocalDate.now().getYear());
+        int month = parseMonth(request.getParameter("month"));
+
+        LocalDate[] dateRange = resolveDateRange(
+                year,
+                month,
+                request.getParameter("fromDate"),
+                request.getParameter("toDate")
+        );
+        LocalDate fromDate = dateRange[0];
+        LocalDate toDate = dateRange[1];
 
         List<ReportItemDTO> reportItems;
         List<InventoryMovementRowDTO> movementRows;
         List<Long> chartData;
 
-        LocalDate fromDate;
-        LocalDate toDate;
-        if (fromDateStr != null && !fromDateStr.isBlank() && toDateStr != null && !toDateStr.isBlank()) {
-            fromDate = LocalDate.parse(fromDateStr);
-            toDate = LocalDate.parse(toDateStr);
-        } else {
-            fromDate = LocalDate.of(year, month, 1);
-            toDate = fromDate.plusMonths(1).minusDays(1);
-        }
-
         try {
             reportItems = reportService.getInventoryItems(month, year);
             movementRows = reportService.getInventoryMovementRows(fromDate, toDate);
             chartData = reportService.getInventoryChartDataByYear(year);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
-            request.getRequestDispatcher("/WEB-INF/report/inventory-report.jsp").forward(request, response);
+            request.setAttribute("type", "inventory");
+            request.setAttribute("year", year);
+            request.setAttribute("month", month);
+            request.setAttribute("fromDate", fromDate);
+            request.setAttribute("toDate", toDate);
+            request.setAttribute("view", view);
+            request.getRequestDispatcher(resolveInventoryView(view)).forward(request, response);
             return;
         }
 
@@ -111,16 +107,28 @@ public class ReportServlet extends HttpServlet {
         request.setAttribute("month", month);
         request.setAttribute("fromDate", fromDate);
         request.setAttribute("toDate", toDate);
-        request.getRequestDispatcher("/WEB-INF/report/inventory-report.jsp").forward(request, response);
+        request.setAttribute("view", view);
+        request.getRequestDispatcher(resolveInventoryView(view)).forward(request, response);
+    }
+
+    private String resolveInventoryView(String view) {
+        if ("in-out-stock".equalsIgnoreCase(view)) {
+            return "/WEB-INF/report/in-out-stock-report.jsp";
+        }
+        return "/WEB-INF/report/inventory-report.jsp";
     }
 
     private void handleExportReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String yearStr = request.getParameter("year");
-        String monthStr = request.getParameter("month");
-
-        // if year and month are not provided, default to current year and month
-        int year = (yearStr != null && !yearStr.isEmpty()) ? Integer.parseInt(yearStr) : LocalDate.now().getYear();
-        int month = (monthStr != null && !monthStr.isEmpty()) ? Integer.parseInt(monthStr) : LocalDate.now().getMonthValue();
+        int year = parsePositiveInt(request.getParameter("year"), LocalDate.now().getYear());
+        int month = parseMonth(request.getParameter("month"));
+        LocalDate[] dateRange = resolveDateRange(
+                year,
+                month,
+                request.getParameter("fromDate"),
+                request.getParameter("toDate")
+        );
+        LocalDate fromDate = dateRange[0];
+        LocalDate toDate = dateRange[1];
 
         List<ReportItemDTO> reportItems;
         List<Long> chartData;
@@ -157,6 +165,11 @@ public class ReportServlet extends HttpServlet {
         } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
+            request.setAttribute("type", "export");
+            request.setAttribute("year", year);
+            request.setAttribute("month", month);
+            request.setAttribute("fromDate", fromDate);
+            request.setAttribute("toDate", toDate);
             request.getRequestDispatcher("/WEB-INF/report/export-report.jsp").forward(request, response);
             return;
         }
@@ -168,15 +181,22 @@ public class ReportServlet extends HttpServlet {
         request.setAttribute("type", "export");
         request.setAttribute("year", year);
         request.setAttribute("month", month);
+        request.setAttribute("fromDate", fromDate);
+        request.setAttribute("toDate", toDate);
         request.getRequestDispatcher("/WEB-INF/report/export-report.jsp").forward(request, response);
     }
 
     private void handleImportReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String yearStr = request.getParameter("year");
-        String monthStr = request.getParameter("month");
-
-        int year = (yearStr != null && !yearStr.isEmpty()) ? Integer.parseInt(yearStr) : LocalDate.now().getYear();
-        int month = (monthStr != null && !monthStr.isEmpty()) ? Integer.parseInt(monthStr) : LocalDate.now().getMonthValue();
+        int year = parsePositiveInt(request.getParameter("year"), LocalDate.now().getYear());
+        int month = parseMonth(request.getParameter("month"));
+        LocalDate[] dateRange = resolveDateRange(
+                year,
+                month,
+                request.getParameter("fromDate"),
+                request.getParameter("toDate")
+        );
+        LocalDate fromDate = dateRange[0];
+        LocalDate toDate = dateRange[1];
 
         // get list items to display in table
         List<ReportItemDTO> reportItems;
@@ -187,6 +207,11 @@ public class ReportServlet extends HttpServlet {
         } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");
+            request.setAttribute("type", "import");
+            request.setAttribute("year", year);
+            request.setAttribute("month", month);
+            request.setAttribute("fromDate", fromDate);
+            request.setAttribute("toDate", toDate);
             request.getRequestDispatcher("/WEB-INF/report/import-report.jsp").forward(request, response);
             return;
         }
@@ -199,7 +224,60 @@ public class ReportServlet extends HttpServlet {
         request.setAttribute("type", "import");
         request.setAttribute("year", year);
         request.setAttribute("month", month);
+        request.setAttribute("fromDate", fromDate);
+        request.setAttribute("toDate", toDate);
         request.getRequestDispatcher("/WEB-INF/report/import-report.jsp").forward(request, response);
+    }
+
+    private String normalizeType(String rawType) {
+        if (rawType == null || rawType.isBlank()) {
+            return "inventory";
+        }
+
+        String type = rawType.trim().toLowerCase();
+        if ("in-out-stock".equals(type)) {
+            return "inventory";
+        }
+
+        if ("inventory".equals(type) || "import".equals(type) || "export".equals(type)) {
+            return type;
+        }
+        return "inventory";
+    }
+
+    private String normalizeInventoryView(String rawView) {
+        if ("in-out-stock".equalsIgnoreCase(rawView)) {
+            return "in-out-stock";
+        }
+        return "inventory";
+    }
+
+    private int parseMonth(String rawMonth) {
+        int parsedMonth = parsePositiveInt(rawMonth, LocalDate.now().getMonthValue());
+        return Math.min(Math.max(parsedMonth, 1), 12);
+    }
+
+    private LocalDate parseDate(String rawValue) {
+        if (rawValue == null || rawValue.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(rawValue);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private LocalDate[] resolveDateRange(int year, int month, String fromDateRaw, String toDateRaw) {
+        LocalDate fromDate = parseDate(fromDateRaw);
+        LocalDate toDate = parseDate(toDateRaw);
+
+        if (fromDate == null || toDate == null || fromDate.isAfter(toDate)) {
+            fromDate = LocalDate.of(year, month, 1);
+            toDate = fromDate.plusMonths(1).minusDays(1);
+        }
+
+        return new LocalDate[]{fromDate, toDate};
     }
 
     private int parsePositiveInt(String rawValue, int defaultValue) {
@@ -225,4 +303,3 @@ public class ReportServlet extends HttpServlet {
         }
     }
 }
-
