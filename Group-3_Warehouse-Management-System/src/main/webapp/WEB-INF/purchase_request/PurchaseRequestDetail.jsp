@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
 
 <!DOCTYPE html>
 <html>
@@ -37,7 +38,7 @@
                 <div class="col-md-4">
                     <label class="fw-semibold">Created At</label>
                     <input class="form-control"
-                           value="${fn:substringBefore(prList.createdAt, 'T')}"
+                           value="${prList.createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}"
                            readonly>
                 </div>
             </div>

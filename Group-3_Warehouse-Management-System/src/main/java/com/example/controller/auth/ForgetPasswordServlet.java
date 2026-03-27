@@ -9,7 +9,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
@@ -36,8 +35,6 @@ public class ForgetPasswordServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String email = request.getParameter("email");
-        HttpSession session = request.getSession();
-        User temp = (User) session.getAttribute("user");
 
         // Check user existed by email
         User user = userService.getUserByEmail(email);
@@ -47,10 +44,10 @@ public class ForgetPasswordServlet extends HttpServlet {
         } else {
             // Create a new password reset request
             passwordResetService.createPasswordResetRequest(user.getId());
-            activityLogService.log(temp, "Create password reset request");
+            activityLogService.log(user, "Create password reset request");
 
             request.setAttribute("status", "Your reset password request was sent successfully!");
-            request.getRequestDispatcher("/WEB-INF/auth/forget-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/auth/login.jsp").forward(request, response);
         }
 
     }
