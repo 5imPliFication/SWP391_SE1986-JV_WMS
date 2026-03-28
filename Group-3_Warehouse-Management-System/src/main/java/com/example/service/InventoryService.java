@@ -105,6 +105,21 @@ public class InventoryService {
 
 
     public void handleExport(User user, ExportDTO exportOrder, String[] serials) {
+        if (serials == null || serials.length == 0) {
+            throw new IllegalArgumentException("No serial numbers provided");
+        }
+
+        // Check for duplicates and empty serials
+        Set<String> seenSerials = new HashSet<>();
+        for (String serial : serials) {
+            if (serial == null || serial.trim().isEmpty()) {
+                throw new IllegalArgumentException("Serial number cannot be empty");
+            }
+            if (!seenSerials.add(serial.trim())) {
+                throw new IllegalArgumentException("Duplicate serial number found: " + serial);
+            }
+        }
+
         int serialIndex = 0;
         // order item id -> list serials assigned to this item
         Map<Long, List<String>> orderItemSerialsMap = new HashMap<>();
@@ -112,7 +127,7 @@ public class InventoryService {
             List<String> assignedSerials = new ArrayList<>();
             for (int i = 0; i < item.getQuantity(); i++) {
                 String serial = serials[serialIndex++];
-                assignedSerials.add(serial);
+                assignedSerials.add(serial.trim());
             }
             orderItemSerialsMap.put(item.getId(), assignedSerials);
         }
