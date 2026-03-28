@@ -336,30 +336,34 @@ public class OrderDAO {
                                 Long processedBy,
                                 String note) {
 
-        String sql = """
-                    UPDATE orders
-                    SET status = ?,
-                        processed_by = ?,
-                        processed_at = ?,
-                        note = ?
-                    WHERE id = ?
-                """;
+        StringBuilder sql = new StringBuilder("UPDATE orders SET status = ?");
+        if (processedBy != null) {
+            sql.append(", processed_by = ?, processed_at = ?");
+        } else {
+            sql.append(", processed_by = NULL, processed_at = NULL");
+        }
+
+        if (note != null) {
+            sql.append(", note = ?");
+        }
+        sql.append(" WHERE id = ?");
 
         try (Connection con = DBConfig.getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
-            ps.setString(1, status);
+            int idx = 1;
+            ps.setString(idx++, status);
 
             if (processedBy != null) {
-                ps.setLong(2, processedBy);
-                ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-            } else {
-                ps.setNull(2, Types.BIGINT);
-                ps.setNull(3, Types.TIMESTAMP);
+                ps.setLong(idx++, processedBy);
+                ps.setTimestamp(idx++, Timestamp.valueOf(LocalDateTime.now()));
             }
 
-            ps.setString(4, note);
-            ps.setLong(5, orderId);
+            if (note != null) {
+                ps.setString(idx++, note);
+            }
+
+            ps.setLong(idx++, orderId);
 
             return ps.executeUpdate() > 0;
 

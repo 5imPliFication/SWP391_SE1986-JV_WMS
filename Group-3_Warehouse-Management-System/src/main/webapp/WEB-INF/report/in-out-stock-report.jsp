@@ -363,19 +363,19 @@
 
                                     <tr>
                                         <td class="inv-sticky-first font-weight-bold">${row.productName}</td>
-                                        <td class="text-center"><fmt:formatNumber value="${row.openingQty}" type="number"/></td>
-                                        <td class="text-center text-primary"><fmt:formatNumber value="${row.importQty}" type="number"/></td>
-                                        <td class="text-center text-danger"><fmt:formatNumber value="${row.exportQty}" type="number"/></td>
+                                        <td class="text-center font-weight-bold"><fmt:formatNumber value="${row.openingQty}" type="number"/></td>
+                                        <td class="text-center font-weight-bold text-primary"><fmt:formatNumber value="${row.importQty}" type="number"/></td>
+                                        <td class="text-center font-weight-bold text-danger"><fmt:formatNumber value="${row.exportQty}" type="number"/></td>
                                         <td class="text-center font-weight-bold text-success"><fmt:formatNumber value="${row.closingQty}" type="number"/></td>
                                     </tr>
                                 </c:forEach>
 
                                 <tr class="inv-summary-total">
-                                    <td class="inv-sticky-first">Total Items: ${fn:length(movementRows)}</td>
-                                    <td class="text-center"><fmt:formatNumber value="${sumOpeningQty}" type="number"/></td>
-                                    <td class="text-center text-primary"><fmt:formatNumber value="${sumImportQty}" type="number"/></td>
-                                    <td class="text-center text-danger"><fmt:formatNumber value="${sumExportQty}" type="number"/></td>
-                                    <td class="text-center text-success"><fmt:formatNumber value="${sumClosingQty}" type="number"/></td>
+                                    <td class="inv-sticky-first font-weight-bold">Total Items: ${fn:length(movementRows)}</td>
+                                    <td class="text-center font-weight-bold"><fmt:formatNumber value="${sumOpeningQty}" type="number"/></td>
+                                    <td class="text-center text-primary font-weight-bold"><fmt:formatNumber value="${sumImportQty}" type="number"/></td>
+                                    <td class="text-center text-danger font-weight-bold"><fmt:formatNumber value="${sumExportQty}" type="number"/></td>
+                                    <td class="text-center text-success font-weight-bold"><fmt:formatNumber value="${sumClosingQty}" type="number"/></td>
                                 </tr>
                             </c:when>
                             <c:otherwise>

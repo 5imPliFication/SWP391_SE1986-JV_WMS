@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -44,64 +44,62 @@
         </div>
     </c:if>
 
-    <div class="card p-3 mb-4 shadow-sm">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body py-3">
+            <!-- Row 1 -->
+            <div class="row align-items-center mb-3">
+                <div class="col-md-3">
+                    <small class="text-muted">Order Code</small>
+                    <div class="font-weight-bold text-monospace">
+                        ${order.orderCode}
+                    </div>
+                </div>
 
-        <!-- Row 1 -->
-        <div class="row align-items-center mb-3">
+                <div class="col-md-3">
+                    <small class="text-muted">Created By</small>
+                    <div class="font-weight-bold">${order.salesmanName}</div>
+                </div>
 
-            <div class="col-md-6">
-                <label class="font-weight-bold mb-1 d-block">Order Code</label>
-                <input type="text" class="form-control form-control-sm bg-light d-inline-block"
-                       value="${order.orderCode}" readonly>
+                <div class="col-md-3">
+                    <small class="text-muted">Created At</small>
+                    <div class="font-weight-bold">
+                        <fmt:parseDate value="${order.createdAt}"
+                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                       var="parsedCreatedAt"
+                                       type="both"/>
+                        <fmt:formatDate pattern="dd/MM/yyyy HH:mm"
+                                        value="${parsedCreatedAt}"/>
+                    </div>
+                </div>
+
+                <div class="col-md-3 d-flex justify-content-end">
+                    <button type="submit" form="assignForm"
+                            class="btn btn-success"
+                            style="height: 45px; padding: 0 20px; font-size: 16px;"
+                            onclick="allowSubmit()"
+                            ${empty order.items ? 'disabled' : ''}>
+                        Export
+                    </button>
+                </div>
             </div>
 
-            <!-- Created By -->
-            <div class="col-md-3 mb-2 mb-md-0">
-                <label class="font-weight-bold mb-1">Created By</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${order.salesmanName}" readonly>
-            </div>
+            <!-- Row 2 -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <small class="text-muted">Customer Name</small>
+                    <div class="font-weight-bold">
+                        ${order.customerName}
+                    </div>
+                </div>
 
-            <!-- Created At -->
-            <div class="col-md-3 mb-2 mb-md-0">
-                <label class="font-weight-bold mb-1">Created At</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${order.createdAt}" readonly>
+                <div class="col-md-9">
+                    <small class="text-muted">Note</small>
+                    <div class="font-weight-bold">
+                        ${order.note}
+                    </div>
+                </div>
             </div>
-
         </div>
-
-        <!-- Row 2 -->
-        <div class="row mb-3">
-
-            <!-- Customer Name -->
-            <div class="col-md-6">
-                <label class="font-weight-bold mb-1">Customer Name</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${order.customerName}" readonly>
-            </div>
-
-            <!-- Note -->
-            <div class="col-md-6">
-                <label class="font-weight-bold mb-1">Note</label>
-                <input type="text" class="form-control form-control-sm bg-light"
-                       value="${order.note}" readonly>
-            </div>
-
-        </div>
-
-        <!-- Row 3 (Button bottom right) -->
-        <div class="row">
-            <div class="col-md-12 d-flex justify-content-end">
-                <button type="submit" form="assignForm"
-                        class="btn btn-success btn-sm"
-                        onclick="allowSubmit()"
-                ${empty order.items ? 'disabled' : '' }>
-                    Export
-                </button>
-            </div>
-        </div>
-
     </div>
 
     <form id="assignForm" method="post" action="${pageContext.request.contextPath}/export">
