@@ -129,6 +129,7 @@ public class InventoryService {
                 String serial = serials[serialIndex++];
                 assignedSerials.add(serial.trim());
             }
+            // product id -> serial
             orderItemSerialsMap.put(item.getId(), assignedSerials);
         }
 

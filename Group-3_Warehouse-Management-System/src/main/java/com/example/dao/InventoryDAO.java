@@ -521,11 +521,11 @@ public class InventoryDAO {
     private void saveStockMovements(Connection con, Long id, Map<Long, List<String>> orderItemSerialsMap) throws SQLException {
         String queryProductId = "SELECT product_id FROM order_items WHERE id = ?";
         String moveSql = "INSERT INTO stock_movements (product_id, quantity, type, reference_type, created_at, reference_id) VALUES (?, ?, ?, ?, NOW(), ?)";
-        String prodSql = "UPDATE products SET total_quantity = total_quantity - ? WHERE id = ?";
+        String updateQuantity = "UPDATE products SET total_quantity = total_quantity - ? WHERE id = ?";
         
         try (PreparedStatement psRead = con.prepareStatement(queryProductId);
              PreparedStatement psMove = con.prepareStatement(moveSql);
-             PreparedStatement psProd = con.prepareStatement(prodSql)) {
+             PreparedStatement psUpdate = con.prepareStatement(updateQuantity)) {
              
             for (Map.Entry<Long, List<String>> entry : orderItemSerialsMap.entrySet()) {
                 Long orderItemId = entry.getKey();
@@ -549,13 +549,13 @@ public class InventoryDAO {
                     psMove.addBatch();
                     
                     // Decrease product total quantity
-                    psProd.setInt(1, quantity);
-                    psProd.setLong(2, productId);
-                    psProd.addBatch();
+                    psUpdate.setInt(1, quantity);
+                    psUpdate.setLong(2, productId);
+                    psUpdate.addBatch();
                 }
             }
             psMove.executeBatch();
-            psProd.executeBatch();
+            psUpdate.executeBatch();
         }
     }
 }

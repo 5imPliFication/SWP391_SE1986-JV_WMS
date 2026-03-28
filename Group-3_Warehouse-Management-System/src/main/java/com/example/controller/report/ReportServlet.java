@@ -133,8 +133,18 @@ public class ReportServlet extends HttpServlet {
         List<ReportItemDTO> reportItems;
         List<Long> chartData;
         try {
-            reportItems = reportService.getItems(month, year, MovementType.EXPORT);
+            int pageNo = parsePositiveInt(request.getParameter("pageNo"), 1);
+            int pageSize = com.example.util.AppConstants.PAGE_SIZE;
+            int totalItems = reportService.countItems(month, year, MovementType.EXPORT);
+            int totalPages = Math.max(1, (int) Math.ceil((double) totalItems / pageSize));
+            pageNo = Math.min(pageNo, totalPages);
+
+            reportItems = reportService.getItems(month, year, MovementType.EXPORT, pageNo, pageSize);
             chartData = reportService.getChartDataByYear(year, MovementType.EXPORT);
+
+            request.setAttribute("pageNo", pageNo);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("pageSize", pageSize);
 
             Long productId = parsePositiveLong(request.getParameter("productId"));
             if (productId != null) {
@@ -202,8 +212,18 @@ public class ReportServlet extends HttpServlet {
         List<ReportItemDTO> reportItems;
         List<Long> chartData;
         try {
-            reportItems = reportService.getItems(month, year, MovementType.IMPORT);
+            int pageNo = parsePositiveInt(request.getParameter("pageNo"), 1);
+            int pageSize = com.example.util.AppConstants.PAGE_SIZE;
+            int totalItems = reportService.countItems(month, year, MovementType.IMPORT);
+            int totalPages = Math.max(1, (int) Math.ceil((double) totalItems / pageSize));
+            pageNo = Math.min(pageNo, totalPages);
+
+            reportItems = reportService.getItems(month, year, MovementType.IMPORT, pageNo, pageSize);
             chartData = reportService.getChartDataByYear(year, MovementType.IMPORT);
+
+            request.setAttribute("pageNo", pageNo);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("pageSize", pageSize);
         } catch (IllegalArgumentException e) {
             request.setAttribute("message", e.getMessage());
             request.setAttribute("messageType", "danger");

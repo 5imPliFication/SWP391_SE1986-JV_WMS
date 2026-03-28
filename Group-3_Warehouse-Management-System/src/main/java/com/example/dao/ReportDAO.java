@@ -83,20 +83,23 @@ public class ReportDAO {
         return data;
     }
 
-    // Get list of items for export report
-    public List<ReportItemDTO> getItems(int month, int year, MovementType movementType) {
+    // Get list of items for report (paginated)
+    public List<ReportItemDTO> getItems(int month, int year, MovementType movementType, int offset, int limit) {
         List<ReportItemDTO> items = new ArrayList<>();
         String sql = """
                 SELECT p.name, SUM(sm.quantity) as quantity FROM stock_movements sm
                 JOIN products p ON sm.product_id = p.id
                 WHERE sm.type = ? AND YEAR(sm.created_at) = ? AND MONTH(sm.created_at) = ?
-                GROUP BY p.name;
+                GROUP BY p.name
+                LIMIT ? OFFSET ?;
                 """;
         try (Connection conn = DBConfig.getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, movementType.name());
             ps.setInt(2, year);
             ps.setInt(3, month);
+            ps.setInt(4, limit);
+            ps.setInt(5, offset);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -109,6 +112,32 @@ public class ReportDAO {
             e.printStackTrace();
         }
         return items;
+    }
+
+    public List<ReportItemDTO> getItems(int month, int year, MovementType movementType) {
+        return getItems(month, year, movementType, 0, Integer.MAX_VALUE);
+    }
+
+    public int countItems(int month, int year, MovementType movementType) {
+        String sql = """
+                SELECT COUNT(DISTINCT sm.product_id) as total FROM stock_movements sm
+                WHERE sm.type = ? AND YEAR(sm.created_at) = ? AND MONTH(sm.created_at) = ?
+                """;
+        try (Connection conn = DBConfig.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, movementType.name());
+            ps.setInt(2, year);
+            ps.setInt(3, month);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public List<Long> getInventoryChartDataByYear(int year) {

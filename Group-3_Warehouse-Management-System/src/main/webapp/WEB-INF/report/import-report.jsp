@@ -338,7 +338,7 @@
                     <c:when test="${not empty reportItems}">
                         <c:forEach items="${reportItems}" var="item" varStatus="loop">
                             <tr>
-                                <td class="text-center">${loop.index + 1}</td>
+                                <td class="text-center">${(pageNo - 1) * pageSize + loop.index + 1}</td>
                                 <td>
                                     <a href="${pageContext.request.contextPath}/stock-history?year=${year}&month=${month}&productName=${item.productName}&type=IMPORT" class="font-weight-bold">
                                     ${item.productName}
@@ -359,6 +359,42 @@
                 </tbody>
             </table>
         </div>
+        <%-- pagination--%>
+        <c:if test="${totalPages > 1}">
+            <nav class="mt-3">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item ${pageNo == 1 ? 'disabled' : ''}">
+                        <a class="page-link"
+                           href="${pageContext.request.contextPath}/report?type=import&year=${year}&month=${month}&pageNo=${pageNo - 1}">
+                            Previous
+                        </a>
+                    </li>
+                    <c:set var="left" value="${pageNo - 2}"/>
+                    <c:set var="right" value="${pageNo + 2}"/>
+                    <c:forEach begin="1" end="${totalPages}" var="i">
+                        <c:choose>
+                            <c:when test="${i == 1 || i == totalPages || (i >= left && i <= right)}">
+                                <li class="page-item ${i == pageNo ? 'active' : ''}">
+                                    <a class="page-link"
+                                       href="${pageContext.request.contextPath}/report?type=import&year=${year}&month=${month}&pageNo=${i}">
+                                        ${i}
+                                    </a>
+                                </li>
+                            </c:when>
+                            <c:when test="${i == left - 1 || i == right + 1}">
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            </c:when>
+                        </c:choose>
+                    </c:forEach>
+                    <li class="page-item ${pageNo == totalPages ? 'disabled' : ''}">
+                        <a class="page-link"
+                           href="${pageContext.request.contextPath}/report?type=import&year=${year}&month=${month}&pageNo=${pageNo + 1}">
+                            Next
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </c:if>
     </div>
 </main>
 

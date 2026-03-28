@@ -21,6 +21,27 @@ public class ReportService {
         return reportDAO.getMovementChartDataByYear(year, movementType);
     }
 
+    public int countItems(int month, int year, MovementType movementType) {
+        if(month < 1 || month > 12) {
+            throw new IllegalArgumentException("Month must be between 1 and 12");
+        }
+        return reportDAO.countItems(month, year, movementType);
+    }
+
+    public List<ReportItemDTO> getItems(int month, int year, MovementType movementType, int pageNo, int pageSize) {
+        if(month < 1 || month > 12) {
+            throw new IllegalArgumentException("Month must be between 1 and 12");
+        }
+        if (pageNo < 1) {
+            throw new IllegalArgumentException("Page number must be at least 1");
+        }
+        if (pageSize < 1) {
+            throw new IllegalArgumentException("Page size must be positive");
+        }
+        int offset = (pageNo - 1) * pageSize;
+        return reportDAO.getItems(month, year, movementType, offset, pageSize);
+    }
+
     public List<ReportItemDTO> getItems(int month, int year, MovementType movementType) {
         // validate month
         if(month < 1 || month > 12) {
