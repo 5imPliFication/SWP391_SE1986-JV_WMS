@@ -126,7 +126,7 @@
         <c:set var="showCatalog" value="${hasAccess and fn:contains(permissions, 'READ_PRODUCT')}" />
         <c:set var="showTransactions" value="${hasAccess and ((userRole.name eq 'Salesman' and fn:contains(permissions, 'READ_ORDER')) or (userRole.name eq 'Warehouse' and fn:contains(permissions, 'READ_ORDER')) or fn:contains(permissions, 'READ_PURCHASE_REQUEST'))}" />
         <c:set var="showInventory" value="${hasAccess and (fn:contains(permissions, 'IMPORT_PRODUCT') or fn:contains(permissions, 'EXPORT_PRODUCT') or fn:contains(permissions, 'READ_AUDIT'))}" />
-        <c:set var="showReports" value="${hasAccess and userRole.name eq 'Manager' and fn:contains(permissions, 'READ_REPORT')}" />
+        <c:set var="showReports" value="${hasAccess and fn:contains(permissions, 'READ_REPORT')}" />
 
         <aside class="sidebar">
 

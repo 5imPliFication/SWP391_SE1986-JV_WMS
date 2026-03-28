@@ -33,7 +33,7 @@ public class ReportServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
-        if (user == null || user.getRole() == null || !"Manager".equalsIgnoreCase(user.getRole().getName())) {
+        if (user == null || user.getRole() == null) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Only manager can manage report pages.");
             return;
         }
