@@ -123,50 +123,7 @@ public class ImportProductItemServlet extends HttpServlet {
 
         if ("save".equals(action)) {
             handleSave(session, request, response);
-        } else if ("file".equals(action)) {
-//            handleFile(session, request, response);
-        } else if ("delete".equals(action)) {
-            handleDelete(session, request, response);
         }
-    }
-
-    private void handleDelete(HttpSession session, HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-
-        List<ProductItemDTO> importItems = (List<ProductItemDTO>) session.getAttribute("importItems");
-        if (importItems == null) {
-            response.sendRedirect(request.getContextPath() + "/import");
-            return;
-        }
-
-        // read arrays directly from form submission to preserve input data before
-        // deleting
-        String[] productIds = request.getParameterValues("productId");
-        String[] serials = request.getParameterValues("serial");
-        String[] prices = request.getParameterValues("price");
-
-        if (productIds != null && serials != null && prices != null) {
-            int maxLimit = Math.min(importItems.size(), productIds.length);
-
-            for (int i = 0; i < maxLimit; i++) {
-                ProductItemDTO dto = importItems.get(i);
-
-                dto.setSerial(serials[i]);
-
-                try {
-                    dto.setImportPrice(Double.parseDouble(prices[i]));
-                } catch (NumberFormatException e) {
-                }
-            }
-        }
-
-        // delete item by delete index
-        String deleteIndexStr = request.getParameter("delete");
-        int deleteIndex = Integer.parseInt(deleteIndexStr);
-        importItems.remove(deleteIndex);
-
-        session.setAttribute("importItems", importItems);
-        response.sendRedirect(request.getContextPath() + "/import");
     }
 
     // save purchase request and others information relative

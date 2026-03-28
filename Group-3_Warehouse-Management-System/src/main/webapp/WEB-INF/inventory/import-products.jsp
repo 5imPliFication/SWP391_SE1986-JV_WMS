@@ -132,7 +132,6 @@
                     <th style="width: 100px;" class="text-center">Unit</th>
                     <th style="width: 160px;" class="text-center">Import Price</th>
                     <th style="width: 160px;" class="text-center">Unit Price</th>
-                    <th style="width: 90px;" class="text-center">Action</th>
                 </tr>
                 </thead>
 
@@ -141,7 +140,7 @@
                 <c:choose>
                     <c:when test="${empty importItems}">
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-3">
+                            <td colspan="5" class="text-center text-muted py-3">
                                 No product items to import.
                             </td>
                         </tr>
@@ -195,9 +194,7 @@
                                                value="${item.importPrice}"
                                                oninput="updateGroupPrice('${item.productId}', this.value)" required>
                                     </td>
-
                                     <td class="text-center">VND</td>
-                                    <td></td>
                                 </tr>
 
                             </c:if>
@@ -237,15 +234,6 @@
                                 </td>
 
                                 <td class="text-center text-muted">VND</td>
-
-                                <td class="text-center align-middle">
-                                    <button type="submit" name="delete"
-                                            value="${status.index}"
-                                            class="btn btn-outline-danger btn-sm"
-                                            formaction="${pageContext.request.contextPath}/import?action=delete">
-                                        Delete
-                                    </button>
-                                </td>
 
                             </tr>
 
